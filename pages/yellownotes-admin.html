@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<!--  
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+		<meta charset="utf-8"/>
+		-->
+		<link rel="stylesheet" href="yellownotes-admin.css"/>
+	</head>
+	<body>
+	<h1>Yellow Sticky-notes for the web</h1>
+Ever created a browser bookmark and forgotten why ? Yellow Sticky-notes where a brilliant invention when they arrive decades ago. 
+Scribble something on it and stick it anywhere. As a reminder to your-self or others. As a bookmark with notes on the text where you can't write directly in the document itself. Change your mind ? No need to erase, just throw the note away. Which you can't do if you write on the page itself. 
+Yes, the little yellow notes where perfect, and justifiably enormously successfull. 
+This is sticky-notes for the web. Stick them straight on a web page and scribble you notes on then. When next you are back to the same place, the note is right there waiting for you.
+You highlight a piece of text and the note is attached to this highlighted area. 
+
+Where bookmarks, Or "like" and "share" in social media,  are crude whole-article/page/document selectiing tools - the Yellow Sticky-Note for Web you select only the piece you are interested in.
+ And add your remarks are tied to only this. 
+
+
+					<h4>your notes</h4>
+					
+<div id="sourceURLYellowNotes">
+
+<table class="scrollTable" id="sourceURLYellowNotesDB" indexeddbname="sourceURLYellowNotesDB" objectstorename="sourceURLYellowNotesStore" width="100%">
+
+
+
+<thead class="fixedHeader">
+<tr class="normalRow">
+<td class="column_header" col_num="0">URL where note is attached<a></a></td>
+<td class="column_header" col_num="1">note text<a></a></td>
+<td class="column_header" col_num="2">selected text<a></a></td>
+<td class="column_header" col_num="3">enabled<a></a></td>
+<td class="column_header" col_num="4">created<a></a></td>
+<td class="column_header" col_num="5">last modified<a></a></td>
+<td class="column_header" col_num="6">id<a></a></td>
+</tr>
+
+<tr class="filter_row">
+<!--  filter on url -->
+<td col_num="0" class="filter" contenteditable="true">.*</td>
+
+<!--  filter on note text -->
+<td col_num="1" class="filter" contenteditable="true">.*</td>
+
+<!--  filter on anchored text -->
+<td col_num="2" class="filter" contenteditable="true">.*</td>
+
+<!--  filter on enabled/disabled -->
+
+<td col_num="3" class="filter" contenteditable="true">.*</td>
+
+<!--  filter on creation time -->
+
+<td col_num="3" class="filter" contenteditable="true">.*</td>
+
+<!--  filter on last modified time -->
+
+<td col_num="4" class="filter" contenteditable="true">.*</td>
+
+<td><button id="action_filter_button">filter</button></td>
+<td><button id="clear_filter_button">clear</button></td>
+<td><input type="radio" id="filterregexp" name="filtertype" value="regexp" checked>RegEx</td>
+<td><input type="radio" id="filterwildcard" name="filtertype" value="wildcard">wildcards</td>
+</tr>
+
+</thead>
+
+
+
+</table>
+
+
+</div>
+<hr/>
+
+
+
+
+					<h2>backup</h2>
+Make a backup of all Yellow Stickynotes to a file
+<button class="ll_button" id="backup-all-rules_button">backup notes</button>
+
+					<h2>import</h2>
+					Import Yellow Stickynotes from a file
+<button class="ll_button" id="import-rules_button">import notes</button>
+
+					<h2>remote</h2>
+					Use a remote file Yellow Stickynotes 
+<button class="ll_button" id="import-rules_button">import notes</button>
+
+
+
+
+		<!-- 
+		<button onclick="document.getElementById('file-input').click();">Open</button>
+<input id="file-input" type="file" name="name" style="display: none;" />
+		 
+					<script src="/utils/handle-window-drag-and-drop.js"></script>
+					
+-->
+					
+
+			
+
+					<script type="module" src="yellownotes-admin.js"></script>
+					
+					
+				</body>
+			</html>
+			
