@@ -1,0 +1,40 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .sidebar {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    padding-top: 20px;
+  }
+  
+  .sidebar a {
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 18px;
+    color: white;
+    display: block;
+  }
+  
+  .sidebar a:hover {
+    background-color: #575757;
+  }
+  
+  .content {
+    margin-left: 200px; /* Same as the width of the sidebar */
+    padding: 20px;
+  }
+
+
+  
+  #content-frame {
+    border: none; /* Removes the border around the iframe */
+    width: 100%; /* Adjusts the width of the iframe */
+    height: 600px; /* Adjusts the height of the iframe */
+  }

@@ -27,32 +27,32 @@ function traverse_text(elm) {
     // produce a string of all test concatenated
     //var text_str = "";
     // Produce an array of all nodes
-    console.debug("#traverse");
-console.debug(elm);
-console.debug(elm.nodeType );
-console.debug(elm.nodeType == Node.ELEMENT_NODE);
-console.debug(elm.nodeType == Node.DOCUMENT_NODE   );
+ //   console.debug("#traverse");
+//console.debug(elm);
+//console.debug(elm.nodeType );
+//console.debug(elm.nodeType == Node.ELEMENT_NODE);
+//console.debug(elm.nodeType == Node.DOCUMENT_NODE   );
 
     if (elm.nodeType == Node.ELEMENT_NODE || elm.nodeType == Node.DOCUMENT_NODE) {
-       console.debug("1.0.1");
-       console.debug(elm);
-console.debug(ignore(elm));
-console.debug(elm.childNodes);
+//       console.debug("1.0.1");
+//       console.debug(elm);
+//console.debug(ignore(elm));
+//console.debug(elm.childNodes);
         // exclude elements with invisible text nodes
         if (ignore(elm)) {
             return
         }
-        console.debug("1.0.2");
-        console.debug(elm.childNodes);
+//        console.debug("1.0.2");
+//        console.debug(elm.childNodes);
         for (var i = 0; i < elm.childNodes.length; i++) {
-            console.debug("1.0.2.1");
+ //           console.debug("1.0.2.1");
             // recursively call to traverse
             traverse_text(elm.childNodes[i]);
         }
 
     }
     if (elm.nodeType == Node.TEXT_NODE) {
-         console.debug("1.0.3");
+   //      console.debug("1.0.3");
         // exclude text node consisting of only spaces
         if (elm.nodeValue.trim() == "") {
             return
@@ -133,27 +133,27 @@ function showStickyNote(node, note_template) {
     console.debug(node.textContent);
     try {
         // count occurences of pattern in text node
-        //var yellowstickynote_regexp = new RegExp(/yellowstickynote=/g);
-        //console.debug(yellowstickynote_regexp);
-        //console.debug(yellowstickynote_regexp.test(node.textContent));
+        //var yellownote_regexp = new RegExp(/yellownote=/g);
+        //console.debug(yellownote_regexp);
+        //console.debug(yellownote_regexp.test(node.textContent));
 
         var token = "";
 
-        //var yellowstickynote_regexp2 = new RegExp(/yellowstickynote=.*(?!yellowstickynote=).*=yellowstickynote/g);
-        //console.debug(yellowstickynote_regexp2);
-        //console.debug(yellowstickynote_regexp2.test(node.textContent));
-        //console.debug(node.textContent.match(yellowstickynote_regexp2));
+        //var yellownote_regexp2 = new RegExp(/yellownote=.*(?!yellownote=).*=yellownote/g);
+        //console.debug(yellownote_regexp2);
+        //console.debug(yellownote_regexp2.test(node.textContent));
+        //console.debug(node.textContent.match(yellownote_regexp2));
 
-        //var yellowstickynote_regexp4 = new RegExp(/yellowstickynote=.*(?=yellowstickynote=).*=yellowstickynote/g);
-        //console.debug(yellowstickynote_regexp4);
-        //console.debug(yellowstickynote_regexp4.test(node.textContent));
-        //console.debug(node.textContent.match(yellowstickynote_regexp4));
+        //var yellownote_regexp4 = new RegExp(/yellownote=.*(?=yellownote=).*=yellownote/g);
+        //console.debug(yellownote_regexp4);
+        //console.debug(yellownote_regexp4.test(node.textContent));
+        //console.debug(node.textContent.match(yellownote_regexp4));
 
         // this pattern may swallow up up multiple separate sticynote token texts but it is a faster match
-        //var yellowstickynote_regexp3 = new RegExp(/yellowstickynote=.*=yellowstickynote/g);
-        // console.debug(yellowstickynote_regexp3);
-        //  console.debug(yellowstickynote_regexp3.test(node.textContent));
-        //console.debug(node.textContent.match(yellowstickynote_regexp3));
+        //var yellownote_regexp3 = new RegExp(/yellownote=.*=yellownote/g);
+        // console.debug(yellownote_regexp3);
+        //  console.debug(yellownote_regexp3.test(node.textContent));
+        //console.debug(node.textContent.match(yellownote_regexp3));
 
         // determine if where are more than one
 
@@ -179,11 +179,11 @@ function showStickyNote(node, note_template) {
 
                 
                 
-                // first check if this serialized notes have already been "processed" by looking for a preceding yellowstickynote node
+                // first check if this serialized notes have already been "processed" by looking for a preceding yellownote node
                 // The presence of such a node would indicate that this procedure has already been carried out
                 // If so, two things must be true
                 // The starting position is 0 (start at the beginning of the text node)
-                // preceding node is yellowstickynote element
+                // preceding node is yellownote element
                 
                 //if (tokenPosition == 0){
                 	// if token position is 0 (zero), check preceding node
@@ -258,6 +258,9 @@ if (node.previousSibling){
 const note_object_data = JSON.parse(decodeURIComponent(token));
 //                var stickynote = deserialize_note(token);
                 console.debug(note_object_data);
+// get template
+
+
 
                 // proceed to render this note
 
@@ -266,7 +269,7 @@ const note_object_data = JSON.parse(decodeURIComponent(token));
             var node_root = document.createElement('div');
 
          
-            node_root.setAttribute("type", 'yellowstickynote');
+            node_root.setAttribute("type", 'yellownote');
             node_root.setAttribute("minimized", 'visible');
 
         
@@ -302,13 +305,13 @@ const note_object_data = JSON.parse(decodeURIComponent(token));
             // attach event listeners to buttons and icons
             attachEventlistenersToYellowStickynote(node_root);
 
-                console.debug(node_root);
-                console.debug(tokenNode);
+            console.debug(node_root);
+            console.debug(tokenNode);
                 
-                // place note on page - ignoring position information contained inside the note, as it is not relevant. 
-                // The location of the serialized text is the only relevant information for placement.
-                //placeStickyNote(stickynote,tokenNode);
-  const inserted = tokenNode.parentNode.insertBefore(node_root, tokenNode);
+            // place note on page - ignoring position information contained inside the note, as it is not relevant. 
+            // The location of the serialized text is the only relevant information for placement.
+            //placeStickyNote(stickynote,tokenNode);
+            const inserted = tokenNode.parentNode.insertBefore(node_root, tokenNode);
             console.debug(inserted);
             inserted.style.visibility = 'visible';
 
@@ -374,18 +377,18 @@ function replaceLink(node, note_template) {
 // check for visibility
 
 
-                // apply regexp identifying yellowstickynote
+                // apply regexp identifying yellownote
 
                 // exclude elements with invisible text nodes
-
+console.log(node.textContent);
                 // ignore any textnode that is not at least xx characters long
                 if (node.textContent.length >= 150) {
 
                     //console.debug("look for sticky note in (" + node.nodeType + "): " + node.textContent);
                     // regexp to match begining and end of a stickynote serialization. The regex pattern is such that multiple note objects may be matched.
-                    var yellowstickynote_regexp = new RegExp(/yellowstickynote=.*=yellowstickynote/);
+                    var yellownote_regexp = new RegExp(/yellownote=.*=yellownote/);
 
-                    if (yellowstickynote_regexp.test(node.textContent)) {
+                    if (yellownote_regexp.test(node.textContent)) {
                         console.debug("HIT");
                         // carry out yellow sticky note presentation on this textnode
 
@@ -399,16 +402,56 @@ function replaceLink(node, note_template) {
     } catch (e) {
         console.debug(e);
     }
+}
 
+
+function traverseDOM(node, foundOpeningTag, collectedText, originalNode , callback) {
+    if (node.nodeType === Node.TEXT_NODE) {
+        let textContent = node.textContent;
+        let startIndex = foundOpeningTag ? -1 : textContent.indexOf("yellownote=");
+        let endIndex = textContent.indexOf("=yellownote");
+
+        if (!foundOpeningTag && startIndex !== -1) {
+            // Found the opening tag
+            foundOpeningTag = true;
+            originalNode = node;
+            // Start collecting text from this node
+            collectedText = textContent.substring(startIndex + 12);
+        } else if (foundOpeningTag) {
+            // Already found the opening tag, keep collecting text
+            collectedText += textContent;
+        }
+console.debug("#################" + collectedText);
+
+        // If we have found the closing tag
+        if (foundOpeningTag && endIndex !== -1) {
+            // Finalize collecting text
+            collectedText = collectedText.substring(0, collectedText.length - textContent.length + endIndex);
+            // Call the named function
+            callback(collectedText, originalNode);
+            // Reset for subsequent searches
+            foundOpeningTag = false;
+            collectedText = '';
+        }
+    }
+
+    // Traverse child nodes
+    node.childNodes.forEach(childNode => traverseDOM(childNode, foundOpeningTag, collectedText, originalNode, callback));
+}
+
+// Example named function to be called
+function processYellownotesText(text, node) {
+    console.log('Found yellownote text:', text, 'in node:', node);
+    // Additional processing can be done here
 }
 
 
 
 
-//traverse_text(document.documentElement);
+traverse_text(document.documentElement);
 //console.debug("################################################");
 //console.debug(all_page_text);
-//console.debug(textnode_map);
+console.debug(textnode_map);
 
 
 var doc = window.document;
@@ -419,21 +462,90 @@ console.debug(root_node);
 
 // start analyzing the DOM (the page/document)
 
+
+function passOver() {
  // collect the template, for later use
- fetch(chrome.runtime.getURL('stickynotetemplate.html')).
- then((response) => response.text())
- .then((html) => {
-     //console.debug(html);
-     //note_template_html = html;
-     //const note_template = document.createElement('div');
-     // container.innerHTML = html;
-     note_template = safeParseInnerHTML(html, 'div');
-     console.log("browsersolutions " + note_template);
-     console.debug(note_template);
-     
+ fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
+        then((response) => response.text())
+        .then((html) => {
+            //console.debug(html);
+            //note_template_html = html;
+            //const note_template = document.createElement('div');
+            // container.innerHTML = html;
+            note_template = safeParseInnerHTML(html, 'div');
+            console.log("browsersolutions " + note_template);
+            console.debug(note_template);
 
-     //console.debug("browsersolutions url: " + url);
-     replaceLink(root_node, note_template);
 
- });
+            //console.debug("browsersolutions url: " + url);
+            replaceLink(root_node, note_template);
 
+        });
+}
+
+
+
+ function onPageChange(callback, delay = 10000) {
+    let lastInvocationTime = 0;
+
+    // Function to be called when mutations are observed
+    const observerCallback = (mutationsList, observer) => {
+        const currentTime = Date.now();
+
+        // Check if the current time is at least 'delay' milliseconds after the last invocation
+        //console.log(currentTime - lastInvocationTime);
+        if (currentTime - lastInvocationTime > delay) {
+            console.log("#################delay###############################");
+            console.log("#################delay###############################");
+            console.log("#################delay###############################");
+            // Start the traversal from the document body
+        }
+        if (currentTime - lastInvocationTime > delay) {
+            lastInvocationTime = currentTime; // Update the last invocation time
+
+      // Start the traversal from the document body
+      traverse_text(document.documentElement);
+      //console.debug("################################################");
+      console.debug(all_page_text);
+      //console.debug(textnode_map);
+      
+      passOver();
+
+
+            //traverse_text(document.documentElement);
+            //console.debug("################################################");
+            //console.debug(all_page_text);
+            console.debug(textnode_map);
+
+            const regexp = new RegExp(/yellownote=.*=yellownote/);
+
+            console.debug("################## contains tag ? ##############################");
+            console.log(regexp.test(all_page_text));    
+
+            // deserialize_note
+
+            for (let mutation of mutationsList) {
+                console.log(mutation.type);
+                if (mutation.type === 'childList' || mutation.type === 'attributes') {
+
+                    callback(mutation); // Call the named function
+                }
+            }
+        }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(observerCallback);
+
+    // Options for the observer (which mutations to observe)
+    const config = { attributes: true, childList: true, subtree: true, characterData: true };
+
+    // Start observing the target node for configured mutations
+    observer.observe(document, config);
+}
+
+// Example usage of onPageChange
+onPageChange(mutation => {
+    //console.log('A change was detected:', mutation);
+    // Your code to handle the change
+});

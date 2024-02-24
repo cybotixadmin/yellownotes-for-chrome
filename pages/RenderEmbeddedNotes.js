@@ -130,27 +130,27 @@ function showStickyNote(node, note_template) {
     console.debug(node.textContent);
     try {
         // count occurences of pattern in text node
-        //var yellowstickynote_regexp = new RegExp(/yellowstickynote=/g);
-        //console.debug(yellowstickynote_regexp);
-        //console.debug(yellowstickynote_regexp.test(node.textContent));
+        //var yellownote_regexp = new RegExp(/yellownote=/g);
+        //console.debug(yellownote_regexp);
+        //console.debug(yellownote_regexp.test(node.textContent));
 
         var token = "";
 
-        //var yellowstickynote_regexp2 = new RegExp(/yellowstickynote=.*(?!yellowstickynote=).*=yellowstickynote/g);
-        //console.debug(yellowstickynote_regexp2);
-        //console.debug(yellowstickynote_regexp2.test(node.textContent));
-        //console.debug(node.textContent.match(yellowstickynote_regexp2));
+        //var yellownote_regexp2 = new RegExp(/yellownote=.*(?!yellownote=).*=yellownote/g);
+        //console.debug(yellownote_regexp2);
+        //console.debug(yellownote_regexp2.test(node.textContent));
+        //console.debug(node.textContent.match(yellownote_regexp2));
 
-        //var yellowstickynote_regexp4 = new RegExp(/yellowstickynote=.*(?=yellowstickynote=).*=yellowstickynote/g);
-        //console.debug(yellowstickynote_regexp4);
-        //console.debug(yellowstickynote_regexp4.test(node.textContent));
-        //console.debug(node.textContent.match(yellowstickynote_regexp4));
+        //var yellownote_regexp4 = new RegExp(/yellownote=.*(?=yellownote=).*=yellownote/g);
+        //console.debug(yellownote_regexp4);
+        //console.debug(yellownote_regexp4.test(node.textContent));
+        //console.debug(node.textContent.match(yellownote_regexp4));
 
         // this pattern may swallow up up multiple separate sticynote token texts but it is a faster match
-        //var yellowstickynote_regexp3 = new RegExp(/yellowstickynote=.*=yellowstickynote/g);
-        // console.debug(yellowstickynote_regexp3);
-        //  console.debug(yellowstickynote_regexp3.test(node.textContent));
-        //console.debug(node.textContent.match(yellowstickynote_regexp3));
+        //var yellownote_regexp3 = new RegExp(/yellownote=.*=yellownote/g);
+        // console.debug(yellownote_regexp3);
+        //  console.debug(yellownote_regexp3.test(node.textContent));
+        //console.debug(node.textContent.match(yellownote_regexp3));
 
         // determine if where are more than one
 
@@ -176,11 +176,11 @@ function showStickyNote(node, note_template) {
 
                 
                 
-                // first check if this serialized notes have already been "processed" by looking for a preceding yellowstickynote node
+                // first check if this serialized notes have already been "processed" by looking for a preceding yellownote node
                 // The presence of such a node would indicate that this procedure has already been carried out
                 // If so, two things must be true
                 // The starting position is 0 (start at the beginning of the text node)
-                // preceding node is yellowstickynote element
+                // preceding node is yellownote element
                 
                 //if (tokenPosition == 0){
                 	// if token position is 0 (zero), check preceding node
@@ -263,7 +263,7 @@ const note_object_data = JSON.parse(decodeURIComponent(token));
             var node_root = document.createElement('div');
 
          
-            node_root.setAttribute("type", 'yellowstickynote');
+            node_root.setAttribute("type", 'yellownote');
             node_root.setAttribute("minimized", 'visible');
 
         
@@ -372,7 +372,7 @@ function replaceLink(node, note_template) {
 // check for visibility
 
 
-                // apply regexp identifying yellowstickynote
+                // apply regexp identifying yellownote
 
                 // exclude elements with invisible text nodes
 
@@ -381,9 +381,9 @@ function replaceLink(node, note_template) {
 
                     //console.debug("look for sticky note in (" + node.nodeType + "): " + node.textContent);
                     // regexp to match begining and end of a stickynote serialization. The regex pattern is such that multiple note objects may be matched.
-                    var yellowstickynote_regexp = new RegExp(/yellowstickynote=.*=yellowstickynote/);
+                    var yellownote_regexp = new RegExp(/yellownote=.*=yellownote/);
 
-                    if (yellowstickynote_regexp.test(node.textContent)) {
+                    if (yellownote_regexp.test(node.textContent)) {
                         console.debug("HIT");
                         // carry out yellow sticky note presentation on this textnode
 

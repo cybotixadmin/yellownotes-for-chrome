@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Popup</title>
-    <script src="popup.js"></script>
+  <title>Options</title>
+  <link rel="stylesheet" type="text/css" href="popup.css">
 </head>
 <body>
-    <button id="sendMessageButton">Send Message to All Tabs</button>
+  <label>
+    <input class="tooltip" type="checkbox" id="isSlidersEnabled">Show Slider Button on all tabs
+  </label>
+  <br>
+  <br>
+  Default action:
+  <ul id="defaultSliderPosition">
+    <li class="tooltip" id="option_nothing">show nothing<span class="tooltiptext">do not display notes</span></li>
+    <li class="tooltip" id="option_own_notes_only">show only my own notes<span class="tooltiptext">display only my own yellow notes</span></li>
+    <li class="tooltip" id="option_all_notes">show all notes<span class="tooltiptext">Display all yellow notes</span></li>
+  </ul>
+  <br>
+  <a target="_blank" href="http://www.yellownotes.xyz/pages/my_account.html">My Yellownotes Account</a>
+
+  <script src="popup.js"></script>
 </body>
 </html>

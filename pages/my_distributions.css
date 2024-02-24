@@ -1,0 +1,287 @@
+  /* General Styling */
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 14px;
+  }
+
+
+  /* Add styles for scrollable table */
+  .scrollable-table {
+    height: 450px; /* Adjust height as needed */
+    overflow-y: auto;
+    display: block;
+  }
+
+  /* Table Styling */
+  table {
+    border: 1px solid #4CAF50;
+    border-collapse: collapse;
+    margin: 15px 0;
+    padding: 0;
+    
+    table-layout: fixed;
+  }
+  /* the first colum contains the data row ID. This information means nothing to the user, so do not display it*/
+  #dataTable th:first-child,
+  #dataTable td:first-child {
+    display: none;
+  }
+
+ 
+
+
+
+.fixed-header {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+}
+
+  table tr {
+    background: #f2f4f3;
+    border: 1px solid #c1e0c9;
+    padding: .35em;
+  }
+
+  
+
+  table.notesTable td {
+    padding: 0px;
+    width: 50px;
+    height: 15px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: left;
+    word-break: break-all;
+    padding-left: 2px;
+  }
+
+  table.notesTable td:nth-child(2){
+    padding: 0px;
+    padding-left: 2px;
+    width: 100px;
+    border: 1px;
+    text-align: center;
+    word-break: break-all;
+  }
+
+  table tr td:nth-child(3) {
+    max-width: 200px;
+    padding: 0px;
+    padding-left: 2px;
+    width: auto;
+    border: 1px solid black;
+    
+    text-align: left;
+    word-break: break-all;
+  }
+
+
+  table tr td:nth-child(4) {
+    background-color: #ffdddd; /* Red background for column 1 */
+
+    padding: 0px;
+    width: 40px;
+    height: 15px;
+    padding: 0px 0px 0px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: left;
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+  table tr td:nth-child(5) {
+    border: 1px solid black;
+    padding: 0px;
+    width: 80px;
+    height: 15px;
+    padding: 0px 0px 0px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: left;
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+  table tr td:nth-child(6) {
+    padding: 0px;
+    width: 35px;
+    height: 15px;
+    text-align: right;
+    padding: 0px 0px 0px;
+    font-size: 10px;
+    line-height: 1;
+    
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+  table tr td:nth-child(7) {
+    border: 1px solid black;
+    padding: 0px;
+    width: 50px;
+    text-align: right;
+    height: 15px;
+    padding: 0px 0px 0px;
+    font-size: 10px;
+    line-height: 1;
+    
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+  table tr td:nth-child(8) {
+    border: 1px solid black;
+    padding: 0px;
+    width: 120px;
+    height: 15px;
+    padding: 0px 0px 0px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: center;
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+  table tr td:nth-child(9) {
+    padding: 0px;
+    width: 20px;
+    height: 15px;
+    padding: 0px 0px 0px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: center;
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+
+  table tr td:nth-child(10) {
+    padding: 0px;
+    width: 80px;
+    min-width: 70px;
+    max-width: 70px;
+  }
+
+  
+
+  td {
+    border: 1px solid black;
+    text-align: center;
+}
+
+.flexible {
+    width: auto; /* Allows these columns to adjust their width */
+}
+
+.fixed {
+    width: 30px; /* Fixed width for columns 5, 6, and 8 */
+}
+
+.extra-fixed {
+    width: 40px; /* Fixed width for column 9 */
+}
+
+
+  select {
+    padding: 0px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: left;
+    word-break: break-all;
+    min-height: 1.0em;
+    margin: 0px;
+  }
+
+  option {
+    padding: 0px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: left;
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+
+
+
+
+  button{
+    padding: 0px;
+    width: 25x;
+    height: 15px;
+    padding: 0px 0px 0px;
+    font-size: 10px;
+    line-height: 1;
+    text-align: left;
+    word-break: break-all;
+    min-height: 1.0em;
+  }
+
+
+
+  table.notesTable th {
+    font-size: .5em;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    background-color: #4CAF50;
+    color: white;
+   
+  }
+
+  table.notesTable th:nth-child(2) {
+    width: 100px;
+  }
+
+  table.notesTable th:nth-child(3) {
+    width: auto;
+    max-width: 200px;
+
+  }
+  table.notesTable th:nth-child(4) {
+    width: 80px;
+  }
+  table.notesTable th:nth-child(5) {
+    width: 80px;
+  }
+
+
+  table.notesTable th:nth-child(6) {
+    width: 35px;
+   
+    font-size: .5em;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    background-color: #4CAF50;
+    color: white;
+   
+
+  }
+
+  table.notesTable th:nth-child(7) {
+    width: 50px;
+  }
+
+
+  table.notesTable th:nth-child(8) {
+    padding-left: 2px;
+    width: 110px;
+  }
+  
+  table.notesTable th:nth-child(9) {
+    width: 30px;
+  }
+  
+  table.notesTable th:nth-child(10) {
+    width: 90px;
+  }
+
+
+

@@ -1,0 +1,199 @@
+<table name="whole_note_table" style="all: initial; 
+z-index: 10103;
+width: 300px;
+height: 200px;
+overflow: hidden;
+position: absolute;
+padding: 0px; margin: 0px; overflow: hidden;
+border: solid 3px;
+color: #333;
+font-size: 17px;
+line-height: 1.7;
+font-weight: 200;
+font-family: 'Merriweather','Helvetica','serif';
+border-color: rgba(0, 0, 0, 0.7);
+background: rgba(255, 255, 0, 0.7);">
+				
+	<tr name="whole_note_topbar" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," style="height: 25px; width: 100%; position: absolute;  top: 0px; z-index: 10103; padding: 0px; border: 0px; margin: 0px; overflow: visible; background: rgba(255, 255, 0, 0.9);">
+		<td name="whole_note_topcell" style="width: 100%; padding: 0px; border: 0px; margin: 0px; top: 0px; z-index: 10103; background: rgba(255, 255, 0, 0.9);">
+			<table name="topbar_table" style="table-layout: fixed; width: 100%; top: 0px; padding: 0px; border: 0px; margin: 0px;  position: relative; z-index: 10103; text-align: right; ">
+				<style>
+					.yellownote_icon_tooltip {
+						position: relative;
+						top: 0px;
+						display: inline-block;
+						z-index: 13000;
+					}
+					.yellownote_icon_tooltip::after {
+										
+										position: absolute;
+										top: 100%;
+										left: 10%;
+										transform: translateX(-50%);
+										white-space: wrap;
+										background-color: black;
+										color: white;
+										text-align: center;
+										padding: 4px;
+										border-radius: 2px;
+										font-size: 15px;
+										z-index: 12000;
+							
+										/* Initially hidden */
+										opacity: 0;
+										visibility: hidden;
+										transition: opacity 0.5s;
+									}
+					.yellownote_icon_tooltip:hover::after {
+											/* Show the tooltip */
+											opacity: 1;
+											visibility: visible;
+											z-index: 13000;
+										}
+					</style>
+				<tr name="note_ribbon" style="max-height: 22px; min-height: 22px; height: 22px; width: 100%; overflow: visible; padding: 0px; border: 0px; margin: 0px;  ">
+					<td name="topbar_filler"  style="position: absolute; top: 0px; left: 0px; text-align: left; padding: 0px; border: 1px; margin: 0px;  overflow: hidden ;z-index: 10103; font-size: 14px">
+<!--
+					<img style="margin: 0px; height: 20px; " height="20" width="170" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKoAAAAUCAYAAAAdtqaHAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAB2GAAAdhgFdohOBAAAAAWJLR0QF+G/pxwAAAAd0SU1FB+UGDgcCJO64MtQAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjEtMDYtMTRUMDc6MDI6MjUrMDA6MDC8ZHBaAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIxLTA2LTE0VDA3OjAyOjI1KzAwOjAwzTnI5gAAAFVJREFUaEPt0rENwDAMwDA3///sLjkiAshFD+jbnR143LmFpxmVBKOSYFQSjEqCUUkwKglGJcGoJBiVBKOSYFQSjEqCUUkwKglGJcGoJBiVBKMSMPMDXDwDJXkkrusAAAAASUVORK5CYII=" alt="goto" />
+					--></td>
+					<td name="topbar_icons" style="position: absolute; top: 0px; right: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 98px; max-width: 98px; top: 0px; z-index: 10103; overflow: visible;">
+						<table style="padding: 0px; border: 0px; margin: 0px; table-layout: fixed; height: 100%; width: 100%; z-index: 10103; border-collapse: collapse;">
+							<tr style="display: table; height: 22px; overflow: visible; ">
+								<!-- icons curtesy of https://buttonoptimizer.com/ -->
+								<!-- icon to go to where the note is attached -->
+								<td name="goto" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="goto_note" style="position: absolute; right: 60px; top: 0px;  display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+									<style>
+										/* text content of tooltip */
+										.goto_tooltip_content::after {
+											content: "goto the location where this note is attched";
+										}
+									</style>
+									<div class="yellownote_icon_tooltip  goto_tooltip_content">
+										<img style="padding: 0px; border: 0px; margin: 0px; width: 20px" height="18" width="18" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYYAAB2GAV2iE4EAAAGbSURBVFhH7Ze9igIxFIXPrKDWVpa2tlZWoqUPIFqIWomVT2NlJWLhD2hlq61PYO0DqFgIgqDZuZvIjjiuGZPJDrvzwWGGJHM5uSE3E4sxMASYD/EMLKFBVUKDqvxPg6MREIsBluVd9boIItBeBycToFoFzmeg0QBSKdEhQa/Hxy+XooEgg7o0HoNFo2DJ5Nek2WLhPu6Z8nkuZ5u2Jb5lLpsFul3RqAEtBmczbo7IZIDplL9rwZnOd0XLQqGcisfB1mv38c/k6xLbge2I3zqdgHRadCrwt+rgfM43g0mkDV4uQKfDN4NJk9IGIxFgOORlxKTJh5Pkroq7cDwCrRaw3QL9PlAuA4UC73v17Svc4jwYpPNQlkQC2O0MG5TJYLMJ7PdmMkg1664w/qTDASyX4+ctnbu3drcC+46UCjXt4koFWK2AwQAolUSHz3jaxe22WXOEp0JdLJo1R3gy+BuEBlUJvEEtlyYqsJsNvyQR16s9c3vq9CRk3327NNVq/C9ahyiWM7b2a6du7MQGm9CgKqFBVUKDqgTcIPAJNuUIuQXP7xIAAAAASUVORK5CYII=" alt="goto" />
+									</div>
+								</td>
+								<td name="copy" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen,"  js_action="copy_note_to_clipboard" style="position: absolute; right: 40px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+									<style>
+										.copy_tooltip_content::after {
+											content: "copy note to clipboard";
+										}
+									</style>
+									<div class="yellownote_icon_tooltip copy_tooltip_content">
+										<img style="padding: 0px; border: 0px; margin: 0px; width: 20px" height="18" width="18" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAdhgAAHYYBXaITgQAAA1tJREFUSEutVUluE0EUfdWDDQmJA2EUgkgMIVIYF4BYsQL2HAGuADeAJay5AkFGYgkIITgACYMYBAdAChHCDgFsVzfvVbnaneCGIOWrX7v71////aFcbZ4+25Hv2vUDmTXYSMmJei3DwusJmJevxvPjx9ro9TxJkvw/mbU5ckVdI0mSYa65F1GWRbBZDT1bo7KGJ08iTExYjI9b9/s3jI5aHDtqEce1IkYZpHFkZn5hGyv5RSODlDpjlt3CemX7dmBxcQs6Hd+iQvhSr1vcbW5DBF1kNESnE7v1mSMRy5/A168Nh1ZrOL59a+DTp4bzj6IEMWEQw+SKI/hKyNB/MTQwqVP6jOpoNFK2pc52JGxl+gfS1GN5OcHPnwlWVmLUanVEXIOLJZJcJBy0FCTxhFJr+CJNMDu7xN4vYWTky1CMjn7B2JhHo7GEnTsXkTCpiAA0F1eJ2sXguZSCRCQpms0O3r61mJyMcGQmwaFDcSWmpxPs3hNxPjnu3PmFNA6VFCShkkAiSYsZ3bi5Fe/fTeHjx/2V+PBhCrdvTTr7Vkt3xRKRGAwvEkQlElO0y5OsfNc9RrdXDYVqt5Uw/RnTEwhuJjIIBJ7Eiwy8k//VmmyrENYlstdzqGRVgEDiKxmQ9ANpbsPgbIWyfdBJm2uBjG7LeWYvg38sXNu4FlWg8O3bF1UINHFXwapFydpKwrvWq1C2DzFXkcQcj5SCxG/htU45WzMM3k8I9iGpEglPLd6DYRA9K0OJz1Q7cBh0JA2zd+Dx7EiCwlpv1Gpb3pVF3ylsSQashIsRKgkx6cMzqiCxGc+deooXC2fw7Plp6jIiZBacCLVnLdyabPv27oCUTokaeheKhGETnDoxicMHx/muwIKkRFJZhdAncZXrXSRFu1LkNNbwu9zS3UDc/8frRNCWjrldq6AYUVQmkU5+jkEKfQM4wBJkkFmtsXHqHKXN42W5ApZtyXLtKj67T7kI/Sls5ufP5idPTnEmGvZAYmb16PFnXLr4vK9ZvzSb53D58j4+bcLdew9ZhmsJM+dXrQxldvHCFK5dn8HmzbH7gP0LIyMRrlw9QILDzt+3jJW8fnM+Pzo7zcfVlQxk0Nv1ieLwg6+9izHM3ZuDuf9gbx7H+qbLYGPFGINut4ffZxEjfkeXmgwAAAAASUVORK5CYII=" alt="copy" js_action="copy_note_to_clipboard" />
+									</div>
+								</td>
+								<!--icon to minimize the note -->
+								<td name="minize" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," js_action="minimize_note" style="position: absolute; right: 20px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px; z-index: 10103; border: 0px solid #F00;">
+									<style>
+										.minimize_tooltip_content::after {
+											content: "minimize note";
+										}
+									</style>
+									<div class="yellownote_icon_tooltip minimize_tooltip_content">
+										<img style="padding: 0px; border: 0px; margin: 0px; width: 20px" height="18" width="18" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAdhgAAHYYBXaITgQAAAJFJREFUWEftjjEKwDAMxPz/F2dLBaGTti5VoWAJo+lmby4MdiyBHUtgxxLYsQR2LIEdS2DHEtixBHYsgR1LYMcS2LEEdiyBHUtgxxLYsQR2LIEdS2DHEtixBHYsgR1LYMcS2LEEdiyBHUtgxxLYsQR2LIEdS2DHEvg8ax1m3uXe8Q98yncHVsGOJbBjCezYYfYFZAOuYDgLc3IAAAAASUVORK5CYII=" alt="min" />
+									</div>
+								</td>
+								<!--icon to restore the note to regular size -->
+								<td name="minize" subcomponentvisibility=",new,ro,rw,minimized,fullscreen," js_action="rightsize_note" style="position: absolute; right: 20px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px; z-index: 10103; border: 0px solid #F00;">
+									<style>
+										.rightsize_tooltip_content::after {
+											content: "rightsize note";
+										}
+									</style>
+									<div class="yellownote_icon_tooltip rightsize_tooltip_content">
+										<img style="padding: 0px; border: 0px; margin: 0px; width: 20px" height="18" width="18" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYYAAB2GAV2iE4EAAABdSURBVFhH7dgxCgAhDAXRxPvfOVrYLiwMwi/mNdo5EEhhz9RUsHXPWAZSBlLxgZ9rpvteHjhv/uaIKQMpAykDKQMpAykDKQMpAykDqfhAP48oAykDKQMpA6nwwKoNV+MLRUhroDIAAAAASUVORK5CYII=" alt="right" />
+									</div>
+								</td>
+	
+								<!---->
+	
+								<td name="close" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="close_note" style="position: absolute; right: 0px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+									<img style="padding: 0px; border: 0px; margin: 0px; width: 20px" height="18" width="18" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYYAAB2GAV2iE4EAAAKRSURBVFhH1VhNT8MwDDXcEIi/M2kcuCBAgxPwKxHiDNyQkBji3/C5A1D86nn1Ui9Nmw6VJ73WtE5i/OrE2kZRUEEDxub8Plj8rwC/v4XPz0Sfn8J1Q9d5fKzWtxh8BpeK5OlJ7uMx0eGh2FdXRNvbYveN93eiszOx7+6IplOxRyO5l0CAyo8P4fFxGXTJ/X0q3t6E1jeHLy/Cg4NqncmEitlMaH2TJN7ZmRs9Ynd3bjTA3QeR+pMTse/vK7mvr/PlDmXlzJXAp7S1JfYSbDotISle9yW3juN/djEfZMU9Nl9UYh5YQ47c3lhvDYvGo64PuV9fiS4uxE6S1SJMqUdIAFcrN6TC85g8+t6TFbuFNyZk8kbNC9WQIrfnw8Glw4t6FZENZFEziaLRwvF8w8yBnm+MfK0/jBELaHC6uJVbN+EcWS07ncUcSA1WSm8TbiWrQeeGFdWtlXlzU1W3AtUKoGKTqnUVwpS2ocptq1upssLHG5vK7HbLk1sRe5eKrAB/fiqG+PqaG5nIziAKQr+3EDnHoiKrSLyuRLNpCyerCwo/yibiowe9fU7fwe6rC+okMaQLZeXFF7C2orPcXtSr6J0QoHdCIFt6FMIX48C2WeRr/WFITAp6ssaOL4yBT9suyDJZYk/WlOOLA6mhldxe1JZe5sDUDIDwTe2CQvK1/hDsuytBMDqPMkXuqMTeJty1KwE4EOLMLaFRbi9q/EeerF0yFxJzW7mxjmbS8+dr9QcCAD1ZYzK0JebCnLa6j46q9a1vUhXzhL0jdc6lsxg/gQH48ej0VOzLy4xmswE4z8/Pxb69JXp4EHtvT+4lbDq5RSo5nfo/5KyDKisHt1jfvs9ut9aNzu3WX2HwGRx4gES/2QpAk/X+YF4AAAAASUVORK5CYII=" alt="close" js_action="close_note" />
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			
+			</table>
+		</td>
+	</tr>
+	<tr name="whole_note_middlebar" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 180px; width: 100%; position: absolute; top: 25px; padding: 0px; border: 0px; margin: 0px; overflow: hidden; background: rgba(255, 255, 0, 0.7); z-index: 10103;">
+		<td name="whole_note_middlecell" style="height: 180px; width: 250px; position: absolute; top: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 140px; min-height: 40px; text-align: left; text-wrap: wrap; overflow: visible; background: rgba(255, 255, 0, 0.7); z-index: 10103;" >
+			<textarea  name="message_display_text"  style="height: 180px; width: 100%; position: absolute; left: 0px; top: 0px; color: rgba(0, 0, 0, 0.7); background-color: rgba(255, 255, 0, 0.7); border: 0px solid #ffff00; border-radius: 0px; overflow: hidden; padding: 0px; margin: 0px; position: relative; bottom: 0; z-index: 10104;" contenteditable="true"></textarea>
+		</td>
+			<!--
+			<form name="note_form" style="border: 0px solid #ffff00;
+ border-radius: 0px; width: 100%; overflow: hidden; padding: 0px; margin: 0px; position: relative; bottom: 0; z-index: 10104;">
+ </form>-->
+			<input type="hidden" name="selection_text"></input>
+			<input type="hidden" name="url"></input>
+			<input type="hidden" name="note_type"></input>
+			<input type="hidden" name="uuid"></input>
+			<input type="hidden" name="createtime"></input>
+			<input type="hidden" name="lastmodifiedtime"></input>
+			<input type="hidden" name="enabled"></input>
+						
+	</tr>
+	<tr name="whole_note_bottombar" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 25px; width: 100%; position: absolute; bottom: 0px; z-index: 10103; padding: 0px; border: 0px; margin: 0px;  overflow: visible;">
+					<td  subcomponentvisibility=",new,normalsized,fullscreen," style="position: static; width: 50px;  padding: 0px; border: 0px; margin: 0px; height: 22px;  text-align: left; overflow: hidden;">
+						<img height="20" width="60" src="data:image/png;base64,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" alt="Save" js_action="save_new_note" style="margin: 0px;height: 20px; "/>
+					</td>
+					<td subcomponentvisibility=",rw,normalsized,fullscreen," style="position: static; width: 50px; padding: 0px; border: 0px; margin: 0px; text-align: left; z-index: 10103;">
+						<img height="20" width="50" src="data:image/png;base64,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" alt="Save changes" js_action="update_note" subcomponentvisibility=",rw,normalsized,fullscreen," style="margin: 0px;height: 20px; z-index: 106;"/>
+					</td>
+					<td subcomponentvisibility=",rw,normalsized,fullscreen," style="position: static; width: 50px; padding: 0px; border: 0px; margin: 0px; text-align: left; z-index: 10103;">
+						<img height="20" width="50" src="data:image/png;base64,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" alt="Save" js_action="delete_note" style="margin: 0px;height: 20px; z-index: 106;"/>
+					</td>
+					<td class="button_cell" subcomponentvisibility=",rw,normalsized,fullscreen," style="position: static; width: 50px; padding: 0px; border: 0px; margin: 0px; text-align: left;">
+						<img height="20" width="50" src="data:image/png;base64,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" alt="Save" js_action="disable_note" style="margin: 0px;height: 20px; z-index: 10103;"/>
+					</td>
+					<td name="bottombar_table_filler" style="width: auto;"></td>					
+					<td style="position: absolute; right: 90px; bottom: 0px; text-align: right; height: 20px; width: 20px; padding: 0px; border: 0px; margin: 0px; line-height: 1.0rem; overflow: visible;background: rgba(255, 255, 0, 0.8);">
+						<style>
+										.yellownote_distributionlist_icon_tooltip {
+											position: absolute;
+											bottom: 0px;
+											display: inline-block;
+											z-index: 12000;
+										}
+								
+										.yellownote_distributionlist_icon_tooltip::after {
+											content: "Select a distribution list for this note";
+											position: absolute;
+											bottom: 100%;
+											left: 0px;
+											transform: translateX(-50%);
+											white-space: wrap;
+											background-color: black;
+											color: white;
+											text-align: center;
+											padding: 4px;
+											border-radius: 2px;
+											font-size: 15px;
+											z-index: 12000;
+								
+											/* Initially hidden */
+											opacity: 0;
+											visibility: hidden;
+											transition: opacity 0.5s;
+										}
+								
+										.yellownote_distributionlist_icon_tooltip:hover::after {
+											/* Show the tooltip */
+											opacity: 1;
+											visibility: visible;
+											z-index: 12000;
+										}
+						</style>
+						<div class="yellownote_distributionlist_icon_tooltip">
+							<img class="yellownote_distributionlist_icon_tooltip" height="20" width="20" src="data:image/png;base64,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" alt="distriutionlist" js_action="distribute" style="margin: 0px;height: 20px; z-index: 10103;"></img>
+						</div>	
+					</td>
+					<td style="position: absolute; right: 0px; bottom: 0px; width: 60px; padding: 0px; border: 0px; margin: 0px; line-height: 1.0rem;overflow: hidden; background: rgba(255, 255, 0, 0.8);">
+						<select name="distributionlistdropdown" style="max-width: 100px; font-size: 1.0rem; padding: 0px; background: rgba(255, 255, 255, 0.8);"></select>
+					</td>
+							
+		
+	</tr>
+</table>

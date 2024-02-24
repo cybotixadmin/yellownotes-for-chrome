@@ -3,8 +3,17 @@
  */
 
 
-var yellowstockynote_text_opening = "yellowstickynote=";
-var yellowstockynote_text_closing = "=yellowstickynote";
+var yellowstockynote_text_opening = "yellownote=";
+var yellowstockynote_text_closing = "=yellownote";
+
+
+
+// the session token is not completed as yet
+ function get_username_from_sessiontoken(token) {
+    
+    return (JSON.parse(token)).userid;   
+    
+}
 
 
 /**
@@ -408,6 +417,20 @@ function getDOMposition(textnode_map, selection_text) {
 
 }
 
+
+
+function utf8_to_b64(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+}
+
+function b64_to_utf8(str) {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+
 function attachEventlistenersToYellowStickynote(note) {
     console.log("attachEventlistenersToYellowStickynote.start");
     console.debug(note);
@@ -711,9 +734,9 @@ function create_stickynote_node(note_object_data, note_template) {
   //  link1.setAttribute("href", fullURLToCSS);
   //  cont1.appendChild(link1);
 
-    cont1.setAttribute("class", "yellowstickynotecontainer");
+    cont1.setAttribute("class", "yellownotecontainer");
     // use this attribute to mark this as a stickynote object
-    cont1.setAttribute("type", 'yellowstickynote');
+    cont1.setAttribute("note_type", 'yellownote');
     cont1.setAttribute("uuid", note_object_data.uuid);
 
     //cont1.appendChild(create_note_table(note_object_data,note_template));
@@ -726,6 +749,8 @@ function create_stickynote_node(note_object_data, note_template) {
 
     noteForm.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
     noteForm.querySelector('input[type="hidden"][name="uuid"]').replaceChildren(document.createTextNode(note_object_data.uuid));
+
+    noteForm.querySelector('input[type="hidden"][name="note_type"]').replaceChildren(document.createTextNode(note_object_data.note_type));
 
     noteForm.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
     noteForm.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
@@ -814,12 +839,12 @@ function locateStickyNote(request, sender, sendResponse) {
 function getYellowStickyNoteRoot(currentElement) {
 
     // let currentElement = element;
-    // container type="yellowstickynote"
+    // container type="yellownote"
     //console.log(currentElement);
-    //console.log(currentElement.querySelector('container[type="yellowstickynote"]'));
+    //console.log(currentElement.querySelector('container[type="yellownote"]'));
 
-    if (currentElement.hasAttribute("type"))  {
-        if (currentElement.getAttribute("type") === "yellowstickynote" ){
+    if (currentElement.hasAttribute("note_type"))  {
+        if (currentElement.getAttribute("note_type") === "yellownote" ){
         
         // Condition met, return this element
         return currentElement;
@@ -827,9 +852,9 @@ function getYellowStickyNoteRoot(currentElement) {
     }
     while (currentElement !== null && currentElement !== document) {
         //console.log(currentElement);
-        //console.log(currentElement.querySelector('container[type="yellowstickynote"]'));
-        if (currentElement.hasAttribute("type"))  {
-            if (currentElement.getAttribute("type") === "yellowstickynote" ){
+        //console.log(currentElement.querySelector('container[type="yellownote"]'));
+        if (currentElement.hasAttribute("note_type"))  {
+            if (currentElement.getAttribute("note_type") === "yellownote" ){
             
             // Condition met, return this element
             return currentElement;
@@ -893,7 +918,7 @@ function isSticyNoteRoot(ele) {
     //console.debug(ele.getAttribute("type"));
 
 try{
-    if (ele.nodeName == "CONTAINER" && ele.getAttribute("type") == "yellowstickynote") {
+    if (ele.nodeName == "CONTAINER" && ele.getAttribute("note_type") == "yellownote") {
         return true;
 
     } else {

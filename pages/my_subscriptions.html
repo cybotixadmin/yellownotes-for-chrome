@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="my_subscriptions.css">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my subscriptions</title>
+</head>
+
+<body>
+
+ <!-- side bar start here-->
+ <div class="sidebar">
+    <div id="login_status"></div>
+    <a href="my_account.html">My account page</a></td></tr>
+    <a href="subscribed_notes.html">subscribed Yellownotes</a>
+    <a href="my_notes.html">my Yellownotes</a>
+    <a href="edit_template.html">edit template</a>
+    <a href="my_subscriptions.html">my subscriptions</a>
+    <a href="my_distributions.html">my distributions</a>
+    <div id="loginlogout"></div>
+  </div>
+<!-- side bar end here -->
+
+<div style="display: flex; justify-content: center; align-items: middle; height: 7vh;">
+  <p style="font-size: 30px; color: black;">My subscriptions</p>
+</div>
+<div style="display: flex;  ">
+  <p style="left: 280px;  font-size: 12px; color: black;">
+  The are the feeds you are subscribed to. You can add a new subscription, refresh the list, suspend all subscriptions, or activate all subscriptions.</p>
+</div> 
+
+  <!-- Empty table structure -->
+  <div class="tabContent scrollable-table" >
+    <div class="tableResponsive">
+      <table id="dataTable">
+        <thead>
+          <tr class="fixed-header">
+            <th>ID</th>
+            <!-- <th class="sortableCol">universaltime</th> -->
+            <th class="sortableCol">name</th>
+            <th>description</th>
+            <th>creator</th>
+            <th>posts</th>
+            <th>since</th>
+            <th>active</th>
+            <th></th>
+          </tr>
+<!-- populate the table with the distribution list owned by this user  
+
+The lists are returned by calling to the background script.
+-->
+
+
+
+          <!-- Add a filter row -->
+          <!-- <tr class="fixed-header">
+      <th class="filterableCol"></th> <!//-- Empty cell --//>
+      <th class="filterableCol">filter:<input type="text" id="filterContent" placeholder="Filter Content" "></th>
+      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" "></th>
+      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" "></th>
+      <th class="filterableCol"></th>
+      <th class="filterableCol"></th>
+    </tr> -->
+          </thead>
+          <tbody>
+            <!-- Rows will be added here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div >
+      <button id="subscriptionsAddButton" class="addBtn">Add a subscription</button>
+      <button id="subscriptionsRefreshButton" class="refreshBtn">Refresh</button>
+      <button id="subscriptionsSuspendAllButton" class="suspendAllBtn">Suspend All</button>
+      <button id="subscriptionsActivateAllButton" class="activateAllBtn">Activate All</button>
+    </div>
+    <!-- use this node to anchor -->
+    <div id="form">
+      </div>
+  
+       <!-- Empty table structure to contain a list of available distributions -->
+       <!--
+       available subscriptions
+  <div class="tabContent scrollable-table">
+    <div class="tableResponsive">
+      <table id="distributionsTable">
+        <thead>
+          <tr class="fixed-header">
+            <th>ID</th>
+            <th class="sortableCol">name</th>
+            <th>description</th>
+            <th>restrictions</th>
+            <th></th>
+          </tr>
+
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  -->
+
+    <div id="form">
+    </div>
+
+  <script type="module" src="my_subscriptions.js"></script>
+  <script src="session_logic.js"></script>
+					
+</body>
+</html>
