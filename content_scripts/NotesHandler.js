@@ -1,14 +1,76 @@
 const default_box_width = 250;
 const default_box_height = 250;
 
-    // Attach the event listener to the document
-    document.addEventListener('mousemove', handleMouseMove);
+var mouseX, mouseY;
+// Attach the event listener to the document to make the mouse coordinates available to the extension
+document.addEventListener('mousemove', (event) => {
+    console.log("mousemove detected");
+    console.log(event);
+    console.log(event.target);
+
+    // Extract the x and y coordinates of the mouse cursor
+    mouseX = event.clientX + window.scrollX;
+    mouseY = event.clientY + window.scrollY
+
+    console.log(mouseX, mouseY ); // For demonstration purposes
+
+});
+
+
+document.addEventListener('contextmenu ', (event) => {
+    console.log("contextmenu detected at " + mouseX + " " + mouseY);
+    // keep the current cursor postion
+
+});
+
+document.addEventListener('oncontextmenu ', (event) => {
+    console.log("oncontextmenu detected at " + mouseX + " " + mouseY);
+    // keep the current cursor postion
+
+});
+
+var clickX, clickY;
+function logPosition(event) {
+    console.log("click detected: " + event.button);
+    if (event.button === 2) {
+console.log("right click detected");
+    clickX = event.clientX + window.scrollX;
+    clickY = event.clientY + window.scrollY;
+    const cursorPosition = {
+        x: event.clientX + window.scrollX,
+        y: event.clientY + window.scrollY
+    };
+    console.log(cursorPosition);
+}else{
+    console.log("not a right click");
+
+}
+}
+
+document.addEventListener('click', logPosition);
+
+document.addEventListener('touchstart', (event) => {
+    console.log("touch detected: " + event.touches[0].clientX + " " + event.touches[0].clientY);
+    if (event.touches.length > 0) {
+        logPosition(event.touches[0]);
+    }
+});
+
+document.addEventListener('touchend', (event) => {
+    if (event.touches.length > 0) {
+        logPosition(event.touches[0]);
+    }
+});
+
 
 
 function listener(request, sender, sendResponse) {
 
     try {
-        console.debug("browsersolutions request: " + JSON.stringify(request));
+        console.debug("browsersolutions request: " );
+        console.debug(request);
+        console.debug( request.info);
+        console.debug( request.tab);
 
         if (!(isUndefined(request.sharedsecret)) && !(isUndefined(request.action))) {
 
@@ -183,7 +245,7 @@ function create_newstickynote_node(info, note_type, html, session) {
     node_root.setAttribute("button_arrangment", 'new');
 
     const note_table = note_template.querySelector('[name="whole_note_table"]');
-    console.debug(note_table);
+    //console.debug(note_table);
     // read size parameters from the note template
     //const box_width = processBoxParameterInput(note_table.getAttribute("box_width"), 250, 50, 500);
     var box_width = note_table.getAttribute("box_width");
@@ -205,9 +267,11 @@ function create_newstickynote_node(info, note_type, html, session) {
     // if there is a selection text, the note will be placed at the selection text
     var selection_text = info.selectionText;
     if (isUndefined(selection_text) || selection_text == null || selection_text == '' || selection_text == 'undefined') {
+        console.debug("no selection text");
         // there is no selection text to place the note next to. Place it at the top left corner of the page
-        node_root.setAttribute("posx", 0);
-        node_root.setAttribute("posy", 0);
+        node_root.setAttribute("posx", mouseX + "px");
+        node_root.setAttribute("posy", mouseY + "px");
+
     } else {
         // look for the cursor coordinates and place the note there
     }
@@ -280,91 +344,72 @@ function create_newstickynote_node(info, note_type, html, session) {
         }
     } else if (note_type == "webframe") {}
 
-
-
     console.debug("calling getSelectionTextDOMPosition")
     var out = getSelectionTextDOMPosition(info.selectionText);
-console.debug(out);
-if (out.selection_matched_in_document){
-    // found selection text in document. get x,y positions
-console.debug(out.start_range_node);
-console.debug(out.start_range_node.parentNode);
-const p = getXYPositionOfDOMElement(out.start_range_node.parentNode);
-console.log(p);
+    console.debug(out);
+    if (out.selection_matched_in_document) {
+        // found selection text in document. get x,y positions
+        console.debug(out.start_range_node);
+        console.debug(out.start_range_node.parentNode);
+        const p = getXYPositionOfDOMElement(out.start_range_node.parentNode);
+        console.log(p);
 
-console.log(p.left);
+        console.log(p.left);
 
-const pos1 = getXYPositionOfDOMElement(out.start_range_node.parentNode);
-const pos2 = getXYPositionOfDOMElement(out.end_range_node.parentNode);
-//console.debug(node_root);
-    node_root.setAttribute("posx" , p.left + "px");
-//    console.debug(node_root);
-    node_root.setAttribute("posy" , p.top + "px");
+        const pos1 = getXYPositionOfDOMElement(out.start_range_node.parentNode);
+        const pos2 = getXYPositionOfDOMElement(out.end_range_node.parentNode);
+        //console.debug(node_root);
+        node_root.setAttribute("posx", p.left + "px");
+        //    console.debug(node_root);
+        node_root.setAttribute("posy", p.top + "px");
 
-}else if (newNote){
-    // use x,y position of cursor for new notes
-    node_root.posx = mouseX + "px";
-    node_root.posy = mouseY + "px";
+    } else if (newNote) {
+        // use x,y position of cursor for new notes
+        console.debug("use x,y position of cursor for new note: " + mouseX + " " + mouseY);
+        node_root.posx = mouseX + "px";
+        node_root.posy = mouseY + "px";
 
-    
+    } else if (haveValidXYPositons(node_root)) {
+        // use x,y position in the note, if any
 
-}else if (haveValidXYPositons(node_root)){
-// use x,y position in the note, if any
+    } else {
+        // use default
 
-}else{
-    // use default
+    }
 
-}
+    console.debug(node_root);
 
-console.debug(node_root);
+    const inserted = placeYellowNote(node_root);
+    // set the flag that contral which button are shown
+    inserted.setAttribute("button_arrangment", 'new');
 
+    // call the function that will set which part of the note will be displayed
+    setComponentVisibility(inserted, ",new,.*normalsized,");
 
-   const inserted = placeYellowNote(node_root);
-  // set the flag that contral which button are shown
-  inserted.setAttribute("button_arrangment", 'new');
-            
-  // call the function that will set which part of the note will be displayed
-  setComponentVisibility(inserted, ",new,.*normalsized,");
+    // call the function that will make the note draggable
+    console.debug("browsersolutions: makeDragAndResize");
+    makeDragAndResize(inserted);
 
-  // call the function that will make the note draggable
-  console.debug("browsersolutions: makeDragAndResize");
-  makeDragAndResize(inserted);
+    // attach eventlisteners to the note
+    attachEventlistenersToYellowStickynote(inserted);
 
-  // attach eventlisteners to the note
-  attachEventlistenersToYellowStickynote(inserted);
-
-
-  
     // move to the default location on the screen
     //inserted.setAttribute("posx", 50);
     //inserted.setAttribute("posy", 50);
-inserted.querySelector('[name="whole_note_table"]').style.left = inserted.getAttribute("posx");
-inserted.querySelector('[name="whole_note_table"]').style.top = inserted.getAttribute("posy");
+    inserted.querySelector('[name="whole_note_table"]').style.left = inserted.getAttribute("posx");
+    inserted.querySelector('[name="whole_note_table"]').style.top = inserted.getAttribute("posy");
 
-inserted.querySelector('[name="whole_note_table"]').style.width = inserted.getAttribute("box_width");
-inserted.querySelector('[name="whole_note_table"]').style.height = inserted.getAttribute("box_height");
+    inserted.querySelector('[name="whole_note_table"]').style.width = inserted.getAttribute("box_width");
+    inserted.querySelector('[name="whole_note_table"]').style.height = inserted.getAttribute("box_height");
 
-  // call the function that will make the note resizeable
-  // console.debug("browsersolutions: makeResizable");
-  // makeResizable(inserted);
+    // call the function that will make the note resizeable
+    // console.debug("browsersolutions: makeResizable");
+    // makeResizable(inserted);
 
-  dropdownlist_add_option(inserted, "", "", "");
+    dropdownlist_add_option(inserted, "", "", "");
 
-    
     // });
 }
-var mouseX, mouseY;
-
-// Function to handle the mousemove event
-function handleMouseMove(event) {
-    // Extract the x and y coordinates of the mouse cursor
-    mouseX = event.clientX;
-     mouseY = event.clientY;
-
-    // Log the coordinates to the console (or handle them as needed)
-    //console.log("Mouse position: X=" + mouseX + ", Y=" + mouseY);
-}
-
 
 function save_new_note(event) {
     console.debug("browsersolutions ### save new note");
@@ -484,7 +529,6 @@ function save_new_note(event) {
                 note_root.querySelector('input[type="hidden"][name="uuid"]').replaceChildren(document.createTextNode(uuid));
                 note_root.setAttribute("uuid", uuid);
 
-
                 // call the function that will set which part of the note will be displayed
                 setComponentVisibility(note_root, ",rw,.*normalsized,");
 
@@ -552,46 +596,46 @@ function get_distributionlist() {
 
 }
 
-function haveValidXYPositons(node_root){
+function haveValidXYPositons(node_root) {
     return true
 
 }
 
-function placeYellowNote(newGloveboxNode){
-console.debug("placeYellowNote");
-var doc = window.document;
+function placeYellowNote(newGloveboxNode) {
+    console.debug("placeYellowNote");
+    var doc = window.document;
     var doc_root = doc.documentElement;
     //console.debug(doc_root);
 
-        const inserted = doc_root.insertBefore(newGloveboxNode, doc_root.firstChild);
-        console.log(inserted);
+    const inserted = doc_root.insertBefore(newGloveboxNode, doc_root.firstChild);
+    console.log(inserted);
 
-const table = inserted.querySelector('table[name="whole_note_table"]');
-console.debug(table);
-table.style.position = "absolute";
+    const table = inserted.querySelector('table[name="whole_note_table"]');
+//    console.debug(table);
+    table.style.position = "absolute";
 
-table.style.left = inserted.getAttribute("posx") ;
-table.style.top = inserted.getAttribute("posy");
+    table.style.left = inserted.getAttribute("posx");
+    table.style.top = inserted.getAttribute("posy");
 
-
-        return inserted;
+    return inserted;
 
 }
 
-function getXYPositionOfDOMElement(element){
+function getXYPositionOfDOMElement(element) {
     console.debug("getXYPositionofDOMElement");
-// Get the position of the element
-const rect = element.getBoundingClientRect();
+    // Get the position of the element
+    const rect = element.getBoundingClientRect();
 
-// Coordinates
-const top = rect.top + window.scrollY;
-const left = rect.left + window.scrollX;
-const out = {left: left, top: top};
-console.debug(out);
-return out;
-}
-
-
+    // Coordinates
+    const top = rect.top + window.scrollY;
+    const left = rect.left + window.scrollX;
+    const out = {
+        left: left,
+        top: top
+    };
+    console.debug(out);
+    return out;
+	}
 
 // the session token is not completed as yet
 function get_username_from_sessiontoken(token) {
@@ -1513,99 +1557,98 @@ function scan_page() {
 
 }
 
-function getSelectionTextDOMPosition( selection_text ){
- var doc = window.document,
-                    body = doc.body,
-                    selection,
-                    range,
-                    bodyText;
+function getSelectionTextDOMPosition(selection_text) {
+    var doc = window.document,
+    body = doc.body,
+    selection,
+    range,
+    bodyText;
 
-                    console.debug(doc);
-                    console.debug("browsersolutions: " + doc.nodeName);
-                    // root
-                    var root_node = doc.documentElement;
-                    //console.debug(root_node);
+    console.debug(doc);
+    console.debug("browsersolutions: " + doc.nodeName);
+    // root
+    var root_node = doc.documentElement;
+    //console.debug(root_node);
 
-                    whole_page_text = "";
-                    console.debug("browsersolutions: " + traverse(doc.documentElement));
-                    console.debug("browsersolutions: " + "################################################");
-                    // console.debug("browsersolutions: " +whole_page_text);
-                    // console.debug("browsersolutions: " +textnode_map);
+    whole_page_text = "";
+    console.debug("browsersolutions: " + traverse(doc.documentElement));
+    console.debug("browsersolutions: " + "################################################");
+    // console.debug("browsersolutions: " +whole_page_text);
+    // console.debug("browsersolutions: " +textnode_map);
 
-                    // console.debug("browsersolutions: " +whole_page_text.replace(/\s/g, ""));
-                    //console.debug(selectionText.replace(/\s/g,""));
-                    // remove all whitespace before making attempt to place selection inside larger text
-
-
-                    //console.debug("browsersolutions: " + "note: " + JSON.stringify(note_obj));
-                    // locate where this note goes.
-                   // var uuid = note_obj.uuid;
-                    // var obj = JSON.parse(note_obj.json);
-                    // Create Base64 Object
+    // console.debug("browsersolutions: " +whole_page_text.replace(/\s/g, ""));
+    //console.debug(selectionText.replace(/\s/g,""));
+    // remove all whitespace before making attempt to place selection inside larger text
 
 
-                    // Decode the String containing the selection text
-                    //console.debug("browsersolutions: selection_text: " + note_obj.selection_text);
-                    //var selection_text = "";
-                    try {
-                        if (selection_text != "" && selection_text != null) {
+    //console.debug("browsersolutions: " + "note: " + JSON.stringify(note_obj));
+    // locate where this note goes.
+    // var uuid = note_obj.uuid;
+    // var obj = JSON.parse(note_obj.json);
+    // Create Base64 Object
 
-                       
-                            console.debug("browsersolutions: selection_text: " + selection_text);
 
-                            // fiund where in the DOM the selection text is found (if at all)
-                            var {
-                                selection_matched_in_document,
-                                start_range_node,
-                                start_offset,
-                                end_range_node,
-                                end_offset
-                            } = getDOMplacement(selection_text);
+    // Decode the String containing the selection text
+    //console.debug("browsersolutions: selection_text: " + note_obj.selection_text);
+    //var selection_text = "";
+    try {
+        if (selection_text != "" && selection_text != null) {
 
-                            console.log("selection_matched_in_document: " + selection_matched_in_document);
-                            console.debug("browsersolutions: start_range_node");
-                            console.log(start_range_node);
-                            console.log("start_offset: " + start_offset);
-                            console.log(end_range_node);
-                            console.log("end_offset: " + end_offset);
-                            // if the selection text that should be use to anchor the note in the document found, switch to using the coordinates contained in the note
-                            const out = {
-                                selection_matched_in_document: selection_matched_in_document,
-                                start_range_node: start_range_node,
-                                start_offset: start_offset,
-                                end_range_node: end_range_node,
-                                end_offset: end_offset
-        
-                            }
+            console.debug("browsersolutions: selection_text: " + selection_text);
+
+            // fiund where in the DOM the selection text is found (if at all)
+            var {
+                selection_matched_in_document,
+                start_range_node,
+                start_offset,
+                end_range_node,
+                end_offset
+            } = getDOMplacement(selection_text);
+
+            console.log("selection_matched_in_document: " + selection_matched_in_document);
+            console.debug("browsersolutions: start_range_node");
+            console.log(start_range_node);
+            console.log("start_offset: " + start_offset);
+            console.log(end_range_node);
+            console.log("end_offset: " + end_offset);
+            // if the selection text that should be use to anchor the note in the document found, switch to using the coordinates contained in the note
+            const out = {
+                selection_matched_in_document: selection_matched_in_document,
+                start_range_node: start_range_node,
+                start_offset: start_offset,
+                end_range_node: end_range_node,
+                end_offset: end_offset
+
+            }
             return out;
-                        } else {
-                            console.debug("browsersolutions: no selection text");
-                            selection_matched_in_document = false;
-                            const out = {
-                                selection_matched_in_document: false,
-                                start_range_node: null,
-                                start_offset: null,
-                                end_range_node: null,
-                                end_offset: null
-        
-                            }
+        } else {
+            console.debug("browsersolutions: no selection text");
+            selection_matched_in_document = false;
+            const out = {
+                selection_matched_in_document: false,
+                start_range_node: null,
+                start_offset: null,
+                end_range_node: null,
+                end_offset: null
+
+            }
             return out;
-                            }
-                    } catch (e) {
-                        console.error(e);
-                        console.debug("browsersolutions: no selection text");
-                        selection_matched_in_document = false;
-                        const out = {
-                            selection_matched_in_document: false,
-                            start_range_node: null,
-                            start_offset: null,
-                            end_range_node: null,
-                            end_offset: null
-    
-                        }
+        }
+    } catch (e) {
+        console.error(e);
+        console.debug("browsersolutions: no selection text");
+        selection_matched_in_document = false;
+        const out = {
+            selection_matched_in_document: false,
+            start_range_node: null,
+            start_offset: null,
+            end_range_node: null,
+            end_offset: null
+
+        }
         return out;
-                    }
-                   
+    }
+
 }
 /*
 note_obj contains the data that populated the note
@@ -1626,28 +1669,25 @@ function placeStickyNote(note_obj, note_template, isOwner, newNote) {
     console.debug(note_template);
     console.debug(isOwner);
 
-// create the note object, populated with data
+    // create the note object, populated with data
 
-/* determine where on the page the note goes
+    /* determine where on the page the note goes
 
-Check in the following order
-1. Does the note have a selectiontext string and is this string on the page? If so place the note next to this selection
-2. Does the note have coordinates, if use use them
-3. Use the cursor position
+    Check in the following order
+    1. Does the note have a selectiontext string and is this string on the page? If so place the note next to this selection
+    2. Does the note have coordinates, if use use them
+    3. Use the cursor position
 
-*/
-//var out = getSelectionTextPosition(note_obj);
+     */
+    //var out = getSelectionTextPosition(note_obj);
 
 
     if (typeof note_obj == 'undefined') {
         // nothing to do
     } else {
         // if noe note, just use cursor position
-        if (newNote) {
-
-
-
-        } else {
+        if (newNote) {}
+        else {
 
             if (note_obj.selection_text == "") {
                 // if no selection_text, only position co-ordinates can place the note
@@ -2668,8 +2708,6 @@ function getDOMplacement(selection_text) {
     };
 }
 
-
-
 function findNodesBetween(startNode, endNode) {
     let nodes = [];
     let node = startNode;
@@ -3011,11 +3049,11 @@ The feed name and creator name is inserted below the logo in the for om a css to
 function renderNoteHeader(note_object_data, note_container) {
     var headerhtml = "";
     if (note_object_data.distributionlistname != undefined) {
-        headerhtml = '<div style="word-wrap: break-word; line-height: 1; letter-spacing: -0.5px;"><a href="http://www.yellownotes.xyz/pages/my_subscriptions.html" target="_blank" rel="noopener noreferrer"><b>' + note_object_data.distributionlistname + '</b></a></div>';
+        headerhtml = '<div style="word-wrap: break-word; line-height: 1; letter-spacing: -0.5px;"><a href="https://www.yellownotes.cloud/pages/my_subscriptions.html" target="_blank" rel="noopener noreferrer"><b>' + note_object_data.distributionlistname + '</b></a></div>';
     }
     if (note_object_data.creatorid != undefined) {
         //    headerhtml = note_object_data.creatorid + "\n"+ headerhtml;
-        headerhtml = '<div style="word-wrap: break-word; line-height: 1; letter-spacing: -0.5px;"><a href="http://www.yellownotes.xyz/pages/my_notes.html?uuid=' + note_object_data.uuid + '" target="_blank" rel="noopener noreferrer"><b>' + note_object_data.creatorid + '</b></a></div>' + headerhtml;
+        headerhtml = '<div style="word-wrap: break-word; line-height: 1; letter-spacing: -0.5px;"><a href="https://www.yellownotes.cloud/pages/my_notes.html?uuid=' + note_object_data.uuid + '" target="_blank" rel="noopener noreferrer"><b>' + note_object_data.creatorid + '</b></a></div>' + headerhtml;
     }
     const topbarfield = note_container.querySelector('td[name="topbar_filler"]');
     //console.debug(topbarfield);
@@ -3276,7 +3314,7 @@ function makeDragAndResize(note) {
     const resizeBorderMargin = 5;
 
     const tableContainer = note.querySelector('[name="whole_note_table"]');
-    console.debug(tableContainer);
+    //console.debug(tableContainer);
     let isDragging = false,
     isResizing = false;
     let startX,

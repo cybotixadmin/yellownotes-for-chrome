@@ -5,7 +5,7 @@
 console.log("Browsersolutions: local_GUI_intercept.js loaded");
 
 console.log(window.location.href);
-const accountTargetURL =  new RegExp(/\/\/www\.yellownotes\.xyz\/.*my_account.html/);
+const accountTargetURL =  new RegExp(/\/\/www\.yellownotes\.cloud\/.*my_account.html/);
 console.log( accountTargetURL.test(window.location.href ));
 if ( accountTargetURL.test(window.location.href )) {
     console.log("redirect this link to plugin")
@@ -14,7 +14,7 @@ if ( accountTargetURL.test(window.location.href )) {
 }
 
 
-const notespage =  new RegExp(/\/\/www\.yellownotes\.xyz\/(pages\/my_notes.html|my_notes.html)/);
+const notespage =  new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/my_notes.html|my_notes.html)/);
 console.log(notespage.test(window.location.href ));
 if ( notespage.test(window.location.href )) {
   const url = window.location.href;
@@ -25,7 +25,7 @@ if ( notespage.test(window.location.href )) {
 chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: newUrl});
 }
 
-const subpage =  new RegExp(/\/\/www\.yellownotes\.xyz\/pages\/my_subscriptions.html/);
+const subpage =  new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/);
 console.log(subpage.test(window.location.href ));
 if ( subpage.test(window.location.href )) {
   console.log("redirect this link to plugin")
@@ -34,7 +34,7 @@ chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri
 }
 
 
-const subscribedpage =  new RegExp(/\/\/www\.yellownotes\.xyz\/subscribed_notes.html/);
+const subscribedpage =  new RegExp(/\/\/www\.yellownotes\.cloud\/subscribed_notes.html/);
 console.log(subscribedpage.test(window.location.href ));
 if ( subscribedpage.test(window.location.href )) {
   console.log("redirect this link to plugin")

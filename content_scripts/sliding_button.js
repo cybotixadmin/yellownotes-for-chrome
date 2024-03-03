@@ -356,11 +356,11 @@ function updateSlider(request, sender, sendResponse) {
 
 function listener(request, sender, sendResponse) {
     try{
-    console.debug("browsersolutions request: " + JSON.stringify(request));
+    //console.debug("browsersolutions request: " + JSON.stringify(request));
     // check for a valid request
    
-    console.log(request);
-    console.log(request.action);
+    //console.log(request);
+    //console.log(request.action);
 
     if (!(isUndefined(request.slidershow))) {
         console.log("browsersolutions show: " + JSON.stringify(request.slidershow));

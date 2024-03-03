@@ -1,5 +1,5 @@
 
-const server_url = "http://api.yellownotes.xyz";
+const server_url = "https://api.yellownotes.cloud";
 
 
 const plugin_uuid_header_name = "ynInstallationUniqueId";

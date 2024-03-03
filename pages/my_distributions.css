@@ -12,28 +12,33 @@
 
   /* Add styles for scrollable table */
   .scrollable-table {
-    height: 450px; /* Adjust height as needed */
+    height: 150px; /* Adjust height as needed */
     overflow-y: auto;
     display: block;
+  }
+
+
+  .pageBody{
+
+    margin-left: 220px;
   }
 
   /* Table Styling */
   table {
     border: 1px solid #4CAF50;
     border-collapse: collapse;
-    margin: 15px 0;
-    padding: 0;
-    
     table-layout: fixed;
-  }
+    font-size: clamp(12px, 2vw, 18px);
+    color: black;
+ 
+}
+
+
   /* the first colum contains the data row ID. This information means nothing to the user, so do not display it*/
   #dataTable th:first-child,
   #dataTable td:first-child {
     display: none;
   }
-
- 
-
 
 
 .fixed-header {
@@ -49,7 +54,35 @@
     padding: .35em;
   }
 
-  
+
+  .editabletext {
+    font-size: clamp(12px, 2vw, 18px);
+    font-style: italic;
+  color: red;
+  }
+
+
+  .tableResponsive {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    padding: 0 2%;
+}
+
+.pagetextcontent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40%;
+}
+
+button.b {
+  font-size: clamp(12px, 2vw, 18px);
+  color: black;
+  width: 100%;
+  margin-left: 250px;
+  margin-right: 20px;
+}
 
   table.notesTable td {
     padding: 0px;
@@ -226,6 +259,10 @@
   }
 
 
+  
+
+  table.formTable {
+  }
 
   table.notesTable th {
     font-size: .5em;
@@ -233,6 +270,7 @@
     text-transform: uppercase;
     background-color: #4CAF50;
     color: white;
+    margin-left: 200px;
    
   }
 

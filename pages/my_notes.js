@@ -1,7 +1,7 @@
 
 
 // uri to the server-side services used by YellowStickyNotes
-const server_url = "http://api.yellownotes.xyz";
+const server_url = "https://api.yellownotes.cloud";
 
 const URI_plugin_user_get_own_yellownotes = "/api/plugin_user_get_own_yellownotes";
 const URI_plugin_user_delete_yellownote = "/api/plugin_user_delete_yellownote";

@@ -10,6 +10,11 @@
   }
 
 
+  .pageBody{
+
+    margin-left: 220px;
+  }
+
   /* Add styles for scrollable table */
   .scrollable-table {
     height: 450px; /* Adjust height as needed */

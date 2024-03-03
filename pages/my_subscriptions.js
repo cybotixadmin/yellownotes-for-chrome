@@ -1,4 +1,4 @@
-const server_url = "http://api.yellownotes.xyz";
+const server_url = "https://api.yellownotes.cloud";
 
 const URI_plugin_user_get_all_agreements = "/api/plugin_user_get_all_data_agreements";
 const URI_plugin_user_delete_data_agreement = "/api/plugin_user_delete_distribution_list";
@@ -61,7 +61,7 @@ async function deleteDataRowByUUID(subscriptionid) {
         let session = await chrome.storage.local.get(["yellownotes_session"]);
         const userid = "";
         const message_body = JSON.stringify({
-            subscriptionid: subscriptionid,
+                subscriptionid: subscriptionid,
             }, );
         console.log(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -96,7 +96,7 @@ async function addSubscriptionByUUID(subscriptionid) {
         let session = await chrome.storage.local.get(["yellownotes_session"]);
         const userid = "";
         const message_body = JSON.stringify({
-            distributionlistid: subscriptionid
+                distributionlistid: subscriptionid
             });
         //console.log(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -139,64 +139,63 @@ async function addSubscriptionByUUID(subscriptionid) {
         cell3.textContent = data.distributionlist_description;
         cell4.textContent = data.subscribedate;
 
+        // Add delete button
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.classList.add("deleteBtn");
+        deleteButton.onclick = function () {
+            // Remove the row from the table
+            newRow.remove();
+            // call to API to delete row from data base
+            deleteDataRowByUUID(row.subscriptionid);
+        };
 
-          // Add delete button
-          const deleteButton = document.createElement("button");
-          deleteButton.textContent = "Delete";
-          deleteButton.classList.add("deleteBtn");
-          deleteButton.onclick = function () {
-              // Remove the row from the table
-              newRow.remove();
-              // call to API to delete row from data base
-              deleteDataRowByUUID(row.subscriptionid);
-          };
+        // Add View button
+        const viewButton = document.createElement("button");
+        viewButton.textContent = "View";
+        viewButton.classList.add("viewBtn");
 
-          // Add View button
-          const viewButton = document.createElement("button");
-          viewButton.textContent = "View";
-          viewButton.classList.add("viewBtn");
+        viewButton.onclick = function () {
 
-          viewButton.onclick = function () {
+            // call to API to delete row from data base
+            viewDistributionlist(row.subscriptionid);
+        };
 
-              // call to API to delete row from data base
-              viewDistributionlist(row.subscriptionid);
-          };
+        //Suspend/Active button
+        const suspendActButton = document.createElement("span");
+        // new subscrption is active by default
+        suspendActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
 
-          //Suspend/Active button
-          const suspendActButton = document.createElement("span");
-              // new subscrption is active by default
-              suspendActButton.innerHTML =
-                  '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
-          
-          // Add classes using classList with error handling
-          const inputElement = suspendActButton.querySelector("input");
-          if (inputElement) {
-              inputElement.classList.add("input-class");
-          }
+        // Add classes using classList with error handling
+        const inputElement = suspendActButton.querySelector("input");
+        if (inputElement) {
+            inputElement.classList.add("input-class");
+        }
 
-          const labelElement = suspendActButton.querySelector("label");
-          if (labelElement) {
-              labelElement.classList.add("switch");
-          }
-          const spanElement = suspendActButton.querySelector("span");
-          if (spanElement) {
-              spanElement.classList.add("slider");
-          }
-          suspendActButton.addEventListener("change", async(e) => {
-              if (e.target.checked) {
-                  await setActiveByUUID(row.subscriptionid, 1);
-              } else {
-                  await setActiveByUUID(row.subscriptionid, 0);
-              }
-          });
+        const labelElement = suspendActButton.querySelector("label");
+        if (labelElement) {
+            labelElement.classList.add("switch");
+        }
+        const spanElement = suspendActButton.querySelector("span");
+        if (spanElement) {
+            spanElement.classList.add("slider");
+        }
+        suspendActButton.addEventListener("change", async(e) => {
+            if (e.target.checked) {
+                await setActiveByUUID(row.subscriptionid, 1);
+            } else {
+                await setActiveByUUID(row.subscriptionid, 0);
+            }
+        });
 
-          // action buttons
-          const cell7 = newRow.insertCell(4);
-          cell7.appendChild(suspendActButton);
-        
-          const cell8 = newRow.insertCell(5);
-          cell8.appendChild(deleteButton);
-        
+        // action buttons
+        const cell7 = newRow.insertCell(4);
+        cell7.appendChild(suspendActButton);
+
+        const cell8 = newRow.insertCell(5);
+        cell8.appendChild(deleteButton);
+
     } catch (error) {
         console.error(error);
     }
@@ -350,7 +349,7 @@ async function setActiveByUUID(subscriptionid, status) {
         let session = await chrome.storage.local.get(["yellownotes_session"]);
         const userid = "";
         const message_body = JSON.stringify({
-            subscriptionid: subscriptionid,
+                subscriptionid: subscriptionid,
                 activestatus: status,
             });
         //console.log(message_body);
@@ -552,7 +551,7 @@ async function fetchData() {
             }
             suspendActButton.addEventListener("change", async(e) => {
                 if (e.target.checked) {
- //                   await suspendByUUID(row.subscriptionid, 1);
+                    //                   await suspendByUUID(row.subscriptionid, 1);
                     await setActiveByUUID(row.subscriptionid, 1);
                 } else {
                     await setActiveByUUID(row.subscriptionid, 0);
@@ -709,9 +708,6 @@ function filterTable(colheader) {
     }
 }
 
-
-
-
 // Function to fetch data and populate the table
 async function fetchAvailableDistributionlists() {
     console.log("fetchAvailableDistributionlists");
@@ -825,14 +821,10 @@ async function fetchAvailableDistributionlists() {
                 viewDistributionlist(row.distributionlistid);
             };
 
-         
-
-
             // action buttons
 
             const cell7 = newRow.insertCell(4);
             cell7.appendChild(subscribeButton);
-
 
         });
     } catch (error) {
@@ -840,13 +832,11 @@ async function fetchAvailableDistributionlists() {
     }
 }
 
-
-
 async function DELadd_subscriber(distributionlistid) {
     console.log("add_subscriber to " + distributionlistid);
     // create a small window/form to add a new distribution list
 
-// get all available distributions lists
+    // get all available distributions lists
     //fetchAvailableDistriutions();
 
     //document.addEventListener('DOMContentLoaded', function() {
@@ -920,7 +910,7 @@ async function DELadd_subscriber(distributionlistid) {
             // Fetch data from web service (replace with your actual API endpoint)
 
             // Send data using fetch
-            return fetch('http://api.yellownotes.xyz/api/plugin_user_add_distribution_list_subscriber', {
+            return fetch('https://api.yellownotes.cloud/api/plugin_user_add_distribution_list_subscriber', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1012,7 +1002,7 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
             // Fetch data from web service (replace with your actual API endpoint)
 
             // Send data using fetch
-            return fetch('http://api.yellownotes.xyz/api/plugin_user_delete_subscription', {
+            return fetch('https://api.yellownotes.cloud/api/plugin_user_delete_subscription', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1117,8 +1107,6 @@ function extractAgreementIds() {
     return agreementIds;
 }
 
-
-
 // Fetch data on current subscriptions on page-load
 fetchData();
 
@@ -1144,7 +1132,6 @@ document
     add_subscription();
 });
 
-
 async function add_subscription() {
     console.log("add_subscription");
     // create a small window/form to add a new subscription
@@ -1152,240 +1139,226 @@ async function add_subscription() {
 
     /**
      * Users select from a list of available subscrptions
-     * 
-     * This will required much modification in future. 
+     *
+     * This will required much modification in future.
      * For the moment a complete list of all possible distrbiution lists is returned, to select from.
-     * 
+     *
      */
-
-
-
 
     // create a table to populate with selectable distribution lists
 
 
     document
-    .getElementById("form").innerHTML = '  available subscriptions'+
-    '<div class="tabContent scrollable-table">'+
-    '  <div class="tableResponsive">'+
-    '    <table id="distributionsTable">'+
-    '      <thead>'+
-    '        <tr class="fixed-header">'+
-    '          <!-- set up column headers here-->'+
-    '          <th>ID</th>'+
-    '          <!-- <th class="sortableCol">universaltime</th> -->'+
-    '          <th class="sortableCol">name</th>'+
-    '          <th>description</th>'+
-    '          <th>creator</th>'+
-    '          <th>post count</th>'+
-    '          <th>restrictions</th>'+
-    '          <th></th>'+
-    '        </tr>'+
-    '        </thead>'+
-    '        <tbody>'+
-    '          <!-- Rows will be added here -->'+
-    '        </tbody>'+
-    '      </table>'+
-    '    </div>'+
-    '  </div>';
+    .getElementById("form").innerHTML = '  available subscriptions' +
+        '<div class="tabContent scrollable-table">' +
+        '  <div class="tableResponsive">' +
+        '    <table id="distributionsTable">' +
+        '      <thead>' +
+        '        <tr class="fixed-header">' +
+        '          <!-- set up column headers here-->' +
+        '          <th>ID</th>' +
+        '          <!-- <th class="sortableCol">universaltime</th> -->' +
+        '          <th class="sortableCol">name</th>' +
+        '          <th>description</th>' +
+        '          <th>creator</th>' +
+        '          <th>post count</th>' +
+        '          <th>restrictions</th>' +
+        '          <th></th>' +
+        '        </tr>' +
+        '        </thead>' +
+        '        <tbody>' +
+        '          <!-- Rows will be added here -->' +
+        '        </tbody>' +
+        '      </table>' +
+        '    </div>' +
+        '  </div>';
 
-
-// get all available distributions lists
-try {
-    let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-    let session = await chrome.storage.local.get(["yellownotes_session"]);
-
-    // Fetch data from web service (replace with your actual API endpoint)
-
-    const headers = {
-        "Content-Type": "application/json",
-        [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-        [plugin_session_header_name]: session.yellownotes_session,
-    };
-    //const body = JSON.stringify(payload);
-
-    const response = await fetch(
-            server_url + "/api/plugin_user_get_available_distributionlists", {
-            method: "GET",
-            headers,
-        });
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    // Parse JSON data
-    // const data = await response.json();
-
-
-    // send save request back to background
-    //chrome.runtime.sendMessage({
-    //    request: "getDistributionLists"
-    //}).then(function (response) {
-    //    console.log(response);
-
-
-    var utc = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
-    console.log(utc);
-    console.log(Date.now());
-    var now = new Date();
-    var utc_timestamp = Date.UTC(
-            now.getUTCFullYear(),
-            now.getUTCMonth(),
-            now.getUTCDate(),
-            now.getUTCHours(),
-            now.getUTCMinutes(),
-            now.getUTCSeconds(),
-            now.getUTCMilliseconds());
-    console.log(utc_timestamp);
-    console.log(new Date().toISOString());
-
-    // Parse JSON data when the results are back
-    const data = await response.json();
-    console.log(data);
-    // Get table body element
-    const tableBody = document
-        .getElementById("distributionsTable")
-        .getElementsByTagName("tbody")[0];
-
-    console.log(tableBody);
-    // loop through the existing table and delete all rows
-    console.log(tableBody.rows);
-    console.log(tableBody.rows.length);
-    var list = tableBody.rows;
+    // get all available distributions lists
     try {
-        if (tableBody.rows.length) {
-            for (var li = list.length - 1; li >= 0; li--) {
-                list[li].remove();
-            }
-        }
-    } catch (e) {
-        console.error(e);
-    }
-    // Loop through data and (re-)populate the table with the results returned from the API
-    data.forEach((row) => {
-        // Create new row
-        console.debug(row);
-        const newRow = tableBody.insertRow();
-        // Create cells and populate them with data
-        const cell1 = newRow.insertCell(0);
-        const cell2 = newRow.insertCell(1);
-        const cell3 = newRow.insertCell(2);
-        const cell4 = newRow.insertCell(3);
-        const cell5 = newRow.insertCell(4);
-        const cell6 = newRow.insertCell(5);
-        //cell1.textContent = row.distributionlistid;
-        cell2.textContent = row.name;
-        cell3.textContent = row.description;
-        cell4.textContent = row.creatorid;
-        cell5.textContent = row.postcount;
-        cell6.textContent = row.restrictions;
-
-        // Add subscribe button
-        const subscribeButton = document.createElement("button");
-        subscribeButton.textContent = "Subscribe";
-        subscribeButton.classList.add("deleteBtn");
-        subscribeButton.onclick = function () {
-            // Remove the row from the table
-            newRow.remove();
-            // call to API to add a subscription to distributionlist,
-            //this function will also update the list of current subscriptions
-            addSubscriptionByUUID(row.distributionlistid);
-        };
-
-        // Add View button
-        const viewButton = document.createElement("button");
-        viewButton.textContent = "View";
-        viewButton.classList.add("viewBtn");
-
-        viewButton.onclick = function () {
-
-            // call to API to delete row from data base
-            viewDistributionlist(row.distributionlistid);
-        };
-
-     
-
-
-        // action buttons
-        const cell7 = newRow.insertCell(6);
-        cell7.appendChild(subscribeButton);
-
-
-    });
-} catch (error) {
-    console.error(error);
-}
-
-
-
-// create button to send data to API
-const button = document.createElement('button');
-button.id = 'new-subscriber';
-button.textContent = 'add';
-const container = document.getElementById('form');
-container.appendChild(button);
-console.log(container);
-
-// Find the button and add an event listener
-const sendDataButton = document.getElementById('new-subscriber');
-//const sendDataButton = container.getElementById('send-data');
-
-sendDataButton.addEventListener('click', function () {
-    console.log("sendDataButton");
-    // Extract data from table
-    //const table1 = document.querySelector('#table-container table');
-    const email = table.rows[0].cells[1].textContent; // Get text from second cell of the first row
-    //const description = table.rows[1].cells[1].textContent; // Get text from second cell of the second row
-
-    var ynInstallationUniqueId = "";
-    var yellownotes_session = "";
-    const msg = {
-        "email": email,
-        "distributionlistid": distributionlistid
-
-    }
-    console.log(msg);
-    chrome.storage.local.get(["ynInstallationUniqueId"]).then(
-        function (result) {
-        ynInstallationUniqueId = result.ynInstallationUniqueId;
-        console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
-        return chrome.storage.local.get(["yellownotes_session"]);
-    }).then(function (result) {
-        yellownotes_session = result.yellownotes_session;
-        console.log("yellownotes_session: " + yellownotes_session);
-
-        // let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-
-        // let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let session = await chrome.storage.local.get(["yellownotes_session"]);
 
         // Fetch data from web service (replace with your actual API endpoint)
 
-        // Send data using fetch
-        return fetch('http://api.yellownotes.xyz/api/plugin_user_add_distribution_list_subscriber', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [plugin_uuid_header_name]: ynInstallationUniqueId,
-                [plugin_session_header_name]: yellownotes_session,
-            },
-            body: JSON.stringify(msg)
+        const headers = {
+            "Content-Type": "application/json",
+            [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+            [plugin_session_header_name]: session.yellownotes_session,
+        };
+        //const body = JSON.stringify(payload);
+
+        const response = await fetch(
+                server_url + "/api/plugin_user_get_available_distributionlists", {
+                method: "GET",
+                headers,
+            });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Parse JSON data
+        // const data = await response.json();
+
+
+        // send save request back to background
+        //chrome.runtime.sendMessage({
+        //    request: "getDistributionLists"
+        //}).then(function (response) {
+        //    console.log(response);
+
+
+        var utc = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
+        console.log(utc);
+        console.log(Date.now());
+        var now = new Date();
+        var utc_timestamp = Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate(),
+                now.getUTCHours(),
+                now.getUTCMinutes(),
+                now.getUTCSeconds(),
+                now.getUTCMilliseconds());
+        console.log(utc_timestamp);
+        console.log(new Date().toISOString());
+
+        // Parse JSON data when the results are back
+        const data = await response.json();
+        console.log(data);
+        // Get table body element
+        const tableBody = document
+            .getElementById("distributionsTable")
+            .getElementsByTagName("tbody")[0];
+
+        console.log(tableBody);
+        // loop through the existing table and delete all rows
+        console.log(tableBody.rows);
+        console.log(tableBody.rows.length);
+        var list = tableBody.rows;
+        try {
+            if (tableBody.rows.length) {
+                for (var li = list.length - 1; li >= 0; li--) {
+                    list[li].remove();
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        // Loop through data and (re-)populate the table with the results returned from the API
+        data.forEach((row) => {
+            // Create new row
+            console.debug(row);
+            const newRow = tableBody.insertRow();
+            // Create cells and populate them with data
+            const cell1 = newRow.insertCell(0);
+            const cell2 = newRow.insertCell(1);
+            const cell3 = newRow.insertCell(2);
+            const cell4 = newRow.insertCell(3);
+            const cell5 = newRow.insertCell(4);
+            const cell6 = newRow.insertCell(5);
+            //cell1.textContent = row.distributionlistid;
+            cell2.textContent = row.name;
+            cell3.textContent = row.description;
+            cell4.textContent = row.creatorid;
+            cell5.textContent = row.postcount;
+            cell6.textContent = row.restrictions;
+
+            // Add subscribe button
+            const subscribeButton = document.createElement("button");
+            subscribeButton.textContent = "Subscribe";
+            subscribeButton.classList.add("deleteBtn");
+            subscribeButton.onclick = function () {
+                // Remove the row from the table
+                newRow.remove();
+                // call to API to add a subscription to distributionlist,
+                //this function will also update the list of current subscriptions
+                addSubscriptionByUUID(row.distributionlistid);
+            };
+
+            // Add View button
+            const viewButton = document.createElement("button");
+            viewButton.textContent = "View";
+            viewButton.classList.add("viewBtn");
+
+            viewButton.onclick = function () {
+
+                // call to API to delete row from data base
+                viewDistributionlist(row.distributionlistid);
+            };
+
+            // action buttons
+            const cell7 = newRow.insertCell(6);
+            cell7.appendChild(subscribeButton);
+
         });
-    })
-    .then(response => response.json())
-    .then(function (data) {
-        console.log('Success:', data);
-        // Usage: Pass the ID of the parent element to cleanup
-        removeAllChildren('form');
+    } catch (error) {
+        console.error(error);
+    }
 
-    }).catch((error) => console.error('Error:', error));
-});
+    // create button to send data to API
+    const button = document.createElement('button');
+    button.id = 'new-subscriber';
+    button.textContent = 'add';
+    const container = document.getElementById('form');
+    container.appendChild(button);
+    console.log(container);
 
+    // Find the button and add an event listener
+    const sendDataButton = document.getElementById('new-subscriber');
+    //const sendDataButton = container.getElementById('send-data');
 
+    sendDataButton.addEventListener('click', function () {
+        console.log("sendDataButton");
+        // Extract data from table
+        //const table1 = document.querySelector('#table-container table');
+        const email = table.rows[0].cells[1].textContent; // Get text from second cell of the first row
+        //const description = table.rows[1].cells[1].textContent; // Get text from second cell of the second row
+
+        var ynInstallationUniqueId = "";
+        var yellownotes_session = "";
+        const msg = {
+            "email": email,
+            "distributionlistid": distributionlistid
+
+        }
+        console.log(msg);
+        chrome.storage.local.get(["ynInstallationUniqueId"]).then(
+            function (result) {
+            ynInstallationUniqueId = result.ynInstallationUniqueId;
+            console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
+            return chrome.storage.local.get(["yellownotes_session"]);
+        }).then(function (result) {
+            yellownotes_session = result.yellownotes_session;
+            console.log("yellownotes_session: " + yellownotes_session);
+
+            // let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+
+            // let session = await chrome.storage.local.get(["yellownotes_session"]);
+
+            // Fetch data from web service (replace with your actual API endpoint)
+
+            // Send data using fetch
+            return fetch('https://api.yellownotes.cloud/api/plugin_user_add_distribution_list_subscriber', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: ynInstallationUniqueId,
+                    [plugin_session_header_name]: yellownotes_session,
+                },
+                body: JSON.stringify(msg)
+            });
+        })
+        .then(response => response.json())
+        .then(function (data) {
+            console.log('Success:', data);
+            // Usage: Pass the ID of the parent element to cleanup
+            removeAllChildren('form');
+
+        }).catch((error) => console.error('Error:', error));
+    });
 
 }
 
-
 // Fetch data on available distributions lists on page-load
 //fetchAvailableDistriutions();
-
 

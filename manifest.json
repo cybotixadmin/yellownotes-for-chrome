@@ -3,12 +3,12 @@
     "name": "Yellow Notes",
     "author": "The BrowserSolutions Team",
     "description": "Yellow Stickynotes for The Web",
-    "homepage_url": "https://www.yellownotes.xyz/",
-    "version": "0.6.5",
+    "homepage_url": "https://www.yellownotes.cloud/",
+    "version": "0.6.6",
     "icons": {
-        "32": "icons/yellownote.xyz.30x30.png",
-        "48": "icons/yellownote.xyz.48x48.png",
-        "96": "icons/yellownote.xyz.250x250.png"
+        "32": "icons/yellownotecloud-32x32.png",
+        "48": "icons/yellownotecloud-48x48.png",
+        "96": "icons/yellownotecloud-96x96.png"
     },
 
     "options_ui": {
@@ -16,10 +16,10 @@
     },
     "action": {
         "default_popup": "./popup/popup.html",
-        "default_icon": "icons/yellownote.xyz.250x250.png",
+        "default_icon": "icons/yellownotecloud-200x200.png",
         "theme_icons": [{
-                "light": "icons/yellownote.xyz.48x48.png",
-                "dark": "icons/yellownote.xyz.48x48.png",
+                "light": "iconsyellownotecloud-48x48.png",
+                "dark": "icons/yellownotecloud-48x48.png",
                 "size": 32
             }
         ],
@@ -35,7 +35,7 @@
             "js": ["./content_scripts/sliding_button.js"],
             "run_at": "document_start"
         }, {
-            "matches": ["*://www.yellownotes.xyz/*"],
+            "matches": ["*://www.yellownotes.cloud/*"],
             "js": ["./content_scripts/local_GUI_intercept.js"],
             "run_at": "document_start"
         }, {
@@ -78,5 +78,5 @@
         "webRequest"
 
     ],
-    "host_permissions": ["*://*/*", "*://www.yellownotes.xyz/*"]
+    "host_permissions": ["*://*/*", "*://www.yellownotes.cloud/*"]
 }

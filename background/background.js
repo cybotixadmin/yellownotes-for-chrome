@@ -19,7 +19,7 @@ console.debug("start with Yellow Notes");
  * */
 
 //const server_url = "http://localhost:3002";
-const server_url = "http://api.yellownotes.xyz";
+const server_url = "https://api.yellownotes.cloud";
 
 const URI_plugin_user_post_yellownote = "/api/plugin_user_post_yellownote";
 const URI_plugin_user_update_yellownote = "/api/plugin_user_update_yellownote";
@@ -1173,11 +1173,10 @@ function fetchContentWithCookies(url, cookies) {
     });
 }
 
-// http://www.yellownotes.online:3002/login
 
 let cookiesInMemory = {};
 
-// pick up the session header set back from the login process in the www.yellowsnotes.xyz domain
+// pick up the session header set back from the login process in the www.yellowsnotes.cloud domain
 chrome.webRequest.onHeadersReceived.addListener(
     (details) => {
     // console.log(details);
@@ -1193,7 +1192,7 @@ chrome.webRequest.onHeadersReceived.addListener(
         });
     }
 }, {
-    urls: ["*://www.yellownotes.xyz/auth/google/callback*"]
+    urls: ["*://www.yellownotes.cloud/auth/google/callback*"]
 },
     ["responseHeaders"]);
 
@@ -1213,7 +1212,7 @@ chrome.webRequest.onHeadersReceived.addListener(
         });
     }
 }, {
-    urls: ["*://www.yellownotes.xyz/logout_silent*"]
+    urls: ["*://www.yellownotes.cloud/logout_silent*"]
 },
     ["responseHeaders"]);
 

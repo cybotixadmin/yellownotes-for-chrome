@@ -15,7 +15,7 @@
  <!-- side bar start here-->
  <div class="sidebar">
     <div id="login_status"></div>
-    <a href="my_account.html">My account page</a></td></tr>
+    <a href="my_account.html">My account page</a>
     <a href="subscribed_notes.html">subscribed Yellownotes</a>
     <a href="my_notes.html">my Yellownotes</a>
     <a href="edit_template.html">edit template</a>
@@ -36,24 +36,11 @@
   
   <!-- Empty table structure -->
   <style>
-    .tableResponsive {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        padding: 0 20%;
-    }
-
-    table {
-        font-size: clamp(12px, 2vw, 18px);
-        color: black;
-        width: 100%;
-        height: 200px
-        margin-left: 250px;
-        margin-right: 20px;
-        max-width:  800px;
-    }
+   
   </style>
+
+<!-- body of document-->
+<div class="pageBody">
 
   <div class="tabContent scrollable-table">
     <div class="tableResponsive">
@@ -97,23 +84,29 @@ The lists are returned by calling to the background script.
     </div>
   
     <style>
-      .textcontent {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 100%;
-          padding: 0 20%;
-      }
+    
 
       p {
           font-size: clamp(12px, 2vw, 18px);
           color: black;
-          width: 100%;
-          margin-left: 250px;
-          margin-right: 20px;
       }
   </style>
-    <div class="textcontent">
+
+    <div >
+      <button id="distributionsAddButton" class="addBtn">Create a feed/distribution list</button>
+      <button id="distributionsRefreshButton" class="refreshBtn">Refresh</button>
+      <button id="distributionsSuspendAllButton" class="suspendAllBtn">Suspend All</button>
+      <button id="distributionsActivateAllButton" class="activateAllBtn">Activate All</button>
+    </div>
+    <div id="form" >
+      </div>
+      <div class="b" id="addform_button">
+      </div>
+      <div class="b" id="cancelform_button">
+      </div>
+     
+    </div>
+    <div class="pagetextcontent">
       <p>
           Feeds can usefully be thought of as a distribution list to which others may subscribe. By default one is created for you automatically. 
           It simply bears your username (email address) as its name.
@@ -128,39 +121,6 @@ The lists are returned by calling to the background script.
           Feeds can carry restrictions on who may subscribe, and how. These are set by the feed owner. By default, the setting is "NONE" which means that anyone may subscribe and their subscription is approved automatically.
       </p>
   </div>
-  ________________________
-
-    <div >
-      <button id="distributionsAddButton" class="addBtn">Create a distribution list</button>
-      <button id="distributionsRefreshButton" class="refreshBtn">Refresh</button>
-      <button id="distributionsSuspendAllButton" class="suspendAllBtn">Suspend All</button>
-      <button id="distributionsActivateAllButton" class="activateAllBtn">Activate All</button>
-    </div>
-    <div id="form">
-      </div>
-      <style>
-        .textcontent {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            padding: 0 20%;
-        }
-  
-        button.b {
-            font-size: clamp(12px, 2vw, 18px);
-            color: black;
-            width: 100%;
-            margin-left: 250px;
-            margin-right: 20px;
-        }
-    </style>
-      <div class="b" id="addform_button">
-      </div>
-     
-        
-        
-
 
   <script src="my_distributions.js"></script>
   <script src="session_logic.js"></script>
