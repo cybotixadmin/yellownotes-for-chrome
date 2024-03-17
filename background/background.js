@@ -21,21 +21,23 @@ console.debug("start with Yellow Notes");
 //const server_url = "http://localhost:3002";
 const server_url = "https://api.yellownotes.cloud";
 
-const URI_plugin_user_post_yellownote = "/api/plugin_user_post_yellownote";
-const URI_plugin_user_update_yellownote = "/api/plugin_user_update_yellownote";
+const URI_plugin_user_create_yellownote = "/api/v1.0/plugin_user_create_yellownote";
+const URI_plugin_user_update_yellownote = "/api/v1.0/plugin_user_update_yellownote";
 const URI_plugin_user_setstatus_yellownote = "/api/plugin_user_setstatus_yellownote";
+
+const URI_plugin_user_add_subscription_v10 = "/api/v1.0/plugin_user_add_subscription";
 
 const URI_plugin_user_get_all_url_yellownotes = "/api/plugin_user_get_all_url_yellownotes";
 
 const URI_plugin_user_get_all_yellownotes = "/api/plugin_user_get_all_yellownotes";
 
-const URI_plugin_user_get_subscribed_url_yellownotes = "/api/plugin_user_get_subscribed_url_yellownotes";
+const URI_plugin_user_get_subscribed_url_yellownotes = "/api/v1.0/plugin_user_get_subscribed_url_yellownotes";
 
 const URI_plugin_user_get_own_url_yellownotes = "/api/plugin_user_get_own_url_yellownotes";
 
-const URI_plugin_user_get_my_distribution_lists = "/api/plugin_user_get_my_distribution_lists";
+const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_distribution_lists";
 
-const URI_plugin_user_delete_yellownote = "/api/plugin_user_delete_yellownote";
+const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 
 let salt;
 
@@ -237,8 +239,6 @@ chrome.contextMenus.create({
     contexts: ["all"]
 });
 
-
-
 // listener for context menu clicks
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -253,8 +253,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         pinYellowNote(info, tab, 'yellownote', 'default');
 
     } else if (info.menuItemId === "pin-content-note") {
-       // pinContentNote(info, tab, 'webframe', 'default');
-       pinYellowNote(info, tab, 'webframe', 'default');
+        // pinContentNote(info, tab, 'webframe', 'default');
+        pinYellowNote(info, tab, 'webframe', 'default');
     } else if (info.menuItemId === "pin-dagensneringsliv-note") {
         pinYellowNote(info, tab, 'webframe', 'dagensneringsliv');
 
@@ -277,8 +277,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
 });
 
-
-
 function pinYellowNote(info, tab, note_type, brand) {
     // contenttype
     // permitted values: text, html, embeded, http_get_url
@@ -296,8 +294,8 @@ function pinYellowNote(info, tab, note_type, brand) {
     var pageUrl = info.pageUrl;
     // this is the selection the user flagged.
     var selectionText = info.selectionText;
-console.log("selectionText: " + selectionText);
-console.log(selectionText);
+    console.log("selectionText: " + selectionText);
+    console.log(selectionText);
 
     // call out to the tab to collect the complete html selected
     var replacement_text = new String("");
@@ -322,12 +320,11 @@ console.log(selectionText);
     // lookup the template file
 
     var note_template;
-var session;
+    var session;
     chrome.storage.local.get(["yellownotes_session"]).then(function (result) {
-console.log(JSON.stringify(result));
-session = result.yellownotes_session;
+        console.log(JSON.stringify(result));
+        session = result.yellownotes_session;
         console.log(session);
-       
 
         return getTemplate(brand, note_type);
     }).then(function (result) {
@@ -337,14 +334,14 @@ session = result.yellownotes_session;
         //console.log(template);
 
         // execute script in active tab
-    //    return chrome.scripting.executeScript({
-    //        target: {
-    //            tabId: tab.id
-    //        },
-    //        files: ["./content_scripts/PinToSelectedHTML.js"]
-    //    });
-    //})
-   // .then(function (result) {
+        //    return chrome.scripting.executeScript({
+        //        target: {
+        //            tabId: tab.id
+        //        },
+        //        files: ["./content_scripts/PinToSelectedHTML.js"]
+        //    });
+        //})
+        // .then(function (result) {
         // send message to the active tab
         return chrome.tabs.sendMessage(tab.id, {
             action: "createnode",
@@ -353,7 +350,7 @@ session = result.yellownotes_session;
             brand: brand,
             note_template: note_template,
             session: session,
-            info: info, 
+            info: info,
             tab: tab
             // });
         });
@@ -362,8 +359,6 @@ session = result.yellownotes_session;
 
     });
 }
-
-
 
 // for access to admin page there is a separate listener
 //chrome.browserAction.onClicked.addListener(() => {
@@ -394,15 +389,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         action = message.action;
         console.debug("action: " + action);
 
-if (isUndefined(message.action)) {
+        if (isUndefined(message.action)) {
 
-    if (!isUndefined(message.message.action)) {
-action = message.message.action;
-    
-    }
-    
+            if (!isUndefined(message.message.action)) {
+                action = message.message.action;
 
-}
+            }
+
+        }
 
         try {
             if (message.stickynote.request) {
@@ -464,26 +458,41 @@ action = message.message.action;
                     defaultSliderPosition: message.setting
                 });
 
-            // Send a message to all tabs to update the slider position on any tab where no slider position has been specifically set by user action.
-            // update the display/non-display of yellownotes accordingly. 
-            // This takes effect regardless of whether or not the slider is currently shown on the page.
-            const sliderupdate_sharedsecret = "Glbx_marke346gewergr3465";
+                // Send a message to all tabs to update the slider position on any tab where no slider position has been specifically set by user action.
+                // update the display/non-display of yellownotes accordingly.
+                // This takes effect regardless of whether or not the slider is currently shown on the page.
+                const sliderupdate_sharedsecret = "Glbx_marke346gewergr3465";
 
-            chrome.tabs.query({}, function(tabs) {
-                for (let tab of tabs) {
-                    try{
-                        console.log("sending message to tab: " + tab.id);
-                  chrome.tabs.sendMessage(tab.id, { "action": "updateSliderPosition", "defaultSliderPosition": message.setting, "sharedsecret": sliderupdate_sharedsecret }); 
-                    } catch (e) {
-                        console.log(e);
+                chrome.tabs.query({}, function (tabs) {
+                    for (let tab of tabs) {
+                        try {
+                            console.log("sending message to tab: " + tab.id);
+                            chrome.tabs.sendMessage(tab.id, {
+                                "action": "updateSliderPosition",
+                                "defaultSliderPosition": message.setting,
+                                "sharedsecret": sliderupdate_sharedsecret
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
                     }
-                }
-              });
-
+                });
 
             } catch (e) {
                 console.log(e);
             }
+        } else if (action === "activeateSubscriptionOnAllTabs") {
+            console.log("activeateSubscriptionOnAllTabs: subscription_details: " + JSON.stringify(message.subscription_details));
+
+            // send message to all tabs to activate the subscription (look for any notes pertaning to the URL in question) on those tabs, if the slider position is set to 3
+
+
+        } else if (action === "suspendSubscriptionOnAllTabs") {
+            console.log("suspendSubscriptionOnAllTabs: subscription_details: " + JSON.stringify(message.subscription_details));
+
+            // send message to all tabs to suspend the subscription (remove any notes pertaning to the URL in question) from those tabs, if the slider position is set to 3
+
+
         } else if (action === "getSliderDefaultPosition") {
             console.log("getSliderDefaultPosition: " + defaultSliderPosition)
             // Relay the state to all open tabs
@@ -499,28 +508,28 @@ action = message.message.action;
             console.debug("tab_id: " + sender.tab.id);
             console.debug(message);
             console.debug(message.message);
-           
+
             //chrome.scripting.executeScript({
             //    target: {
             //        tabId: sender.tab.id
             //    },
             //    files: ["./content_scripts/NotesHandler.js"],
             //}).then(function (result) {
-                // send message to the active tab
+            // send message to the active tab
             //    return chrome.tabs.sendMessage(sender.tab.id, {
-                chrome.tabs.sendMessage(sender.tab.id, {
-                    sharedsecret: "qwertyui",
-                    action: "update_notes_on_page",
-                    position: message.message.parameters.position
-        
+            chrome.tabs.sendMessage(sender.tab.id, {
+                sharedsecret: "qwertyui",
+                action: "update_notes_on_page",
+                position: message.message.parameters.position
+
                 //});
             }).then(function (res) {
                 // read response
                 console.debug("# response " + JSON.stringify(res));
                 sendResponse(res);
             });
-        
-return true;
+
+            return true;
 
         } else if (action === "simple_url_lookup") {
             console.log("simple_url_lookup " + JSON.stringify(message));
@@ -529,26 +538,26 @@ return true;
             console.log("simple_url_lookup");
             const url = message.message.url;
             console.log(url);
-            if (url=="") {
+            if (url == "") {
                 sendResponse(null);
-            }else{
-            // call to the "cookie jar" to collect any cookies pertaining to this URL.
-            // this is essetial for authentication purposes. The cookies are needed to authenticate the user with the server.
-            // session cookie are generallt set to SameSite = lax,
-            // which means that they are not sent to the server when the url is being opened from inside an iframe
-            logCookiesForUrl(url).then(function (cookies) {
-                console.debug(cookies);
+            } else {
+                // call to the "cookie jar" to collect any cookies pertaining to this URL.
+                // this is essetial for authentication purposes. The cookies are needed to authenticate the user with the server.
+                // session cookie are generallt set to SameSite = lax,
+                // which means that they are not sent to the server when the url is being opened from inside an iframe
+                logCookiesForUrl(url).then(function (cookies) {
+                    console.debug(cookies);
 
-                // make a fetch to get the page content, using the cookies retieved above
+                    // make a fetch to get the page content, using the cookies retieved above
 
-                return fetchContentWithCookies(url, cookies);
-            }).then(content => {
-                console.log('Fetched content:', content);
-                sendResponse(content);
-            })
-            .catch(error => {
-                console.error('Error fetching content:', error);
-            });
+                    return fetchContentWithCookies(url, cookies);
+                }).then(content => {
+                    console.log('Fetched content:', content);
+                    sendResponse(content);
+                })
+                .catch(error => {
+                    console.error('Error fetching content:', error);
+                });
 
             }
             return true;
@@ -556,36 +565,36 @@ return true;
             console.log("getDistributionLists")
             // get all distribution list belonging to the user
 
-            try{
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
-                ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
-                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+            try {
+                chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+                    ynInstallationUniqueId = result.ynInstallationUniqueId;
+                    yellownotes_session = result.yellownotes_session;
+                    console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    console.debug("yellownotes_session: " + yellownotes_session);
 
-                const opts = {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
-                    },
+                    const opts = {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'ynInstallationUniqueId': ynInstallationUniqueId,
+                            'yellownotes_session': yellownotes_session
+                        },
 
-                };
-                console.debug(opts);
+                    };
+                    console.debug(opts);
 
-                return fetch(server_url + URI_plugin_user_get_my_distribution_lists, opts);
-            }).then(function (response) {
-                //                console.log(response);
-                return response.json();
-            }).then(function (data) {
-                // return the uuid assigned to this note
-                sendResponse(data);
+                    return fetch(server_url + URI_plugin_user_get_my_distribution_lists, opts);
+                }).then(function (response) {
+                    //                console.log(response);
+                    return response.json();
+                }).then(function (data) {
+                    // return the uuid assigned to this note
+                    sendResponse(data);
 
-            });
+                });
             } catch (e) {
-            console.log(e);
-            sendResponse(null);
+                console.log(e);
+                sendResponse(null);
 
             }
             return true;
@@ -624,7 +633,7 @@ return true;
                 //        console.debug(opts);
 
 
-                return fetch(server_url + URI_plugin_user_post_yellownote, opts);
+                return fetch(server_url + URI_plugin_user_create_yellownote, opts);
             }).then(function (response) {
                 //                console.log(response);
                 return response.json();
@@ -705,19 +714,72 @@ return true;
                     sharedsecret: "qwertyui",
                     action: "update_single_note_on_page",
                     uuid: uuid
-                
+
                 });
-                }).then(function (res) {
+            }).then(function (res) {
                 //                  console.log(data);
                 sendResponse(message.message.update_details);
 
             });
 
+        } else if (action == 'subscribe') {
+
+            console.debug("action: subscribe");
+            const distributionlistid = message.distributionlistid;
+            // make call to backend to add the user to the distribution list
+
+            var plugin_uuid;
+            var session;
+
+            const userid = "";
+            const message_body = JSON.stringify({
+                    distributionlistid: subscriptionid
+                });
+            chrome.storage.local.get(["ynInstallationUniqueId"])
+            .then(pluginUuidResult => {
+                plugin_uuid = pluginUuidResult.ynInstallationUniqueId;
+
+                return chrome.storage.local.get(["yellownotes_session"]).then(sessionResult => {
+                    session = sessionResult.yellownotes_session;
+                   
+                    // Fetch data from web service
+                    return fetch(server_url + URI_plugin_user_add_subscription_v10, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            [plugin_uuid_header_name]: plugin_uuid,
+                            [plugin_session_header_name]: session,
+                        },
+                        body: message_body,
+                    });
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                // update the row in the table of current subscriptions
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+
+ // The URL inside the plugin (e.g., an HTML file)
+ const pluginURL = chrome.runtime.getURL(message.uri);
+ chrome.tabs.update(sender.tab.id, {
+     url: pluginURL
+ });
+
         } else if (action == 'get_template') {
 
             console.debug("action: get_template");
             const brand = message.brand;
-           
+
             const note_type = message.note_type;
 
             getTemplate(brand, note_type).then(function (result) {
@@ -730,8 +792,8 @@ return true;
 
             console.debug("action: get_webframe_template");
             const brand = message.brand;
-           
-            getTemplate( brand, "webframe").then(function (result) {
+
+            getTemplate(brand, "webframe").then(function (result) {
                 console.debug(result);
                 sendResponse(result);
             });
@@ -741,9 +803,9 @@ return true;
 
             console.debug("action: get_yellownote_template");
             const brand = message.brand;
-           
+
             getTemplate(brand, "yellownote").then(function (result) {
-               // console.debug(result);
+                // console.debug(result);
                 sendResponse(result);
             });
 
@@ -768,7 +830,7 @@ return true;
                     },
 
                 };
-                return fetch(server_url + "/api/plugin_user_get_my_distribution_lists", opts);
+                return fetch(server_url + URI_plugin_user_get_my_distribution_lists, opts);
             }).then(function (response) {
                 //                console.log(response);
                 return response.json();
@@ -807,22 +869,19 @@ return true;
                 console.debug(JSON.stringify(opts));
                 return fetch(server_url + URI_plugin_user_delete_yellownote, opts);
             }).then(function (response) {
-console.debug("response: " + JSON.stringify(response));
-console.debug("sender.tab.id: " + sender.tab.id );
-console.debug("notify tab to remove note with uuid: " + uuid );
-// send notification to all pages that this note should be removed from the page
-return chrome.tabs.sendMessage(sender.tab.id, {
-    sharedsecret: "qwertyui",
-    action: "remove_single_note",
-    uuid: uuid
+                console.debug("response: " + JSON.stringify(response));
+                console.debug("sender.tab.id: " + sender.tab.id);
+                console.debug("notify tab to remove note with uuid: " + uuid);
+                // send notification to all pages that this note should be removed from the page
+                return chrome.tabs.sendMessage(sender.tab.id, {
+                    sharedsecret: "qwertyui",
+                    action: "remove_single_note",
+                    uuid: uuid
 
-});
-}).then(function (res) {
+                });
+            }).then(function (res) {
 
                 sendResponse('{"statuscode":0}');
-
-
-
 
             });
 
@@ -854,15 +913,15 @@ return chrome.tabs.sendMessage(sender.tab.id, {
                 console.debug(JSON.stringify(opts));
                 return fetch(server_url + URI_plugin_user_setstatus_yellownote, opts);
             }).then(function (response) {
-                console.debug("notify tab to disable note with uuid: " + uuid );
+                console.debug("notify tab to disable note with uuid: " + uuid);
                 // send notification to all pages that this note should be removed from the page
                 return chrome.tabs.sendMessage(sender.tab.id, {
                     sharedsecret: "qwertyui",
                     action: "disable_single_note",
                     uuid: uuid
-                
+
                 });
-                }).then(function (res) {
+            }).then(function (res) {
                 sendResponse('{"response":"ok"}');
 
             });
@@ -903,12 +962,7 @@ return chrome.tabs.sendMessage(sender.tab.id, {
             const uuid = message.message.scroll_to_note_details.uuid;
             const url = message.message.scroll_to_note_details.url;
 
-           
-
-        openUrlAndScrollToElement(url, '[note_type="yellownote"][uuid="' + uuid + '"]', uuid); 
-
-
-
+            openUrlAndScrollToElement(url, '[note_type="yellownote"][uuid="' + uuid + '"]', uuid);
 
         } else if (action == 'lookup_stickynote_in_place') {
             console.debug("request: lookup a single yellow note exactly where it is located");
@@ -1011,9 +1065,8 @@ return chrome.tabs.sendMessage(sender.tab.id, {
                 sendResponse(data);
 
             });
-return true;
+            return true;
 
-            
         } else if (action == 'get_all_available_yellownotes') {
             console.debug("get all available notes for " + message.message.url);
             const url = message.message.url;
@@ -1045,10 +1098,10 @@ return true;
                 sendResponse(data);
 
             });
-return true;
+            return true;
         } else if (action == 'get_own_applicable_stickynotes') {
-            console.debug("get_own_applicable_stickynotes" );
-//            console.debug("get all notes for " + message.message);
+            console.debug("get_own_applicable_stickynotes");
+            //            console.debug("get all notes for " + message.message);
             console.debug("get all notes for " + message.message.url);
             const url = message.message.url;
             // call out to database
@@ -1088,65 +1141,70 @@ return true;
     return true;
 });
 
-
 function openUrlAndScrollToElement(url, selector, uuid) {
     console.debug('openUrlAndScrollToElement: Opening url ' + url + ' and scrolling to element ' + selector + ' with uuid ' + uuid);
-    chrome.tabs.create({ url: url }, function(tab) {
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: scrollToElement,
-        args: [selector, uuid]
-      });
+    chrome.tabs.create({
+        url: url
+    }, function (tab) {
+        chrome.scripting.executeScript({
+            target: {
+                tabId: tab.id
+            },
+            function : scrollToElement,
+            args: [selector, uuid]
     });
-  }
-
+});
+}
 
 function scrollToElement(selector, uuid) {
     // This part of the function will be injected and executed in the context of the webpage
 
     // insert a marker in the local memory to indicate that the note with this uuid should be scrolled to when the note is opened
     chrome.storage.sync.set({
-       setNoteFocusTo: uuid
-        });
-        
-
-    window.addEventListener('load', function() {
-      const element = document.querySelectorAll(selector)[0];
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
+        setNoteFocusTo: uuid
     });
-  }
 
-  
+    window.addEventListener('load', function () {
+        const element = document.querySelectorAll(selector)[0];
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+    });
+}
+
 function utf8_to_b64(str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-        return String.fromCharCode('0x' + p1);
-    }));
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
 }
 
 function b64_to_utf8(str) {
-    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
 }
 
 function findTabsAndSendMessage(url, message) {
     console.log('findTabsAndSendMessage: Sending message to tabs matching url ' + url + ':', message);
-    return chrome.tabs.query({ url: url })
-      .then(tabs => {
+    return chrome.tabs.query({
+        url: url
+    })
+    .then(tabs => {
         console.log('Found tabs:', tabs);
 
         const promises = tabs.map(tab => {
-console.log('Sending message to tab ' + tab.id + ':', message);
-          return chrome.tabs.sendMessage(tab.id, message )
-            .then(response => console.log('Response from tab ' + tab.id + ':', response))
-            .catch(error => console.error('Error sending message to tab ' + tab.id + ':', error));
-        });
+                console.log('Sending message to tab ' + tab.id + ':', message);
+                return chrome.tabs.sendMessage(tab.id, message)
+                .then(response => console.log('Response from tab ' + tab.id + ':', response))
+                .catch(error => console.error('Error sending message to tab ' + tab.id + ':', error));
+            });
         return Promise.all(promises);
-      })
-      .catch(error => console.error('Error querying tabs:', error));
-  }
+    })
+    .catch(error => console.error('Error querying tabs:', error));
+}
 
 function createCookieHeader(cookies) {
     return cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
@@ -1173,7 +1231,6 @@ function fetchContentWithCookies(url, cookies) {
     });
 }
 
-
 let cookiesInMemory = {};
 
 // pick up the session header set back from the login process in the www.yellowsnotes.cloud domain
@@ -1182,7 +1239,7 @@ chrome.webRequest.onHeadersReceived.addListener(
     // console.log(details);
     console.log(details.responseHeaders);
     const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === 'x_yellownotes_session');
-    console.log('Yellownotes session header detected' );
+    console.log('Yellownotes session header detected');
     if (xSessionHeader) {
         console.log('Yellownotes session value:' + xSessionHeader.value);
         chrome.storage.local.set({
@@ -1202,7 +1259,7 @@ chrome.webRequest.onHeadersReceived.addListener(
     // console.log(details);
     console.log(details.responseHeaders);
     const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === 'x_yellownotes_session');
-    console.log('Yellownotes session header detected' );
+    console.log('Yellownotes session header detected');
     if (xSessionHeader) {
         console.log('Yellownotes session value:' + xSessionHeader.value);
         chrome.storage.local.set({
@@ -1215,7 +1272,6 @@ chrome.webRequest.onHeadersReceived.addListener(
     urls: ["*://www.yellownotes.cloud/logout_silent*"]
 },
     ["responseHeaders"]);
-
 
 function logHeaders(tabId, url) {
     console.log('Listening for headers on tab:', tabId);
@@ -1339,7 +1395,6 @@ function create_free_yellownote(info, tab) {
     });
 }
 
-
 function create_free_webframe_note(info, tab) {
     // contenttype
     // permitted values: text, html, embeded, linked
@@ -1371,12 +1426,12 @@ function create_free_webframe_note(info, tab) {
     //    return chrome.tabs.sendMessage(tab_id, {
     // use this when contentsciript is already loaded (from the monifest)
     chrome.tabs.sendMessage(tab_id, {
-    sharedsecret: PinToSelectedHTML_sharedsecret,
-            contenttype: "webframe",
-            task: "createBlankWebFrameNote",
-            info: info,
-            tab: tab
-//        }); // uncomment this when contentsciript is already loaded (from the monifest)
+        sharedsecret: PinToSelectedHTML_sharedsecret,
+        contenttype: "webframe",
+        task: "createBlankWebFrameNote",
+        info: info,
+        tab: tab
+        //        }); // uncomment this when contentsciript is already loaded (from the monifest)
     }).then(function (res) {
         // read response
         console.debug("# response " + JSON.stringify(res));
@@ -1451,10 +1506,6 @@ function create_yellownote(info, tab, contenttype) {
     });
 }
 
-
-
-
-
 function pinContentNote(info, tab, note_type, brand) {
     // contenttype
     // permitted values: text, html, embeded, http_get_url
@@ -1498,10 +1549,9 @@ function pinContentNote(info, tab, note_type, brand) {
     var template;
 
     chrome.storage.local.get(["yellownotes_session"]).then(function (result) {
-console.log(JSON.stringify(result));
+        console.log(JSON.stringify(result));
         const sessiontoken = result.yellownotes_session;
         console.log(sessiontoken);
-       
 
         return getTemplate(brand, note_type);
     }).then(function (result) {
@@ -1535,11 +1585,16 @@ console.log(JSON.stringify(result));
     });
 }
 
-
 // the session token is not completed as yet
 function get_username_from_sessiontoken(token) {
 
     return (JSON.parse(token)).userid;
+
+}
+
+function get_displayname_from_sessiontoken(token) {
+
+    return (JSON.parse(token)).displayname;
 
 }
 
@@ -1557,16 +1612,15 @@ function getTemplate(brand, note_type) {
     if (isUndefined(brand) || brand == null || brand == '' || brand == 'undefined') {
         brand = '';
     }
-  
 
     //if (isUndefined(type) || type == null || type == '' || type == 'undefined') {
     //    type = 'yellownote';
     //}
 
-    console.log("getTemplate(brand, note_type): '" +  "' '" + brand + "' '" + note_type + "'");
+    console.log("getTemplate(brand, note_type): '" + "' '" + brand + "' '" + note_type + "'");
 
- // The notes are/can be branded. The brand is a feature for premium users.
- // The user can also be part of a brand/organization. If so, the notes are branded accordingly.
+    // The notes are/can be branded. The brand is a feature for premium users.
+    // The user can also be part of a brand/organization. If so, the notes are branded accordingly.
 
     // feature priority: brand over user. Check first if the user is part of a brand. If so, search for a template belonging to this brand first.
     // search order: local filesystem, remote database, default templates
@@ -1589,8 +1643,8 @@ function getTemplate(brand, note_type) {
             The template files are named according to the brand and type of the note.
             This is a feature for note belonging to (premium) brands in order to inrease performance
 
-           
-            
+
+
 
              */
 
@@ -1617,7 +1671,7 @@ function getTemplate(brand, note_type) {
                     // tried and failed to find the file locally, try the server ( there will be a cache-lookup intercept)
                     console.log("looking for template file " + server_url + '/template with params:');
                     const msg_obj = {
-                       
+
                         brand: brand,
                         note_type: note_type
                     }
@@ -1669,7 +1723,7 @@ function getTemplate(brand, note_type) {
                         });
                     });
                 });
-            } 
+            }
 
         });
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
    <!----> <link rel="stylesheet" href="view_yellowstickynotes.css"/>
-    <link rel="stylesheet" href="common.css"/>
+    <link rel="stylesheet" href="on_page_common.css"/>
     <link rel="stylesheet" type="text/css" href="edit_template.css"/>
     <link rel="stylesheet" href="sidebar.css"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -13,18 +13,9 @@
 <body>
 
  <!-- side bar start here-->
- <div class="sidebar">
-    <div id="login_status"></div>
-    <a href="my_account.html">My account page</a>
-    <a href="subscribed_notes.html">subscribed Yellownotes</a>
-    <a href="my_notes.html">my Yellownotes</a>
-    <a href="edit_template.html">edit template</a>
-    <a href="my_subscriptions.html">my subscriptions</a>
-    <a href="my_distributions.html">my distributions</a>
-    <div id="loginlogout"></div>
-  </div>
-<!-- side bar end here -->
-
+ <div id="sidebar"></div>
+ <!-- side bar end here -->
+ 
 
 <!-- yellow notes start-->
 <h2 style="color: black;" >Yellownotes template</h2>
@@ -56,9 +47,9 @@
 
 
 <!-- web frame notes end-->
-
+  <script  src="on_page_common.js"></script>
   <script src="edit_template.js"></script>
-  <script src="session_logic.js"></script>
+
 					
 </body>
 </html>

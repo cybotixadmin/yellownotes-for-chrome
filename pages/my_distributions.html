@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="my_distributions.css">
-    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="on_page_common.css">
     <link rel="stylesheet" href="sidebar.css">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,19 +12,14 @@
 
 <body>
 
+
  <!-- side bar start here-->
- <div class="sidebar">
-    <div id="login_status"></div>
-    <a href="my_account.html">My account page</a>
-    <a href="subscribed_notes.html">subscribed Yellownotes</a>
-    <a href="my_notes.html">my Yellownotes</a>
-    <a href="edit_template.html">edit template</a>
-    <a href="my_subscriptions.html">my subscriptions</a>
-    <a href="my_distributions.html">my distributions</a>
-    <div id="loginlogout"></div>
-  </div>
+ <div id="sidebar"></div>
 <!-- side bar end here -->
 
+
+<!-- body of document start -->
+<div class="pageBody">
 <div style="display: flex; justify-content: center; align-items: middle; height: 7vh;">
   <p style="font-size: 30px; color: black;">My feeds</p>
 </div>
@@ -39,12 +34,10 @@
    
   </style>
 
-<!-- body of document-->
-<div class="pageBody">
 
   <div class="tabContent scrollable-table">
     <div class="tableResponsive">
-      <table class="notesTable" id="dataTable">
+      <table class="distributionlistsTable" id="dataTable">
         <thead>
           <tr class="fixed-header">
             <th>ID</th>
@@ -94,7 +87,7 @@ The lists are returned by calling to the background script.
 
     <div >
       <button id="distributionsAddButton" class="addBtn">Create a feed/distribution list</button>
-      <button id="distributionsRefreshButton" class="refreshBtn">Refresh</button>
+     
       <button id="distributionsSuspendAllButton" class="suspendAllBtn">Suspend All</button>
       <button id="distributionsActivateAllButton" class="activateAllBtn">Activate All</button>
     </div>
@@ -105,8 +98,8 @@ The lists are returned by calling to the background script.
       <div class="b" id="cancelform_button">
       </div>
      
-    </div>
-    <div class="pagetextcontent">
+    
+    
       <p>
           Feeds can usefully be thought of as a distribution list to which others may subscribe. By default one is created for you automatically. 
           It simply bears your username (email address) as its name.
@@ -118,12 +111,21 @@ The lists are returned by calling to the background script.
       </p>
 
       <p>
-          Feeds can carry restrictions on who may subscribe, and how. These are set by the feed owner. By default, the setting is "NONE" which means that anyone may subscribe and their subscription is approved automatically.
+          Feeds can carry restrictions on who may subscribe, and how. These are set by you as the feed owner. By default, the setting is "NONE" which means that anyone may subscribe and their subscription is approved automatically. The owner of the feed may remove subscribers at any time.
+          <br/>Restrictions have not yet been implemented.
       </p>
-  </div>
+
+      <p>
+        Feeds can be deleted or deactivated by you at any time. Deletion is permanent. Deactivation is reversible at any time.
+        The visible effect to subscribers is the same to for both deactivation and deletion: The feeds are no longer visible lists of subscribed feeds, and will it appear in searches for feeds.
+        Nor are the notes attached to those feeds accessible to subscribers.    
+    </p>
+
+    </div>
+<!-- body of document end -->
+<script  src="on_page_common.js"></script>
 
   <script src="my_distributions.js"></script>
-  <script src="session_logic.js"></script>
 					
 </body>
 </html>

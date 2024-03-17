@@ -9,12 +9,6 @@
     font-size: 14px;
   }
 
-
-  .pageBody{
-
-    margin-left: 220px;
-  }
-
   /* Add styles for scrollable table */
   .scrollable-table {
     height: 450px; /* Adjust height as needed */
@@ -28,18 +22,13 @@
     border-collapse: collapse;
     margin: 15px 0;
     padding: 0;
-  
-    table-layout: fixed;
+      table-layout: fixed;
   }
   /* the first colum contains the data row ID. This information means nothing to the user, so do not display it*/
   #dataTable th:first-child,
   #dataTable td:first-child {
     display: none;
   }
-
- 
-
-
 
 .fixed-header {
   position: sticky;
@@ -54,39 +43,13 @@
     padding: .35em;
   }
 
-
   table td {
     padding: .625em;
     text-align: center;
   }
-
-
-
-  table th {
-    font-size: .5em;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    background-color: #4CAF50;
-    color: white;
-   
-  }
-
-  table.notesTable th th {
-    font-size: .5em;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    background-color: #4CAF50;
-    color: white;
-   
-
-  }
-
-
 
   table td {
     font-size: .55em;
     color: #388E3C;
     word-break: break-all;
   }
-
-

@@ -25,6 +25,27 @@ if ( notespage.test(window.location.href )) {
 chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: newUrl});
 }
 
+const aboutpage =  new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/about_yellownotes.html/);
+console.log(aboutpage.test(window.location.href ));
+if ( aboutpage.test(window.location.href )) {
+  console.log("redirect this link to plugin")
+// Notify the background script to redirect
+chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/about_yellownotes.html"});
+}
+
+// intercept inviations to subscribe to feeds
+const inviteregexp =  new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe/);
+
+const distributionlistid = new URLSearchParams(window.location.search).get("distributionlistid");
+console.log(inviteregexp.test(window.location.href ));
+if ( inviteregexp.test(window.location.href )) {
+  console.log("send subscripition request to plugin");
+// Notify the background script to redirect
+chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid});
+}
+
+
+
 const subpage =  new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/);
 console.log(subpage.test(window.location.href ));
 if ( subpage.test(window.location.href )) {
@@ -42,8 +63,8 @@ if ( subscribedpage.test(window.location.href )) {
 chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/subscribed_notes.html"});
 }
 
-console.log(loginTargetURL.test(window.location.href ));
 const loginTargetURL =  new RegExp(/login.html/);
+console.log(loginTargetURL.test(window.location.href ));
 if ( loginTargetURL.test(window.location.href )) {
     console.log("redirect this link to plugin")
   // Notify the background script to redirect
@@ -51,8 +72,8 @@ if ( loginTargetURL.test(window.location.href )) {
 }
 
 
-console.log(logout_silentTargetURL.test(window.location.href ));
 const logout_silentTargetURL =  new RegExp(/logout_silent/);
+console.log(logout_silentTargetURL.test(window.location.href ));
 if ( logout_silentTargetURL.test(window.location.href )) {
     console.log("redirect this link to plugin")
   // Notify the background script to redirect

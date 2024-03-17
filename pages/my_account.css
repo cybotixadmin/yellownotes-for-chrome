@@ -8,8 +8,7 @@
     text-align: center;
     font-size: 14px;
   }
-
-
+  
   /* Add styles for scrollable table */
   .scrollable-table {
     height: 450px; /* Adjust height as needed */
@@ -32,10 +31,6 @@
     display: none;
   }
 
- 
-
-
-
 .fixed-header {
   position: sticky;
   top: 0;
@@ -57,31 +52,5 @@
 
 
 
-  table th {
-    font-size: .5em;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    background-color: #4CAF50;
-    color: white;
-   
-  }
-
-  table.notesTable th th {
-    font-size: .5em;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    background-color: #4CAF50;
-    color: white;
-   
-
-  }
-
-
-
-  table td {
-    font-size: .55em;
-    color: #388E3C;
-    word-break: break-all;
-  }
 
 

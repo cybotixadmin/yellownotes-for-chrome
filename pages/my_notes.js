@@ -3,8 +3,9 @@
 // uri to the server-side services used by YellowStickyNotes
 const server_url = "https://api.yellownotes.cloud";
 
-const URI_plugin_user_get_own_yellownotes = "/api/plugin_user_get_own_yellownotes";
-const URI_plugin_user_delete_yellownote = "/api/plugin_user_delete_yellownote";
+const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
+const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
+const URI_plugin_user_set_note_active_status = "/api/plugin_user_setstatus_yellownote";
 
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
@@ -14,12 +15,12 @@ const plugin_session_header_name = "yellownotes_session";
 //const browser_id = chrome.runtime.id;
 
 // Function to use "fetch" to delete a data row
-async function deleteDataRow(uuid) {
+async function deleteDataRow(noteid) {
     try {
 
         const userid = "";
-        console.log("deleting: " + uuid);
-        const message_body = '{ "uuid":"' + uuid + '" }';
+        console.log("deleting: " + noteid);
+        const message_body = '{ "noteid":"' + noteid + '" }';
         //console.log(message_body);
         const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
 
@@ -55,12 +56,12 @@ async function deleteDataRow(uuid) {
  * Navigate to the page where the note is attached
  * @param {*} url
  */
-async function goThere(url, uuid) {
+async function goThere(url, noteid) {
     try {
 
         const userid = "";
         console.log("go to url: " + url);
-        console.log("go lookup uuid: " + uuid);
+        console.log("go lookup noteid: " + noteid);
 
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();
@@ -70,7 +71,7 @@ async function goThere(url, uuid) {
             message: {
                 action: "scroll_to_note",
                 scroll_to_note_details: {
-                    uuid: uuid,
+                    noteid: noteid,
                     url: url
 
                 }
@@ -93,15 +94,15 @@ async function goThere(url, uuid) {
 
 /**
  * Open the note for editing
- * @param {*} uuid
+ * @param {*} noteid
  */
 
-async function editNote(uuid) {
+async function editNote(noteid) {
     try {
 
         const userid = "";
-        console.log("deleting: " + uuid);
-        const message_body = '{ "uuid":"' + uuid + '" }';
+        console.log("deleting: " + noteid);
+        const message_body = '{ "noteid":"' + noteid + '" }';
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
         let session = await chrome.storage.local.get(["yellownotes_session"]);
 
@@ -191,7 +192,6 @@ for (var i = 0; i < buttons.length; i++) {
     buttons[i].addEventListener('click', function (event) {
         sortTa();
     }, false);
-
 }
 
 // Locate all cells that are used for filtering of search results
@@ -206,8 +206,8 @@ for (var i = 0; i < f_cells.length; i++) {
     f_cells[i].addEventListener('input', function (event) {
         filterTable_a();
     }, false);
-
 }
+
 
 // Sort states for each column
 const sortStates = {
@@ -215,25 +215,58 @@ const sortStates = {
     1: 'none'
 };
 
-function sortTa() {
 
-    sortTable(event.target.getAttribute("colindex"));
+function sortTa() {
+    console.log("sortTa");
+    console.log(event.target);
+    sortTable("dataTable", event.target.getAttribute("colindex"));
 }
 
+
+function timestampstring2timestamp(str) {
+    console.log("timestampstring2timestamp: " + str );
+    try{
+    const year = str.substring(0, 4);
+    const month = str.substring(5, 7);
+    const day = str.substring(8, 10);
+    const hour = str.substring(11, 13);
+    const minute = str.substring(14, 16);
+    const second = str.substring(17, 19);
+//    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second + "";
+    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute ;
+    console.log("timestamp: " + timestamp);
+
+    return timestamp;
+}catch(e){
+        console.log(e);
+        return null;
+    }
+}
+
+
 function integerstring2timestamp(int) {
+    console.log("integerstring2timestamp: " + int );
+    try{
     const year = int.substring(0, 4);
-    const month = int.substring(4, 6);
-    const day = int.substring(6, 8);
-    const hour = int.substring(8, 10);
-    const minute = int.substring(10, 12);
-    const second = int.substring(12, 14);
-    return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+    const month = int.substring(5, 6);
+    const day = int.substring(8, 9);
+    const hour = int.substring(8, 9);
+    const minute = int.substring(10, 11);
+    const second = int.substring(12, 13);
+     
+    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+    console.log("timestamp: " + timestamp);
+
+    return timestamp;}catch(e){
+        console.log(e);
+        return null;
+    }
 }
 
 // Function to sort the table
-function sortTable(columnIndex) {
+function sortTable(table_id, columnIndex) {
     console.log("sortable: " + columnIndex)
-    const table = document.getElementById('dataTable');
+    const table = document.getElementById(table_id);
 
     let rows = Array.from(table.rows).slice(1); // Ignore the header
     let sortedRows;
@@ -244,7 +277,8 @@ function sortTable(columnIndex) {
     } else {
         sortStates[columnIndex] = 'desc';
     }
-
+    console.log(sortStates[columnIndex]);
+    
     // Sort based on the selected column and sort state
     // Consider options for different types of sorting here.
     if (columnIndex === 0) {
@@ -254,7 +288,7 @@ function sortTable(columnIndex) {
     } else {
         sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
     }
-
+    console.log(sortStates[columnIndex]);
     if (sortStates[columnIndex] === 'desc') {
         sortedRows.reverse();
     }
@@ -357,7 +391,7 @@ function render() {
             data.forEach(row => {
                 console.log(row);
                 console.log(JSON.stringify(row));
-                console.log(row.uuid);
+                console.log(row.noteid);
 
                 // Create new row
                 const newRow = tableBody.insertRow();
@@ -369,40 +403,99 @@ function render() {
                 const cell4 = newRow.insertCell(3);
                 const cell5 = newRow.insertCell(4);
                 const cell6 = newRow.insertCell(5);
+                const cell7 = newRow.insertCell(6);
+                const cell8 = newRow.insertCell(7);
                 const obj = JSON.parse(row.json);
-                cell1.textContent = row.uuid;
+                cell1.textContent = row.noteid;
 try{
-                cell2.textContent = integerstring2timestamp(obj.createtime);
+    console.log(row.createtime);
+    console.log(/2024/.test(row.createtime));
+if(/2024/.test(row.createtime)){
+    console.log("createtime is timestamp: " + row.createtime);
+    //console.log("createtime: " + integerstring2timestamp(row.createtime));
+
+    cell2.textContent = timestampstring2timestamp(row.createtime);
+}else{
+
+    console.log("createtime is integer: " + row.createtime)  
+    cell2.textContent = integerstring2timestamp(row.createtime);
+
+}
+
 }catch(e){
     console.log(e);
 }
 try{
-                    cell3.textContent = integerstring2timestamp(obj.lastmodifiedtime);
-                }catch(e){
-                    console.log(e);
-                }
-                
-                if (row.status == "1") {
-                    cell4.textContent = "enabled";
-                } else {
-                    cell4.textContent = "disabled";
-                }
+    console.log(row.lastmodifiedtime);
+    console.log(/2024/.test(row.lastmodifiedtime));
+if(/2024/.test(row.lastmodifiedtime)){
+    console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
+    //console.log("createtime: " + integerstring2timestamp(row.createtime));
+
+    cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
+}else{
+
+    console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)  
+    cell3.textContent = integerstring2timestamp(row.lastmodifiedtime);
+
+}
+
+}catch(e){
+    console.log(e);
+}
+
+
+                // render a check box to enable/disable the note
+                const suspendActButton = document.createElement("span");
+    if (row.status == 1) {
+        // active
+        suspendActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
+    } else {
+        // deactivated
+        suspendActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
+    }
+
+    // Add classes using classList with error handling
+    const inputElement = suspendActButton.querySelector("input");
+    if (inputElement) {
+        inputElement.classList.add("input-class");
+    }
+
+    const labelElement = suspendActButton.querySelector("label");
+    if (labelElement) {
+        labelElement.classList.add("switch");
+    }
+    const spanElement = suspendActButton.querySelector("span");
+    if (spanElement) {
+        spanElement.classList.add("slider");
+    }
+    suspendActButton.addEventListener("change", async (e) => {
+        if (e.target.checked) {
+   //         await disable_note_with_noteid(row.noteid);
+            await setNoteActiveStatusByUUID(row.noteid, 1);
+        } else {
+            await setNoteActiveStatusByUUID(row.noteid, 0);
+ //           await enable_note_with_noteid(row.noteid);
+        }
+    });
+    cell4.appendChild(suspendActButton);
+
+
+
+  //              if (row.status == "1") {
+    //                cell4.textContent = "enabled";
+      //          } else {
+        //            cell4.textContent = "disabled";
+          //      }
 
                 cell5.textContent = obj.url;
                 cell6.textContent = obj.message_display_text;
 
                 // create small table to contain the action buttons
-                const buttonTable = document.createElement('table');
-                buttonTable.setAttribute('class', 'actionButtonTable');
-                const buttonRow = document.createElement('tr');
-                buttonRow.setAttribute('class', 'actionButtonTable');
-                buttonTable.appendChild(buttonRow);
-                buttonRow.setAttribute('class', 'actionButtonTable');
-
-                const buttonCell1 = document.createElement('td');
-                buttonCell1.setAttribute('class', 'actionButtonTable');
-                buttonTable.appendChild(buttonCell1);
-
+               
+               
                 // Add delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
@@ -410,39 +503,32 @@ try{
                     // Remove the row from the table
                     newRow.remove();
                     // call to API to delete row from data base
-                    deleteDataRow(row.uuid);
+                    deleteDataRow(row.noteid);
                 };
-                buttonCell1.appendChild(deleteButton);
-                const cell7 = newRow.insertCell(6);
-                cell7.appendChild(buttonTable);
+               
+                cell7.appendChild(deleteButton);
 
                 // Add edit button
-                const buttonCell2 = document.createElement('td');
-                buttonCell2.setAttribute('class', 'actionButtonTable');
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Edit';
                 editButton.onclick = function () {
                     // call to API to delete row from data base
-                    editNote(row.uuid);
+                    editNote(row.noteid);
                 };
-                buttonCell2.appendChild(editButton);
-                buttonTable.appendChild(buttonCell2);
+                cell7.appendChild(editButton);
 
+               
                 // Add location "go there" button
-                const buttonCell3 = document.createElement('td');
-                buttonCell3.setAttribute('class', 'actionButtonTable');
                 const goThereButton = document.createElement('button');
                 goThereButton.textContent = 'locate';
                 goThereButton.onclick = function () {
                     // call to API to delete row from data base
-                    goThere(obj.url, obj.uuid);
+                    goThere(obj.url, obj.noteid);
                 };
-                buttonCell3.appendChild(goThereButton);
-                buttonTable.appendChild(buttonCell3);
+                cell7.appendChild(goThereButton);
 
+               
                 // add enable/disable button
-                const buttonCell4 = document.createElement('td');
-                buttonCell4.setAttribute('class', 'actionButtonTable');
                 const ableButton = document.createElement('button');
 
                 if (row.status == "1" || row.status == 1) {
@@ -450,23 +536,20 @@ try{
                     ableButton.textContent = 'disable';
                     ableButton.onclick = function () {
                         // call to API to delete row from data base
-                        disable_note_with_uuid(obj.uuid);
+                        disable_note_with_noteid(obj.noteid);
                     };
                 } else {
                     ableButton.setAttribute('name', 'enable');
                     ableButton.textContent = 'enable';
                     ableButton.onclick = function () {
                         // call to API to delete row from data base
-                        enable_note_with_uuid(obj.uuid);
+                        enable_note_with_noteid(obj.noteid);
                     };
                 }
-                buttonCell4.appendChild(ableButton);
-                buttonTable.appendChild(buttonCell4);
-
-                const cell8 = newRow.insertCell(7);
-
+               // cell7.appendChild(ableButton);
+               
+                
                 // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
-
                 //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
 
                 // Adding data-label for mobile responsive
@@ -483,19 +566,58 @@ try{
 
 }
 
-var valid_uuid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
+var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
-function disable_note_with_uuid(uuid) {
-    console.debug("disable_note_with_uuid: " + uuid);
 
-    console.debug(valid_uuid_regexp.test(uuid));
-    if (valid_uuid_regexp.test(uuid)) {
+// Function to use "fetch" to re-activate a data agreement
+async function setNoteActiveStatusByUUID(noteid, status) {
+    console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status); 
+    try {
+        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        const userid = "";
+        const message_body = JSON.stringify({
+            noteid: noteid,
+                status: status,
+            });
+        //console.log(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_set_note_active_status, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_session_header_name]: session.yellownotes_session,
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.log(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table
+
+        // Parse JSON data
+        const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+function disable_note_with_noteid(noteid) {
+    console.debug("disable_note_with_noteid: " + noteid);
+
+    console.debug(valid_noteid_regexp.test(noteid));
+    if (valid_noteid_regexp.test(noteid)) {
         // send save request back to background
         chrome.runtime.sendMessage({
             message: {
                 "action": "single_note_disable",
                 "disable_details": {
-                    "uuid": uuid,
+                    "noteid": noteid,
                     "enabled": false
                 }
             }
@@ -511,17 +633,17 @@ function disable_note_with_uuid(uuid) {
     }
 }
 
-function enable_note_with_uuid(uuid) {
-    console.debug("enable_note_with_uuid: " + uuid);
+function enable_note_with_noteid(noteid) {
+    console.debug("enable_note_with_noteid: " + noteid);
 
-    console.debug(valid_uuid_regexp.test(uuid));
-    if (valid_uuid_regexp.test(uuid)) {
+    console.debug(valid_noteid_regexp.test(noteid));
+    if (valid_noteid_regexp.test(noteid)) {
         // send save request back to background
         chrome.runtime.sendMessage({
             message: {
                 "action": "single_note_enable",
                 "enable_details": {
-                    "uuid": uuid
+                    "noteid": noteid
                 }
             }
         }, function (response) {
@@ -636,7 +758,7 @@ render().then(function (d) {
     fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
     then((response) => response.text())
     .then((html) => {
-        console.debug(html);
+        //console.debug(html);
         //note_template_html = html;
         //const note_template = document.createElement('div');
         // container.innerHTML = html;
@@ -684,3 +806,6 @@ then((response) => response.text())
 });
 
 
+fetchAndDisplayStaticContent( "/fragments/sidebar_fragment.html", "sidebar").then(() => {   
+    page_display_login_status();
+  });

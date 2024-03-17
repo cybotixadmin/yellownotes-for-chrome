@@ -4,7 +4,7 @@
 const server_url = "https://api.yellownotes.cloud";
 
 const URI_plugin_user_get_all_yellownotes = "/api/plugin_user_get_all_yellownotes";
-const URI_plugin_user_delete_yellownote = "/api/plugin_user_delete_yellownote";
+const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
@@ -291,7 +291,7 @@ async function fetchData() {
                 ynInstallationUniqueId = plugin_uuid.ynInstallationUniqueId;
                 yellownotes_session = session.yellownotes_session;
     
-        const response  = await   fetch(server_url + "/api/plugin_user_get_all_subscribed_notes", {
+        const response  = await   fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -339,6 +339,7 @@ async function fetchData() {
             //const cell4 = newRow.insertCell(3);
             const cell5 = newRow.insertCell(3);
             const cell6 = newRow.insertCell(4);
+            const cell7 = newRow.insertCell(5);
             // parse the JSON of the note
             const obj = JSON.parse(row.json);
             console.log(obj);
@@ -354,57 +355,29 @@ async function fetchData() {
             cell5.textContent = obj.url;
             cell6.textContent = obj.message_display_text;
 
-            // create small table to contain the action buttons
-            const buttonTable = document.createElement('table');
-            buttonTable.setAttribute('class', 'actionButtonTable');
-            const buttonRow = document.createElement('tr');
-            buttonRow.setAttribute('class', 'actionButtonTable');
-            buttonTable.appendChild(buttonRow);
-            buttonRow.setAttribute('class', 'actionButtonTable');
+            // Add delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function () {
+                // Remove the row from the table
+                newRow.remove();
+                // call to API to delete row from data base
+                deleteDataRow(row.uuid);
+            };
+           
+            cell7.appendChild(deleteButton);
 
-            const buttonCell1 = document.createElement('td');
-            buttonCell1.setAttribute('class', 'actionButtonTable');
-            buttonTable.appendChild(buttonCell1);
+        
 
-            const cell7 = newRow.insertCell(5);
-            cell7.appendChild(buttonTable);
-
-
+           
             // Add location "go there" button
-            const buttonCell3 = document.createElement('td');
-            buttonCell3.setAttribute('class', 'actionButtonTable');
             const goThereButton = document.createElement('button');
             goThereButton.textContent = 'locate';
             goThereButton.onclick = function () {
                 // call to API to delete row from data base
-                goThere(obj.url);
+                goThere(obj.url, obj.uuid);
             };
-            buttonCell3.appendChild(goThereButton);
-            buttonTable.appendChild(buttonCell3);
-
-            // add disable button
-            // for notes merely subscribed to, there is ofcourse no delete. But diable does effectively the same ting - blocking it and preventng the subscribing user from seeing it again. 
-                        const buttonCell4 = document.createElement('td');
-                        buttonCell4.setAttribute('class', 'actionButtonTable');
-                        const ableButton = document.createElement('button');
-
-                        if (row.status == "1"){
-                        ableButton.setAttribute('name', 'disable');
-                        ableButton.textContent = 'disable';
-                        ableButton.onclick = function () {
-                            // call to API to delete row from data base
-                            disable_note_with_uuid(obj.uuid);
-                        };
-                    }else{  
-                        ableButton.setAttribute('name', 'enable');
-                        ableButton.textContent = 'enable';
-                        ableButton.onclick = function () {
-                            // call to API to delete row from data base
-                            enable_note_with_uuid(obj.uuid);
-                        };
-                    }
-                        buttonCell4.appendChild(ableButton);
-                        buttonTable.appendChild(buttonCell4);
+            cell7.appendChild(goThereButton);
             
 
             const cell8 = newRow.insertCell(6);
@@ -415,19 +388,19 @@ async function fetchData() {
 
 }
 
-var valid_uuid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
+var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
-function disable_note_with_uuid(uuid) {
-console.debug("disable_note_with_uuid: " + uuid);
+function disable_note_with_noteid(noteid) {
+console.debug("disable_note_with_noteid: " + noteid);
 
-    console.debug(valid_uuid_regexp.test(uuid));
-if (valid_uuid_regexp.test(uuid)){
+    console.debug(valid_noteid_regexp.test(noteid));
+if (valid_noteid_regexp.test(noteid)){
   // send save request back to background
   chrome.runtime.sendMessage({
     stickynote: {
         "request": "single_disable",
         "disable_details": {
-            "uuid": uuid
+            "noteid": noteid
         }
     }
 }, function (response) {
@@ -438,22 +411,21 @@ if (valid_uuid_regexp.test(uuid)){
     //  }catch(g){console.debug(g);}
 
 });
-
 }
 }
 
 
-function enable_note_with_uuid(uuid) {
-    console.debug("enable_note_with_uuid: " + uuid);
+function enable_note_with_noteid(noteid) {
+    console.debug("enable_note_with_noteid: " + noteid);
     
-        console.debug(valid_uuid_regexp.test(uuid));
-    if (valid_uuid_regexp.test(uuid)){
+        console.debug(valid_noteid_regexp.test(noteid));
+    if (valid_noteid_regexp.test(noteid)){
       // send save request back to background
       chrome.runtime.sendMessage({
         stickynote: {
             "request": "single_enable",
             "enable_details": {
-                "uuid": uuid
+                "noteid": noteid
             }
         }
     }, function (response) {
@@ -590,4 +562,7 @@ var note_template = null;
  console.debug("RenderEmbeddedNotes.js: end");
 
 
+ fetchAndDisplayStaticContent( "/fragments/sidebar_fragment.html", "sidebar").then(() => {   
+    page_display_login_status();
+  });
 

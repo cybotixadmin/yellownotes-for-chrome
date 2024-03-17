@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="my_notes.css">
-    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="on_page_common.css">
     <link rel="stylesheet" href="sidebar.css">
     
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,19 +13,11 @@
 <body>
 
  <!-- side bar start here-->
- <div class="sidebar">
-     <div id="login_status"></div>
-     <a href="my_account.html">My account page</a></td></tr>
-      <a href="subscribed_notes.html">subscribed Yellownotes</a>
-      <a href="my_notes.html">my Yellownotes</a>
-      <a href="edit_template.html">edit template</a>
-      <a href="my_subscriptions.html">my subscriptions</a>
-      <a href="my_distributions.html">my distributions</a>
-      <div id="loginlogout"></div>
-      </div>
-  <!-- side bar end here -->
+ <div id="sidebar"></div>
+ <!-- side bar end here -->
   
-  
+  <!-- main page start-->
+<div class="pageBody">
 
     <div>
         This is an overview of your click history
@@ -39,24 +31,23 @@
   <thead>
     <tr class="fixed-header">
       <th>ID</th>
-      <th class="sortableCol" >created</th>
-      <th class="sortableCol" >last modified</th>
+      <th class="sortableCol" >created <span class="sort-icon"">&#9650;</span></th>
+      <th class="sortableCol" >last modified <span class="sort-icon" ">&#9650;</span></th>
       <th class="sortableCol" >active</th>
-      <th class="sortableCol" >URL</th>
+      <th class="sortableCol" >location</th>
       <th class="sortableCol" >text</th>
       <th>action</th>
       <th class="serialized_note">note</th>
     </tr>
 
-
     <!-- Add a filter row -->
     <tr class="fixed-header">
       <th class="filterableCol"></th> <!-- Empty cell -->
-      <th class="filterableCol">filter:<input type="text" id="filterContent" placeholder="Filter Content" ></th>
-      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
-      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
-      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
-      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+      <th class="filterableCol">filter:<input type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol"></th>
+      <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
       <th class="filterableCol"></th>
     </tr>
   </thead>
@@ -66,9 +57,11 @@
 </table>
 <hr/>
 </div>
+</div>
+<!-- main page end -->
+    <script  src="on_page_common.js"></script>
     <script src="./my_notes.js"></script>
     <script src="./common.js"></script>
-    <script src="./session_logic.js"></script>
     
 <!--   <script src="./RenderEmbeddedNotes.js"></script>
     -->

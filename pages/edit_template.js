@@ -293,3 +293,7 @@ function safeParseInnerHTML(rawHTML, targetElementName) {
 
     return container;
 }
+
+fetchAndDisplayStaticContent( "/fragments/sidebar_fragment.html", "sidebar").then(() => {   
+    page_display_login_status();
+  });

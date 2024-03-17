@@ -1,35 +1,29 @@
 
 
+// determine if the user is authneticted or not
 
+chrome.storage.local.get(["yellownotes_session"]).then( (session) => {  
 
-display_login_status();
+  const userid = get_username_from_sessiontoken(session.yellownotes_session);
+console.debug(userid  );
+if (userid == null) {
+    document.getElementById("login_status").textContent = "Not logged in";
+    document.getElementById("loginlogout").innerHTML =  '<a href="https://www.yellownotes.cloud/loginpage">login</a>' ;
+  // populate the fragment pertaining to Yellow Notes more generally
 
-async function display_login_status() {
-    console.log("display_login_status()");
-    //con
+    fetchAndDisplayStaticContent( "/fragments/yellownotes_fragment.html", "front_page").then(() => {});
 
-    let session = await chrome.storage.local.get(["yellownotes_session"]);
-
-const userid = await get_username_from_sessiontoken(session.yellownotes_session);
-
-    
-    console.debug("userid: " + userid);
-    if (userid == null) {
-        document.getElementById("login_status").innerHTML = "Not logged in";
-    } else {
-        document.getElementById("login_status").innerHTML = "Logged in as " + userid;
-    }
-}
-
-async function logout() {
-   
-    // wipe the locate storage where the session token is stored
-
+}else {
+  // populate the fragment pertaining the users account
+  fetchAndDisplayStaticContent( "/fragments/account_information.html", "account_information").then(() => {});
 
 }
-// the session token is not completed as yet
-async function get_username_from_sessiontoken(token) {
-    
-    return (JSON.parse(token)).userid;   
-    
-}
+}).catch( (error) => {} );
+  
+
+fetchAndDisplayStaticContent( "/fragments/sidebar_fragment.html", "sidebar").then(() => {   
+    page_display_login_status();
+    login_logout_action();
+  
+  });
+

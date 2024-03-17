@@ -2,36 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="on_page_common.css">
     <link rel="stylesheet" href="sidebar.css">
-    <link rel="stylesheet" href="view_yellowstickynotes.css">
+    <link rel="stylesheet" href="my_account.css">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>my account</title>
 </head>
 <body>
-   
-
  <!-- side bar start here-->
- <div class="sidebar">
-  <div id="login_status"></div>
-  <a href="my_account.html">My account page</a>
-  <a href="about_yellownotes.html">About Yellownotes</a>
-  <a href="subscribed_notes.html">Yellownotes feeds</a>
-  <a href="my_notes.html">my Yellownotes</a>
-  <a href="edit_template.html">edit template</a>
-  <a href="my_subscriptions.html">Feeds I subscribe to</a>
-  <a href="my_distributions.html">my own Feeds</a>
-  <div id="loginlogout"></div>
+ <div id="sidebar"></div>
+<!-- side bar end here -->
 
-  <a href="https://www.yellownotes.cloud/">Yellownotes home</a>
+<!-- main page start-->
+<div class="pageBody">
+<!-- depending on the login status of the user, display dfferent content
+If the user IS NOT authenticated:
+Display a message to the user to login or register.
+Followed by the front page of the app.
+If the user IS authenticated:
+Display the user's account information.
+
+-->
+
+<div id="login_status"></div>
+
+<div id="front_page"></div>
+
+<div id="account_information"></div>
 
 </div>
 
-<!-- side bar end here -->
+<!-- main page end -->
 
-<script type="module" src="my_account.js"></script>
-<script src="./session_logic.js"></script>
+<script  src="on_page_common.js"></script>
+<script src="my_account.js"></script>
+
 
 </body>
 </html>
