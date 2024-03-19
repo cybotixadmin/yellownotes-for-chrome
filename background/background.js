@@ -43,7 +43,8 @@ let salt;
 
 const plugin_uuid_header_name = "ynInstallationUniqueId";
 
-const plugin_session_header_name = "yellownotes_session";
+// name of HTTP header contaning the session token
+const plugin_session_header_name = "xyellownotessession";
 
 // the session cookie will look something like
 // {"userid":"lars.reinertsen@browsersolutions.no","name":"Lars Reinertsen","sessionid":"109be0df-6787-4ab1-cf28-7a329f6b1bed"}
@@ -321,9 +322,9 @@ function pinYellowNote(info, tab, note_type, brand) {
 
     var note_template;
     var session;
-    chrome.storage.local.get(["yellownotes_session"]).then(function (result) {
+    chrome.storage.local.get(["xYellownotesSession"]).then(function (result) {
         console.log(JSON.stringify(result));
-        session = result.yellownotes_session;
+        session = result.xYellownotesSession;
         console.log(session);
 
         return getTemplate(brand, note_type);
@@ -413,7 +414,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     console.debug("action: " + action);
     var ynInstallationUniqueId = "";
-    var yellownotes_session = "";
+    var xYellownotesSession = "";
     try {
 
         if (action === "toggleSlider") {
@@ -566,18 +567,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             // get all distribution list belonging to the user
 
             try {
-                chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+                chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                     ynInstallationUniqueId = result.ynInstallationUniqueId;
-                    yellownotes_session = result.yellownotes_session;
+                    xYellownotesSession = result.xYellownotesSession;
                     console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                    console.debug("yellownotes_session: " + yellownotes_session);
+                    console.debug("xYellownotesSession: " + xYellownotesSession);
 
                     const opts = {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                            'ynInstallationUniqueId': ynInstallationUniqueId,
-                            'yellownotes_session': yellownotes_session
+                            [plugin_uuid_header_name]: ynInstallationUniqueId,
+                            [plugin_session_header_name]: xYellownotesSession
                         },
 
                     };
@@ -615,18 +616,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         } else if (action == 'single_create') {
             console.debug("request: save a new yellow note");
             // pass the note create message on to the server, returning the unique identifier assigned to the note.
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify(message.message.create_details),
                 };
@@ -691,18 +692,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             const uuid = message.message.update_details.uuid;
 
             console.debug(message.message.update_details);
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify(message.message.update_details),
                 };
@@ -739,8 +740,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             .then(pluginUuidResult => {
                 plugin_uuid = pluginUuidResult.ynInstallationUniqueId;
 
-                return chrome.storage.local.get(["yellownotes_session"]).then(sessionResult => {
-                    session = sessionResult.yellownotes_session;
+                return chrome.storage.local.get(["xYellownotesSession"]).then(sessionResult => {
+                    session = sessionResult.xYellownotesSession;
                    
                     // Fetch data from web service
                     return fetch(server_url + URI_plugin_user_add_subscription_v10, {
@@ -815,18 +816,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             // if update is to disable the note, remove it from the in-memory store
 
 
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]:xYellownotesSession
                     },
 
                 };
@@ -848,18 +849,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(JSON.stringify(message.message.delete_details));
 
             const uuid = message.message.delete_details.uuid;
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({
                         uuid: uuid
@@ -892,18 +893,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(JSON.stringify(message.message.disable_details));
 
             const uuid = message.message.disable_details.uuid;
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({
                         uuid: uuid,
@@ -931,18 +932,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(JSON.stringify(message.message.enable_details));
 
             const uuid = message.message.enable_details.uuid;
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({
                         uuid: uuid,
@@ -1038,18 +1039,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug("get all subscribed notes for " + message.message.url);
             const url = message.message.url;
             // call out to database
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({
                         'url': url
@@ -1071,18 +1072,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug("get all available notes for " + message.message.url);
             const url = message.message.url;
             // call out to database
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({
                         'url': url
@@ -1105,21 +1106,21 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug("get all notes for " + message.message.url);
             const url = message.message.url;
             // call out to database
-            //  chrome.storage.local.set({yellownotes_session: xSessionHeader.value}, () => {
+            //  chrome.storage.local.set({xYellownotesSession: xSessionHeader.value}, () => {
             //console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
 
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
-                yellownotes_session = result.yellownotes_session;
+                xYellownotesSession = result.xYellownotesSession;
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("yellownotes_session: " + yellownotes_session);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'ynInstallationUniqueId': ynInstallationUniqueId,
-                        'yellownotes_session': yellownotes_session
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({
                         'url': url
@@ -1233,17 +1234,21 @@ function fetchContentWithCookies(url, cookies) {
 
 let cookiesInMemory = {};
 
-// pick up the session header set back from the login process in the www.yellowsnotes.cloud domain
+/* login
+* pick up the session header set back from the login process in the www.yellowsnotes.cloud domain
+
+*/
+
 chrome.webRequest.onHeadersReceived.addListener(
     (details) => {
     // console.log(details);
     console.log(details.responseHeaders);
-    const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === 'x_yellownotes_session');
+    const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === plugin_session_header_name);
     console.log('Yellownotes session header detected');
     if (xSessionHeader) {
         console.log('Yellownotes session value:' + xSessionHeader.value);
         chrome.storage.local.set({
-            yellownotes_session: xSessionHeader.value
+            xYellownotesSession: xSessionHeader.value
         }, () => {
             console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
         });
@@ -1258,12 +1263,12 @@ chrome.webRequest.onHeadersReceived.addListener(
     (details) => {
     // console.log(details);
     console.log(details.responseHeaders);
-    const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === 'x_yellownotes_session');
+    const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === plugin_session_header_name);
     console.log('Yellownotes session header detected');
     if (xSessionHeader) {
         console.log('Yellownotes session value:' + xSessionHeader.value);
         chrome.storage.local.set({
-            yellownotes_session: xSessionHeader.value
+            xYellownotesSession: xSessionHeader.value
         }, () => {
             console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
         });
@@ -1548,9 +1553,9 @@ function pinContentNote(info, tab, note_type, brand) {
 
     var template;
 
-    chrome.storage.local.get(["yellownotes_session"]).then(function (result) {
+    chrome.storage.local.get(["xYellownotesSession"]).then(function (result) {
         console.log(JSON.stringify(result));
-        const sessiontoken = result.yellownotes_session;
+        const sessiontoken = result.xYellownotesSession;
         console.log(sessiontoken);
 
         return getTemplate(brand, note_type);
@@ -1632,11 +1637,11 @@ function getTemplate(brand, note_type) {
 
         var template;
         var ynInstallationUniqueId;
-        var yellownotes_session;
+        var xYellownotesSession;
 
-        chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (ins) {
+        chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (ins) {
             ynInstallationUniqueId = ins.ynInstallationUniqueId;
-            yellownotes_session = ins.yellownotes_session;
+            xYellownotesSession = ins.xYellownotesSession;
             /* first: look for the template file in the filesystem templates directory
             The template files are stored in the templates directory and have the "_template.html" file name ending.
 
@@ -1682,7 +1687,7 @@ function getTemplate(brand, note_type) {
                         headers: {
                             'Content-Type': 'application/json',
                             [plugin_uuid_header_name]: ynInstallationUniqueId,
-                            [plugin_session_header_name]: yellownotes_session,
+                            [plugin_session_header_name]: xYellownotesSession,
                             // Add any other necessary headers
                         },
                         body: message_body,

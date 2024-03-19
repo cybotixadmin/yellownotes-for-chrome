@@ -10,7 +10,8 @@ const URI_plugin_user_set_note_active_status = "/api/plugin_user_setstatus_yello
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
 const plugin_uuid_header_name = "ynInstallationUniqueId";
-const plugin_session_header_name = "yellownotes_session";
+// name of header containing session token
+const plugin_session_header_name = "xyellownotessession";
 
 //const browser_id = chrome.runtime.id;
 
@@ -25,7 +26,7 @@ async function deleteDataRow(noteid) {
         const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
 
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
 
         console.log(installationUniqueId);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -34,7 +35,7 @@ async function deleteDataRow(noteid) {
                 headers: {
                     'Content-Type': 'application/json',
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body // example IDs, replace as necessary
             });
@@ -104,7 +105,7 @@ async function editNote(noteid) {
         console.log("deleting: " + noteid);
         const message_body = '{ "noteid":"' + noteid + '" }';
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
 
         //console.log(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -113,7 +114,7 @@ async function editNote(noteid) {
                 headers: {
                     'Content-Type': 'application/json',
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session
+                    [plugin_session_header_name]: session.xYellownotesSession
                 },
                 body: message_body // example IDs, replace as necessary
             });
@@ -143,16 +144,16 @@ function fetchData() {
 
             console.log(installationUniqueId);
             //  let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-            //  let session = await chrome.storage.local.get(["yellownotes_session"]);
+            //  let session = await chrome.storage.local.get(["xYellownotesSession"]);
             var ynInstallationUniqueId;
-            var yellownotes_session;
-            chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session'])
+            var xYellownotesSession;
+            chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession'])
             .then(function (ins) {
                 console.log(ins);
                 ynInstallationUniqueId = ins.ynInstallationUniqueId;
-                yellownotes_session = ins.yellownotes_session;
+                xYellownotesSession = ins.xYellownotesSession;
                 console.log(ynInstallationUniqueId);
-                console.log(yellownotes_session);
+                console.log(xYellownotesSession);
                 //ynInstallationUniqueId = "dummy";
 
                 // Fetch data from web service (replace with your actual API endpoint)
@@ -161,7 +162,7 @@ function fetchData() {
                     headers: {
                         'Content-Type': 'application/json',
                         [plugin_uuid_header_name]: ynInstallationUniqueId,
-                        [plugin_session_header_name]: yellownotes_session
+                        [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({}) // example IDs, replace as necessary
                 });
@@ -345,23 +346,23 @@ function render() {
     return new Promise(
         function (resolve, reject) {
         var ynInstallationUniqueId = "";
-        var yellownotes_session = "";
+        var xYellownotesSession = "";
         //const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
 
 
-        chrome.storage.local.get(['ynInstallationUniqueId', 'yellownotes_session']).then(function (result) {
+        chrome.storage.local.get(['ynInstallationUniqueId', 'xYellownotesSession']).then(function (result) {
             console.log(result);
             console.log(ynInstallationUniqueId);
             ynInstallationUniqueId = result.ynInstallationUniqueId;
-            yellownotes_session = result.yellownotes_session;
+            xYellownotesSession = result.xYellownotesSession;
             console.log(ynInstallationUniqueId);
-            console.log(yellownotes_session);
+            console.log(xYellownotesSession);
             return fetch(server_url + URI_plugin_user_get_own_yellownotes, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     [plugin_uuid_header_name]: ynInstallationUniqueId,
-                    [plugin_session_header_name]: yellownotes_session,
+                    [plugin_session_header_name]: xYellownotesSession,
                 },
                 body: JSON.stringify({}) // example IDs, replace as necessary, the body is used to retrieve the notes of other users, default is to retrieve the notes of the authenticated user
             });
@@ -574,7 +575,7 @@ async function setNoteActiveStatusByUUID(noteid, status) {
     console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status); 
     try {
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const userid = "";
         const message_body = JSON.stringify({
             noteid: noteid,
@@ -588,7 +589,7 @@ async function setNoteActiveStatusByUUID(noteid, status) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body, // example IDs, replace as necessary
             });

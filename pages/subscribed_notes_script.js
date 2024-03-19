@@ -9,7 +9,8 @@ const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellowno
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
 const plugin_uuid_header_name = "ynInstallationUniqueId";
-const plugin_session_header_name = "yellownotes_session";
+// name of header containing session token
+const plugin_session_header_name = "xyellownotessession";
 
 //const browser_id = chrome.runtime.id;
 
@@ -283,20 +284,20 @@ async function fetchData() {
 
   
             var ynInstallationUniqueId = "";
-            var yellownotes_session = "";
+            var xYellownotesSession = "";
     
             let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-            let session = await chrome.storage.local.get(["yellownotes_session"]);
+            let session = await chrome.storage.local.get(["xYellownotesSession"]);
     
                 ynInstallationUniqueId = plugin_uuid.ynInstallationUniqueId;
-                yellownotes_session = session.yellownotes_session;
+                xYellownotesSession = session.xYellownotesSession;
     
         const response  = await   fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 [plugin_uuid_header_name]: ynInstallationUniqueId,
-                [plugin_session_header_name]: yellownotes_session,
+                [plugin_session_header_name]: xYellownotesSession,
             },
             });
         

@@ -355,12 +355,12 @@ function page_scan() {
         console.debug("browsersolutions note_type of note: " + type);
 
         // get brand from note data, or from session
-        chrome.storage.local.get(["yellownotes_session"]).then(function (session) {
+        chrome.storage.local.get(["xYellownotesSession"]).then(function (session) {
             var brand = "";
             if (note_data.hasOwnProperty('brand')) {
                 brand = note_data.brand;
             } else {
-                brand = get_brand_from_sessiontoken(session.yellownotes_session);
+                brand = get_brand_from_sessiontoken(session.xYellownotesSession);
                 if (brand === undefined || brand == null || brand == '') {
                     brand = "default";
                 }
@@ -465,12 +465,12 @@ tokens.forEach(result => {
   console.debug("browsersolutions note_type of note: " + type);
 
   // get brand from note data, or from session
-  chrome.storage.local.get(["yellownotes_session"]).then(function (session) {
+  chrome.storage.local.get(["xYellownotesSession"]).then(function (session) {
       var brand = "";
       if (note_data.hasOwnProperty('brand')) {
           brand = note_data.brand;
       } else {
-          brand = get_brand_from_sessiontoken(session.yellownotes_session);
+          brand = get_brand_from_sessiontoken(session.xYellownotesSession);
           if (brand === undefined || brand == null || brand == '') {
               brand = "default";
           }

@@ -14,7 +14,8 @@ const URI_plugin_user_activate_agreements = "/api/plugin_user_activate_distribut
 const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_distribution_lists";
 
 const plugin_uuid_header_name = "ynInstallationUniqueId";
-const plugin_session_header_name = "yellownotes_session";
+// name of header containing session token
+const plugin_session_header_name = "xyellownotessession";
 
 const browser_id = chrome.runtime.id;
 
@@ -24,7 +25,7 @@ async function deleteDataRowByDistributionlistId(distributionlistid) {
     console.log("deleteDataRowByDistributionlistId");
     try {
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const userid = "";
         const message_body = JSON.stringify({
                 distributionlistid: distributionlistid,
@@ -37,7 +38,7 @@ async function deleteDataRowByDistributionlistId(distributionlistid) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body, // example IDs, replace as necessary
             });
@@ -62,7 +63,7 @@ async function updateDataRowByUUID(distributionlistid) {
         const row = document.querySelector('tr[distributionlistid="' + distributionlistid + '"]');
         console.debug(row);
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const userid = "";
 
         const message_body = {
@@ -81,7 +82,7 @@ async function updateDataRowByUUID(distributionlistid) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: JSON.stringify(message_body), // example IDs, replace as necessary
             });
@@ -103,7 +104,7 @@ async function deleteSubscriptionByUUID(subscriptionid) {
     console.log("deleteSubscriptionByUUID (" + subscriptionid + ")");
     try {
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const userid = "";
         const message_body = JSON.stringify({
                 subscriptionid: subscriptionid
@@ -116,7 +117,7 @@ async function deleteSubscriptionByUUID(subscriptionid) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body, // example IDs, replace as necessary
             });
@@ -137,7 +138,7 @@ async function deleteSubscriptionByUUID(subscriptionid) {
 async function viewDistributionlist(distributionlistid) {
     try {
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const userid = "";
         const message_body = JSON.stringify({
                 distributionlistid: distributionlistid
@@ -150,7 +151,7 @@ async function viewDistributionlist(distributionlistid) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body, // example IDs, replace as necessary
             });
@@ -207,7 +208,7 @@ async function viewDistributionlist(distributionlistid) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body2, // example IDs, replace as necessary
             });
@@ -285,7 +286,7 @@ async function activateByUUID(distributionlistid) {
 
     try {
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const userid = "";
         const message_body = JSON.stringify({
                 distributionlistid: distributionlistid,
@@ -299,7 +300,7 @@ async function activateByUUID(distributionlistid) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body, // example IDs, replace as necessary
             });
@@ -322,7 +323,7 @@ async function deactivateByUUID(distributionlistid) {
     console.log("deactivateByUUID" + distributionlistid);
     try {
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const userid = "";
         const message_body = JSON.stringify({
                 distributionlistid: distributionlistid,
@@ -336,7 +337,7 @@ async function deactivateByUUID(distributionlistid) {
                 headers: {
                     "Content-Type": "application/json",
                     [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                    [plugin_session_header_name]: session.yellownotes_session,
+                    [plugin_session_header_name]: session.xYellownotesSession,
                 },
                 body: message_body, // example IDs, replace as necessary
             });
@@ -390,14 +391,14 @@ async function fetchData() {
     console.log("fetchData");
     try {
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
 
         // Fetch data from web service (replace with your actual API endpoint)
 
         const headers = {
             "Content-Type": "application/json",
             [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-            [plugin_session_header_name]: session.yellownotes_session,
+            [plugin_session_header_name]: session.xYellownotesSession,
         };
         //const body = JSON.stringify(payload);
 
@@ -882,7 +883,7 @@ async function add_distribution() {
         console.log("description: " + description);
 
         var ynInstallationUniqueId = "";
-        var yellownotes_session = "";
+        var xYellownotesSession = "";
 
         if (name != "Enter a name" && description != "Enter a description") {
 
@@ -890,14 +891,14 @@ async function add_distribution() {
                 function (result) {
                 ynInstallationUniqueId = result.ynInstallationUniqueId;
                 console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                return chrome.storage.local.get(["yellownotes_session"]);
+                return chrome.storage.local.get(["xYellownotesSession"]);
             }).then(function (result) {
-                yellownotes_session = result.yellownotes_session;
-                console.log("yellownotes_session: " + yellownotes_session);
+                xYellownotesSession = result.xYellownotesSession;
+                console.log("xYellownotesSession: " + xYellownotesSession);
 
                 // let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
 
-                // let session = await chrome.storage.local.get(["yellownotes_session"]);
+                // let session = await chrome.storage.local.get(["xYellownotesSession"]);
 
                 // Fetch data from web service (replace with your actual API endpoint)
 
@@ -913,7 +914,7 @@ async function add_distribution() {
                     headers: {
                         'Content-Type': 'application/json',
                         [plugin_uuid_header_name]: ynInstallationUniqueId,
-                        [plugin_session_header_name]: yellownotes_session,
+                        [plugin_session_header_name]: xYellownotesSession,
                     },
                     body: JSON.stringify(msg)
                 });
@@ -1082,7 +1083,7 @@ async function add_subscriber(distributionlistid) {
         //const description = table.rows[1].cells[1].textContent; // Get text from second cell of the second row
 
         var ynInstallationUniqueId = "";
-        var yellownotes_session = "";
+        var xYellownotesSession = "";
         const msg = {
             "email": email,
             "distributionlistid": distributionlistid
@@ -1093,14 +1094,14 @@ async function add_subscriber(distributionlistid) {
             function (result) {
             ynInstallationUniqueId = result.ynInstallationUniqueId;
             console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
-            return chrome.storage.local.get(["yellownotes_session"]);
+            return chrome.storage.local.get(["xYellownotesSession"]);
         }).then(function (result) {
-            yellownotes_session = result.yellownotes_session;
-            console.log("yellownotes_session: " + yellownotes_session);
+            xYellownotesSession = result.xYellownotesSession;
+            console.log("xYellownotesSession: " + xYellownotesSession);
 
             // let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
 
-            // let session = await chrome.storage.local.get(["yellownotes_session"]);
+            // let session = await chrome.storage.local.get(["xYellownotesSession"]);
 
             // Fetch data from web service (replace with your actual API endpoint)
 
@@ -1110,7 +1111,7 @@ async function add_subscriber(distributionlistid) {
                 headers: {
                     'Content-Type': 'application/json',
                     [plugin_uuid_header_name]: ynInstallationUniqueId,
-                    [plugin_session_header_name]: yellownotes_session,
+                    [plugin_session_header_name]: xYellownotesSession,
                 },
                 body: JSON.stringify(msg)
             });
@@ -1178,20 +1179,20 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
         //const description = table.rows[1].cells[1].textContent; // Get text from second cell of the second row
 
         var ynInstallationUniqueId = "";
-        var yellownotes_session = "";
+        var xYellownotesSession = "";
 
         chrome.storage.local.get(["ynInstallationUniqueId"]).then(
             function (result) {
             ynInstallationUniqueId = result.ynInstallationUniqueId;
             console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
-            return chrome.storage.local.get(["yellownotes_session"]);
+            return chrome.storage.local.get(["xYellownotesSession"]);
         }).then(function (result) {
-            yellownotes_session = result.yellownotes_session;
-            console.log("yellownotes_session: " + yellownotes_session);
+            xYellownotesSession = result.xYellownotesSession;
+            console.log("xYellownotesSession: " + xYellownotesSession);
 
             // let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
 
-            // let session = await chrome.storage.local.get(["yellownotes_session"]);
+            // let session = await chrome.storage.local.get(["xYellownotesSession"]);
 
             // Fetch data from web service (replace with your actual API endpoint)
 
@@ -1201,7 +1202,7 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
                 headers: {
                     'Content-Type': 'application/json',
                     [plugin_uuid_header_name]: ynInstallationUniqueId,
-                    [plugin_session_header_name]: yellownotes_session,
+                    [plugin_session_header_name]: xYellownotesSession,
                 },
                 body: JSON.stringify({
                     "subscriptionid": subscriptionid,
@@ -1246,12 +1247,12 @@ async function activateAllDistributions() {
          
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
 
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
 
         const headers = {
             "Content-Type": "application/json",
             [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-            [plugin_session_header_name]: session.yellownotes_session,
+            [plugin_session_header_name]: session.xYellownotesSession,
         };
         const body = JSON.stringify({"active":1});
 
@@ -1285,11 +1286,11 @@ async function deactivateAllDistributions() {
  
 
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["yellownotes_session"]);
+        let session = await chrome.storage.local.get(["xYellownotesSession"]);
         const headers = {
             "Content-Type": "application/json",
             [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-            [plugin_session_header_name]: session.yellownotes_session,
+            [plugin_session_header_name]: session.xYellownotesSession,
         };
         const body = JSON.stringify({"active":0});
         const response = await fetch(

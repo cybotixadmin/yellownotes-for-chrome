@@ -4,7 +4,7 @@
     "author": "The BrowserSolutions Team",
     "description": "Yellow Stickynotes for The Web",
     "homepage_url": "https://www.yellownotes.cloud/",
-    "version": "0.7.3",
+    "version": "0.7.4",
     "icons": {
         "32": "icons/yellownotecloud-32x32.png",
         "48": "icons/yellownotecloud-48x48.png",

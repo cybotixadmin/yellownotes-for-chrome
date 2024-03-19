@@ -4,12 +4,12 @@ async function page_display_login_status() {
     console.log("display_login_status()");
     //con
 
-    let session = await chrome.storage.local.get(["yellownotes_session"]);
+    let session = await chrome.storage.local.get(["xYellownotesSession"]);
     console.debug(session);
     var userid = null;
 
     try{
-        userid = await get_username_from_sessiontoken(session.yellownotes_session);
+        userid = await get_username_from_sessiontoken(session.xYellownotesSession);
     } catch (e) {
         console.error(e);
     }
@@ -98,11 +98,11 @@ function fetchAndDisplayStaticContent(url, dom_id) {
     console.log("login_logout_action()");
     //con
 
-    let session = await chrome.storage.local.get(["yellownotes_session"]);
+    let session = await chrome.storage.local.get(["xYellownotesSession"]);
     var userid = null;
 console.debug(session);
 try{
- userid = await get_username_from_sessiontoken(session.yellownotes_session);
+ userid = await get_username_from_sessiontoken(session.xYellownotesSession);
 } catch (e) {
     console.error(e);
     userid = null;

@@ -170,7 +170,7 @@ chrome.runtime.onMessage.addListener(listener);
 /* creates DOM object of the stick note */
 function create_newstickynote_node(info, note_type, html, session) {
 
-    console.debug("# create_stickynote_node_3 start");
+    console.debug("# create_newstickynote_node start");
 
     
     const isOwner = true;
@@ -336,6 +336,8 @@ note_object_data.highlightUniqueId = highlightUniqueId;
                     textarea.value = placeholderText;
                 }
             });
+
+
         } catch (e) {
             console.error(e);
         }
@@ -416,6 +418,11 @@ console.debug("use default x,y position for new note");
     // makeResizable(inserted);
 console.debug("browsersolutions: calling dropdownlist_add_option");
     dropdownlist_add_option(inserted, "", "", "");
+
+    // place focus
+    inserted.querySelector('[focus="true"]').focus();
+
+
 
     // });
 }
@@ -1017,8 +1024,8 @@ function getOwnNotes() {
                     }
                     // what brand should be used for the note. Set default it nothing else is applicable for this user (this is the user's own notes)
                     var brand = "default";
-                    chrome.storage.local.get(["yellownotes_session"]).then(function (session) {
-                        brand = get_brand_from_sessiontoken(session.yellownotes_session);
+                    chrome.storage.local.get(["xYellownotesSession"]).then(function (session) {
+                        brand = get_brand_from_sessiontoken(session.xYellownotesSession);
                         if (isUndefined(brand) || brand == null || brand == '' || brand == 'undefined') {
                             brand = "default";
 
@@ -1413,8 +1420,8 @@ var displayname = "";
                     }
                     // what brand should be used for the note. Set default it nothing else is applicable for this user (this is the user's own notes)
                     var brand = "default";
-                    chrome.storage.local.get(["yellownotes_session"]).then(function (session) {
-                        brand = get_brand_from_sessiontoken(session.yellownotes_session);
+                    chrome.storage.local.get(["xYellownotesSession"]).then(function (session) {
+                        brand = get_brand_from_sessiontoken(session.xYellownotesSession);
                         if (isUndefined(brand) || brand == null || brand == '' || brand == 'undefined') {
                             brand = "default";
 
@@ -1575,8 +1582,8 @@ function getAllNotes() {
                     }
                     // what brand should be used for the note. Set default it nothing else is applicable for this user (this is the user's own notes)
                     var brand = "default";
-                    chrome.storage.local.get(["yellownotes_session"]).then(function (session) {
-                        brand = get_brand_from_sessiontoken(session.yellownotes_session);
+                    chrome.storage.local.get(["xYellownotesSession"]).then(function (session) {
+                        brand = get_brand_from_sessiontoken(session.xYellownotesSession);
                         if (isUndefined(brand) || brand == null || brand == '' || brand == 'undefined') {
                             brand = "default";
                         }
@@ -1797,6 +1804,7 @@ function placeStickyNote(note_obj, note_template, isOwner, newNote) {
                 // if no selection_text, only position co-ordinates can place the note
 
                 try {
+                    console.debug("browsersolutions: calling: create_stickynote_node");
                     create_stickynote_node(note_obj, note_template, newNote).then(function (response) {
                         var newGloveboxNode = response;
 
@@ -1936,219 +1944,28 @@ function placeStickyNote(note_obj, note_template, isOwner, newNote) {
                             var newGloveboxNode = response;
 
                             console.debug(newGloveboxNode);
+                            var newGloveboxNode = response;
 
-                            //newGloveboxNode.addEventListener('mouseenter',
-                            //    function () {
-                            //    console.debug("browsersolutions: " + "### mouseover");
-                            //    // add functionality to display selection linked to this note
-                            //});
-                            //attachEventlistenersToYellowStickynote(newGloveboxNode);
-
-
-                            // Construct a DOM range-type object of the selected text, and use this give to a coloured background to the selected text
-
-                            // insert the note DOM-object into the textnode where the selection was made from. right before text selection begins.
-                            // this means splitting the text node into two parts, inserting the note in between them.
-
-                            if (start_range_node.nodeType == Node.TEXT_NODE) {
-                                console.debug("browsersolutions: is text node");
-                                var mark2 = document.createElement('span');
-                                var insertedNode;
-                                // if the selection text is within one single text node in the document, then do things a little differently
-                                if (nodesAreIdentical(start_range_node, end_range_node)) {
-                                    console.debug("browsersolutions: " + "start_range_node and end_range_node are identical");
-                                    //start_offset = 10;
-                                    //end_offset = 20;
-
-                                    // highlight the text the note is tied to (it any)
-                                    //
-                                    console.debug("browsersolutions: start_range_node length=" + start_range_node.length);
-                                    //console.debug("browsersolutions: start_range_node textContent=" + start_range_node.textContent);
-                                    //console.debug(start_range_node);
-                                    console.debug("browsersolutions: start_range_node start offset " + start_offset);
-
-                                    console.debug("browsersolutions: end_range_node length=" + end_range_node.length);
-                                    //console.debug("browsersolutions: end_range_node textContent=" + end_range_node.textContent);
-                                    //console.debug(end_range_node);
-                                    console.debug("browsersolutions: end_range_node offset " + end_offset);
-                                    let notedRange = document.createRange();
-                                    notedRange.setStart(start_range_node, start_offset);
-                                    notedRange.setEnd(end_range_node, end_offset);
-
-                                    // create a range to contain the selection specified in the stickynote
-                                    console.debug("browsersolutions: new notedRange");
-                                    console.debug(notedRange);
-                                    console.debug("browsersolutions: range.toString: " + notedRange.toString());
-
-                                    // make highlighting of the selected text pertaining to the sticky note
-                                    var color = "#ffffcc";
-
-                                    // Link the span to the note by setting the "to_note" attribute to the noteid of the note
-                                    // newly created notes do not have a noteid yet, in which case, use ""
-                                    var note_id = note_obj.noteid;
-
-                                    mark2.setAttribute("style", "background-color: " + color + ";");
-                                    mark2.setAttribute("to_note", "" + note_id + "");
-
-                                    notedRange.surroundContents(mark2);
-                                    console.debug(notedRange);
-                                    console.debug(mark2);
-                                    //it2.appendChild(newGloveboxNode);
-                                    // start_range_node.textContent = original_start_range_node_textcontent.substring(0, start_offset);
-
-                                    // insert the sticky note document into the main DOM just before the highlighted selection
-
-                                    // insert the sticky note node immediately before the selection text it "links" too.
-
-                                    insertedNode = mark2.parentNode.insertBefore(newGloveboxNode, mark2);
-                                    // shift the inserted node slightly to the right, to make the highlighted text more visible
-
-                                    increaseVerticalDistanceUsingTop(mark2, insertedNode);
-
-                                    // Shrink text content in the textnode where the selection begins,
-                                    // to no longer incldue the selected text (which has been copied into the span)
-
-                                    //console.debug("browsersolutions " + start_range_node.textContent);
-                                    //start_range_node.textContent = original_start_range_node_textcontent.substring(0, start_offset);
-                                    //console.debug("browsersolutions " + start_range_node.textContent);
-
-                                    // shrik the text content in the textnode where the selection ends, to exclude the selected text
-
-
-                                } else {
-                                    // the selection spans multiple DOM nodes
-
-                                    // create a "span" for each node separately, and link them to the note
-
-                                    //start_offset = 10;
-                                    //end_offset = 20;
-                                    //console.debug("browsersolutions: start_range_node length=" + start_range_node.length);
-                                    //console.debug(start_range_node);
-                                    //console.debug("browsersolutions: start_range_node start offset " + start_offset);
-                                    //console.log("browsersolutions: insertedNode at root");
-                                    //const rootElement = document.documentElement; // For <html> as root
-                                    //const insertedNode2 = rootElement.appendChild(newGloveboxNode)
-                                    //     console.debug(insertedNode2);
-                                    //console.debug("browsersolutions: end_range_node length=" + end_range_node.length);
-                                    //console.debug(end_range_node);
-                                    //console.debug("browsersolutions: end_range_node offset " + end_offset);
-                                    let notedRange = document.createRange();
-                                    notedRange.setStart(start_range_node, start_offset);
-                                    notedRange.setEnd(end_range_node, end_offset);
-
-                                    // create a range to contain the selection specified in the stickynote
-                                    console.debug("browsersolutions: new notedRange");
-                                    console.debug(notedRange);
-                                    console.debug("browsersolutions " + notedRange.toString());
-
-                                    var spanNodesBetween = findNodesBetween(start_range_node, end_range_node);
-                                    console.debug("browsersolutions: spanNodesBetween");
-                                    console.debug(spanNodesBetween);
-
-                                    // make highlighting of the selected text pertaining to the sticky note
-                                    var color = "#ffffcc";
-
-                                    // Link the span to the note by setting the "to_note" attribute to the noteid of the note
-                                    // newly created notes do not have a noteid yet, in which case, use ""
-                                    var note_id = note_obj.noteid;
-
-                                    var mark2 = document.createElement('span');
-                                    mark2.setAttribute("style", "background-color: " + color + ";");
-                                    mark2.setAttribute("to_note", "" + note_id + "");
-                                    let notedRange2 = document.createRange();
-                                    console.debug(notedRange2);
-                                    console.debug("browsersolutions: start_range_node");
-                                    console.debug(start_range_node.textContent);
-                                    notedRange2.setStart(start_range_node, 4);
-                                    notedRange2.setEnd(start_range_node, 15);
-                                    console.debug(notedRange2);
-                                    notedRange2.surroundContents(mark2);
-                                    console.debug(notedRange2);
-                                    console.debug(notedRange2.textContent);
-                                    //it2.appendChild(newGloveboxNode);
-                                    // start_range_node.textContent = original_start_range_node_textcontent.substring(0, start_offset);
-
-                                    // insert the sticky note document into the main DOM just before the highlighted selection
-
-                                    // insert the sticky note node immediately before the selection text it links too.
-                                    console.debug(start_range_node.parentNode);
-                                    insertedNode = start_range_node.parentNode.insertBefore(newGloveboxNode, start_range_node);
-                                }
-                                console.debug(insertedNode);
-                                //const rootElement = document.documentElement; // For <html> as root
-                                //const insertedNode2 = rootElement.appendChild(newGloveboxNode);
-                                //console.debug(insertedNode2);
-                                console.debug("calling attachEventlistenersToYellowStickynote");
-                                attachEventlistenersToYellowStickynote(insertedNode);
-
-                                // whether or not a note is owned  by the current user will be flaged in the DOM (for easier handling of selective-removal of notes)))
-                                if (isOwner) {
-                                    console.debug(insertedNode);
-                                    insertedNode.setAttribute("isOwner", "true");
-                                } else {
-                                    insertedNode.setAttribute("isOwner", "false");
-                                }
-                                console.debug("######################################################");
-
-                                // Set which parts of the note DOM tree is visible -
-                                // Depending of whether or not the note is editable, some buttons will be visible or not.
-                                // Only the note owner should see editing button
-
-                                if (isOwner) {
-                                    setComponentVisibility(insertedNode, ",rw,.*normalsized,");
-                                } else {
-                                    setComponentVisibility(insertedNode, ",ro,.*normalsized,");
-                                }
-                                // make note dragable
-                                console.debug(insertedNode);
-                                console.debug("calling makeDragAndResize");
-                                //makeDraggable(insertedNode, insertedNode.querySelector("[name='topbar_filler']"));
-                                makeDragAndResize(insertedNode);
-                                //console.debug("calling makeResizable");
-                                //makeResizable(insertedNode);
-
-                                //console.debug("calling makeDragAndResize");
-                                //makeDragAndResize(insertedNode);
-
-                                // determine which part of the text is before and after the start of the selection
-                                // save whole text
-                                // remove all text after the selection point
-                                // add an empty element after the end of the text node
-                                // determine position of this element
-                                // remove element
-                                // restore the original text
-
-                                //var {
-                                //    insertedNote,
-                                //    start_range_node_preceeding
-                                //} = insertNodeIntoTextNodebeforeSelectionText(start_range_node, start_offset, newGloveboxNode);
-
-                                // updateNotePositionCoordinates(insertedNote, newGloveboxNode);
-
-
-                                //  console.debug("browsersolutions: " + "Y-position: " + divOffset_y(insertedNote));
-                                //  console.debug("browsersolutions: " + "X-position: " + divOffset_x(insertedNote));
-                                // console.debug("browsersolutions: " + "Y-position: " + divOffset_y(spanNode));
-                                // console.debug("browsersolutions: " + "X-position: " + divOffset_x(spanNode));
-
-
+                            console.debug(newGloveboxNode);
+                            console.debug("browsersolutions: calling: size_and_place_note_based_on_coordinates");
+                            size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj);
+                            console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
+                            attachEventlistenersToYellowStickynote(newGloveboxNode);
+                            // make some parts visible and other not visible
+                            if (isOwner) { // if the note is the user's own note, then make the edit buttons visible
+                                console.debug("browsersolutions: makeEditButtonsVisible");
+                                console.debug("calling setComponentVisibility");
+                                setComponentVisibility(newGloveboxNode, ",rw,.*normalsized");
                             } else {
-                                console.debug("browsersolutions: " + " is not text node");
-                                // in case the start node is not a text node, insert the note as preceeding it.
-
-                                const insertedNode = start_range_node.parentNode.insertBefore(newGloveboxNode, start_range_node)
-                                    console.log(insertedNode);
-
-                                // whether or not a note is owned  by the current user will be flaged in the DOM (for easier handling of selective-removal of notes)))
-                                if (isOwner) {
-                                    console.debug(insertedNode);
-                                    insertedNode.setAttribute("isOwner", "true");
-                                } else {
-                                    insertedNode.setAttribute("isOwner", "false");
-                                }
-                                console.debug("######################################################");
-
+                                console.debug("browsersolutions: makeEditButtonsInvisible");
+                                setComponentVisibility(newGloveboxNode, ",ro,.*normalsized");
                             }
+    
+                            // Make the stickynote draggable:
+                            console.debug("browsersolutions: makeDragAndResize");
+                            makeDragAndResize(newGloveboxNode);
+
+                           
 
                             //return;
                         });
@@ -2175,6 +1992,7 @@ function placeStickyNote(note_obj, note_template, isOwner, newNote) {
                             console.debug("browsersolutions: " + valid_stickynote_position_coordinate_regexp.test(posy));
 
                             try {
+                                console.debug("browsersolutions: " + "calling create_stickynote_node");
                                 create_stickynote_node(note_obj, note_template, newNote).then(function (newGloveboxNode) {
                                     console.debug(newGloveboxNode);
                                     console.debug("calling size_and_place_note_based_on_coordinates");
@@ -2224,6 +2042,133 @@ function placeStickyNote(note_obj, note_template, isOwner, newNote) {
             return true;
         }
     }
+}
+
+// hold onto some cade that spans multiple text nodes
+function one (note_obj, note_template, isOwner, newNote) {
+
+    if (nodesAreIdentical(start_range_node, end_range_node)) {
+        console.debug("browsersolutions: " + "start_range_node and end_range_node are identical");
+        //start_offset = 10;
+        //end_offset = 20;
+
+        // highlight the text the note is tied to (it any)
+        //
+        console.debug("browsersolutions: start_range_node length=" + start_range_node.length);
+        //console.debug("browsersolutions: start_range_node textContent=" + start_range_node.textContent);
+        //console.debug(start_range_node);
+        console.debug("browsersolutions: start_range_node start offset " + start_offset);
+
+        console.debug("browsersolutions: end_range_node length=" + end_range_node.length);
+        //console.debug("browsersolutions: end_range_node textContent=" + end_range_node.textContent);
+        //console.debug(end_range_node);
+        console.debug("browsersolutions: end_range_node offset " + end_offset);
+        let notedRange = document.createRange();
+        notedRange.setStart(start_range_node, start_offset);
+        notedRange.setEnd(end_range_node, end_offset);
+
+        // create a range to contain the selection specified in the stickynote
+        console.debug("browsersolutions: new notedRange");
+        console.debug(notedRange);
+        console.debug("browsersolutions: range.toString: " + notedRange.toString());
+
+        // make highlighting of the selected text pertaining to the sticky note
+        var color = "#ffffcc";
+
+        // Link the span to the note by setting the "to_note" attribute to the noteid of the note
+        // newly created notes do not have a noteid yet, in which case, use ""
+        var note_id = note_obj.noteid;
+
+        mark2.setAttribute("style", "background-color: " + color + ";");
+        mark2.setAttribute("to_note", "" + note_id + "");
+
+        notedRange.surroundContents(mark2);
+        console.debug(notedRange);
+        console.debug(mark2);
+        //it2.appendChild(newGloveboxNode);
+        // start_range_node.textContent = original_start_range_node_textcontent.substring(0, start_offset);
+
+        // insert the sticky note document into the main DOM just before the highlighted selection
+
+        // insert the sticky note node immediately before the selection text it "links" too.
+
+        insertedNode = mark2.parentNode.insertBefore(newGloveboxNode, mark2);
+        // shift the inserted node slightly to the right, to make the highlighted text more visible
+
+        increaseVerticalDistanceUsingTop(mark2, insertedNode);
+
+        // Shrink text content in the textnode where the selection begins,
+        // to no longer incldue the selected text (which has been copied into the span)
+
+        //console.debug("browsersolutions " + start_range_node.textContent);
+        //start_range_node.textContent = original_start_range_node_textcontent.substring(0, start_offset);
+        //console.debug("browsersolutions " + start_range_node.textContent);
+
+        // shrik the text content in the textnode where the selection ends, to exclude the selected text
+
+
+    } else {
+        // the selection spans multiple DOM nodes
+
+        // create a "span" for each node separately, and link them to the note
+
+        //start_offset = 10;
+        //end_offset = 20;
+        //console.debug("browsersolutions: start_range_node length=" + start_range_node.length);
+        //console.debug(start_range_node);
+        //console.debug("browsersolutions: start_range_node start offset " + start_offset);
+        //console.log("browsersolutions: insertedNode at root");
+        //const rootElement = document.documentElement; // For <html> as root
+        //const insertedNode2 = rootElement.appendChild(newGloveboxNode)
+        //     console.debug(insertedNode2);
+        //console.debug("browsersolutions: end_range_node length=" + end_range_node.length);
+        //console.debug(end_range_node);
+        //console.debug("browsersolutions: end_range_node offset " + end_offset);
+        let notedRange = document.createRange();
+        notedRange.setStart(start_range_node, start_offset);
+        notedRange.setEnd(end_range_node, end_offset);
+
+        // create a range to contain the selection specified in the stickynote
+        console.debug("browsersolutions: new notedRange");
+        console.debug(notedRange);
+        console.debug("browsersolutions " + notedRange.toString());
+
+        var spanNodesBetween = findNodesBetween(start_range_node, end_range_node);
+        console.debug("browsersolutions: spanNodesBetween");
+        console.debug(spanNodesBetween);
+
+        // make highlighting of the selected text pertaining to the sticky note
+        var color = "#ffffcc";
+
+        // Link the span to the note by setting the "to_note" attribute to the noteid of the note
+        // newly created notes do not have a noteid yet, in which case, use ""
+        var note_id = note_obj.noteid;
+
+        var mark2 = document.createElement('span');
+        mark2.setAttribute("style", "background-color: " + color + ";");
+        mark2.setAttribute("to_note", "" + note_id + "");
+        let notedRange2 = document.createRange();
+        console.debug(notedRange2);
+        console.debug("browsersolutions: start_range_node");
+        console.debug(start_range_node.textContent);
+        notedRange2.setStart(start_range_node, 4);
+        notedRange2.setEnd(start_range_node, 15);
+        console.debug(notedRange2);
+        notedRange2.surroundContents(mark2);
+        console.debug(notedRange2);
+        console.debug(notedRange2.textContent);
+        //it2.appendChild(newGloveboxNode);
+        // start_range_node.textContent = original_start_range_node_textcontent.substring(0, start_offset);
+
+        // insert the sticky note document into the main DOM just before the highlighted selection
+
+        // insert the sticky note node immediately before the selection text it links too.
+        console.debug(start_range_node.parentNode);
+        insertedNode = start_range_node.parentNode.insertBefore(newGloveboxNode, start_range_node);
+    }
+    console.debug(insertedNode);
+   
+
 }
 
 /*
@@ -2643,6 +2588,55 @@ function attachEventlistenersToYellowStickynote(note) {
     console.log("attachEventlistenersToYellowStickynote.end");
 }
 
+
+function load_url(event) {
+    console.debug("load_url");
+    console.debug(event);
+    console.debug(event.target.parentNode);
+        // get the root node of the note    
+        var note_root = getYellowStickyNoteRoot(event.target.parentNode);
+        console.debug(note_root);
+        return new Promise(function (resolve, reject) {
+    console.debug(note_root.querySelector('input[id="urlInput"]'));
+    const url = note_root.querySelector('input[id="urlInput"]').value;
+    
+            console.debug("#### perform url lookup #### " + url);
+                //console.debug(cont1);
+             
+                // check for content_url for notes that collect content from elsewhere
+                try {
+                    //cont1.querySelector('input[id="urlInput"]').value = note_object_data.content_url;
+    
+                    // start the process of looking up the content
+                    var content_iframe = note_root.querySelector('#contentFrame');
+                    console.log("content_iframe: " + content_iframe);
+                    // console.log(content_iframe);
+    
+                    // send message to background serviceworker and it will lookup the URL. This is to bypass any CORS issues
+                    // Send save request back to background
+                    // Stickynotes are always enabled when created.
+                    console.log("remote url: " + url);
+                    chrome.runtime.sendMessage({
+                        message: {
+                            "action": "simple_url_lookup",
+                            "url": url
+                        }
+                    }).then(function (response) {
+                        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                        // render content of ifram based on this
+                        //console.log(getYellowStickyNoteRoot(event.target));
+                        setContentInIframe(content_iframe, response);
+                        resolve(cont1);
+                    });
+    
+                } catch (e) {
+                    console.error(e);
+                }
+        });
+    }
+    
+    
+
 function increaseVerticalDistanceUsingTop(element1, element2) {
     // Ensure that both elements are valid DOM elements
     if (!(element1 instanceof HTMLElement) || !(element2 instanceof HTMLElement)) {
@@ -2908,6 +2902,7 @@ function create_stickynote_node(note_object_data, note_template, newNote) {
         console.debug("browsersolutions " + JSON.stringify(note_object_data));
         console.debug(note_template);
 
+        // create the "wrapping" container that hold the DOM-structure of the note
         var cont1 = document.createElement('container');
 
         //<!--<link rel="stylesheet" type="text/css" href="message-box.css">-->
@@ -3445,6 +3440,8 @@ function makeDragAndResize(note) {
         } else if (e.target.tagName === 'TEXTAREA') {
             console.debug("on top of textarea");
             // allow action on the drop down list
+        } else if (e.target.tagName === 'INPUT') {
+            // allow default action on the input field
         } else {
             // no action on the note
             // prevent action "behind" the note

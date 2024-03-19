@@ -2,9 +2,9 @@
 
 // determine if the user is authneticted or not
 
-chrome.storage.local.get(["yellownotes_session"]).then( (session) => {  
+chrome.storage.local.get(["xYellownotesSession"]).then( (session) => {  
 
-  const userid = get_username_from_sessiontoken(session.yellownotes_session);
+  const userid = get_username_from_sessiontoken(session.xYellownotesSession);
 console.debug(userid  );
 if (userid == null) {
     document.getElementById("login_status").textContent = "Not logged in";
