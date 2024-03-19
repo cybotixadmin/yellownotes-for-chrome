@@ -189,7 +189,7 @@ chrome.contextMenus.create({
     id: "create-yellownote",
     parentId: "yellownotes",
     title: "attach yellow sticky-note to selection",
-    contexts: ["selection"]
+    contexts: ["all"]
 });
 
 //chrome.contextMenus.create({

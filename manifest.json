@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Yellow Notes",
     "author": "The BrowserSolutions Team",
-    "description": "Yellow Stickynotes for The Web",
+    "description": "__MSG_appDesc__",
     "homepage_url": "https://www.yellownotes.cloud/",
     "version": "0.7.4",
     "icons": {
@@ -14,6 +14,7 @@
     "options_ui": {
         "page": "./pages/my_account.html"
     },
+    "default_locale": "en_US",
     "action": {
         "default_popup": "./popup/popup.html",
         "default_icon": "icons/yellownotecloud-200x200.png",

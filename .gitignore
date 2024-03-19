@@ -1,10 +1,13 @@
 
-*/archive/*
+/archive/
 
 terraform/*/*/.aws/credentials
 terraform/*/*/*/.aws/credentials
 
-*/.terraform/
+.terraform
+.aws
+.ssh
+.settings
 
 terraform/notes.txt
 *.tfstate
@@ -15,6 +18,6 @@ terraform/notes.txt
 
 *privkey*
 
-notes.txt
+n*.txt
 
 */*/.ssh/
