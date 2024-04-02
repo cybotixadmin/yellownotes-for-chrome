@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="on_page_common.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="view_a_distribution_list.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>view feed</title>
+</head>
+<body>
+ <!-- side bar start here-->
+ <div id="sidebar"></div>
+<!-- side bar end here -->
+
+<!-- main page start-->
+<div class="pageBody">
+<!-- depending on the login status of the user, display dfferent content
+If the user IS NOT authenticated:
+Display a message to the user to login or register.
+Followed by the front page of the app.
+If the user IS authenticated:
+Display the user's account information.
+
+-->
+     <!-- Empty table structure -->
+<div class="scrollable-table">
+    <table id="dataTable" class="notesTable">
+      <thead>
+        <tr class="fixed-header">
+         
+          <th class="sortableCol" >created <span class="sort-icon"">&#9650;</span></th>
+          <th class="sortableCol" >last modified <span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" >location</th>
+          <th class="sortableCol" >text</th>
+          <th>action</th>
+          <th class="serialized_note">remote page</th>
+        </tr>
+    
+        <!-- Add a filter row -->
+        <tr class="fixed-header">
+          
+          <th class="filterableCol">filter:<input type="text" class="filterContent" placeholder="Filter " ></th>
+          <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
+          <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
+          <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
+          <th class="filterableCol"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be added here -->
+      </tbody>
+    </table>
+    </div>
+    </div>
+
+<!-- main page end -->
+
+<script  src="on_page_common.js"></script>
+<script src="view_a_distribution_list.js"></script>
+
+
+</body>
+</html>
+    

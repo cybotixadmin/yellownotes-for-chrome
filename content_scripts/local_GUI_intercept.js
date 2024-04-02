@@ -49,9 +49,12 @@ chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri
 const subpage =  new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/);
 console.log(subpage.test(window.location.href ));
 if ( subpage.test(window.location.href )) {
+    // Extract the query string
+    const queryString = window.location.search;
+
   console.log("redirect this link to plugin")
 // Notify the background script to redirect
-chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/my_subscriptions.html"});
+chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/my_subscriptions.html"+ queryString});
 }
 
 

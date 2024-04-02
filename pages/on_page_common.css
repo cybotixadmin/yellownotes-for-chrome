@@ -151,6 +151,10 @@ table.notesTable th {
   color: #ffffff; /* White when active */
 }
 
+.highlighted {
+  background-color: yellow;
+}
+
   table.notesTable th th {
     font-size: .5em;
     letter-spacing: .1em;

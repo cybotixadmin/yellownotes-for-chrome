@@ -355,7 +355,7 @@ function page_scan() {
         console.debug("browsersolutions note_type of note: " + type);
 
         // get brand from note data, or from session
-        chrome.storage.local.get(["xYellownotesSession"]).then(function (session) {
+        chrome.storage.local.get([plugin_session_header_name]).then(function (session) {
             var brand = "";
             if (note_data.hasOwnProperty('brand')) {
                 brand = note_data.brand;
@@ -465,7 +465,7 @@ tokens.forEach(result => {
   console.debug("browsersolutions note_type of note: " + type);
 
   // get brand from note data, or from session
-  chrome.storage.local.get(["xYellownotesSession"]).then(function (session) {
+  chrome.storage.local.get([plugin_session_header_name]).then(function (session) {
       var brand = "";
       if (note_data.hasOwnProperty('brand')) {
           brand = note_data.brand;

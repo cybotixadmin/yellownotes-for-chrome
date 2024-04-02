@@ -1,16 +1,10 @@
 
 
-// uri to the server-side services used by YellowStickyNotes
-const server_url = "https://api.yellownotes.cloud";
-
 const URI_plugin_user_get_all_yellownotes = "/api/plugin_user_get_all_yellownotes";
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
-const plugin_uuid_header_name = "ynInstallationUniqueId";
-// name of header containing session token
-const plugin_session_header_name = "xyellownotessession";
 
 //const browser_id = chrome.runtime.id;
 
@@ -287,10 +281,10 @@ async function fetchData() {
             var xYellownotesSession = "";
     
             let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-            let session = await chrome.storage.local.get(["xYellownotesSession"]);
+            let session = await chrome.storage.local.get([plugin_session_header_name]);
     
                 ynInstallationUniqueId = plugin_uuid.ynInstallationUniqueId;
-                xYellownotesSession = session.xYellownotesSession;
+                xYellownotesSession = session[plugin_session_header_name];
     
         const response  = await   fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {
             method: 'GET',

@@ -1,20 +1,12 @@
 
-const server_url = "https://api.yellownotes.cloud";
-
-
-const plugin_uuid_header_name = "ynInstallationUniqueId";
-// name of header containing session token
-const plugin_session_header_name = "xyellownotessession";
-
-
 var frame = document.getElementById('frame');
 
 // Function to load content into the frame using fetch
 async function loadFrameContent() {
 console.log("loadFrameContent");
-    let session = await chrome.storage.local.get(["xYellownotesSession"]);
+    let session = await chrome.storage.local.get([plugin_session_header_name]);
 
-    const userid = await get_username_from_sessiontoken(session.xYellownotesSession);
+    const userid = await get_username_from_sessiontoken(session[plugin_session_header_name]);
 const trype = "webframe";
     // Send save request back to background to pickup the note template
     const action = "get_" + type + "_template";
@@ -81,9 +73,9 @@ console.log(frame_root);
 async function loadYellownoteContent() {
 console.log("loadYellownoteContent");
     const trype = "yellownote";
-    let session = await chrome.storage.local.get(["xYellownotesSession"]);
+    let session = await chrome.storage.local.get([plugin_session_header_name]);
 
-    const userid = await get_username_from_sessiontoken(session.xYellownotesSession);
+    const userid = await get_username_from_sessiontoken(session[plugin_session_header_name]);
 
     // Send save request back to background to pickup the note template
     const action = "get_" + type + "_template";
@@ -183,24 +175,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-// the session token is not completed as yet
-async function get_username_from_sessiontoken(token) {
-    
-    return (JSON.parse(token)).userid;   
-    
-}
-
-
- function get_brand_from_sessiontoken(token) {
-    
-    try {
-        return (JSON.parse(token)).brand;   
-    } catch (error) {
-        return "default";
-    }
-
-    
-}
 
 
  async function save_setup (type) {
@@ -219,11 +193,11 @@ async function get_username_from_sessiontoken(token) {
         console.log(btoa(content));
 
         let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
-        let session = await chrome.storage.local.get(["xYellownotesSession"]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
 
-        const userid = await get_username_from_sessiontoken(session.xYellownotesSession);
+        const userid = await get_username_from_sessiontoken(session[plugin_session_header_name]);
         // look up brand in the user session object // not implemented as yet
-        const brand = get_brand_from_sessiontoken(session.xYellownotesSession);
+        const brand = get_brand_from_sessiontoken(session[plugin_session_header_name]);
     const msg = {
         type: "webframe",
         userid: userid,
@@ -240,7 +214,7 @@ async function get_username_from_sessiontoken(token) {
             headers: {
                 "Content-Type": "application/json",
                 [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
-                [plugin_session_header_name]: session.xYellownotesSession,
+                [plugin_session_header_name]: session[plugin_session_header_name],
             },
             body: message_body, // example IDs, replace as necessary
         });
