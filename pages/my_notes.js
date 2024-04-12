@@ -7,7 +7,6 @@ const URI_plugin_user_set_note_active_status = "/api/v1.0/plugin_user_setstatus_
 
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
-
 // Function to use "fetch" to delete a data row
 async function deleteDataRow(noteid) {
     try {
@@ -16,9 +15,9 @@ async function deleteDataRow(noteid) {
         console.log("deleting: " + noteid);
         const message_body = '{ "noteid":"' + noteid + '" }';
         //console.log(message_body);
-        const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         console.log(installationUniqueId);
@@ -27,7 +26,7 @@ async function deleteDataRow(noteid) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body // example IDs, replace as necessary
@@ -60,7 +59,7 @@ async function goThere(url, noteid) {
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();
         // add functionality to scroll to the note in question
- // invoke the background script to scroll to the note in question
+        // invoke the background script to scroll to the note in question
         chrome.runtime.sendMessage({
             message: {
                 action: "scroll_to_note",
@@ -79,8 +78,6 @@ async function goThere(url, noteid) {
 
         });
 
-
-
     } catch (error) {
         console.error(error);
     }
@@ -97,7 +94,7 @@ async function editNote(noteid) {
         const userid = "";
         console.log("deleting: " + noteid);
         const message_body = '{ "noteid":"' + noteid + '" }';
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         //console.log(message_body);
@@ -106,7 +103,7 @@ async function editNote(noteid) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name]
                 },
                 body: message_body // example IDs, replace as necessary
@@ -133,17 +130,17 @@ function fetchData() {
         return new Promise(
             function (resolve, reject) {
 
-            // const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+            // const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
             console.log(installationUniqueId);
-            //  let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+            //  let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
             //  let session = await chrome.storage.local.get([plugin_session_header_name]);
             var ynInstallationUniqueId;
             var xYellownotesSession;
-            chrome.storage.local.get(['ynInstallationUniqueId', plugin_session_header_name])
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
             .then(function (ins) {
                 console.log(ins);
-                ynInstallationUniqueId = ins.ynInstallationUniqueId;
+                ynInstallationUniqueId = ins[plugin_uuid_header_name];
                 xYellownotesSession = ins[plugin_session_header_name];
                 console.log(ynInstallationUniqueId);
                 console.log(xYellownotesSession);
@@ -202,13 +199,11 @@ for (var i = 0; i < f_cells.length; i++) {
     }, false);
 }
 
-
 // Sort states for each column
 const sortStates = {
     0: 'none', // None -> Ascending -> Descending -> None -> ...
     1: 'none'
 };
-
 
 function sortTa() {
     console.log("sortTa");
@@ -216,42 +211,41 @@ function sortTa() {
     sortTable("dataTable", event.target.getAttribute("colindex"));
 }
 
-
 function timestampstring2timestamp(str) {
-    console.log("timestampstring2timestamp: " + str );
-    try{
-    const year = str.substring(0, 4);
-    const month = str.substring(5, 7);
-    const day = str.substring(8, 10);
-    const hour = str.substring(11, 13);
-    const minute = str.substring(14, 16);
-    const second = str.substring(17, 19);
-//    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second + "";
-    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute ;
-    console.log("timestamp: " + timestamp);
+    console.log("timestampstring2timestamp: " + str);
+    try {
+        const year = str.substring(0, 4);
+        const month = str.substring(5, 7);
+        const day = str.substring(8, 10);
+        const hour = str.substring(11, 13);
+        const minute = str.substring(14, 16);
+        const second = str.substring(17, 19);
+        //    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second + "";
+        var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute;
+        console.log("timestamp: " + timestamp);
 
-    return timestamp;
-}catch(e){
+        return timestamp;
+    } catch (e) {
         console.log(e);
         return null;
     }
 }
 
-
 function integerstring2timestamp(int) {
-    console.log("integerstring2timestamp: " + int );
-    try{
-    const year = int.substring(0, 4);
-    const month = int.substring(5, 6);
-    const day = int.substring(8, 9);
-    const hour = int.substring(8, 9);
-    const minute = int.substring(10, 11);
-    const second = int.substring(12, 13);
-     
-    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
-    console.log("timestamp: " + timestamp);
+    console.log("integerstring2timestamp: " + int);
+    try {
+        const year = int.substring(0, 4);
+        const month = int.substring(5, 6);
+        const day = int.substring(8, 9);
+        const hour = int.substring(8, 9);
+        const minute = int.substring(10, 11);
+        const second = int.substring(12, 13);
 
-    return timestamp;}catch(e){
+        var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+        console.log("timestamp: " + timestamp);
+
+        return timestamp;
+    } catch (e) {
         console.log(e);
         return null;
     }
@@ -272,7 +266,7 @@ function sortTable(table_id, columnIndex) {
         sortStates[columnIndex] = 'desc';
     }
     console.log(sortStates[columnIndex]);
-    
+
     // Sort based on the selected column and sort state
     // Consider options for different types of sorting here.
     if (columnIndex === 0) {
@@ -340,13 +334,13 @@ function render() {
         function (resolve, reject) {
         var ynInstallationUniqueId = "";
         var xYellownotesSession = "";
-        //const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+        //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
 
-        chrome.storage.local.get(['ynInstallationUniqueId', plugin_session_header_name]).then(function (result) {
+        chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
             console.log(result);
             console.log(ynInstallationUniqueId);
-            ynInstallationUniqueId = result.ynInstallationUniqueId;
+            ynInstallationUniqueId = result[plugin_uuid_header_name];
             xYellownotesSession = result[plugin_session_header_name];
             console.log(ynInstallationUniqueId);
             console.log(xYellownotesSession);
@@ -401,95 +395,92 @@ function render() {
                 const cell8 = newRow.insertCell(7);
                 const obj = JSON.parse(row.json);
                 cell1.textContent = row.noteid;
-try{
-    console.log(row.createtime);
-    console.log(/2024/.test(row.createtime));
-if(/2024/.test(row.createtime)){
-    console.log("createtime is timestamp: " + row.createtime);
-    //console.log("createtime: " + integerstring2timestamp(row.createtime));
+                try {
+                    console.log(row.createtime);
+                    console.log(/2024/.test(row.createtime));
+                    if (/2024/.test(row.createtime)) {
+                        console.log("createtime is timestamp: " + row.createtime);
+                        //console.log("createtime: " + integerstring2timestamp(row.createtime));
 
-    cell2.textContent = timestampstring2timestamp(row.createtime);
-}else{
+                        cell2.textContent = timestampstring2timestamp(row.createtime);
+                    } else {
 
-    console.log("createtime is integer: " + row.createtime)  
-    cell2.textContent = integerstring2timestamp(row.createtime);
+                        console.log("createtime is integer: " + row.createtime)
+                        cell2.textContent = integerstring2timestamp(row.createtime);
 
-}
+                    }
 
-}catch(e){
-    console.log(e);
-}
-try{
-    console.log(row.lastmodifiedtime);
-    console.log(/2024/.test(row.lastmodifiedtime));
-if(/2024/.test(row.lastmodifiedtime)){
-    console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
-    //console.log("createtime: " + integerstring2timestamp(row.createtime));
+                } catch (e) {
+                    console.log(e);
+                }
+                try {
+                    console.log(row.lastmodifiedtime);
+                    console.log(/2024/.test(row.lastmodifiedtime));
+                    if (/2024/.test(row.lastmodifiedtime)) {
+                        console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
+                        //console.log("createtime: " + integerstring2timestamp(row.createtime));
 
-    cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
-}else{
+                        cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
+                    } else {
 
-    console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)  
-    cell3.textContent = integerstring2timestamp(row.lastmodifiedtime);
+                        console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)
+                        cell3.textContent = integerstring2timestamp(row.lastmodifiedtime);
 
-}
+                    }
 
-}catch(e){
-    console.log(e);
-}
-
+                } catch (e) {
+                    console.log(e);
+                }
 
                 // render a check box to enable/disable the note
                 const suspendActButton = document.createElement("span");
-    if (row.status == 1) {
-        // active
-        suspendActButton.innerHTML =
-            '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
-    } else {
-        // deactivated
-        suspendActButton.innerHTML =
-            '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
-    }
+                if (row.status == 1) {
+                    // active
+                    suspendActButton.innerHTML =
+                        '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
+                } else {
+                    // deactivated
+                    suspendActButton.innerHTML =
+                        '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
+                }
 
-    // Add classes using classList with error handling
-    const inputElement = suspendActButton.querySelector("input");
-    if (inputElement) {
-        inputElement.classList.add("input-class");
-    }
+                // Add classes using classList with error handling
+                const inputElement = suspendActButton.querySelector("input");
+                if (inputElement) {
+                    inputElement.classList.add("input-class");
+                }
 
-    const labelElement = suspendActButton.querySelector("label");
-    if (labelElement) {
-        labelElement.classList.add("switch");
-    }
-    const spanElement = suspendActButton.querySelector("span");
-    if (spanElement) {
-        spanElement.classList.add("slider");
-    }
-    suspendActButton.addEventListener("change", async (e) => {
-        if (e.target.checked) {
-   //         await disable_note_with_noteid(row.noteid);
-            await setNoteActiveStatusByUUID(row.noteid, 1);
-        } else {
-            await setNoteActiveStatusByUUID(row.noteid, 0);
- //           await enable_note_with_noteid(row.noteid);
-        }
-    });
-    cell4.appendChild(suspendActButton);
+                const labelElement = suspendActButton.querySelector("label");
+                if (labelElement) {
+                    labelElement.classList.add("switch");
+                }
+                const spanElement = suspendActButton.querySelector("span");
+                if (spanElement) {
+                    spanElement.classList.add("slider");
+                }
+                suspendActButton.addEventListener("change", async(e) => {
+                    if (e.target.checked) {
+                        //         await disable_note_with_noteid(row.noteid);
+                        await setNoteActiveStatusByUUID(row.noteid, 1);
+                    } else {
+                        await setNoteActiveStatusByUUID(row.noteid, 0);
+                        //           await enable_note_with_noteid(row.noteid);
+                    }
+                });
+                cell4.appendChild(suspendActButton);
 
-
-
-  //              if (row.status == "1") {
-    //                cell4.textContent = "enabled";
-      //          } else {
-        //            cell4.textContent = "disabled";
-          //      }
+                //              if (row.status == "1") {
+                //                cell4.textContent = "enabled";
+                //          } else {
+                //            cell4.textContent = "disabled";
+                //      }
 
                 cell5.textContent = obj.url;
-                cell6.textContent = obj.message_display_text;
+                cell6.textContent = b64_to_utf8(obj.message_display_text);
 
                 // create small table to contain the action buttons
-               
-               
+
+
                 // Add delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
@@ -499,19 +490,18 @@ if(/2024/.test(row.lastmodifiedtime)){
                     // call to API to delete row from data base
                     deleteDataRow(row.noteid);
                 };
-               
+
                 cell7.appendChild(deleteButton);
 
-                // Add edit button
+                // Add save/edit button
                 const editButton = document.createElement('button');
-                editButton.textContent = 'Edit';
+                editButton.textContent = 'Save';
                 editButton.onclick = function () {
                     // call to API to delete row from data base
                     editNote(row.noteid);
                 };
                 cell7.appendChild(editButton);
 
-               
                 // Add location "go there" button
                 const goThereButton = document.createElement('button');
                 goThereButton.textContent = 'locate';
@@ -521,7 +511,6 @@ if(/2024/.test(row.lastmodifiedtime)){
                 };
                 cell7.appendChild(goThereButton);
 
-               
                 // add enable/disable button
                 const ableButton = document.createElement('button');
 
@@ -540,9 +529,9 @@ if(/2024/.test(row.lastmodifiedtime)){
                         enable_note_with_noteid(obj.noteid);
                     };
                 }
-               // cell7.appendChild(ableButton);
-               
-                
+                // cell7.appendChild(ableButton);
+
+
                 // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
                 //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
 
@@ -562,16 +551,15 @@ if(/2024/.test(row.lastmodifiedtime)){
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
-
 // Function to use "fetch" to re-activate a data agreement
 async function setNoteActiveStatusByUUID(noteid, status) {
-    console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status); 
+    console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status);
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
-            noteid: noteid,
+                noteid: noteid,
                 status: status,
             });
         //console.log(message_body);
@@ -581,7 +569,7 @@ async function setNoteActiveStatusByUUID(noteid, status) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary
@@ -599,7 +587,6 @@ async function setNoteActiveStatusByUUID(noteid, status) {
         console.error(error);
     }
 }
-
 
 function disable_note_with_noteid(noteid) {
     console.debug("disable_note_with_noteid: " + noteid);
@@ -799,7 +786,6 @@ then((response) => response.text())
 
 });
 
-
-fetchAndDisplayStaticContent( "/fragments/sidebar_fragment.html", "sidebar").then(() => {   
+fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
     page_display_login_status();
-  });
+});

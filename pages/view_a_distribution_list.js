@@ -20,9 +20,9 @@ async function deleteDataRow(noteid) {
         console.log("deleting: " + noteid);
         const message_body = '{ "noteid":"' + noteid + '" }';
         //console.log(message_body);
-        const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         console.log(installationUniqueId);
@@ -31,7 +31,7 @@ async function deleteDataRow(noteid) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body // example IDs, replace as necessary
@@ -99,7 +99,7 @@ async function editNote(noteid) {
         const userid = "";
         console.log("deleting: " + noteid);
         const message_body = '{ "noteid":"' + noteid + '" }';
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         //console.log(message_body);
@@ -108,7 +108,7 @@ async function editNote(noteid) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name]
                 },
                 body: message_body // example IDs, replace as necessary
@@ -135,20 +135,20 @@ function DELETEfetchData(distributionlistid) {
         return new Promise(
             function (resolve, reject) {
 
-            // const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+            // const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
             console.log(installationUniqueId);
-            //  let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+            //  let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
             //  let session = await chrome.storage.local.get([plugin_session_header_name]);
-            var ynInstallationUniqueId;
-            var xYellownotesSession;
-            chrome.storage.local.get(['ynInstallationUniqueId', plugin_session_header_name])
+            var InstallationUniqueId;
+            var sessiontoken;
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
             .then(function (ins) {
                 console.log(ins);
-                ynInstallationUniqueId = ins.ynInstallationUniqueId;
-                xYellownotesSession = ins[plugin_session_header_name];
-                console.log(ynInstallationUniqueId);
-                console.log(xYellownotesSession);
+                InstallationUniqueId = ins[plugin_uuid_header_name];
+                sessiontoken = ins[plugin_session_header_name];
+                console.log(InstallationUniqueId);
+                console.log(sessiontoken);
                 //ynInstallationUniqueId = "dummy";
 
                 // Fetch data from web service (replace with your actual API endpoint)
@@ -156,8 +156,8 @@ function DELETEfetchData(distributionlistid) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        [plugin_uuid_header_name]: ynInstallationUniqueId,
-                        [plugin_session_header_name]: xYellownotesSession
+                        [plugin_uuid_header_name]: InstallationUniqueId,
+                        [plugin_session_header_name]: sessiontoken
                     },
                     body: JSON.stringify({}) // example IDs, replace as necessary
                 });
@@ -339,13 +339,13 @@ function render(distributionlistid) {
         function (resolve, reject) {
         var ynInstallationUniqueId = "";
         var xYellownotesSession = "";
-        //const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+        //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
 
-        chrome.storage.local.get(['ynInstallationUniqueId', plugin_session_header_name]).then(function (result) {
+        chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
             console.log(result);
             console.log(ynInstallationUniqueId);
-            ynInstallationUniqueId = result.ynInstallationUniqueId;
+            ynInstallationUniqueId = result[plugin_uuid_header_name];
             xYellownotesSession = result[plugin_session_header_name];
             console.log(ynInstallationUniqueId);
             console.log(xYellownotesSession);
@@ -541,7 +541,7 @@ var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 async function setNoteActiveStatusByUUID(noteid, status) {
     console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status);
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
@@ -555,7 +555,7 @@ async function setNoteActiveStatusByUUID(noteid, status) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary

@@ -65,14 +65,14 @@ async function downloadAllData() {
   try {
 
     
-    let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+    let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
     let session = await chrome.storage.local.get([plugin_session_header_name]);
 
     fetch(server_url + URI_plugin_user_download_data, {
       method: "GET",
       headers: {
           "Content-Type": "application/json",
-          [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+          [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
           [plugin_session_header_name]: session[plugin_session_header_name],
       },
   })
@@ -104,14 +104,14 @@ async function deleteAllData() {
   try {
 
     
-    let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+    let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
     let session = await chrome.storage.local.get([plugin_session_header_name]);
 
     fetch(server_url + URI_plugin_user_delete_all_data, {
       method: "GET",
       headers: {
           "Content-Type": "application/json",
-          [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+          [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
           [plugin_session_header_name]: session[plugin_session_header_name],
       },
   })

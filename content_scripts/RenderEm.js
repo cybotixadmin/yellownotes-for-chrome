@@ -308,6 +308,7 @@ function extractTokens(str) {
     return tokens;
 }
 
+
 function searchStringInPage(searchString) {
     if (!searchString) {
         console.log("No search string provided");
@@ -317,11 +318,12 @@ function searchStringInPage(searchString) {
     const bodyText = document.body.textContent || document.body.innerText;
     //console.log(bodyText);
     const foundIndex = bodyText.indexOf(searchString);
-
     return foundIndex !== -1; // returns true if the string is found, false otherwise
 }
 
+
 function page_scan() {
+    console.log('page_scan() called');
     // Use the function and process results
     let yellownotesResults = traverseDOMAndExtractYellownotes(doc.documentElement);
     //let yellownotesResults = traverseDOMAndExtractYellownotes(null);
@@ -406,8 +408,8 @@ function page_scan() {
             });
         });
     });
-
 }
+
 
 function listener(request, sender, sendResponse) {
 
@@ -475,9 +477,7 @@ tokens.forEach(result => {
               brand = "default";
           }
       }
-
       console.debug("collect template based on brand (" + brand + "), note type (" + type + ")");
-
       chrome.runtime.sendMessage({
           action: "get_template",
           brand: brand,
@@ -577,3 +577,72 @@ tokens.forEach(result => {
 }
 // temprarily disable listener
 //chrome.runtime.onMessage.addListener(listener);
+
+// Define the create_note function
+function create_note(text, linkId) {
+    // Logic to handle the note creation
+    console.log('Creating note:', text, 'with linkId:', linkId);
+}
+
+// Function to generate a unique identifier
+function generateUniqueId() {
+    return 'id_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Function to check if the parent node is already highlighted
+function isAlreadyHighlighted(node) {
+    return node.parentNode.classList.contains('highlight');
+}
+
+// Function to highlight text and create notes
+function highlightTextAndCreateNote(node, match) {
+    const linkId = generateUniqueId();
+    const highlightedHTML = `<span class="highlight" style="background-color: yellow; cursor: pointer;" data-linkid="${linkId}">${match}</span>`;
+    const replacedText = node.textContent.replace(match, highlightedHTML);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = replacedText;
+    while (tempDiv.firstChild) {
+        node.parentNode.insertBefore(tempDiv.firstChild, node);
+    }
+    node.parentNode.removeChild(node);
+    create_note(match, linkId);
+}
+
+
+// Function to traverse the DOM and process text nodes
+function traverseDOMAndProcessText(node) {
+    const regexp = /yellownote=[^=]*=yellownote/g;
+
+    if (node.nodeType === Node.TEXT_NODE && !isAlreadyHighlighted(node)) {
+        const matches = node.textContent.match(regexp);
+        if (matches) {
+            matches.forEach(match => highlightTextAndCreateNote(node, match));
+        }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+        node.childNodes.forEach(child => traverseDOMAndProcessText(child));
+    }
+}
+
+
+
+
+// Set up a 5-second interval to check the chrome.storage.local value
+setInterval(() => {
+    const slidertag = getSliderTag();
+    chrome.storage.local.get([slidertag], function(result) {
+        console.log('Value of slidertag:', slidertag, 'in chrome.storage.local:', result);
+        console.log(result);
+        console.log(result[slidertag]);
+        console.log(result[slidertag].position);
+        // if no values was set, use the system default value
+        
+        
+        if (result[slidertag].position === 2 || result[slidertag].position === 3) {
+            console.log('calling traverseDOMAndProcessText()');
+            // Start the DOM traversal from the body
+            traverseDOMAndProcessText(document.body);
+            //page_scan();
+
+        }
+    });
+}, 60000); // 5000 milliseconds = 5 seconds

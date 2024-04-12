@@ -63,6 +63,8 @@ async function get_displayname_from_sessiontoken(token) {
   }
 
 
+// call for a html faile and inserts the content of this html fil into the DOM at the location of the element with the id dom_id
+
 function fetchAndDisplayStaticContent(url, dom_id) {
     return new Promise((resolve, reject) => {
       console.log("fetchAndDisplayStaticContent()");
@@ -164,6 +166,21 @@ console.log(claims);
       console.error(e);
       return null;
   }
+}
+
+
+
+
+function utf8_to_b64(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+      return String.fromCharCode('0x' + p1);
+  }));
+}
+
+function b64_to_utf8(str) {
+  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
 }
 
 

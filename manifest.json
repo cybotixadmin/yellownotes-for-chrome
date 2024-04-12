@@ -4,7 +4,7 @@
     "author": "The BrowserSolutions Team",
     "description": "__MSG_appDesc__",
     "homepage_url": "https://www.yellownotes.cloud/",
-    "version": "0.7.8",
+    "version": "0.8.0",
     "icons": {
         "32": "icons/yellownotecloud-32x32.png",
         "48": "icons/yellownotecloud-48x48.png",
@@ -37,6 +37,10 @@
             "js": ["./content_scripts/local_GUI_intercept.js"],
             "run_at": "document_start"
         }, {
+            "matches": ["<all_urls>"],
+            "js": ["./content_scripts/RenderEm.js"],
+                "run_at": "document_start"
+            }, {
             "matches": ["<all_urls>"],
             "js": ["./content_scripts/NotesHandler.js"],
             "run_at": "document_start"

@@ -16,7 +16,7 @@ async function deleteDataRow(uuid) {
         console.log("deleting: " + uuid);
         const message_body = '{ "uuid":"' + uuid + '" }';
         //console.log(message_body);
-        const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
         console.log(installationUniqueId);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -24,7 +24,7 @@ async function deleteDataRow(uuid) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'installationUniqueId': installationUniqueId
+                    [plugin_uuid_header_name]: installationUniqueId
                 },
                 body: message_body // example IDs, replace as necessary
             });
@@ -99,13 +99,13 @@ async function editNote(uuid) {
 
 
 // Function to fetch data and populate the table
-function fetchData() {
+function DELfetchData() {
     try {
 
         return new Promise(
             function (resolve, reject) {
 
-       // const installationUniqueId = (await chrome.storage.local.get(['installationUniqueId'])).installationUniqueId;
+       // const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
         console.log(installationUniqueId);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -116,7 +116,7 @@ function fetchData() {
                 },
                 body: JSON.stringify({
                     "userid": "dummy",
-                    "installationUniqueId": installationUniqueId
+                    [plugin_uuid_header_name]: installationUniqueId
                 }) // example IDs, replace as necessary
             });
 
@@ -280,10 +280,10 @@ async function fetchData() {
             var ynInstallationUniqueId = "";
             var xYellownotesSession = "";
     
-            let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+            let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
             let session = await chrome.storage.local.get([plugin_session_header_name]);
     
-                ynInstallationUniqueId = plugin_uuid.ynInstallationUniqueId;
+                ynInstallationUniqueId = plugin_uuid[plugin_uuid_header_name];
                 xYellownotesSession = session[plugin_session_header_name];
     
         const response  = await   fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {

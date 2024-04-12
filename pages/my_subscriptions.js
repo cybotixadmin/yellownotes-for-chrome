@@ -31,7 +31,7 @@ addSubscriptionByUUIDinBackground(url.replace(/.*add_distributionlistid=/, ""));
 async function addSubscriptionByUUIDinBackground(distributionlistid) {
     console.log("addSubscriptionByUUIDinBackground ("+distributionlistid+")");
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
@@ -44,7 +44,7 @@ async function addSubscriptionByUUIDinBackground(distributionlistid) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary
@@ -65,7 +65,7 @@ async function addSubscriptionByUUIDinBackground(distributionlistid) {
 // Function to use "fetch" to delete a data row
 async function deleteDataRow(distributionlistid) {
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         console.log("deleting agreement: " + id);
@@ -80,7 +80,7 @@ async function deleteDataRow(distributionlistid) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary
@@ -102,7 +102,7 @@ async function deleteDataRow(distributionlistid) {
 async function deleteDataRowByDistributionlistId(subscriptionid) {
     console.log("deleteDataRowByUUID");
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
@@ -115,7 +115,7 @@ async function deleteDataRowByDistributionlistId(subscriptionid) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary
@@ -139,7 +139,7 @@ async function addSubscriptionByUUID(distributionlistid, feed_data) {
     console.debug(distributionlistid);
     console.debug(feed_data);
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
@@ -152,7 +152,7 @@ async function addSubscriptionByUUID(distributionlistid, feed_data) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary
@@ -212,7 +212,7 @@ async function addSubscriptionByUUID(distributionlistid, feed_data) {
 // Function to use "fetch" to suspend a data agreement
 async function viewDistributionlist(distributionlistid) {
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
@@ -225,7 +225,7 @@ async function viewDistributionlist(distributionlistid) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary
@@ -282,7 +282,7 @@ async function viewDistributionlist(distributionlistid) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body2, // example IDs, replace as necessary
@@ -355,7 +355,7 @@ async function viewDistributionlist(distributionlistid) {
 // Function to use "fetch" to re-activate a data agreement
 async function setActiveByUUID(subscriptionid, status) {
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
@@ -369,7 +369,7 @@ async function setActiveByUUID(subscriptionid, status) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                     [plugin_session_header_name]: session[plugin_session_header_name],
                 },
                 body: message_body, // example IDs, replace as necessary
@@ -426,14 +426,14 @@ async function fetchData() {
     removeAllChildNodes(document.getElementById('add_subscription_form'));
 
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         // Fetch data from web service (replace with your actual API endpoint)
 
         const headers = {
             "Content-Type": "application/json",
-            [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
             [plugin_session_header_name]: session[plugin_session_header_name],
         };
         //const body = JSON.stringify(payload);
@@ -802,16 +802,16 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
         var ynInstallationUniqueId = "";
         var xYellownotesSession = "";
 
-        chrome.storage.local.get(["ynInstallationUniqueId"]).then(
+        chrome.storage.local.get([plugin_uuid_header_name]).then(
             function (result) {
-            ynInstallationUniqueId = result.ynInstallationUniqueId;
+            ynInstallationUniqueId = result[plugin_uuid_header_name];
             console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
             return chrome.storage.local.get([plugin_session_header_name]);
         }).then(function (result) {
             xYellownotesSession = result[plugin_session_header_name];
             console.log("xYellownotesSession: " + xYellownotesSession);
 
-            // let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+            // let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
 
             // let session = await chrome.storage.local.get([plugin_session_header_name]);
 
@@ -868,13 +868,13 @@ async function activateAllSubscriptions() {
 
         // call the API that activates all supscriptions of the user
 
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
 
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         const headers = {
             "Content-Type": "application/json",
-            [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
             [plugin_session_header_name]: session[plugin_session_header_name],
         };
         const body = '{"activestatus":1}';
@@ -907,11 +907,11 @@ async function deactivateAllSubscriptions() {
         });
 
         // call the API that suspeds all supscriptions of the user
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const headers = {
             "Content-Type": "application/json",
-            [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
             [plugin_session_header_name]: session[plugin_session_header_name],
         };
         const body = '{"activestatus":0}';
@@ -1026,14 +1026,14 @@ async function add_subscription() {
     // get all available distributions lists
     var available_count = 0;
     try {
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         // Fetch data from web service (replace with your actual API endpoint)
 
         const headers = {
             "Content-Type": "application/json",
-            [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
             [plugin_session_header_name]: session[plugin_session_header_name],
         };
         //const body = JSON.stringify(payload);
@@ -1163,9 +1163,9 @@ async function add_subscription() {
                 "distributionlistid": distributionlistid
             }
             console.log(msg);
-            chrome.storage.local.get(["ynInstallationUniqueId"]).then(
+            chrome.storage.local.get([plugin_uuid_header_name]).then(
                 function (result) {
-                ynInstallationUniqueId = result.ynInstallationUniqueId;
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
                 console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
                 return chrome.storage.local.get([plugin_session_header_name]);
             }).then(function (result) {

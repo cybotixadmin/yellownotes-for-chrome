@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log(content);
         console.log(btoa(content));
 
-        let plugin_uuid = await chrome.storage.local.get(["ynInstallationUniqueId"]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
         const userid = await get_username_from_sessiontoken(session[plugin_session_header_name]);
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                [plugin_uuid_header_name]: plugin_uuid.ynInstallationUniqueId,
+                [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                 [plugin_session_header_name]: session[plugin_session_header_name],
             },
             body: message_body, // example IDs, replace as necessary

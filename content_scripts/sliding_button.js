@@ -73,6 +73,7 @@ function close_slider() {
     }
 }
 
+
 function create_slider() {
     console.log("browsersolutions: create_slider");
 

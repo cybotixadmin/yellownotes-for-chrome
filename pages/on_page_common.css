@@ -1,108 +1,110 @@
 body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
-    color: white;
-    font-size: 20px;
-    background-color: rgb(255, 255, 255);
+  color: black;
+  font-size: 20px;
+  background-color: rgb(255, 255, 255);
 
 }
 
 /* body text */
 .text-body {
-    font-size: 20px;
-    color: black;
+  font-size: 20px;
+  color: black;
 }
 
 .pagetextcontent {
-  display: flex;
-  flex-direction: column;
-  width: 60%;
+display: flex;
+flex-direction: column;
+width: 60%;
 }
 
-  /* General Styling */
-  body {
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-  }
-  
+/* General Styling */
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
 .message_to_user {
-  font-size: 20px;
-  color: black;
-  font-weight: bold;
-  text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
+font-size: 20px;
+color: black;
+font-weight: bold;
+text-align: center;
+margin-top: 20px;
+margin-bottom: 20px;
 }
 
-  h1 {
-    text-align: center;
-    font-size: 14px;
-  }
+
+h1 {
+  text-align: center;
+  font-size: 14px;
+}
 
 
-  /* Add styles for scrollable table */
-  .scrollable-table {
-    height: 150px; /* Adjust height as needed */
-    overflow-y: auto;
-    display: block;
-  }
+/* Add styles for scrollable table */
+.scrollable-table {
+  height: 600px; /* Adjust height as needed */
+  overflow-y: auto;
+  display: block;
+}
 
 
-  /* Table Styling */
-  table {
-    border: 1px solid #4CAF50;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: clamp(12px, 2vw, 18px);
-    color: black;
- 
+/* Table Styling */
+table {
+  border: 1px solid #4CAF50;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: clamp(12px, 2vw, 18px);
+  color: black;
+
 }
 
 
 .fixed-header {
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 1;
+position: sticky;
+top: 0;
+background-color: white;
+z-index: 1;
 }
 
 
 
-  .editabletext {
-    font-size: clamp(12px, 2vw, 18px);
-    font-style: italic;
-  color: red;
-  }
+
+.editabletext {
+  font-size: clamp(12px, 2vw, 18px);
+  font-style: italic;
+color: red;
+}
 
 
-  .tableResponsive {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    padding: 0 2%;
+.tableResponsive {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  padding: 0 2%;
 }
 
 /* move the body of the page away from the left side to provide space for the sidebar menu */ 
 .pageBody{
-  margin-left: 220px;
+margin-left: 220px;
 }
 
 /* Style for the table row */
 
 table tr {
-  background: #f2f4f3;
-  border: 1px solid #c1e0c9;
-  padding: .35em;
+background: #f2f4f3;
+border: 1px solid #c1e0c9;
+padding: .35em;
 }
 
 
 /* Style for the table */
 .table-no-border {
-    border: none;
-  }
-  
+  border: none;
+}
+
 
 
   /* Style for table data */
@@ -128,6 +130,7 @@ table tr {
     color: white;
    
   }
+
 
 
 /* Add styles specific for scrollable table containing notes*/
@@ -168,6 +171,7 @@ table.notesTable th {
 
  }
 
+
  table.notesTable tr th:nth-child(3) {
   max-width: 200px;
 }
@@ -205,78 +209,95 @@ table.notesTable tr th:nth-child(10) {
 }
 
 
-  table.notesTable td {
-    padding: 0px;
-    width: 50px;
-    height: 15px;
-    font-size: 10px;
-    line-height: 1;
-    min-height: 1.0em;
-    text-align: left;
-    word-break: break-all;
-    padding: 0px;
-    padding: 0px 0px 0px;
-    padding-left: 2px;
-    border: 1px solid black;
-    text-align: center;
-    display: table-cell;
-    vertical-align: inherit;
-    word-break: break-all;
+table.notesTable td {
+  padding: 0px;
+  width: 50px;
+  height: 15px;
+  font-size: 10px;
+  line-height: 1;
+  min-height: 1.0em;
+  text-align: left;
+  word-break: break-all;
+  padding: 0px;
+  padding: 0px 0px 0px;
+  padding-left: 2px;
+  border: 1px solid black;
+  text-align: center;
+  display: table-cell;
+  vertical-align: inherit;
+  word-break: break-all;
 
-  }
+}
 
-  table.notesTable tr td:nth-child(2){
-    display: none;
+table.notesTable tr td:nth-child(2){
+  display: none;
 
- }
-
-  
-  table.notesTable tr td:nth-child(3) {
-    max-width: 200px;
-  }
+}
 
 
-  table.notesTable tr td:nth-child(4) {
-    width: 20px;
-  }
-
-  table.notesTable tr td:nth-child(5) {
-    width: 80px;
-  }
-
-  table.notesTable tr td:nth-child(6) {
-    width: 35px;
-  }
-
-  table.notesTable tr td:nth-child(7) {
-    width: 200px;
-  }
-
-  table.notesTable tr td:nth-child(8) {
-    width: 120px;
-  }
-
-  table.notesTable tr td:nth-child(9) {
-    width: 20px;
-  }
+table.notesTable tr td:nth-child(3) {
+  max-width: 200px;
+}
 
 
-  table.notesTable tr td:nth-child(10) {
-    width: 80px;
-    min-width: 70px;
-    max-width: 70px;
-  }
+table.notesTable tr td:nth-child(4) {
+  width: 20px;
+}
 
-  
+table.notesTable tr td:nth-child(5) {
+  width: 80px;
+}
+
+table.notesTable tr td:nth-child(6) {
+  width: 35px;
+}
+
+table.notesTable tr td:nth-child(7) {
+  width: 200px;
+}
+
+table.notesTable tr td:nth-child(8) {
+  width: 120px;
+}
+
+table.notesTable tr td:nth-child(9) {
+  width: 20px;
+}
+
+
+table.notesTable tr td:nth-child(10) {
+  width: 80px;
+  min-width: 70px;
+  max-width: 70px;
+}
+
+
 
 .flexible {
-  width: auto; /* Allows these columns to adjust their width */
+width: auto; /* Allows these columns to adjust their width */
 }
 
 .fixed {
-  width: 30px; /* Fixed width for columns 5, 6, and 8 */
+width: 30px; /* Fixed width for columns 5, 6, and 8 */
 }
 
 .extra-fixed {
-  width: 40px; /* Fixed width for column 9 */
+width: 40px; /* Fixed width for column 9 */
 }
+
+
+
+
+.toggle {
+position: relative;
+display: inline-block;
+width: 60px;
+height: 34px;
+}
+
+.toggle input { 
+display: none;
+}
+
+
+
