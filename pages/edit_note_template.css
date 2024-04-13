@@ -23,3 +23,44 @@
 input[type="color"] {
     margin: 10px 0;
 }
+
+.box {
+    width: 50%; /* Each box takes up half of the container's width */
+   
+    display: flex;
+    align-items: center; /* Centers content vertically */
+    justify-content: center; /* Centers content horizontally */
+    border: 1px solid #000; /* Adds a border around each box */
+}
+
+/* move the body of the page away from the left side to provide space for the sidebar menu */ 
+.colorPicker{
+    background-color: white;
+    float: left;
+    height: 33.33%;
+    width: 50%;
+    }
+
+.noteEditor{
+    float: right;
+        background-color: lightred;
+        height: 100%; /* This box takes up the full height of the container */
+        display: flex;
+        width: 50%;
+        align-items: center; /* Centers content vertically */
+        justify-content: center; /* Centers content horizontally */
+        }
+    
+        .information{
+            background-color: lightyellow;
+            height: 33.33%;
+            width: 50%;
+            float: left;
+        }
+        
+.actionbuttons{
+    height: 33.33%;
+    width: 50%;
+        background-color: white;
+        float: left;
+        }

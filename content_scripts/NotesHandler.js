@@ -1888,7 +1888,7 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
 
                         console.debug(newGloveboxNode);
                         console.debug("browsersolutions: calling: size_and_place_note_based_on_coordinates");
-                        size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj);
+                        size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
                         console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
                         attachEventlistenersToYellowStickynote(newGloveboxNode);
                         // make some parts visible and other not visible
@@ -2026,7 +2026,7 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
 
                             console.debug(newGloveboxNode);
                             console.debug("browsersolutions: calling: size_and_place_note_based_on_coordinates");
-                            size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj);
+                            size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
                             console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
                             attachEventlistenersToYellowStickynote(newGloveboxNode);
                             // make some parts visible and other not visible
@@ -2072,7 +2072,7 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                 create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (newGloveboxNode) {
                                     console.debug(newGloveboxNode);
                                     console.debug("calling size_and_place_note_based_on_coordinates");
-                                    size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj);
+                                    size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
 
                                     console.debug("calling setComponentVisibility");
                                     if (isOwner) {
@@ -2682,9 +2682,9 @@ function attachEventlistenersToYellowStickynote(note) {
     }
 
     try {
-
         const myload_url = (event) => {
             console.log("myload_url");
+            console.debug("calling load_url");
             load_url(event);
             event.stopPropagation();
         };
@@ -2757,7 +2757,7 @@ function load_url(event) {
                 // render content of ifram based on this
                 //console.log(getYellowStickyNoteRoot(event.target));
                 setContentInIframe(content_iframe, response);
-                resolve(cont1);
+                resolve(response);
             });
 
         } catch (e) {
@@ -4272,7 +4272,7 @@ var valid_stickynote_position_coordinate_regexp = new RegExp(/^[0-9][0-9]*[a-z][
  *  inside the page the location where the note should be placed. If this does not success, place it on top of the page.
  */
 
-function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj) {
+function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote) {
     console.debug("browsersolutions: " + "#size_and_place_note_based_on_coordinates.start");
     // final placement
     // check if note contains position coordinates/parameters. If so, try to use them to place the note
@@ -4326,13 +4326,23 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj) {
 
     try {
         //console.debug(insertedNode.querySelector('[name="contentFrame"]'));
-        const new_heigth = (parseInt(box_height) - 120);
+
+        var note_internal_height_padding = 57;
+        if (isOwner) {
+
+        } else {
+            // if the note is not owned by the current user, the note will be smaller as the bottom bar is removed
+            note_internal_height_padding = 31;
+        }
+
+        const new_heigth = (parseInt(box_height) - note_internal_height_padding);
         console.debug("setting new content frame height: " + new_heigth);
         
         insertedNode.querySelector('[name="contentFrame"]').style.height = new_heigth + 'px';
-const new_width = (parseInt(box_width) - 20);
-        console.debug("setting new frame width " + new_width);
-        insertedNode.querySelector('[name="contentFrame"]').style.width = new_width;
+        const note_internal_width_padding = 2;
+const new_width = (parseInt(box_width) - note_internal_width_padding);
+        console.debug("setting new content frame width " + new_width);
+        insertedNode.querySelector('[name="contentFrame"]').style.width = new_width + 'px';
 
     } catch (e) {
         console.error(e);

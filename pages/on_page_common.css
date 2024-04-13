@@ -89,6 +89,11 @@ color: red;
 /* move the body of the page away from the left side to provide space for the sidebar menu */ 
 .pageBody{
 margin-left: 220px;
+/*display: flex;
+/*flex-wrap: wrap;
+/*width: 200px; /* Adjust size as needed */
+/*height: 200px; /* Adjust size as needed */
+background-color: white;
 }
 
 /* Style for the table row */

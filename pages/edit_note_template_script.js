@@ -205,9 +205,3 @@ async function fetchAndUpdateBannerImage() {
 
 // Call the function to update the banner image
 fetchAndUpdateBannerImage();
-
-fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
-    //page_display_login_status();
-    //login_logout_action();
-
-});

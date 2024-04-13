@@ -1,59 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8"></meta>
-    <title>edit yellow note</title>
-    <link rel="stylesheet" href="edit_note_template.css">
-    <link rel="stylesheet" href="on_page_common.css"></link>
-    <link rel="stylesheet" href="sidebar.css"></link>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8"></meta>
+        <title>edit yellow note</title>
+        <link rel="stylesheet" href="edit_note_template.css"></link>
+        <link rel="stylesheet" href="on_page_common.css"></link>
+        <link rel="stylesheet" href="sidebar.css"></link>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+    </head>
+    <body>
 
- <!-- side bar start here-->
- <div id="sidebar"></div>
- <!-- side bar end here -->
+        <!-- side bar start here-->
+        <div id="sidebar"></div>
+        <!-- side bar end here -->
 
- <div class="pageBody">
+        <div class="pageBody">
 
- <div style="display: flex;  ">
-   
-    <div id="notetemplate_information"></div>
-
-    <div id="bannerContainer" class="banner">
-        <div id="drop_zone">
-            <img id="bannerImage" src="" alt="Banner Image">
+    
+        <b><div id="login_status"></div></b>
+            
+            <div class="information" id="notetemplate_information">
+            </div>
+            <div class="noteEditor" >
+                <div id="bannerContainer" class="banner">
+                    <div id="drop_zone">
+                        <img id="bannerImage" src="" alt="Banner Image"/>
             Upload your banner here</div>
-    </div>
-
-
-    <input type="file" id="file_input" style="display: none;"/>
-
-<div style="
-position: fixed;
-left: 200px;
-top:  300px;
-">
-    <label for="colorPicker" style="
-    position: fixed;
-    left: 300px;
-    top:  350px;
-">Choose a color:</label>
-    <p/>Select color
-    <input type="color" id="colorPicker" value="#ffff00">
-    </div>
-    <br/>
-    <button id="saveButton" style="
-    position: fixed;
-    left: 200px;
-    top:  300px;
-">Save</button>
-
-</div> 
-</div> 
-
-    <script src="on_page_common.js"></script>
-    <script src="edit_note_template_script.js"></script>
-</body>
+                </div>
+                <input type="file" id="file_input" style="display: none;"/>
+            </div>
+            <div class="box colorPicker" >
+                <p/>Select color
+                <input type="color" id="colorPicker" value="#ffff00"/>
+            </div>
+            <div class="box actionbuttons">
+                <button id="saveButton" >Save changes</button>
+            </div> 
+        </div> 
+        <script src="on_page_common.js"></script>
+        <script src="edit_note_template_script.js"></script>
+    </body>
 </html>

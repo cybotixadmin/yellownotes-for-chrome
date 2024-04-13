@@ -1219,12 +1219,3 @@ console.log(rows);
     //}
 }
 
-// Fetch data on available distributions lists on page-load
-//fetchAvailableDistriutions();
-
-fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
-    page_display_login_status();
-
-
-
-});

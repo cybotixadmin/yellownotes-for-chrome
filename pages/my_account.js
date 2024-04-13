@@ -41,11 +41,7 @@ if (element) {
 }).catch( (error) => {} );
   
 
-fetchAndDisplayStaticContent( "/fragments/sidebar_fragment.html", "sidebar").then(() => {   
-    page_display_login_status();
-    login_logout_action();
-  
-  });
+
 
   downloadButton = document.getElementById('downloadAllButton');
   downloadButton.onclick = function () {
@@ -57,7 +53,43 @@ deleteAllButton = document.getElementById('deleteAllButton');
 deleteAllButton.onclick = function () {
   // call to API to delete from data base
   deleteAllData();
+  logout();
+  
+
+
 };
+
+async function logout(){
+
+ // execute a logout 
+ try {
+
+   
+    
+   
+  let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+  let session = await chrome.storage.local.get([plugin_session_header_name]);
+  const headers = {
+      "Content-Type": "application/json",
+      [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+      [plugin_session_header_name]: session[plugin_session_header_name],
+  };
+  const response = await fetch(
+          silent_logout_url, {
+          method: "GET",
+          headers,
+         
+      });
+
+  if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  // refresh the page
+  window.location.reload();
+} catch (error) {
+  console.log(error);
+}
+}
 
 
 async function downloadAllData() {

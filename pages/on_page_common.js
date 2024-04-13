@@ -5,6 +5,8 @@ const plugin_uuid_header_name = "ynInstallationUniqueId";
 const plugin_session_header_name = "xyellownotessession_jwt";
 
 
+const silent_logout_url = "https://www.yellownotes.cloud/logout_silent";
+
 async function page_display_login_status() {
     console.log("display_login_status()");
     //con
@@ -238,3 +240,13 @@ function getClaimsFromJwt(token, claimNames) {
   });
   return claims;
 }
+
+
+
+fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
+  //page_display_login_status();
+  login_logout_action();
+
+});
+
+page_display_login_status();

@@ -785,7 +785,3 @@ then((response) => response.text())
     replaceLink(root_node, note_template);
 
 });
-
-fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
-    page_display_login_status();
-});
