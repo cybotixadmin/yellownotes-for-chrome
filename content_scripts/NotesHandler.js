@@ -1109,10 +1109,8 @@ const newNote = false;
                         promiseArray.push(promise);
                         console.log("notes to be placed: " + promiseArray.length);
                     });
-
                 }
                 console.log("notes to be placed: " + promiseArray.length);
-
             });
             console.log("notes to be placed: " + promiseArray.length);
 
@@ -1127,12 +1125,10 @@ const newNote = false;
             }).catch(error => {
                 console.error("An error occurred: ", error);
             });
-
         } else {
             console.debug("browsersolutions no notes found");
             // terminate here
         }
-
     });
 }
 
@@ -1896,9 +1892,11 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                             console.debug("browsersolutions: makeEditButtonsVisible");
                             console.debug("calling setComponentVisibility");
                             setComponentVisibility(newGloveboxNode, ",rw,.*normalsized");
+                            newGloveboxNode.setAttribute("button_arrangment", "rw");
                         } else {
                             console.debug("browsersolutions: makeEditButtonsInvisible");
                             setComponentVisibility(newGloveboxNode, ",ro,.*normalsized");
+                            newGloveboxNode.setAttribute("button_arrangment", "ro");
                         }
 
                         // Make the stickynote draggable:
@@ -2034,9 +2032,14 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                 console.debug("browsersolutions: makeEditButtonsVisible");
                                 console.debug("calling setComponentVisibility");
                                 setComponentVisibility(newGloveboxNode, ",rw,.*normalsized");
+                                // store with the note which buttons are to be shown
+                                newGloveboxNode.setAttribute("button_arrangment", "rw")
+
                             } else {
                                 console.debug("browsersolutions: makeEditButtonsInvisible");
                                 setComponentVisibility(newGloveboxNode, ",ro,.*normalsized");
+                                // store with the note which buttons are to be shown
+                                newGloveboxNode.setAttribute("button_arrangment", "ro")
                             }
 
                             // Make the stickynote draggable:
@@ -2077,8 +2080,10 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                     console.debug("calling setComponentVisibility");
                                     if (isOwner) {
                                         setComponentVisibility(newGloveboxNode, ",rw,.*normalsized,");
+                                        newGloveboxNode.setAttribute("button_arrangment", "rw")
                                     } else {
                                         setComponentVisibility(newGloveboxNode, ",ro,.*normalsized,");
+                                        newGloveboxNode.setAttribute("button_arrangment", "ro")
                                     }
                                     console.debug("calling attachEventlistenersToYellowStickynote");
                                     attachEventlistenersToYellowStickynote(newGloveboxNode);
@@ -2731,7 +2736,7 @@ function load_url(event) {
         console.debug(note_root.querySelector('input[id="urlInput"]'));
         const url = note_root.querySelector('input[id="urlInput"]').value;
 
-        console.debug("#### perform url lookup #### " + url);
+        console.debug("#### perform url lookup on " + url);
         //console.debug(cont1);
 
         // check for content_url for notes that collect content from elsewhere
@@ -3458,6 +3463,11 @@ function minimize_note(event) {
     //console.debug("calling attachEventlistenersToYellowStickynote");
     //attachEventlistenersToYellowStickynote(note);
 
+// set new size for note to be minimized
+note.querySelector('table[name="whole_note_table"]').style.height = "26px";
+
+
+
     return;
     // step through all DOM nodes in the node and set to not visible, the ones that should not be displayed when the note is minimized.
     // only nodes with minimized="display" should be displayed when the note is minimized.
@@ -3543,6 +3553,13 @@ function rightsize_note(event) {
     setComponentVisibility(note, "," + button_arrangment + ",.*normalsized");
     //console.debug("calling attachEventlistenersToYellowStickynote");
     //attachEventlistenersToYellowStickynote(note);
+
+// restore original size for note to be minimized
+const original_height = note.getAttribute("box_height");
+
+note.querySelector('table[name="whole_note_table"]').style.height = original_height;
+
+
     return;
 
     const allElements = note.querySelectorAll('[ minimized="notvisible" ]');
@@ -3629,7 +3646,8 @@ function disable_note(event) {
         var noteid = note_root.getAttribute("noteid");
 
         console.debug("browsersolutions noteid: " + noteid);
-
+        // call close on the note
+        remove_noteid(noteid);
         // send save request back to background
         chrome.runtime.sendMessage({
             message: {
@@ -3645,7 +3663,7 @@ function disable_note(event) {
             //  try{
             //  	close_note(event);
             //  }catch(g){console.debug(g);}
-            remove_noteid(noteid);
+            //remove_noteid(noteid);
         });
 
     } catch (e) {
@@ -3722,6 +3740,15 @@ function makeDragAndResize(note) {
         } else if (e.target.tagName === 'TEXTAREA') {
             console.debug("on top of textarea");
             // allow action on the drop down list
+        } else if (e.target.tagName === 'IMG') {
+            // the click was on an image inside the note
+            // is the image was an icon that has an action connection to it, then disallow the drag action
+            console.debug("on top of an image");
+            console.debug(e.target);
+            console.debug( e.target.hasAttribute("js_action"));
+            console.debug(e.target.getAttribute("js_action"));
+
+
         } else if (e.target.tagName === 'INPUT') {
             // allow default action on the input field
         } else {
@@ -3847,7 +3874,7 @@ function makeDragAndResize(note) {
         console.debug(note);
         console.debug(posx);
         console.debug(posy);
-        console.debug(note);
+        //console.debug(note);
         // store the new position coordinates with root node of the note object
         if (!isUndefined(posx) && !isUndefined(posy)) {
             console.debug("update the position properties of the note root node");
@@ -3859,6 +3886,8 @@ function makeDragAndResize(note) {
         }
 
         // whole_note_middlebar
+
+      
 
         // store the new size information in the note object
 
@@ -3888,6 +3917,28 @@ function makeDragAndResize(note) {
             const new_height = number_h - 70;
             //message_field.style.height = new_height + "px";
 
+
+  // update some internal objects in the note object to reflect the new overall size of the note
+  try {
+const new_width = (parseInt(number_w) - note_internal_width_padding);
+    console.debug("setting new content frame width " + new_width);
+    note.querySelector('[name="contentFrame"]').style.width = new_width + 'px';
+} catch (e) {
+    console.error(e);
+}
+
+try {
+ const new_field_width = (parseInt(number_w) - 40);
+    console.debug("setting new url intput field width " + new_field_width);
+    note.querySelector('[id="urlInput"]').style.width = new_field_width + 'px';
+} catch (e) {
+    console.error(e);
+}
+
+
+
+
+
             tableContainer.removeEventListener('mousemove', drag);
             tableContainer.removeEventListener('touchmove', drag);
             tableContainer.removeEventListener('mousemove', resize);
@@ -3907,16 +3958,17 @@ function makeDragAndResize(note) {
  */
 
 function copy_note_to_clipboard(event) {
-    console.debug("# copy yellow note to clipboard");
+    console.debug("### copy yellow note to clipboard");
     // stop clicking anything behind the button
     event.stopPropagation();
 
-    // call to copy not to clipboard
+    // call to copye not to clipboard
 
     // loop upwards from the target nodes to locate the root node for the sticky note
 
     const root_note = getYellowStickyNoteRoot(event.target);
-    console.debug(root_note);
+    //console.debug(root_note);
+    /*
     try {
         // use the event target to loop the top node of the note object.
         // call remove of this node
@@ -3941,15 +3993,16 @@ function copy_note_to_clipboard(event) {
     } catch (e) {
         console.error(e);
     }
+    */
 
     try {
 
-        console.debug(stickynote_node);
+       //console.debug(stickynote_node);
 
         //console.debug("1.2.1");
         //if (isSticyNoteRoot(stickynote_node)) {
-        console.debug("copy...");
-        console.debug(stickynote_node);
+        //console.debug("copy...");
+        //console.debug(stickynote_node);
 
         var out = NoteDOM2JSON(root_note);
 
@@ -4001,18 +4054,34 @@ function NoteDOM2JSON(note) {
         const posy = note.querySelector('[name="posy"]');
         const box_width = note.querySelector('[name="box_width"]');
 
+var  message_display_text = "";
+try{
+    if (note.querySelector('[name="message_display_text"]')){
+
+    message_display_text = utf8_to_b64(note.querySelector('[name="message_display_text"]').value.trim());
+}
+
+}catch(e){
+    console.error(e);
+}
+var  selection_text = "";
+try{
+    selection_text = utf8_to_b64(note.querySelector('[name="selection_text"]').value.trim());
+
+}catch(e){
+    console.error(e);
+}
+      
+
         var output = {
-            url: note.querySelector('[name="url"]').textContent,
-            noteid: note.querySelector('[name="noteid"]').textContent,
-            message_display_text: utf8_to_b64(note.querySelector('[name="message_display_text"]').value.trim()),
-            enabled: note.querySelector('[name="enabled"]').textContent,
-            selection_text: note.querySelector('[name="selection_text"]').textContent,
+            noteid: note.getAttribute('noteid'),
+            message_display_text: message_display_text,
+            selection_text: selection_text,
             posx: posx,
+            note_type: note.getAttribute("note_type"),
             posy: posy,
-            box_width: box_width,
-            box_height: box_height,
-            createtime: note.querySelector('[name="createtime"]').textContent,
-            lastmodifiedtime: note.querySelector('[name="lastmodifiedtime"]').textContent
+            box_width: note.getAttribute('box_width'),
+            box_height: note.getAttribute('box_height')
         }
         console.debug(output);
         return output;
@@ -4203,6 +4272,8 @@ function delete_note(event) {
 
     console.debug("browsersolutions removing noteid: " + noteid);
 
+    // call "close" on the note
+    remove_noteid(noteid);
     // send delete request back to server to delete the note.
     // rely on the browser already having an authenticated session with the server.
 
@@ -4218,11 +4289,9 @@ function delete_note(event) {
         console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
         console.debug("message sent to backgroup.js with response code: " + response.statuscode);
 
-        // finally, call "close" on the note
-        remove_noteid(noteid);
     });
-
 }
+
 
 // check if a yellownote is already on the page
 function isNoteOnPage(noteid) {
@@ -4327,19 +4396,20 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
     try {
         //console.debug(insertedNode.querySelector('[name="contentFrame"]'));
 
-        var note_internal_height_padding = 57;
+        var new_heigth ;
         if (isOwner) {
-
+            new_heigth = (parseInt(box_height) - note_internal_height_padding);
+        
         } else {
             // if the note is not owned by the current user, the note will be smaller as the bottom bar is removed
-            note_internal_height_padding = 31;
+            //note_internal_height_padding = 31;
+            new_heigth = (parseInt(box_height) - (note_internal_height_padding-26));
         }
 
-        const new_heigth = (parseInt(box_height) - note_internal_height_padding);
         console.debug("setting new content frame height: " + new_heigth);
         
         insertedNode.querySelector('[name="contentFrame"]').style.height = new_heigth + 'px';
-        const note_internal_width_padding = 2;
+       
 const new_width = (parseInt(box_width) - note_internal_width_padding);
         console.debug("setting new content frame width " + new_width);
         insertedNode.querySelector('[name="contentFrame"]').style.width = new_width + 'px';
@@ -4352,3 +4422,6 @@ const new_width = (parseInt(box_width) - note_internal_width_padding);
     insertedNode.setAttribute("box_height", box_height);
 
 }
+
+const note_internal_height_padding = 57;
+const note_internal_width_padding = 2;

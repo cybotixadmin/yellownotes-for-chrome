@@ -381,6 +381,8 @@ function render() {
                 console.log(JSON.stringify(row));
                 console.log(row.noteid);
 
+
+               
                 // Create new row
                 const newRow = tableBody.insertRow();
 
@@ -388,13 +390,16 @@ function render() {
                 const cell1 = newRow.insertCell(0);
                 const cell2 = newRow.insertCell(1);
                 const cell3 = newRow.insertCell(2);
-                const cell4 = newRow.insertCell(3);
-                const cell5 = newRow.insertCell(4);
-                const cell6 = newRow.insertCell(5);
-                const cell7 = newRow.insertCell(6);
-                const cell8 = newRow.insertCell(7);
+                const type_cell = newRow.insertCell(3);
+                const cell4 = newRow.insertCell(4);
+                const cell5 = newRow.insertCell(5);
+                const cell6 = newRow.insertCell(6);
+                const cell7 = newRow.insertCell(7);
+                const cell8 = newRow.insertCell(8);
                 const obj = JSON.parse(row.json);
+                // key column - not to be displayed
                 cell1.textContent = row.noteid;
+                // create timestamp - not to be dsiplayed either
                 try {
                     console.log(row.createtime);
                     console.log(/2024/.test(row.createtime));
@@ -418,16 +423,18 @@ function render() {
                     console.log(/2024/.test(row.lastmodifiedtime));
                     if (/2024/.test(row.lastmodifiedtime)) {
                         console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
-                        //console.log("createtime: " + integerstring2timestamp(row.createtime));
-
-                        cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
+                         cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
                     } else {
-
                         console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)
                         cell3.textContent = integerstring2timestamp(row.lastmodifiedtime);
-
                     }
+                } catch (e) {
+                    console.log(e);
+                }
 
+                try {
+                        type_cell.textContent = obj.note_type  ;
+                   
                 } catch (e) {
                     console.log(e);
                 }
@@ -469,15 +476,18 @@ function render() {
                 });
                 cell4.appendChild(suspendActButton);
 
-                //              if (row.status == "1") {
-                //                cell4.textContent = "enabled";
-                //          } else {
-                //            cell4.textContent = "disabled";
-                //      }
+          // where note is attached    
 
                 cell5.textContent = obj.url;
+// payload
+ if (obj.note_type == "yellownote") {
                 cell6.textContent = b64_to_utf8(obj.message_display_text);
-
+ }else if  (obj.note_type == "webframe") {
+    cell6.textContent = (obj.content_url);
+ }else{
+// default - will revisit this later (L.R.)
+cell6.textContent = b64_to_utf8(obj.message_display_text);
+ }
                 // create small table to contain the action buttons
 
 
