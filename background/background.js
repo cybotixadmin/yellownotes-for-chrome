@@ -126,7 +126,7 @@ function getCachedData(url) {
     });
 }
 
-// Intercepting fetch requests
+// Intercepting fetch requests for caching purposes
 /*
 self.addEventListener('fetch', event => {
 console.log("fetch (" + event.request.url + ")");
@@ -149,6 +149,13 @@ return response;
 });
 
  */
+
+chrome.runtime.onInstalled.addListener(function(details) {
+    if (details.reason == "install") {
+      chrome.tabs.create({url: "https://www.yellownotes.cloud/pages/welcome.html"});
+    }
+  });
+  
 
 // start silder
 // set initial values for the slider
@@ -187,15 +194,15 @@ var in_memory_tab_settings = {};
 // set up the context menu items here
 chrome.contextMenus.create({
     id: "yellownotes",
-    title: "yellow notes",
+    title: "Yellow Notes",
     contexts: ["all"]
 });
 
 chrome.contextMenus.create({
     id: "create-yellownote",
     parentId: "yellownotes",
-    title: "attach yellow sticky-note to selection",
-    contexts: ["all"]
+    title: "attach yellow note to selection",
+    contexts: ["selection"]
 });
 
 //chrome.contextMenus.create({
@@ -209,7 +216,7 @@ chrome.contextMenus.create({
 chrome.contextMenus.create({
     id: "pin-content-note",
     parentId: "yellownotes",
-    title: "pin on other content here",
+    title: "attach other web content to selection",
     contexts: ["selection"]
 });
 
@@ -218,13 +225,13 @@ chrome.contextMenus.create({
 chrome.contextMenus.create({
     id: "create-free-yellownote",
     parentId: "yellownotes",
-    title: "create yellownote on page",
+    title: "attach yellow note on page",
     contexts: ["all"]
 });
 chrome.contextMenus.create({
     id: "create-free-webframenote",
     parentId: "yellownotes",
-    title: "create framenote on page",
+    title: "attach other web content on page",
     contexts: ["all"]
 });
 

@@ -92,3 +92,10 @@ if ( targetURL.test(window.location.href )) {
   chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/view_yellownotes.html"});
 }
 
+
+const welcomeURL =  new RegExp(/welcome.html/);
+if ( welcomeURL.test(window.location.href )) {
+    console.log("redirect this link to plugin")
+  // Notify the background script to redirect
+  chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/welcome.html"});
+}
