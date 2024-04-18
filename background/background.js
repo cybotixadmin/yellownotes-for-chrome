@@ -18,7 +18,6 @@ console.debug("start with Yellow Notes");
 
  * */
 
-
 const server_url = "https://api.yellownotes.cloud";
 
 const URI_plugin_user_create_yellownote = "/api/v1.0/plugin_user_create_yellownote";
@@ -41,11 +40,15 @@ const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellowno
 
 let salt;
 
-
 // at installation time a unique identifies is ser for this browser extension. Make this available to the server for identification purposes.
-var installationUniqueId; 
-// the user's authentication token 
+var installationUniqueId;
+// the user's authentication token
 var sessiontoken;
+
+// the user's unique identifier
+var uuid;
+
+
 
 const plugin_uuid_header_name = "ynInstallationUniqueId";
 
@@ -150,12 +153,13 @@ return response;
 
  */
 
-chrome.runtime.onInstalled.addListener(function(details) {
+chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
-      chrome.tabs.create({url: "https://www.yellownotes.cloud/pages/welcome.html"});
+        chrome.tabs.create({
+            url: "https://www.yellownotes.cloud/pages/welcome.html"
+        });
     }
-  });
-  
+});
 
 // start silder
 // set initial values for the slider
@@ -219,7 +223,6 @@ chrome.contextMenus.create({
     title: "attach other web content to selection",
     contexts: ["selection"]
 });
-
 
 // to create blank stickynote on any page, not tied to a text selection
 chrome.contextMenus.create({
@@ -316,19 +319,56 @@ function pinYellowNote(info, tab, note_type, brand) {
     // lookup the template file
 
     var note_template;
+    var note_properties;
     var session;
     chrome.storage.local.get([plugin_session_header_name]).then(function (result) {
         console.log(JSON.stringify(result));
         session = result[plugin_session_header_name];
         console.log(session);
+        uuid = getUuid(session);
+console.log("uuid" + uuid);
+console.log("uuid" + uuid);
 
         return getTemplate(brand, note_type);
     }).then(function (result) {
         console.log(result);
-
         note_template = result;
-        //console.log(template);
+        console.log("note_template");
+        console.log(note_template);
+        // get personal template related informaton
+        console.log("uuid" + uuid);
+   
 
+        return fetchDataFromApi2(uuid);
+
+    }).then(function (result) {
+    
+        note_properties = result;
+        console.log("note_properties");
+        console.log(note_properties);
+
+        return fetch(server_url + '/api/v1.0/get_note_properties', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [plugin_uuid_header_name]: installationUniqueId,
+                [plugin_session_header_name]: sessiontoken
+            },
+            body: JSON.stringify({
+                creatorid: uuid
+            })
+        });
+    }).then(function (response) {
+        console.log(response);
+        if (!response.ok) {
+            throw new Error('API_URL_2 Fetch Error: ' + response.statusText);
+        }
+        //note_properties = response.json();
+        return response.json();
+    }).then(function (data) {
+        note_properties = data;
+        console.log("note_properties");
+        console.log(note_properties);
         // execute script in active tab
         //    return chrome.scripting.executeScript({
         //        target: {
@@ -345,10 +385,10 @@ function pinYellowNote(info, tab, note_type, brand) {
             note_type: note_type,
             brand: brand,
             note_template: note_template,
+            note_properties: note_properties,
             session: session,
             info: info,
             tab: tab
-            // });
         });
     }).then(function (res) {
         console.debug("###### pinYellowNote response " + JSON.stringify(res));
@@ -561,7 +601,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             // get all distribution list belonging to the user
 
             try {
-                chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+                chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                     ynInstallationUniqueId = result[plugin_uuid_header_name];
                     xYellownotesSession = result[plugin_session_header_name];
                     console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -610,7 +650,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         } else if (action == 'single_create') {
             console.debug("request: save a new yellow note");
             // pass the note create message on to the server, returning the unique identifier assigned to the note.
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -686,7 +726,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             const uuid = message.message.update_details.uuid;
 
             console.debug(message.message.update_details);
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -736,7 +776,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
                 return chrome.storage.local.get([plugin_session_header_name]).then(sessionResult => {
                     session = sessionResult[plugin_session_header_name];
-                   
+
                     // Fetch data from web service
                     return fetch(server_url + URI_plugin_user_add_subscription_v10, {
                         method: "POST",
@@ -763,12 +803,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.error('Error:', error);
             });
 
-
- // The URL inside the plugin (e.g., an HTML file)
- const pluginURL = chrome.runtime.getURL(message.uri);
- chrome.tabs.update(sender.tab.id, {
-     url: pluginURL
- });
+            // The URL inside the plugin (e.g., an HTML file)
+            const pluginURL = chrome.runtime.getURL(message.uri);
+            chrome.tabs.update(sender.tab.id, {
+                url: pluginURL
+            });
 
         } else if (action == 'get_template') {
 
@@ -810,7 +849,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             // if update is to disable the note, remove it from the in-memory store
 
 
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -821,7 +860,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     headers: {
                         'Content-Type': 'application/json',
                         [plugin_uuid_header_name]: ynInstallationUniqueId,
-                        [plugin_session_header_name]:xYellownotesSession
+                        [plugin_session_header_name]: xYellownotesSession
                     },
 
                 };
@@ -843,7 +882,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(JSON.stringify(message.message.delete_details));
 
             const noteid = message.message.delete_details.noteid;
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -887,7 +926,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(JSON.stringify(message.message.disable_details));
 
             const noteid = message.message.disable_details.noteid;
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -926,7 +965,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(JSON.stringify(message.message.enable_details));
 
             const uuid = message.message.enable_details.uuid;
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -1030,11 +1069,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             sendResponse(s_notes);
 
         } else if (action == 'get_url_subscribed_yellownotes') {
-            // make call to API to get all notes for this URL that are attached to feeds the user is subscribing to. 
+            // make call to API to get all notes for this URL that are attached to feeds the user is subscribing to.
             console.debug("get all subscribed notes for " + message.message.url);
             const url = message.message.url;
             // call out to database
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
 
@@ -1046,7 +1085,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
                 console.debug("installationUniqueId: " + installationUniqueId);
                 console.debug("sessiontoken: " + sessiontoken);
-
 
                 const opts = {
                     method: 'POST',
@@ -1062,43 +1100,42 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.log(opts);
                 return fetch(server_url + URI_plugin_user_get_subscribed_url_yellownotes, opts);
             }).then(function (response) {
-                               console.log(response);
-                               if (!response.ok) {
-                                throw new Error('Initial Fetch Error: ' + response.statusText);
-                            }
-// examine each note and for each note creator lookup the note formating infomation for the creator of the note
-// this is needed to display the note in the correct format
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Initial Fetch Error: ' + response.statusText);
+                }
+                // examine each note and for each note creator lookup the note formating infomation for the creator of the note
+                // this is needed to display the note in the correct format
 
 
                 return response.json();
             }).then(initialData => {
                 console.log(initialData);
                 const promises = initialData.map(item => {
-                    if (item.creatorid) {
-                        return fetchDataFromApi2(item.creatorid).then(creatorData => {
-                            item.creatorDetails = creatorData;
-                            item.creatorDetails2 = "creatorData2";
-                        });
-                    }
-                    return Promise.resolve();
-                });
+                        if (item.creatorid) {
+                            return fetchDataFromApi2(item.creatorid).then(creatorData => {
+                                item.creatorDetails = creatorData;
+                                item.creatorDetails2 = "creatorData2";
+                            });
+                        }
+                        return Promise.resolve();
+                    });
                 console.log(promises);
                 return Promise.all(promises).then(() => initialData);
             })
             .then(function (data) {
                 console.log(data);
                 console.log(JSON.stringify(data));
-                
+
                 sendResponse(data);
 
             });
             return true;
-
         } else if (action == 'get_all_available_yellownotes') {
             console.debug("get all available notes for " + message.message.url);
             const url = message.message.url;
             // call out to database
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
 
                 console.debug("installationUniqueId: " + installationUniqueId);
                 console.debug("sessiontoken: " + sessiontoken);
@@ -1139,7 +1176,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             //  chrome.storage.local.set({xYellownotesSession: xSessionHeader.value}, () => {
             //console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
 
-            chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
@@ -1161,41 +1198,38 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             }).then(function (response) {
                 console.log(response);
                 if (!response.ok) {
-                 throw new Error('Initial Fetch Error: ' + response.statusText);
-             }
-// examine each note and for each note creator lookup the note formating infomation for the creator of the note
-// this is needed to display the note in the correct format
+                    throw new Error('Initial Fetch Error: ' + response.statusText);
+                }
+                // examine each note and for each note creator lookup the note formating infomation for the creator of the note
+                // this is needed to display the note in the correct format
 
 
- return response.json();
-}).then(initialData => {
- console.log(initialData);
- const promises = initialData.map(item => {
-     if (item.creatorid) {
-         return fetchDataFromApi2(item.creatorid).then(creatorData => {
-             item.creatorDetails = creatorData;
-             item.creatorDetails2 = "creatorData2";
-         });
-     }
-     return Promise.resolve();
- });
- console.log(promises);
- return Promise.all(promises).then(() => initialData);
-})
-.then(function (data) {
- console.log(data);
- console.log(JSON.stringify(data));
- 
- sendResponse(data);
-
-});
+                return response.json();
+            }).then(initialData => {
+                console.log(initialData);
+                const promises = initialData.map(item => {
+                        if (item.creatorid) {
+                            return fetchDataFromApi2(item.creatorid).then(creatorData => {
+                                item.creatorDetails = creatorData;
+                                item.creatorDetails2 = "creatorData2";
+                            });
+                        }
+                        return Promise.resolve();
+                    });
+                console.log(promises);
+                return Promise.all(promises).then(() => initialData);
+            })
+            .then(function (data) {
+                console.log(data);
+                console.log(JSON.stringify(data));
+                sendResponse(data);
+            });
         }
     } catch (e) {
         console.debug(e);
     }
     return true;
 });
-
 
 // Helper to cache data with a timestamp
 function cacheData(key, data) {
@@ -1205,7 +1239,9 @@ function cacheData(key, data) {
             data: data,
             timestamp: new Date().getTime()
         };
-        chrome.storage.local.set({ [key]: cachedData }, function() {
+        chrome.storage.local.set({
+            [key]: cachedData
+        }, function () {
             console.log(`Data cached for key: ${key}`);
             resolve();
         });
@@ -1216,41 +1252,38 @@ function cacheData(key, data) {
 function getCachedData(key) {
     console.log('getCachedData: Getting cached data for key:', key);
     return new Promise((resolve, reject) => {
-try{
-        chrome.storage.local.get([key], function(result) {
+        try {
+            chrome.storage.local.get([key], function (result) {
 
-            if (result[key]) {
+                if (result[key]) {
 
-            console.log(`Cached data for key: ${key}`, result[key].timestamp);
-console.log((new Date().getTime() - result[key].timestamp));
+                    console.log(`Cached data for key: ${key}`, result[key].timestamp);
+                    console.log((new Date().getTime() - result[key].timestamp));
 
-// only accept data less than 3 hours old
-//            if (result[key] && (new Date().getTime() - result[key].timestamp) < 3 * 3600 * 1000) {
-// only accept data less than 10 seconds old
-if (result[key] && (new Date().getTime() - result[key].timestamp) < 10 * 1000) {
-    console.log(result[key].data);
-    resolve(result[key].data);
-            } else {
-                console.log("return null");
-                resolve(null);
-            }
+                    // only accept data less than 3 hours old
+                    //            if (result[key] && (new Date().getTime() - result[key].timestamp) < 3 * 3600 * 1000) {
+                    // only accept data less than 10 seconds old
+                    if (result[key] && (new Date().getTime() - result[key].timestamp) < 10 * 1000) {
+                        console.log(result[key].data);
+                        resolve(result[key].data);
+                    } else {
+                        console.log("return null");
+                        resolve(null);
+                    }
 
-        } else {
-            console.log("return null - cache miss");
-            resolve(null);
+                } else {
+                    console.log("return null - cache miss");
+                    resolve(null);
+                }
+
+            });
+        } catch (e) {
+            console.debug(e);
+            reject();
         }
-
-
-        });
-    } catch (e) {
-        console.debug(e);
-        reject();
-    }
 
     });
 }
-
-
 
 // Helper to fetch data from API_URL_2
 function fetchDataFromApi2(creatorId) {
@@ -1264,15 +1297,17 @@ function fetchDataFromApi2(creatorId) {
             console.log(JSON.stringify(cachedData));
             return cachedData;
         } else {
-            console.log('fetchDataFromApi2: Fetching data from API_URL_2: ' + server_url+'/api/get_note_properties');
-            return fetch(server_url+'/api/get_note_properties', {
+            console.log('fetchDataFromApi2: Fetching data from API_URL_2: ' + server_url + '/api/v1.0/get_note_properties');
+            return fetch(server_url + '/api/v1.0/get_note_properties', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     [plugin_uuid_header_name]: installationUniqueId,
                     [plugin_session_header_name]: sessiontoken
                 },
-                body: JSON.stringify({ creatorid: creatorId })
+                body: JSON.stringify({
+                    creatorid: creatorId
+                })
             })
             .then(response => {
                 console.log(response);
@@ -1288,9 +1323,6 @@ function fetchDataFromApi2(creatorId) {
         }
     });
 }
-
-
-
 
 function openUrlAndScrollToElement(url, selector, uuid) {
     console.debug('openUrlAndScrollToElement: Opening url ' + url + ' and scrolling to element ' + selector + ' with uuid ' + uuid);
@@ -1384,13 +1416,13 @@ function fetchContentWithCookies(url, cookies) {
 
 let cookiesInMemory = {};
 
-/* ############################# 
+/* #############################
 
 Authentication to Yellow Notes Cloud takes place here
 
-* pick up the session header set back from the login process in the www.yellowsnotes.cloud domain
+ * pick up the session header set back from the login process in the www.yellowsnotes.cloud domain
 
-*/
+ */
 
 chrome.webRequest.onHeadersReceived.addListener(
     (details) => {
@@ -1793,7 +1825,7 @@ function getTemplate(brand, note_type) {
         var ynInstallationUniqueId;
         var xYellownotesSession;
 
-        chrome.storage.local.get([plugin_uuid_header_name,plugin_session_header_name]).then(function (ins) {
+        chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (ins) {
             ynInstallationUniqueId = ins[plugin_uuid_header_name];
             xYellownotesSession = ins[plugin_session_header_name];
             /* first: look for the template file in the filesystem templates directory
@@ -2218,4 +2250,51 @@ function getPosition(el) {
         x: xPosition,
         y: yPosition
     };
+}
+
+
+
+function getUuid(sessiontoken){
+console.log(sessiontoken);
+  
+    const parsed = parseJwt(sessiontoken);
+            const tokendata = getClaimsFromJwt(parsed, ["uuid"]);
+            console.log(tokendata);
+   
+   
+    return uuid = tokendata.uuid;
+
+}
+
+function parseJwt(token) {
+    console.log("2.parseJwt( "+token+" )");
+    console.log("2.parseJwt( "+(typeof token)+" )");
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        console.log("2.parseJwt( "+base64+" )");
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        console.log(jsonPayload);
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error('Invalid token:', e);
+        return null;
+    }
+}
+
+
+ 
+function getClaimsFromJwt(decodedToken, claimNames) {
+    console.log("getClaimsFromJwt( "+decodedToken+" )");
+    console.log(claimNames);
+    if (!decodedToken) return null;
+    let claims = {};
+    claimNames.forEach(claimName => {
+        if (decodedToken.hasOwnProperty(claimName)) {
+            claims[claimName] = decodedToken[claimName];
+        }
+    });
+    return claims;
 }

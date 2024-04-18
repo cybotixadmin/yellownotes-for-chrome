@@ -37,7 +37,7 @@
             "js": ["./content_scripts/local_GUI_intercept.js"],
             "run_at": "document_start"
         }, {
-            "matches": ["<all_urls>"],
+            "matches": ["*://www.DISABLED.cloud/*"],
             "js": ["./content_scripts/RenderEm.js"],
                 "run_at": "document_start"
             }, {

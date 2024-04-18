@@ -6,7 +6,7 @@ document.getElementById('drop_zone').addEventListener('click', function () {
     document.getElementById('file_input').click();
 });
 
-const URI_plugin_user_update_yellownote_attributes = "/api/update_note_properties";
+const URI_plugin_user_update_yellownote_attributes = "/api/v1.0/update_note_properties";
 
 var note_properties = {
     note_color: "#FFFF00",
@@ -152,7 +152,7 @@ async function fetchAndUpdateBannerImage() {
             creatorid: uuid
         });
 
-    fetch(server_url + '/api/get_note_properties', {
+    fetch(server_url + '/api/v1.0/get_note_properties', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",

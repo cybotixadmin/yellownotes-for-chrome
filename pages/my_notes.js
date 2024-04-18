@@ -186,7 +186,7 @@ for (var i = 0; i < buttons.length; i++) {
 }
 
 // Locate all cells that are used for filtering of search results
-const f_cells = document.querySelectorAll('.filterableCol');
+const f_cells = document.getElementById("dataTable").querySelectorAll("thead tr:nth-child(2) th");
 console.log(f_cells);
 len = f_cells.length;
 for (var i = 0; i < f_cells.length; i++) {
@@ -195,7 +195,7 @@ for (var i = 0; i < f_cells.length; i++) {
     // set column index number for each column
     f_cells[i].setAttribute("colindex", i);
     f_cells[i].addEventListener('input', function (event) {
-        filterTable_a();
+        filterTableAllCols();
     }, false);
 }
 
@@ -292,36 +292,92 @@ function sortTable(table_id, columnIndex) {
     sortedRows.forEach(row => tbody.appendChild(row));
 }
 
-function filterTable_a() {
-    //  console.log("filterTable_a " );
+/*
+apply all filters simmultaneously
 
-    filterTable(event.target);
+TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
+and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
+ */
+function filterTableAllCols() {
+    console.log("filterTableAllCols");
+    var table = document.getElementById("dataTable");
+    var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
+    var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    //console.debug(filtersCols);
+
+    // Loop through each row of the table
+    for (var i = 0; i < rows.length; i++) {
+        ///  for (var i = 0; i < 1; i++) {
+        var showRow = true;
+        // console.debug(rows[i]);
+        // check each cell against the corresponding filter for the column, if any
+        for (var j = 0; j < filtersCols.length; j++) {
+            console.log(j +" ##########");
+//            console.log(j);
+console.log(filtersCols[j]);
+console.log(filtersCols[j].value);
+console.debug(filtersCols[j].tagName );
+console.debug(filtersCols[j].tagName  == "SELECT");
+console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+console.debug(filtersCols[j].tagName  == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
+
+if (filtersCols[j].tagName  == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch"){
+// filter on whether or not a checkbox has been checked
+var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+console.log("filter on col: " + comparingCol)
+var cell = rows[i].getElementsByTagName("td")[comparingCol];
+console.log(cell);
+if (cell) {
+    console.log(cell.querySelector('input[type="checkbox"]'));
+var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+console.log("isChecked: " + isChecked);
+var filterValue = filtersCols[j].value;
+console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
+if (filterValue === "active" && !isChecked ||
+    filterValue === "inactive" && isChecked) {
+  showRow = false;
+  break;// Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                        
 }
+}
+}else{
 
-function filterTable(colheader) {
-    const columnIndex = colheader.parentNode.getAttribute("colindex");
-    //console.log(colheader);
-    console.log("filter on col: " + columnIndex)
-    //const input = colheader;
-    const filter = colheader.value.toUpperCase();
-    const table = document.getElementById('dataTable');
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    //console.log("filter column:" + columnIndex);
-    //console.log("filter value:" + filter);
-
-    for (let i = 0; i < rows.length; i++) {
-        const cell = rows[i].getElementsByTagName('td')[columnIndex];
-        //console.log(cell);
-        if (cell) {
-            const content = cell.innerText || cell.textContent;
-            if (new RegExp(filter, 'i').test(content)) {
-                //        console.log("not sho");
-                rows[i].style.display = '';
-            } else {
-                rows[i].style.display = 'none';
+            try {
+                if (filtersCols[j].value) { // Only process filters with a value
+                    var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                    console.log("filter on col: " + comparingCol)
+                    var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                    if (cell) {
+                        var filterValue = filtersCols[j].value;
+                        var regex = new RegExp(escapeRegex(filterValue), "i");
+                        console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                        // Test the regex against the cell content
+                        if (!regex.test(cell.textContent.trim())) {
+                            showRow = false;
+                            break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                        }
+                    }
+                   
+                }
+            } catch (e) {
+                console.log(e);
             }
+
         }
     }
+        // Show or hide the row based on the filter results
+        rows[i].style.display = showRow ? "" : "none";
+    }
+}
+
+function escapeRegex(text) {
+    // Escapes the regular expression special characters in text except for '*' and '?'
+    // '*' is converted to '.*' and '?' to '.'
+    return text.replace(/[-[\]{}()+.,\\^$|#\s]/g, "\\$&")
+    .replace(/\*/g, '.*')
+    .replace(/\?/g, '.');
 }
 
 // Fetch data on page load
@@ -381,8 +437,6 @@ function render() {
                 console.log(JSON.stringify(row));
                 console.log(row.noteid);
 
-
-               
                 // Create new row
                 const newRow = tableBody.insertRow();
 
@@ -423,7 +477,7 @@ function render() {
                     console.log(/2024/.test(row.lastmodifiedtime));
                     if (/2024/.test(row.lastmodifiedtime)) {
                         console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
-                         cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
+                        cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
                     } else {
                         console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)
                         cell3.textContent = integerstring2timestamp(row.lastmodifiedtime);
@@ -433,8 +487,8 @@ function render() {
                 }
 
                 try {
-                        type_cell.textContent = obj.note_type  ;
-                   
+                    type_cell.textContent = obj.note_type;
+
                 } catch (e) {
                     console.log(e);
                 }
@@ -476,18 +530,18 @@ function render() {
                 });
                 cell4.appendChild(suspendActButton);
 
-          // where note is attached    
+                // where note is attached
 
                 cell5.textContent = obj.url;
-// payload
- if (obj.note_type == "yellownote") {
-                cell6.textContent = b64_to_utf8(obj.message_display_text);
- }else if  (obj.note_type == "webframe") {
-    cell6.textContent = (obj.content_url);
- }else{
-// default - will revisit this later (L.R.)
-cell6.textContent = b64_to_utf8(obj.message_display_text);
- }
+                // payload
+                if (obj.note_type == "yellownote") {
+                    cell6.textContent = b64_to_utf8(obj.message_display_text);
+                } else if (obj.note_type == "webframe") {
+                    cell6.textContent = (obj.content_url);
+                } else {
+                    // default - will revisit this later (L.R.)
+                    cell6.textContent = b64_to_utf8(obj.message_display_text);
+                }
                 // create small table to contain the action buttons
 
 
