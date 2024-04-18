@@ -22,6 +22,64 @@ document.getElementById('saveButton').addEventListener('click', saveData, false)
 document.getElementById('drop_zone').addEventListener('dragover', handleDragOver, false);
 document.getElementById('drop_zone').addEventListener('drop', handleFileDrop, false);
 
+
+document.querySelector('.remove-icon').addEventListener('click', function(event) {
+    // Prevent the event from bubbling up to parent elements
+    event.stopPropagation();
+    var ynInstallationUniqueId = "";
+    var xYellownotesSession = "";
+    
+    // First, retrieve the plugin UUID
+    chrome.storage.local.get([plugin_uuid_header_name])
+      .then(function(result) {
+        ynInstallationUniqueId = result[plugin_uuid_header_name];
+    
+        // After successfully retrieving the UUID, retrieve the session
+        return chrome.storage.local.get([plugin_session_header_name]);
+      })
+      .then(function(result) {
+        xYellownotesSession = result[plugin_session_header_name];
+    
+        // If you need to perform more operations after fetching these values, continue here
+        console.log("Installation Unique ID:", ynInstallationUniqueId);
+        console.log("Session:", xYellownotesSession);
+      })
+      .catch(function(error) {
+        console.error("Error fetching data from chrome storage:", error);
+      }).then(function(result) {
+        // After fetching the values, perform the fetch call
+     console.log("make API call to remove banner");
+    
+     // Perform the fetch call in the background
+        return fetch(server_url+ plugin_remove_banner_uri, { 
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                [plugin_uuid_header_name]: ynInstallationUniqueId,
+                [plugin_session_header_name]: xYellownotesSession,
+            },
+        
+        });
+      }) 
+      .then(response => {
+        // Check if the response is ok (status 200-299)
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response.json(); // Parse JSON response
+      })
+      .then(data => {
+        // Log the success data to console
+        console.log('Success:', data);
+      })
+      .catch(error => {
+        // Log any errors to the console
+        console.error('Error:', error);
+      });
+  });
+  
+
+
 function handleFileSelect(evt) {
     console.log("handleFileSelect()");
     processFile(evt.target.files[0]);
@@ -197,7 +255,7 @@ async function fetchAndUpdateBannerImage() {
             document.getElementById('bannerContainer').style.height = data.box_height;
         } else {
             console.log('Banner height data not found in response');
-        }
+        }       
 
     })
     .catch(error => console.error('Fetch error:', error));

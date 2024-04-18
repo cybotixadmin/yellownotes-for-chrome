@@ -98,42 +98,6 @@ async function editNote(uuid) {
 
 
 
-// Function to fetch data and populate the table
-function DELfetchData() {
-    try {
-
-        return new Promise(
-            function (resolve, reject) {
-
-       // const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
-
-        console.log(installationUniqueId);
-        // Fetch data from web service (replace with your actual API endpoint)
-        return fetch(server_url + URI_plugin_user_get_all_yellownotes, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "userid": "dummy",
-                    [plugin_uuid_header_name]: installationUniqueId
-                }) // example IDs, replace as necessary
-            });
-
-        // Check for errors
-      //  if (!response.ok) {
-      //      throw new Error(`HTTP error! status: ${response.status}`);
-      //  }
-
-       
-        //resolve('Data saved OK');
-
-    });
-
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 // Locate all elements with the class "my-button"
 const buttons = document.querySelectorAll('.sortableCol');
@@ -283,8 +247,8 @@ async function fetchData() {
             let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
             let session = await chrome.storage.local.get([plugin_session_header_name]);
     
-                ynInstallationUniqueId = plugin_uuid[plugin_uuid_header_name];
-                xYellownotesSession = session[plugin_session_header_name];
+        ynInstallationUniqueId = plugin_uuid[plugin_uuid_header_name];
+        xYellownotesSession = session[plugin_session_header_name];
     
         const response  = await   fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {
             method: 'GET',

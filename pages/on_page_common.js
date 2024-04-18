@@ -4,6 +4,7 @@ const plugin_uuid_header_name = "ynInstallationUniqueId";
 // name of header containing session token
 const plugin_session_header_name = "xyellownotessession_jwt";
 
+const plugin_remove_banner_uri = "/api/v1.0/delete_note_banner";
 
 const silent_logout_url = "https://www.yellownotes.cloud/logout_silent";
 

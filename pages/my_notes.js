@@ -313,60 +313,59 @@ function filterTableAllCols() {
         // console.debug(rows[i]);
         // check each cell against the corresponding filter for the column, if any
         for (var j = 0; j < filtersCols.length; j++) {
-            console.log(j +" ##########");
-//            console.log(j);
-console.log(filtersCols[j]);
-console.log(filtersCols[j].value);
-console.debug(filtersCols[j].tagName );
-console.debug(filtersCols[j].tagName  == "SELECT");
-console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
-console.debug(filtersCols[j].tagName  == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
-console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
+            //console.log(j + " ##########");
+            //            console.log(j);
+            //console.log(filtersCols[j]);
+            //console.log(filtersCols[j].value);
+            //console.debug(filtersCols[j].tagName);
+            //console.debug(filtersCols[j].tagName == "SELECT");
+            //console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.debug(filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
 
-if (filtersCols[j].tagName  == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch"){
-// filter on whether or not a checkbox has been checked
-var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
-console.log("filter on col: " + comparingCol)
-var cell = rows[i].getElementsByTagName("td")[comparingCol];
-console.log(cell);
-if (cell) {
-    console.log(cell.querySelector('input[type="checkbox"]'));
-var isChecked = cell.querySelector('input[type="checkbox"]').checked;
-console.log("isChecked: " + isChecked);
-var filterValue = filtersCols[j].value;
-console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
-if (filterValue === "active" && !isChecked ||
-    filterValue === "inactive" && isChecked) {
-  showRow = false;
-  break;// Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
-                        
-}
-}
-}else{
-
-            try {
-                if (filtersCols[j].value) { // Only process filters with a value
-                    var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
-                    console.log("filter on col: " + comparingCol)
-                    var cell = rows[i].getElementsByTagName("td")[comparingCol];
-                    if (cell) {
-                        var filterValue = filtersCols[j].value;
-                        var regex = new RegExp(escapeRegex(filterValue), "i");
-                        console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
-                        // Test the regex against the cell content
-                        if (!regex.test(cell.textContent.trim())) {
-                            showRow = false;
-                            break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
-                        }
+            if (filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch") {
+                // filter on whether or not a checkbox has been checked
+                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                //console.log("filter on col: " + comparingCol)
+                var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                //console.log(cell);
+                if (cell) {
+                    //console.log(cell.querySelector('input[type="checkbox"]'));
+                    var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                    //console.log("isChecked: " + isChecked);
+                    var filterValue = filtersCols[j].value;
+                    //console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
+                    if (filterValue === "active" && !isChecked ||
+                        filterValue === "inactive" && isChecked) {
+                        showRow = false;
+                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
                     }
-                   
                 }
-            } catch (e) {
-                console.log(e);
-            }
+            } else {
 
+                try {
+                    if (filtersCols[j].value) { // Only process filters with a value
+                        var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                        //console.log("filter on col: " + comparingCol)
+                        var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                        if (cell) {
+                            var filterValue = filtersCols[j].value;
+                            var regex = new RegExp(escapeRegex(filterValue), "i");
+                            //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                            // Test the regex against the cell content
+                            if (!regex.test(cell.textContent.trim())) {
+                                showRow = false;
+                                break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                            }
+                        }
+
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+
+            }
         }
-    }
         // Show or hide the row based on the filter results
         rows[i].style.display = showRow ? "" : "none";
     }
