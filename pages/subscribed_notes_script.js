@@ -114,7 +114,7 @@ for (var i = 0; i < buttons.length; i++) {
 }
 
 // Locate all cells that are used for filtering of search results
-const f_cells = document.querySelectorAll('.filterableCol');
+const f_cells = document.getElementById("dataTable").querySelectorAll("thead tr:nth-child(2) th");
 console.log(f_cells);
 len = f_cells.length;
 for (var i = 0; i < f_cells.length; i++) {
@@ -123,7 +123,7 @@ for (var i = 0; i < f_cells.length; i++) {
     // set column index number for each column
     f_cells[i].setAttribute("colindex", i);
     f_cells[i].addEventListener('input', function (event) {
-        filterTable_a();
+        filterTableAllCols();
     }, false);
 
 }
@@ -293,28 +293,59 @@ async function fetchData() {
 
             // Create cells and populate them with data
             const cell1 = newRow.insertCell(0);
-            const cell2 = newRow.insertCell(1);
-            const cell3 = newRow.insertCell(2);
-            //const cell4 = newRow.insertCell(3);
-            const cell5 = newRow.insertCell(3);
-            const cell6 = newRow.insertCell(4);
-            const cell7 = newRow.insertCell(5);
+            const cell_lastmodifiedtime = newRow.insertCell(1);
+            const cell_createtime = newRow.insertCell(2);
+            const type_cell = newRow.insertCell(3);
+            const cell_name = newRow.insertCell(4);
+            const cell_url = newRow.insertCell(5);
+            const cell_message_text = newRow.insertCell(6);
+            const cell_buttons = newRow.insertCell(7);
+            // do not include a option for notes in this release
+            //const cell_notes = newRow.insertCell(7);
+
+            
             // parse the JSON of the note
             const obj = JSON.parse(row.json);
             console.log(obj);
+
             cell1.textContent = row.uuid;
+            // last create timestamp
             try{
-            cell2.textContent = integerstring2timestamp(obj.createtime);
-            }catch(e){console.debug(e);}
+                cell_createtime.textContent = integerstring2timestamp(row.createtime);
+                }catch(e){
+                    console.debug(e);
+                }
+
+                // last modified timestamp
             try{
-                cell3.textContent = integerstring2timestamp(obj.lastmodifiedtime);
-            }catch(e){console.debug(e);}
+            cell_lastmodifiedtime.textContent = integerstring2timestamp(row.lastmodifiedtime);
+            }catch(e){
+                console.debug(e);
+            }
+
+            try {
+                type_cell.textContent = obj.note_type;
+
+            } catch (e) {
+                console.log(e);
+            }
+
+            // name
+            try{
+                cell_name.textContent = row.name;
+            }catch(e){
+                console.debug(e);
+            }
             
+            // url where note is attached
+            cell_url.textContent = obj.url;
 
-            cell5.textContent = obj.url;
-            cell6.textContent = obj.message_display_text;
+            // display/message text
+            cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
 
+            // buttons
             // Add delete button
+            /*
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.onclick = function () {
@@ -323,29 +354,127 @@ async function fetchData() {
                 // call to API to delete row from data base
                 deleteDataRow(row.uuid);
             };
-           
-            cell7.appendChild(deleteButton);
-
-        
-
-           
+            cell_buttons.appendChild(deleteButton);
+            */
             // Add location "go there" button
-            const goThereButton = document.createElement('button');
-            goThereButton.textContent = 'locate';
+
+
+            const goThereButtonContainer = document.createElement('div');
+            goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+
+            const goThereButton = document.createElement('img');
+goThereButton.src = "../icons/arrow-right-long.svg";
+
+goThereButton.alt = 'go there';
+
+goThereButton.setAttribute('class', 'go_to_location_button');
+
+         //   goThereButton.textContent = 'locate';
             goThereButton.onclick = function () {
                 // call to API to delete row from data base
                 goThere(obj.url, obj.uuid);
             };
-            cell7.appendChild(goThereButton);
-            
 
-            const cell8 = newRow.insertCell(6);
-           
-          
+            goThereButtonContainer.appendChild(goThereButton);
+            cell_buttons.appendChild(goThereButtonContainer);
+            
+            //cell_buttons.appendChild(goThereButton);
+            
+           // const cell8 = newRow.insertCell(6);
+
         });
-       
 
 }
+
+
+/*
+apply all filters simmultaneously
+
+TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
+and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
+ */
+function filterTableAllCols() {
+    console.log("filterTableAllCols");
+    var table = document.getElementById("dataTable");
+    var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
+    var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    console.debug(filtersCols);
+
+    // Loop through each row of the table
+    for (var i = 0; i < rows.length; i++) {
+        ///  for (var i = 0; i < 1; i++) {
+        var showRow = true;
+        // console.debug(rows[i]);
+        // check each cell against the corresponding filter for the column, if any
+        for (var j = 0; j < filtersCols.length; j++) {
+            //console.log(j + " ##########");
+            //            console.log(j);
+            //console.log(filtersCols[j]);
+            console.log(filtersCols[j].value);
+            //console.debug(filtersCols[j].tagName);
+            //console.debug(filtersCols[j].tagName == "SELECT");
+            //console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.debug(filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
+
+            if (filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch") {
+                // filter on whether or not a checkbox has been checked
+                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                //console.log("filter on col: " + comparingCol)
+                var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                console.log(cell);
+                if (cell) {
+                    //console.log(cell.querySelector('input[type="checkbox"]'));
+                    var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                    //console.log("isChecked: " + isChecked);
+                    var filterValue = filtersCols[j].value;
+                    //console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
+                    if (filterValue === "active" && !isChecked ||
+                        filterValue === "inactive" && isChecked) {
+                        showRow = false;
+                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                    }
+                }
+            } else {
+
+                try {
+                    if (filtersCols[j].value) { // Only process filters with a value
+                        var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                        console.log("filter on col: " + comparingCol)
+                        var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                        if (cell) {
+                            var filterValue = filtersCols[j].value;
+                            var regex = new RegExp(escapeRegex(filterValue), "i");
+                            //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                            // Test the regex against the cell content
+                            if (!regex.test(cell.textContent.trim())) {
+                                showRow = false;
+                                break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                            }
+                        }
+
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+
+            }
+        }
+        // Show or hide the row based on the filter results
+        rows[i].style.display = showRow ? "" : "none";
+    }
+}
+
+function escapeRegex(text) {
+    // Escapes the regular expression special characters in text except for '*' and '?'
+    // '*' is converted to '.*' and '?' to '.'
+    return text.replace(/[-[\]{}()+.,\\^$|#\s]/g, "\\$&")
+    .replace(/\*/g, '.*')
+    .replace(/\?/g, '.');
+}
+
+
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 

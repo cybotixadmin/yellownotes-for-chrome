@@ -67,3 +67,39 @@
   }
 
 
+
+
+  .go_to_location_button {
+    height: 20px;
+  position: relative;
+    z-index: 12000;
+  }
+
+  .go_to_location_button::after {
+    content: "Go to Location to note";
+    position: absolute;
+    bottom: 50%;
+    left: 0px;
+    transform: translateY(-15%);
+    white-space: wrap;
+    background-color: black;
+    
+    color: white;
+    text-align: center;
+    padding: 4px;
+    border-radius: 2px;
+    font-size: 15px;
+    z-index: 12000;
+
+    /* Initially hidden */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s;
+  }
+
+  .go_to_location_button:hover::after {
+    /* Show the tooltip */
+    opacity: 0.7;
+    visibility: visible;
+    z-index: 12000;
+  }

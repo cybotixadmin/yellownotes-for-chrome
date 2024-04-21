@@ -183,7 +183,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     // create the note object data with suitable initial values for some fields
     var note_object_data = {}
     console.log("note_object_data: " + JSON.stringify(note_object_data));
-
+console.log("note_properties: " + JSON.stringify(note_properties));
     var userid = "";
     console.debug("session: " + JSON.stringify(session));
     console.debug("selection text: " + info.selectionText);
@@ -262,7 +262,20 @@ Default values are specified in the template itself
     }
     node_root.setAttribute("box_height", box_height);
     //note_table.st
- 
+
+    // what color to use for the note
+    var note_color = "#ffff00"; // set default value, override with more specific values if available
+    // attempt to read size parameters from the note properties of the creator
+    if (note_properties.note_color) {
+        note_color =  note_properties.note_color
+        console.debug("creator's note_properties has note_color, use it "+ note_color);
+       
+    } else {
+        // brand-level not implemted yet
+    }
+    var box_background = "rgba(" +hexToRGB(note_color) + ", 0.7)";
+    console.log("box_background" + box_background);
+
 
     /* where on the page is the note going to be placed ?
 
@@ -328,7 +341,9 @@ Default values are specified in the template itself
         console.error(e);
 
     }
-
+// set background color of the note
+    updateBackground(box_background, node_root);
+    
     // attach event listeners to buttons and icons
     //attachEventlistenersToYellowStickynote(node_root);
 
@@ -456,6 +471,44 @@ Default values are specified in the template itself
     }
 
 }
+
+
+function updateBackground(newBackground, note_root) {
+    console.debug("browsersolutions ### updateBackground to " + newBackground );
+    // Get all elements in the note_root 
+    const allElements = note_root.querySelectorAll('*');
+
+    // Iterate over each element
+    allElements.forEach(element => {
+        // Check if the element has a style attribute that includes 'background'
+        if (element.style && element.style.background) {
+            // Update the background style to the new value
+            console.log(element);
+            element.style.backgroundColor = newBackground;
+            console.log(element);
+            
+        }
+    });
+}
+
+
+
+function hexToRGB(hex) {
+    // Remove the leading '#' if it exists
+    if (hex.charAt(0) === '#') {
+        hex = hex.slice(1);
+    }
+
+    // Parse the red, green, and blue values
+    let r = parseInt(hex.slice(0, 2), 16);
+    let g = parseInt(hex.slice(2, 4), 16);
+    let b = parseInt(hex.slice(4, 6), 16);
+
+    // Return the RGB string
+    return `${r},${g},${b}`;
+}
+
+
 
 function save_new_note(event) {
     console.debug("browsersolutions ### save new note");
@@ -1883,6 +1936,7 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
     console.debug(note_template);
     console.debug(creatorDetails);
     console.debug(isOwner);
+    console.debug(newNote);
 
     // create the note object, populated with data
 
@@ -3257,6 +3311,23 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
              */
             console.debug("browsersolutions calling renderNoteHeader");
             renderNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+
+// set background color of note
+ // what color to use for the note
+ var note_color = "#ffff00"; // set default value, override with more specific values if available
+ // attempt to read size parameters from the note properties of the creator
+ if (creatorDetails.note_color) {
+     note_color =  creatorDetails.note_color
+     console.debug("creator's note_properties has note_color, use it "+ note_color);
+    
+ } else {
+     // brand-level not implemted yet
+ }
+ var box_background = "rgba(" +hexToRGB(note_color) + ", 0.7)";
+ console.log("box_background" + box_background);
+
+ updateBackground(box_background, cont1);
+
 
             // set up the drop-down menu for distribution lists/feeds
             // pre-select the distribution list drop down menu

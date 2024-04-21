@@ -543,36 +543,64 @@ function render() {
                 }
                 // create small table to contain the action buttons
 
+                                // Add button container
+               const actionButtonContainer = document.createElement('div');
+               actionButtonContainer.setAttribute('class', 'button-container');
 
                 // Add delete button
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
+               const deleteButtonContainer = document.createElement('div');
+               deleteButtonContainer.setAttribute('class', 'delete_button');
+               const deleteButton = document.createElement('img');
+               deleteButton.src = "../icons/delete-left.svg";
+                deleteButton.alt = 'delete';
+                deleteButton.setAttribute('class', 'delete_button');
                 deleteButton.onclick = function () {
                     // Remove the row from the table
                     newRow.remove();
                     // call to API to delete row from data base
                     deleteDataRow(row.noteid);
                 };
-
-                cell7.appendChild(deleteButton);
+                deleteButtonContainer.appendChild(deleteButton);
+                actionButtonContainer.appendChild(deleteButtonContainer);
 
                 // Add save/edit button
-                const editButton = document.createElement('button');
-                editButton.textContent = 'Save';
-                editButton.onclick = function () {
-                    // call to API to delete row from data base
-                    editNote(row.noteid);
-                };
-                cell7.appendChild(editButton);
+              
+
+   // Add save button
+   const saveButtonContainer = document.createElement('div');
+   saveButtonContainer.setAttribute('class', 'save_button');
+   const saveButton = document.createElement('img');
+   saveButton.src = "../icons/floppy-disk.svg";
+   saveButton.alt = 'save';
+   saveButton.setAttribute('class', 'save_button');
+   saveButton.onclick = function () {
+        // Remove the row from the table
+        newRow.remove();
+        // call to API to delete row from data base
+        deleteDataRow(row.noteid);
+    };
+    saveButtonContainer.appendChild(saveButton);
+    actionButtonContainer.appendChild(saveButtonContainer);
+
+
+
+
+
 
                 // Add location "go there" button
-                const goThereButton = document.createElement('button');
-                goThereButton.textContent = 'locate';
+                const goThereButtonContainer = document.createElement('div');
+                goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+                const goThereButton = document.createElement('img');
+                 goThereButton.src = "../icons/arrow-right-long.svg";
+                 goThereButton.alt = 'go there';
+                 goThereButton.setAttribute('class', 'go_to_location_button');
                 goThereButton.onclick = function () {
                     // call to API to delete row from data base
-                    goThere(obj.url, obj.noteid);
+                    goThere(obj.url, obj.uuid);
                 };
-                cell7.appendChild(goThereButton);
+                goThereButtonContainer.appendChild(goThereButton);
+                actionButtonContainer.appendChild(goThereButtonContainer);
+                
 
                 // add enable/disable button
                 const ableButton = document.createElement('button');
@@ -592,7 +620,8 @@ function render() {
                         enable_note_with_noteid(obj.noteid);
                     };
                 }
-                // cell7.appendChild(ableButton);
+
+                cell7.appendChild(actionButtonContainer);
 
 
                 // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';

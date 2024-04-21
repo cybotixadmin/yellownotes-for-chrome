@@ -284,12 +284,9 @@ function pinYellowNote(info, tab, note_type, brand) {
 
     // Should the user later click "save" The event handler for the save-event in the content script will then call back to the background script to save the note to the database.
 
-
     console.debug("pinYellowNote (info," + note_type + ") and " + brand);
-
     console.debug(JSON.stringify(info));
     console.debug(JSON.stringify(tab));
-
     var pageUrl = info.pageUrl;
     // this is the selection the user flagged.
     var selectionText = info.selectionText;
@@ -307,7 +304,6 @@ function pinYellowNote(info, tab, note_type, brand) {
     console.debug("tab_id: " + tab_id);
 
     // get the template file from the server
-
     console.debug("###calling for contenttype=" + note_type);
 
     var shared_secret_to_identify_background_js_to_content_script_NoteSelectedHTML = "Glbx_marker6";
@@ -317,17 +313,15 @@ function pinYellowNote(info, tab, note_type, brand) {
     }
 
     // lookup the template file
-
     var note_template;
     var note_properties;
-    var session;
+    var sessionToken;
     chrome.storage.local.get([plugin_session_header_name]).then(function (result) {
         console.log(JSON.stringify(result));
-        session = result[plugin_session_header_name];
-        console.log(session);
-        uuid = getUuid(session);
-console.log("uuid" + uuid);
-console.log("uuid" + uuid);
+        sessionToken = result[plugin_session_header_name];
+        console.log(sessionToken);
+        uuid = getUuid(sessionToken);
+        console.log("uuid" + uuid);
 
         return getTemplate(brand, note_type);
     }).then(function (result) {
@@ -335,6 +329,7 @@ console.log("uuid" + uuid);
         note_template = result;
         console.log("note_template");
         console.log(note_template);
+        
         // get personal template related informaton
         console.log("uuid" + uuid);
    
@@ -386,7 +381,7 @@ console.log("uuid" + uuid);
             brand: brand,
             note_template: note_template,
             note_properties: note_properties,
-            session: session,
+            session: sessionToken,
             info: info,
             tab: tab
         });
