@@ -8,6 +8,11 @@ const plugin_remove_banner_uri = "/api/v1.0/delete_note_banner";
 
 const silent_logout_url = "https://www.yellownotes.cloud/logout_silent";
 
+
+const URI_plugin_user_get_own_distributionlists = '/api/v1.0/plugin_user_get_my_distribution_lists';
+
+const URI_plugin_user_setdistributionlist_yellownote = '/api/v1.0/plugin_user_setdistributionlist_yellownote';
+
 async function page_display_login_status() {
     console.log("display_login_status()");
     //con

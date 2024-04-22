@@ -341,6 +341,37 @@ function filterTableAllCols() {
                         break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
                     }
                 }
+            } else if (filtersCols[j].value && filtersCols[j].getAttribute("filtertype") == "selectmatch") {
+                console.log("selectmatch");
+                    // filter on whether or not a checkbox has been checked
+                    var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                    console.log("filter on col: " + comparingCol)
+                    var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                    console.log(cell);
+                    if (cell) {
+                        console.log(cell.getElementsByTagName("select"));
+
+                        var selectElement = cell.getElementsByTagName("select")[0];
+                        var selectedText = selectElement.options[selectElement.selectedIndex].text;
+
+                        // Log the selected text to the console or return it from the function
+                        console.log('Currently selected text:', selectedText);
+
+                        console.log(cell.getElementsByTagName("select")[0].value);
+                        //var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                        //console.log("isChecked: " + isChecked);
+                        var filterValue = filtersCols[j].value;
+                        console.log("filterValue: " + filterValue + " selectedText: " + selectedText);
+                       
+                        var regex = new RegExp(escapeRegex(filterValue), "i");
+                        //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                        // Test the regex against the cell content
+                        if (!regex.test(selectedText.trim())) {
+                            showRow = false;
+                            break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                        }
+                    }
+    
             } else {
 
                 try {
@@ -389,6 +420,8 @@ function render() {
         function (resolve, reject) {
         var ynInstallationUniqueId = "";
         var xYellownotesSession = "";
+        var distributionlists;
+        var data;
         //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
 
@@ -413,8 +446,27 @@ function render() {
                 reject(new Error('Network response was not ok'));
             }
             return response.json();
-        }).then(function (data) {
-            // Parse JSON data
+        }).then(function (resp) {
+            data = resp;
+
+            return fetch(server_url + URI_plugin_user_get_own_distributionlists, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: ynInstallationUniqueId,
+                    [plugin_session_header_name]: xYellownotesSession,
+                },
+            });
+        }).then(response => {
+            if (!response.ok) {
+                reject(new Error('Network response was not ok'));
+            }
+            return response.json();
+        }).then(function (dist) {
+            distributionListData = dist;
+
+            console.log(distributionListData);
+
 
             console.log(data);
 
@@ -551,7 +603,7 @@ function render() {
                const deleteButtonContainer = document.createElement('div');
                deleteButtonContainer.setAttribute('class', 'delete_button');
                const deleteButton = document.createElement('img');
-               deleteButton.src = "../icons/delete-left.svg";
+               deleteButton.src = "../icons/trash-can.transparent.40x40.png";
                 deleteButton.alt = 'delete';
                 deleteButton.setAttribute('class', 'delete_button');
                 deleteButton.onclick = function () {
@@ -623,6 +675,27 @@ function render() {
 
                 cell7.appendChild(actionButtonContainer);
 
+// create drop-down of feeds
+  // Add location "go there" button
+  const selectionList = document.createElement('select');
+//  selectionContainer.setAttribute('class', 'go_to_location_button');
+const option0 = document.createElement('option');
+option0.value = "";
+option0.textContent = "";
+selectionList.appendChild(option0);
+
+  const option = document.createElement('option');
+   option.value = row.distributionlistid;
+option.textContent = row.distributionlistname;
+   selectionList.appendChild(option);
+
+
+   // Create the dropdown list
+const dropdown = createDropdown(distributionListData, row.distributionlistid);
+console.log(dropdown);
+   cell8.appendChild(dropdown);
+
+
 
                 // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
                 //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
@@ -638,8 +711,52 @@ function render() {
             resolve('Data saved OK');
         });
     });
-
 }
+
+function createDropdown(optionsArray, selectedDistributionListId) {
+    // Create a select element
+    const selectElement = document.createElement('select');
+    
+    // Add a blank option as the first option
+    const blankOption = document.createElement('option');
+    blankOption.value = '';
+    selectElement.appendChild(blankOption);
+    
+    // Loop through the array and create an option for each object
+    optionsArray.forEach(item => {
+        const option = document.createElement('option');
+        option.textContent = item.name; // Set the display text
+        option.value = item.distributionlistid; // Set the option value
+        selectElement.appendChild(option);
+    });
+    
+    // Set the selected option based on distributionListId argument
+    selectElement.value = selectedDistributionListId && optionsArray.some(item => item.distributionlistid === selectedDistributionListId)
+        ? selectedDistributionListId
+        : '';
+
+    // Add an event listener for the 'change' event
+    selectElement.addEventListener('change', (event) => {
+        const selectedId = event.target.value;
+        console.debug( event.target.parentNode);
+        console.debug( event.target.parentNode.parentNode);
+        console.debug( event.target.parentNode.parentNode.firstChild.textContent );
+noteid = event.target.parentNode.parentNode.firstChild.textContent;
+
+        // Only trigger fetch call if the selected value is not empty
+        if (selectedId) {
+            console.debug("update the note with this distrubtionlistid: " + selectedId);
+
+
+            setNoteDistributionlistId( noteid, selectedId );
+            
+            
+        }
+    });
+
+    return selectElement;
+}
+
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
@@ -679,6 +796,45 @@ async function setNoteActiveStatusByUUID(noteid, status) {
         console.error(error);
     }
 }
+
+
+async function setNoteDistributionlistId(noteid, distributionlistid) {
+    console.debug("setNoteDistributionlistId: " + noteid + " distributionlistid: " + distributionlistid);
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+        const userid = "";
+        const message_body = JSON.stringify({
+                noteid: noteid,
+                distributionlistid: distributionlistid,
+            });
+        //console.log(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_setdistributionlist_yellownote, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.log(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table
+
+        // Parse JSON data
+        const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
 
 function disable_note_with_noteid(noteid) {
     console.debug("disable_note_with_noteid: " + noteid);
