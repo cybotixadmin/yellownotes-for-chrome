@@ -539,7 +539,7 @@ function render() {
 
                 try {
                     type_cell.textContent = obj.note_type;
-
+type_cell.setAttribute('name', 'note_type');
                 } catch (e) {
                     console.log(e);
                 }
@@ -582,18 +582,28 @@ function render() {
                 cell4.appendChild(suspendActButton);
 
                 // where note is attached
-
+                 //contenteditable="true"
                 cell5.textContent = obj.url;
+                cell5.setAttribute('contenteditable', 'true');
+                cell5.setAttribute('data-label', 'url');
+                cell5.setAttribute('name', 'url');
+                
                 // payload
+                // contenteditable="true"
                 if (obj.note_type == "yellownote") {
                     cell6.textContent = b64_to_utf8(obj.message_display_text);
+                    cell6.setAttribute('name', 'message_display_text');
                 } else if (obj.note_type == "webframe") {
                     cell6.textContent = (obj.content_url);
+                    cell6.setAttribute('name', 'content_url');
                 } else {
                     // default - will revisit this later (L.R.)
                     cell6.textContent = b64_to_utf8(obj.message_display_text);
+                    cell6.setAttribute('name', 'message_display_text');
                 }
-                // create small table to contain the action buttons
+                cell6.setAttribute('contenteditable', 'true');
+                cell6.setAttribute('data-label', 'text');
+// create small table to contain the action buttons
 
                                 // Add button container
                const actionButtonContainer = document.createElement('div');
@@ -625,11 +635,15 @@ function render() {
    saveButton.src = "../icons/floppy-disk.svg";
    saveButton.alt = 'save';
    saveButton.setAttribute('class', 'save_button');
-   saveButton.onclick = function () {
-        // Remove the row from the table
-        newRow.remove();
-        // call to API to delete row from data base
-        deleteDataRow(row.noteid);
+   saveButton.onclick = function (event) {
+
+    console.debug( event.target.parentNode);
+    console.debug( event.target.parentNode.parentNode);
+    console.debug( event.target.parentNode.parentNode.firstChild.textContent );
+
+
+        // call to API to save changes to data base
+        saveChanges(row.noteid, event);
     };
     saveButtonContainer.appendChild(saveButton);
     actionButtonContainer.appendChild(saveButtonContainer);
@@ -674,7 +688,7 @@ function render() {
                 }
 
                 cell7.appendChild(actionButtonContainer);
-
+                cell7.setAttribute('data-label', 'text');
 // create drop-down of feeds
   // Add location "go there" button
   const selectionList = document.createElement('select');
@@ -705,8 +719,8 @@ console.log(dropdown);
                 cell2.setAttribute('class', 'timestamp');
                 cell3.setAttribute('data-label', 'lastmodfiedtime');
                 cell3.setAttribute('class', 'timestamp');
-                cell4.setAttribute('data-label', 'url');
-                cell5.setAttribute('data-label', 'text');
+                
+               
             });
             resolve('Data saved OK');
         });
@@ -775,6 +789,86 @@ async function setNoteActiveStatusByUUID(noteid, status) {
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_set_note_active_status, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.log(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table
+
+        // Parse JSON data
+        const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+/**
+ * save changes to the notes attachment url and content text ( or URL incase of webframe)
+ * @param {
+ * } noteid 
+ */
+async function saveChanges(noteid, event) {
+    console.debug("saveChanges: " + noteid );
+    console.debug( event.target.parentNode);
+    console.debug( event.target.parentNode.parentNode);
+    console.debug( event.target.parentNode.parentNode.parentNode);
+    console.debug( event.target.parentNode.parentNode.parentNode.parentNode);
+
+    console.debug( event.target.parentNode.parentNode.firstChild.textContent );
+
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+var message_display_text;
+var content_url
+        try{
+            message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent );
+    }catch(e){
+        console.debug(e);
+    }
+    try{
+        content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
+}catch(e){
+    console.debug(e);
+}
+        const url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="url"]').textContent;
+        const note_type = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="note_type"]').textContent;
+
+        var message_body ;
+if (note_type == "webframe") {
+    console.debug("webframe");
+    message_body = JSON.stringify({
+        noteid: noteid,
+        note_type: note_type,
+        url: url,
+        content_url: content_url,
+    });
+}else{
+    message_body = JSON.stringify({
+        noteid: noteid,
+        note_type: note_type,
+        url: url,
+        message_display_text: message_display_text,
+    });
+}
+
+       
+
+        //console.log(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_savechanges_yellownote, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

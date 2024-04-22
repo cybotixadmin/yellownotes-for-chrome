@@ -13,6 +13,9 @@ const URI_plugin_user_get_own_distributionlists = '/api/v1.0/plugin_user_get_my_
 
 const URI_plugin_user_setdistributionlist_yellownote = '/api/v1.0/plugin_user_setdistributionlist_yellownote';
 
+const URI_plugin_user_savechanges_yellownote = '/api/v1.0/plugin_user_savechanges_yellownote';
+
+
 async function page_display_login_status() {
     console.log("display_login_status()");
     //con
