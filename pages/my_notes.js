@@ -49,12 +49,13 @@ async function deleteDataRow(noteid) {
  * Navigate to the page where the note is attached
  * @param {*} url
  */
-async function goThere(url, noteid) {
+async function goThere(datarow) {
     try {
 
         const userid = "";
-        console.log("go to url: " + url);
-        console.log("go lookup noteid: " + noteid);
+        console.log("go to url: " + datarow.url);
+        console.log("go lookup noteid: " + datarow.noteid);
+        console.log("go lookup creatorid: " + datarow.creatorid);
 
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();
@@ -64,8 +65,7 @@ async function goThere(url, noteid) {
             message: {
                 action: "scroll_to_note",
                 scroll_to_note_details: {
-                    noteid: noteid,
-                    url: url
+                    datarow: datarow
 
                 }
             }
@@ -343,35 +343,35 @@ function filterTableAllCols() {
                 }
             } else if (filtersCols[j].value && filtersCols[j].getAttribute("filtertype") == "selectmatch") {
                 console.log("selectmatch");
-                    // filter on whether or not a checkbox has been checked
-                    var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
-                    console.log("filter on col: " + comparingCol)
-                    var cell = rows[i].getElementsByTagName("td")[comparingCol];
-                    console.log(cell);
-                    if (cell) {
-                        console.log(cell.getElementsByTagName("select"));
+                // filter on whether or not a checkbox has been checked
+                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                console.log("filter on col: " + comparingCol)
+                var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                console.log(cell);
+                if (cell) {
+                    console.log(cell.getElementsByTagName("select"));
 
-                        var selectElement = cell.getElementsByTagName("select")[0];
-                        var selectedText = selectElement.options[selectElement.selectedIndex].text;
+                    var selectElement = cell.getElementsByTagName("select")[0];
+                    var selectedText = selectElement.options[selectElement.selectedIndex].text;
 
-                        // Log the selected text to the console or return it from the function
-                        console.log('Currently selected text:', selectedText);
+                    // Log the selected text to the console or return it from the function
+                    console.log('Currently selected text:', selectedText);
 
-                        console.log(cell.getElementsByTagName("select")[0].value);
-                        //var isChecked = cell.querySelector('input[type="checkbox"]').checked;
-                        //console.log("isChecked: " + isChecked);
-                        var filterValue = filtersCols[j].value;
-                        console.log("filterValue: " + filterValue + " selectedText: " + selectedText);
-                       
-                        var regex = new RegExp(escapeRegex(filterValue), "i");
-                        //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
-                        // Test the regex against the cell content
-                        if (!regex.test(selectedText.trim())) {
-                            showRow = false;
-                            break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
-                        }
+                    console.log(cell.getElementsByTagName("select")[0].value);
+                    //var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                    //console.log("isChecked: " + isChecked);
+                    var filterValue = filtersCols[j].value;
+                    console.log("filterValue: " + filterValue + " selectedText: " + selectedText);
+
+                    var regex = new RegExp(escapeRegex(filterValue), "i");
+                    //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                    // Test the regex against the cell content
+                    if (!regex.test(selectedText.trim())) {
+                        showRow = false;
+                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
                     }
-    
+                }
+
             } else {
 
                 try {
@@ -467,7 +467,6 @@ function render() {
 
             console.log(distributionListData);
 
-
             console.log(data);
 
             var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
@@ -492,18 +491,18 @@ function render() {
                 const newRow = tableBody.insertRow();
 
                 // Create cells and populate them with data
-                const cell1 = newRow.insertCell(0);
-                const cell2 = newRow.insertCell(1);
-                const cell3 = newRow.insertCell(2);
+                const cell_noteid = newRow.insertCell(0);
+                const cell_createtime = newRow.insertCell(1);
+                const cell_lastmodified = newRow.insertCell(2);
                 const type_cell = newRow.insertCell(3);
-                const cell4 = newRow.insertCell(4);
-                const cell5 = newRow.insertCell(5);
-                const cell6 = newRow.insertCell(6);
-                const cell7 = newRow.insertCell(7);
-                const cell8 = newRow.insertCell(8);
+                const cell_status = newRow.insertCell(4);
+                const cell_url = newRow.insertCell(5);
+                const cell_payload = newRow.insertCell(6);
+                const cell_actions = newRow.insertCell(7);
+                const cell_distributionlist = newRow.insertCell(8);
                 const obj = JSON.parse(row.json);
                 // key column - not to be displayed
-                cell1.textContent = row.noteid;
+                cell_noteid.textContent = row.noteid;
                 // create timestamp - not to be dsiplayed either
                 try {
                     console.log(row.createtime);
@@ -512,11 +511,11 @@ function render() {
                         console.log("createtime is timestamp: " + row.createtime);
                         //console.log("createtime: " + integerstring2timestamp(row.createtime));
 
-                        cell2.textContent = timestampstring2timestamp(row.createtime);
+                        cell_createtime.textContent = timestampstring2timestamp(row.createtime);
                     } else {
 
                         console.log("createtime is integer: " + row.createtime)
-                        cell2.textContent = integerstring2timestamp(row.createtime);
+                        cell_createtime.textContent = integerstring2timestamp(row.createtime);
 
                     }
 
@@ -528,10 +527,10 @@ function render() {
                     console.log(/2024/.test(row.lastmodifiedtime));
                     if (/2024/.test(row.lastmodifiedtime)) {
                         console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
-                        cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
+                        cell_lastmodified.textContent = timestampstring2timestamp(row.lastmodifiedtime);
                     } else {
                         console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)
-                        cell3.textContent = integerstring2timestamp(row.lastmodifiedtime);
+                        cell_lastmodified.textContent = integerstring2timestamp(row.lastmodifiedtime);
                     }
                 } catch (e) {
                     console.log(e);
@@ -539,7 +538,7 @@ function render() {
 
                 try {
                     type_cell.textContent = obj.note_type;
-type_cell.setAttribute('name', 'note_type');
+                    type_cell.setAttribute('name', 'note_type');
                 } catch (e) {
                     console.log(e);
                 }
@@ -579,41 +578,41 @@ type_cell.setAttribute('name', 'note_type');
                         //           await enable_note_with_noteid(row.noteid);
                     }
                 });
-                cell4.appendChild(suspendActButton);
+                cell_status.appendChild(suspendActButton);
 
                 // where note is attached
-                 //contenteditable="true"
-                cell5.textContent = obj.url;
-                cell5.setAttribute('contenteditable', 'true');
-                cell5.setAttribute('data-label', 'url');
-                cell5.setAttribute('name', 'url');
-                
+                //contenteditable="true"
+                cell_url.textContent = obj.url;
+                cell_url.setAttribute('contenteditable', 'true');
+                cell_url.setAttribute('data-label', 'url');
+                cell_url.setAttribute('name', 'url');
+
                 // payload
                 // contenteditable="true"
                 if (obj.note_type == "yellownote") {
-                    cell6.textContent = b64_to_utf8(obj.message_display_text);
-                    cell6.setAttribute('name', 'message_display_text');
+                    cell_payload.textContent = b64_to_utf8(obj.message_display_text);
+                    cell_payload.setAttribute('name', 'message_display_text');
                 } else if (obj.note_type == "webframe") {
-                    cell6.textContent = (obj.content_url);
-                    cell6.setAttribute('name', 'content_url');
+                    cell_payload.textContent = (obj.content_url);
+                    cell_payload.setAttribute('name', 'content_url');
                 } else {
                     // default - will revisit this later (L.R.)
-                    cell6.textContent = b64_to_utf8(obj.message_display_text);
-                    cell6.setAttribute('name', 'message_display_text');
+                    cell_payload.textContent = b64_to_utf8(obj.message_display_text);
+                    cell_payload.setAttribute('name', 'message_display_text');
                 }
-                cell6.setAttribute('contenteditable', 'true');
-                cell6.setAttribute('data-label', 'text');
-// create small table to contain the action buttons
+                cell_payload.setAttribute('contenteditable', 'true');
+                cell_payload.setAttribute('data-label', 'text');
+                // create small table to contain the action buttons
 
-                                // Add button container
-               const actionButtonContainer = document.createElement('div');
-               actionButtonContainer.setAttribute('class', 'button-container');
+                // Add button container
+                const actionButtonContainer = document.createElement('div');
+                actionButtonContainer.setAttribute('class', 'button-container');
 
                 // Add delete button
-               const deleteButtonContainer = document.createElement('div');
-               deleteButtonContainer.setAttribute('class', 'delete_button');
-               const deleteButton = document.createElement('img');
-               deleteButton.src = "../icons/trash-can.transparent.40x40.png";
+                const deleteButtonContainer = document.createElement('div');
+                deleteButtonContainer.setAttribute('class', 'delete_button');
+                const deleteButton = document.createElement('img');
+                deleteButton.src = "../icons/trash-can.transparent.40x40.png";
                 deleteButton.alt = 'delete';
                 deleteButton.setAttribute('class', 'delete_button');
                 deleteButton.onclick = function () {
@@ -626,47 +625,40 @@ type_cell.setAttribute('name', 'note_type');
                 actionButtonContainer.appendChild(deleteButtonContainer);
 
                 // Add save/edit button
-              
-
-   // Add save button
-   const saveButtonContainer = document.createElement('div');
-   saveButtonContainer.setAttribute('class', 'save_button');
-   const saveButton = document.createElement('img');
-   saveButton.src = "../icons/floppy-disk.svg";
-   saveButton.alt = 'save';
-   saveButton.setAttribute('class', 'save_button');
-   saveButton.onclick = function (event) {
-
-    console.debug( event.target.parentNode);
-    console.debug( event.target.parentNode.parentNode);
-    console.debug( event.target.parentNode.parentNode.firstChild.textContent );
 
 
-        // call to API to save changes to data base
-        saveChanges(row.noteid, event);
-    };
-    saveButtonContainer.appendChild(saveButton);
-    actionButtonContainer.appendChild(saveButtonContainer);
+                // Add save button
+                const saveButtonContainer = document.createElement('div');
+                saveButtonContainer.setAttribute('class', 'save_button');
+                const saveButton = document.createElement('img');
+                saveButton.src = "../icons/floppy-disk.svg";
+                saveButton.alt = 'save';
+                saveButton.setAttribute('class', 'save_button');
+                saveButton.onclick = function (event) {
 
+                    console.debug(event.target.parentNode);
+                    console.debug(event.target.parentNode.parentNode);
+                    console.debug(event.target.parentNode.parentNode.firstChild.textContent);
 
-
-
-
+                    // call to API to save changes to data base
+                    saveChanges(row.noteid, event);
+                };
+                saveButtonContainer.appendChild(saveButton);
+                actionButtonContainer.appendChild(saveButtonContainer);
 
                 // Add location "go there" button
                 const goThereButtonContainer = document.createElement('div');
                 goThereButtonContainer.setAttribute('class', 'go_to_location_button');
                 const goThereButton = document.createElement('img');
-                 goThereButton.src = "../icons/arrow-right-long.svg";
-                 goThereButton.alt = 'go there';
-                 goThereButton.setAttribute('class', 'go_to_location_button');
+                goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
+                goThereButton.alt = 'go there';
+                goThereButton.setAttribute('class', 'go_to_location_button');
                 goThereButton.onclick = function () {
                     // call to API to delete row from data base
-                    goThere(obj.url, obj.uuid);
+                    goThere(row);
                 };
                 goThereButtonContainer.appendChild(goThereButton);
                 actionButtonContainer.appendChild(goThereButtonContainer);
-                
 
                 // add enable/disable button
                 const ableButton = document.createElement('button');
@@ -687,40 +679,36 @@ type_cell.setAttribute('name', 'note_type');
                     };
                 }
 
-                cell7.appendChild(actionButtonContainer);
-                cell7.setAttribute('data-label', 'text');
-// create drop-down of feeds
-  // Add location "go there" button
-  const selectionList = document.createElement('select');
-//  selectionContainer.setAttribute('class', 'go_to_location_button');
-const option0 = document.createElement('option');
-option0.value = "";
-option0.textContent = "";
-selectionList.appendChild(option0);
+                cell_actions.appendChild(actionButtonContainer);
+                cell_actions.setAttribute('data-label', 'text');
+                // create drop-down of feeds
+                // Add location "go there" button
+                const selectionList = document.createElement('select');
+                //  selectionContainer.setAttribute('class', 'go_to_location_button');
+                const option0 = document.createElement('option');
+                option0.value = "";
+                option0.textContent = "";
+                selectionList.appendChild(option0);
 
-  const option = document.createElement('option');
-   option.value = row.distributionlistid;
-option.textContent = row.distributionlistname;
-   selectionList.appendChild(option);
+                const option = document.createElement('option');
+                option.value = row.distributionlistid;
+                option.textContent = row.distributionlistname;
+                selectionList.appendChild(option);
 
-
-   // Create the dropdown list
-const dropdown = createDropdown(distributionListData, row.distributionlistid);
-console.log(dropdown);
-   cell8.appendChild(dropdown);
-
-
+                // Create the dropdown list
+                const dropdown = createDropdown(distributionListData, row.distributionlistid);
+                console.log(dropdown);
+                cell_distributionlist.appendChild(dropdown);
 
                 // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
                 //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
 
                 // Adding data-label for mobile responsive
-                cell2.setAttribute('data-label', 'createtime');
-                cell2.setAttribute('class', 'timestamp');
-                cell3.setAttribute('data-label', 'lastmodfiedtime');
-                cell3.setAttribute('class', 'timestamp');
-                
-               
+                cell_createtime.setAttribute('data-label', 'createtime');
+                cell_createtime.setAttribute('class', 'timestamp');
+                cell_lastmodified.setAttribute('data-label', 'lastmodfiedtime');
+                cell_lastmodified.setAttribute('class', 'timestamp');
+
             });
             resolve('Data saved OK');
         });
@@ -730,12 +718,12 @@ console.log(dropdown);
 function createDropdown(optionsArray, selectedDistributionListId) {
     // Create a select element
     const selectElement = document.createElement('select');
-    
+
     // Add a blank option as the first option
     const blankOption = document.createElement('option');
     blankOption.value = '';
     selectElement.appendChild(blankOption);
-    
+
     // Loop through the array and create an option for each object
     optionsArray.forEach(item => {
         const option = document.createElement('option');
@@ -743,34 +731,31 @@ function createDropdown(optionsArray, selectedDistributionListId) {
         option.value = item.distributionlistid; // Set the option value
         selectElement.appendChild(option);
     });
-    
+
     // Set the selected option based on distributionListId argument
     selectElement.value = selectedDistributionListId && optionsArray.some(item => item.distributionlistid === selectedDistributionListId)
-        ? selectedDistributionListId
-        : '';
+         ? selectedDistributionListId
+         : '';
 
     // Add an event listener for the 'change' event
     selectElement.addEventListener('change', (event) => {
         const selectedId = event.target.value;
-        console.debug( event.target.parentNode);
-        console.debug( event.target.parentNode.parentNode);
-        console.debug( event.target.parentNode.parentNode.firstChild.textContent );
-noteid = event.target.parentNode.parentNode.firstChild.textContent;
+        console.debug(event.target.parentNode);
+        console.debug(event.target.parentNode.parentNode);
+        console.debug(event.target.parentNode.parentNode.firstChild.textContent);
+        noteid = event.target.parentNode.parentNode.firstChild.textContent;
 
         // Only trigger fetch call if the selected value is not empty
         if (selectedId) {
             console.debug("update the note with this distrubtionlistid: " + selectedId);
 
+            setNoteDistributionlistId(noteid, selectedId);
 
-            setNoteDistributionlistId( noteid, selectedId );
-            
-            
         }
     });
 
     return selectElement;
 }
-
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
@@ -811,59 +796,52 @@ async function setNoteActiveStatusByUUID(noteid, status) {
     }
 }
 
-
-
 /**
  * save changes to the notes attachment url and content text ( or URL incase of webframe)
  * @param {
- * } noteid 
+ * } noteid
  */
 async function saveChanges(noteid, event) {
-    console.debug("saveChanges: " + noteid );
-    console.debug( event.target.parentNode);
-    console.debug( event.target.parentNode.parentNode);
-    console.debug( event.target.parentNode.parentNode.parentNode);
-    console.debug( event.target.parentNode.parentNode.parentNode.parentNode);
+    console.debug("saveChanges: " + noteid);
+   
+    console.debug(event.target.parentNode.parentNode.parentNode.parentNode);
 
-    console.debug( event.target.parentNode.parentNode.firstChild.textContent );
-
+   
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
-var message_display_text;
-var content_url
-        try{
-            message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent );
-    }catch(e){
-        console.debug(e);
-    }
-    try{
-        content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
-}catch(e){
-    console.debug(e);
-}
+        var message_display_text;
+        var content_url
+        try {
+            message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent);
+        } catch (e) {
+            console.debug(e);
+        }
+        try {
+            content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
+        } catch (e) {
+            console.debug(e);
+        }
         const url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="url"]').textContent;
         const note_type = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="note_type"]').textContent;
 
-        var message_body ;
-if (note_type == "webframe") {
-    console.debug("webframe");
-    message_body = JSON.stringify({
-        noteid: noteid,
-        note_type: note_type,
-        url: url,
-        content_url: content_url,
-    });
-}else{
-    message_body = JSON.stringify({
-        noteid: noteid,
-        note_type: note_type,
-        url: url,
-        message_display_text: message_display_text,
-    });
-}
-
-       
+        var message_body;
+        if (note_type == "webframe") {
+            console.debug("webframe");
+            message_body = JSON.stringify({
+                    noteid: noteid,
+                    note_type: note_type,
+                    url: url,
+                    content_url: content_url,
+                });
+        } else {
+            message_body = JSON.stringify({
+                    noteid: noteid,
+                    note_type: note_type,
+                    url: url,
+                    message_display_text: message_display_text,
+                });
+        }
 
         //console.log(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -890,7 +868,6 @@ if (note_type == "webframe") {
         console.error(error);
     }
 }
-
 
 async function setNoteDistributionlistId(noteid, distributionlistid) {
     console.debug("setNoteDistributionlistId: " + noteid + " distributionlistid: " + distributionlistid);
@@ -927,8 +904,6 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
         console.error(error);
     }
 }
-
-
 
 function disable_note_with_noteid(noteid) {
     console.debug("disable_note_with_noteid: " + noteid);
@@ -1057,15 +1032,8 @@ function replaceLink(node, note_template) {
 }
 
 render().then(function (d) {
-    console.log("render NOtes");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log(d);
+    console.debug("render notes");
+    console.debug(d);
     // kick of the process of rendering the yellow sticky notes in the graphic form
 
 

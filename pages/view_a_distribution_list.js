@@ -1,7 +1,6 @@
 
 
 
-
 const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 const URI_plugin_user_set_note_active_status = "/api/plugin_user_setstatus_yellownote";
@@ -11,6 +10,13 @@ const URI_plugin_user_get_active_feed_notes = "/api/v1.0/plugin_user_get_active_
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
 //const browser_id = chrome.runtime.id;
+
+
+const url = window.location.href.trim();
+console.log(url);
+console.log(url.replace(/.*distributionlistid=/, ""));
+// accept the submitted value for the distribution list id
+
 
 // Function to use "fetch" to delete a data row
 async function deleteDataRow(noteid) {
@@ -52,14 +58,16 @@ async function deleteDataRow(noteid) {
 
 /**
  * Navigate to the page where the note is attached
+ * 
+ * Include all note information in the message
  * @param {*} url
  */
-async function goThere(url, noteid) {
+async function goThere(url, datarow) {
     try {
 
-        const userid = "";
-        console.log("go to url: " + url);
-        console.log("go lookup noteid: " + noteid);
+        
+        console.log("go to url: " + datarow.url);
+        console.log("go lookup noteid: " + datarow.noteid);
 
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();
@@ -70,7 +78,8 @@ async function goThere(url, noteid) {
                 action: "scroll_to_note",
                 scroll_to_note_details: {
                     noteid: noteid,
-                    url: url
+                    url: url,
+                    datarow: datarow
 
                 }
             }
@@ -88,94 +97,7 @@ async function goThere(url, noteid) {
     }
 }
 
-/**
- * Open the note for editing
- * @param {*} noteid
- */
 
-async function editNote(noteid) {
-    try {
-
-        const userid = "";
-        console.log("deleting: " + noteid);
-        const message_body = '{ "noteid":"' + noteid + '" }';
-        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-        let session = await chrome.storage.local.get([plugin_session_header_name]);
-
-        //console.log(message_body);
-        // Fetch data from web service (replace with your actual API endpoint)
-        const response = await fetch(server_url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
-                    [plugin_session_header_name]: session[plugin_session_header_name]
-                },
-                body: message_body // example IDs, replace as necessary
-            });
-        //console.log(response);
-        // Check for errors
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Parse JSON data
-        const data = await response.json();
-
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-// Function to fetch data and populate the table
-function DELETEfetchData(distributionlistid) {
-    console.debug("fetchData (" + distributionlistid + ")");
-    try {
-
-        return new Promise(
-            function (resolve, reject) {
-
-            // const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
-
-            console.log(installationUniqueId);
-            //  let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-            //  let session = await chrome.storage.local.get([plugin_session_header_name]);
-            var InstallationUniqueId;
-            var sessiontoken;
-            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
-            .then(function (ins) {
-                console.log(ins);
-                InstallationUniqueId = ins[plugin_uuid_header_name];
-                sessiontoken = ins[plugin_session_header_name];
-                console.log(InstallationUniqueId);
-                console.log(sessiontoken);
-                //ynInstallationUniqueId = "dummy";
-
-                // Fetch data from web service (replace with your actual API endpoint)
-                return fetch(server_url + URI_plugin_user_get_own_yellownotes, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [plugin_uuid_header_name]: InstallationUniqueId,
-                        [plugin_session_header_name]: sessiontoken
-                    },
-                    body: JSON.stringify({}) // example IDs, replace as necessary
-                });
-            });
-            // Check for errors
-            //  if (!response.ok) {
-            //      throw new Error(`HTTP error! status: ${response.status}`);
-            //  }
-
-
-            //resolve('Data saved OK');
-
-        });
-
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 // Locate all elements with the class "my-button"
 const buttons = document.querySelectorAll('.sortableCol');
@@ -331,209 +253,159 @@ function filterTable(colheader) {
 
 // Fetch data on page load
 
-
-function render(distributionlistid) {
-    console.log("render (distributionlistid=" + distributionlistid + ")");
-
-    return new Promise(
-        function (resolve, reject) {
-        var ynInstallationUniqueId = "";
-        var xYellownotesSession = "";
-        //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+// Fetch data on page load
 
 
-        chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
-            console.log(result);
-            console.log(ynInstallationUniqueId);
-            ynInstallationUniqueId = result[plugin_uuid_header_name];
-            xYellownotesSession = result[plugin_session_header_name];
-            console.log(ynInstallationUniqueId);
-            console.log(xYellownotesSession);
-            const msg = {
-                distributionlistid: distributionlistid
-            }
-            console.log(msg);
-            return fetch(server_url + URI_plugin_user_get_active_feed_notes, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: ynInstallationUniqueId,
-                    [plugin_session_header_name]: xYellownotesSession,
-                },
-                body: JSON.stringify(msg) // example IDs, replace as necessary, the body is used to retrieve the notes of other users, default is to retrieve the notes of the authenticated user
-            });
-        }).then(response => {
-            if (!response.ok) {
-                reject(new Error('Network response was not ok'));
-            }
-            return response.json();
-        }).then(function (data) {
-            // Parse JSON data
+async function fetchData(distributionlistid) {
+    console.log("fetchData");
 
-            console.log(data);
+    var ynInstallationUniqueId = "";
+    var xYellownotesSession = "";
 
-            var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
-            console.log(utc);
-            console.log(Date.now());
-            var now = new Date;
-            var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-                    now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-            console.log(utc_timestamp);
-            console.log(new Date().toISOString());
+    let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+    let session = await chrome.storage.local.get([plugin_session_header_name]);
 
-            // Get table body element
-            const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+    ynInstallationUniqueId = plugin_uuid[plugin_uuid_header_name];
+    xYellownotesSession = session[plugin_session_header_name];
 
-            // Loop through data and populate the table
-            data.forEach(row => {
-                console.log(row);
-                console.log(JSON.stringify(row));
-                console.log(row.noteid);
-
-                // Create new row
-                const newRow = tableBody.insertRow();
-
-                newRow.noteid = row.noteid;
-                // Create cells and populate them with data
-                //const cell1 = newRow.insertCell(0);
-                const cell2 = newRow.insertCell(0);
-                const cell3 = newRow.insertCell(1);
-                //const cell4 = newRow.insertCell(4);
-                const cell5 = newRow.insertCell(2);
-                const cell6 = newRow.insertCell(3);
-                const cell7 = newRow.insertCell(4);
-                const cell8 = newRow.insertCell(5);
-                const obj = JSON.parse(row.json);
-                //cell1.textContent = row.noteid;
-                try {
-                    console.log(row.createtime);
-                    console.log(/2024/.test(row.createtime));
-                    if (/2024/.test(row.createtime)) {
-                        console.log("createtime is timestamp: " + row.createtime);
-                        //console.log("createtime: " + integerstring2timestamp(row.createtime));
-
-                        cell2.textContent = timestampstring2timestamp(row.createtime);
-                    } else {
-
-                        console.log("createtime is integer: " + row.createtime)
-                        cell2.textContent = integerstring2timestamp(row.createtime);
-
-                    }
-
-                } catch (e) {
-                    console.log(e);
-                }
-                try {
-                    console.log(row.lastmodifiedtime);
-                    console.log(/2024/.test(row.lastmodifiedtime));
-                    if (/2024/.test(row.lastmodifiedtime)) {
-                        console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
-                        //console.log("createtime: " + integerstring2timestamp(row.createtime));
-
-                        cell3.textContent = timestampstring2timestamp(row.lastmodifiedtime);
-                    } else {
-
-                        console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)
-                        cell3.textContent = integerstring2timestamp(row.lastmodifiedtime);
-
-                    }
-
-                } catch (e) {
-                    console.log(e);
-                }
-
-                // render a check box to enable/disable the note
-                const suspendActButton = document.createElement("span");
-                if (row.status == 1) {
-                    // active
-                    suspendActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
-                } else {
-                    // deactivated
-                    suspendActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
-                }
-
-                // Add classes using classList with error handling
-                const inputElement = suspendActButton.querySelector("input");
-                if (inputElement) {
-                    inputElement.classList.add("input-class");
-                }
-
-                const labelElement = suspendActButton.querySelector("label");
-                if (labelElement) {
-                    labelElement.classList.add("switch");
-                }
-                const spanElement = suspendActButton.querySelector("span");
-                if (spanElement) {
-                    spanElement.classList.add("slider");
-                }
-                suspendActButton.addEventListener("change", async(e) => {
-                    if (e.target.checked) {
-                        //         await disable_note_with_noteid(row.noteid);
-                        await setNoteActiveStatusByUUID(row.noteid, 1);
-                    } else {
-                        await setNoteActiveStatusByUUID(row.noteid, 0);
-                        //           await enable_note_with_noteid(row.noteid);
-                    }
-                });
-                //cell4.appendChild(suspendActButton);
-
-   
-
-                cell5.textContent = obj.url;
-                cell6.textContent = obj.message_display_text;
-
-                // create small table to contain the action buttons
-
-
-              
-
-                // Add location "go there" button
-                const goThereButton = document.createElement('button');
-                goThereButton.textContent = 'locate';
-                goThereButton.onclick = function () {
-                    // call to API to delete row from data base
-                    goThere(obj.url, obj.noteid);
-                };
-                cell7.appendChild(goThereButton);
-
-                // add enable/disable button
-                const ableButton = document.createElement('button');
-
-                if (row.status == "1" || row.status == 1) {
-                    ableButton.setAttribute('name', 'disable');
-                    ableButton.textContent = 'disable';
-                    ableButton.onclick = function () {
-                        // call to API to delete row from data base
-                        disable_note_with_noteid(obj.noteid);
-                    };
-                } else {
-                    ableButton.setAttribute('name', 'enable');
-                    ableButton.textContent = 'enable';
-                    ableButton.onclick = function () {
-                        // call to API to delete row from data base
-                        enable_note_with_noteid(obj.noteid);
-                    };
-                }
-                // cell7.appendChild(ableButton);
-
-
-                // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
-                //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
-
-                // Adding data-label for mobile responsive
-                cell2.setAttribute('data-label', 'createtime');
-                cell2.setAttribute('class', 'timestamp');
-                cell3.setAttribute('data-label', 'lastmodfiedtime');
-                cell3.setAttribute('class', 'timestamp');
-                cell5.setAttribute('data-label', 'text');
-            });
-            resolve('Data saved OK');
+    const msg = {
+        distributionlistid: distributionlistid
+    };
+    const response = await fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [plugin_uuid_header_name]: ynInstallationUniqueId,
+                [plugin_session_header_name]: xYellownotesSession,
+            },
+            body: JSON.stringify(msg)
         });
+
+    if (!response.ok) {
+        reject(new Error('Network response was not ok'));
+    }
+
+    const data = await response.json();
+    // Parse JSON data
+
+    console.log(data);
+
+    var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+    console.log(utc);
+    console.log(Date.now());
+    var now = new Date;
+    var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+    console.log(utc_timestamp);
+    console.log(new Date().toISOString());
+
+    // Get table body element
+    const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+
+    // Loop through data and populate the table
+    data.forEach(row => {
+        console.log(row);
+        console.log(JSON.stringify(row));
+        console.log(row.noteid);
+
+        // Create new row
+        const newRow = tableBody.insertRow();
+
+        // Create cells and populate them with data
+        const cell1 = newRow.insertCell(0);
+        const cell_lastmodifiedtime = newRow.insertCell(1);
+        const cell_createtime = newRow.insertCell(2);
+        const type_cell = newRow.insertCell(3);
+        const cell_name = newRow.insertCell(4);
+        const cell_url = newRow.insertCell(5);
+        const cell_message_text = newRow.insertCell(6);
+        const cell_buttons = newRow.insertCell(7);
+        // do not include a option for notes in this release
+        //const cell_notes = newRow.insertCell(7);
+
+
+        // parse the JSON of the note
+        const obj = JSON.parse(row.json);
+        console.log(obj);
+
+        cell1.textContent = row.noteid;
+        // last create timestamp
+        try {
+            cell_createtime.textContent = integerstring2timestamp(row.createtime);
+        } catch (e) {
+            console.debug(e);
+        }
+
+        // last modified timestamp
+        try {
+            cell_lastmodifiedtime.textContent = integerstring2timestamp(row.lastmodifiedtime);
+        } catch (e) {
+            console.debug(e);
+        }
+
+        try {
+            type_cell.textContent = obj.note_type;
+
+        } catch (e) {
+            console.log(e);
+        }
+
+        // name
+        try {
+            cell_name.textContent = row.distributionlistname;
+        } catch (e) {
+            console.debug(e);
+        }
+
+        // url where note is attached
+        cell_url.textContent = obj.url;
+
+        // display/message text
+        cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
+
+        // buttons
+        // Add delete button
+        /*
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = function () {
+        // Remove the row from the table
+        newRow.remove();
+        // call to API to delete row from data base
+        deleteDataRow(row.uuid);
+        };
+        cell_buttons.appendChild(deleteButton);
+         */
+        // Add location "go there" button
+
+
+        const goThereButtonContainer = document.createElement('div');
+        goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+
+        const goThereButton = document.createElement('img');
+        goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
+
+        goThereButton.alt = 'go there';
+
+        goThereButton.setAttribute('class', 'go_to_location_button');
+
+        //   goThereButton.textContent = 'locate';
+        goThereButton.onclick = function () {
+            // call to API to delete row from data base
+            goThere(obj.url, row);
+        };
+
+        goThereButtonContainer.appendChild(goThereButton);
+        cell_buttons.appendChild(goThereButtonContainer);
+
+        //cell_buttons.appendChild(goThereButton);
+
+        // const cell8 = newRow.insertCell(6);
+
     });
 
 }
+
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
@@ -574,172 +446,9 @@ async function setNoteActiveStatusByUUID(noteid, status) {
     }
 }
 
-function disable_note_with_noteid(noteid) {
-    console.debug("disable_note_with_noteid: " + noteid);
-
-    console.debug(valid_noteid_regexp.test(noteid));
-    if (valid_noteid_regexp.test(noteid)) {
-        // send save request back to background
-        chrome.runtime.sendMessage({
-            message: {
-                "action": "single_note_disable",
-                "disable_details": {
-                    "noteid": noteid,
-                    "enabled": false
-                }
-            }
-        }, function (response) {
-            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-            // finally, call "close" on the note
-            //  try{
-            //  	close_note(event);
-            //  }catch(g){console.debug(g);}
-
-        });
-
-    }
-}
-
-function enable_note_with_noteid(noteid) {
-    console.debug("enable_note_with_noteid: " + noteid);
-
-    console.debug(valid_noteid_regexp.test(noteid));
-    if (valid_noteid_regexp.test(noteid)) {
-        // send save request back to background
-        chrome.runtime.sendMessage({
-            message: {
-                "action": "single_note_enable",
-                "enable_details": {
-                    "noteid": noteid
-                }
-            }
-        }, function (response) {
-            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-            // finally, call "close" on the note
-            //  try{
-            //  	close_note(event);
-            //  }catch(g){console.debug(g);}
-
-        });
-
-    }
-}
-
-/*
- * recursively go down the DOM tree below the specified node
- *
- */
-function replaceLink(node, note_template) {
-    try {
-        //  console.debug("# replaceLink");
-        //console.debug(node);
-
-        if (node) {
-
-            // recursively call to analyse child nodes
-
-            for (var i = 0; i < node.childNodes.length; i++) {
-                //console.debug("call childnodes");
-                try {
-                    replaceLink(node.childNodes[i], note_template);
-                } catch (f) {}
-            }
-
-            /*
-             * Node.ELEMENT_NODE 	1 	An Element node like <p> or <div>.
-            Node.ATTRIBUTE_NODE 	2 	An Attribute of an Element.
-            Node.TEXT_NODE 	3 	The actual Text inside an Element or Attr.
-            Node.CDATA_SECTION_NODE 	4 	A CDATASection, such as <!CDATA[[ … ]]>.
-            Node.PROCESSING_INSTRUCTION_NODE 	7 	A ProcessingInstruction of an XML document, such as <?xml-stylesheet … ?>.
-            Node.COMMENT_NODE 	8 	A Comment node, such as <!-- … -->.
-            Node.DOCUMENT_NODE 	9 	A Document node.
-            Node.DOCUMENT_TYPE_NODE 	10 	A DocumentType node, such as <!DOCTYPE html>.
-            Node.DOCUMENT_FRAGMENT_NODE 	11 	A DocumentFragment node.
-             *
-             */
-
-            if (node.nodeType == Node.ELEMENT_NODE || node.nodeType == Node.DOCUMENT_NODE) {
-                // console.debug("1.0.1");
-
-                // exclude elements with invisible text nodes
-                //  if (ignore(node)) {
-                //      return
-                //  }
-            }
-
-            // if this node is a textnode, look for the
-            if (node.nodeType === Node.TEXT_NODE) {
-                // check for visibility
 
 
-                // apply regexp identifying yellownote
-
-                // exclude elements with invisible text nodes
-
-                // ignore any textnode that is not at least xx characters long
-                if (node.textContent.length >= 150) {
-
-                    //console.debug("look for sticky note in (" + node.nodeType + "): " + node.textContent);
-                    // regexp to match begining and end of a stickynote serialization. The regex pattern is such that multiple note objects may be matched.
-                    var yellownote_regexp = new RegExp(/yellownote=.*=yellownote/);
-
-                    if (yellownote_regexp.test(node.textContent)) {
-                        console.debug("HIT");
-                        // carry out yellow sticky note presentation on this textnode
-
-                        showStickyNote(node, note_template);
-
-                    }
-
-                }
-            }
-        }
-    } catch (e) {
-        console.debug(e);
-    }
-
-}
-
-render(getQueryStringParameter('distributionlistid')).then(function (d) {
-    console.log("render NOtes");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log("################################################");
-    console.log(d);
-    // kick of the process of rendering the yellow sticky notes in the graphic form
-
-
-    var doc = window.document;
-
-    var root_node = doc.documentElement;
-    console.debug(root_node);
-
-    // start analyzing the DOM (the page/document)
-
-    var note_template = null;
-    // collect the template, for later use
-    fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
-    then((response) => response.text())
-    .then((html) => {
-        //console.debug(html);
-        //note_template_html = html;
-        //const note_template = document.createElement('div');
-        // container.innerHTML = html;
-        note_template = safeParseInnerHTML(html, 'div');
-        console.log("browsersolutions " + note_template);
-        console.debug(note_template);
-
-        replaceLink(root_node, note_template);
-
-    });
-
-    console.debug(note_template);
-
-});
+fetchData(getQueryStringParameter('distributionlistid'));
 
 //traverse_text(document.documentElement);
 console.debug("################################################");

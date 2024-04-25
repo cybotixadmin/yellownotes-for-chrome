@@ -46,21 +46,42 @@ async function deleteDataRow(uuid) {
  * Navigate to the page where the note is attached
  * @param {*} url
  */
-async function goThere(url) {
+
+async function goThere(datarow) {
     try {
 
         const userid = "";
-        console.log("go: " + url);
+        console.log("go to url: " + datarow.url);
+        console.log("go lookup noteid: " + datarow.noteid);
+        console.log("go lookup creatorid: " + datarow.creatorid);
 
-// issue a http redirect to open the URL in another browser tab
-window.open(url, '_blank').focus();
-// add functionality to scroll to the note in question
+        // issue a http redirect to open the URL in another browser tab
+        //window.open(url, '_blank').focus();
+        // add functionality to scroll to the note in question
+        // invoke the background script to scroll to the note in question
+        chrome.runtime.sendMessage({
+            message: {
+                action: "scroll_to_note",
+                scroll_to_note_details: {
+                    datarow: datarow
 
+                }
+            }
+        }, function (response) {
+            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+            // finally, call "close" on the note
+            //  try{
+            //  	close_note(event);
+            //  }catch(g){console.debug(g);}
+
+        });
 
     } catch (error) {
         console.error(error);
     }
 }
+
+
 
 /**
  * Open the note for editing
@@ -332,7 +353,7 @@ async function fetchData() {
 
             // name
             try{
-                cell_name.textContent = row.name;
+                cell_name.textContent = row.distributionlistname;
             }catch(e){
                 console.debug(e);
             }
@@ -363,7 +384,7 @@ async function fetchData() {
             goThereButtonContainer.setAttribute('class', 'go_to_location_button');
 
             const goThereButton = document.createElement('img');
-goThereButton.src = "../icons/arrow-right-long.svg";
+goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
 
 goThereButton.alt = 'go there';
 
@@ -372,7 +393,7 @@ goThereButton.setAttribute('class', 'go_to_location_button');
          //   goThereButton.textContent = 'locate';
             goThereButton.onclick = function () {
                 // call to API to delete row from data base
-                goThere(obj.url, obj.uuid);
+                goThere(row);
             };
 
             goThereButtonContainer.appendChild(goThereButton);
@@ -533,7 +554,7 @@ function enable_note_with_noteid(noteid) {
  * recursively go down the DOM tree below the specified node
  *
  */
-function replaceLink(node, note_template) {
+function DELreplaceLink(node, note_template) {
     try {
         console.debug("# replaceLink");
         //console.debug(node);

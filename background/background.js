@@ -807,6 +807,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         } else if (action == 'get_template') {
 
             console.debug("action: get_template");
+            console.debug(message);
+            
             const brand = message.brand;
 
             const note_type = message.note_type;
@@ -988,67 +990,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         } else if (action == 'scroll_to_note') {
             console.debug("request: scroll_to_note");
+            console.debug(message);
+            const datarow = message.message.scroll_to_note_details.datarow;
             const uuid = message.message.scroll_to_note_details.uuid;
-            const url = message.message.scroll_to_note_details.url;
+            const url = datarow.url;
 
-            openUrlAndScrollToElement(url, '[note_type="yellownote"][uuid="' + uuid + '"]', uuid);
-
-        } else if (action == 'lookup_stickynote_in_place') {
-            console.debug("request: lookup a single yellow note exactly where it is located");
-
-            // lookup the details of the note in the database
-            var object_id = message.stickynote.stickynote_details.object_id;
-            var note_object;
-            var tab_id;
-            loadFromIndexedDBbyIndex_async("sourceURLYellowNotesDB", "sourceURLYellowNotesStore", "uuid", object_id)
-            .then(function (res) {
-                console.debug(res);
-
-                //var url = res.url;
-                note_object = res;
-                console.debug("###calling NavigateToSpecificStickynote.js");
-
-                console.debug("### with delay");
-
-                const sleep = function (ms) {
-                    console.debug("ms:" + ms);
-                    return new Promise(function (resolve, reject) {
-                        console.debug("ms:" + ms);
-                        return setTimeout(resolve, ms);
-                    });
-                }
-                // Using Sleep,to let the note to be placed on the page first
-                //console.debug('Now');
-                return sleep(4000);
-
-            }).then(function (res) {
-                console.debug("### completed");
-
-                // execute script in active tab
-                // query for the one active tab
-                return chrome.tabs.query({
-                    active: true,
-                    currentWindow: true
-                });
-
-            }).then(function (tabs) {
-                // execute script on active tab
-                console.debug("###### NavigateToSpecificStickynote response " + JSON.stringify(tabs));
-                tab_id = tabs[0].id;
-                console.debug(tab_id);
-                // send message to the active tab
-                var shared_secret_to_identify_background_js_to_content_script_NavigateToSpecificStickynote = "Glbx_marker3465";
-                return chrome.tabs.sendMessage(tab_id, {
-                    NavigateToSpecificStickynote: shared_secret_to_identify_background_js_to_content_script_NavigateToSpecificStickynote,
-                    note_object: note_object
-                });
-
-            }).then(function (res) {
-                console.debug(res);
-                // send message to script
-                sendResponse(res);
-            });
-
+            openUrlAndScrollToElement(datarow.url, datarow.noteid, datarow);
+//return true;
+        
         } else if (action == 'DELget_all_available_stickynotes') {
             console.debug("get all notes for " + message.message.url);
 
@@ -1170,7 +1119,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             // call out to database
             //  chrome.storage.local.set({xYellownotesSession: xSessionHeader.value}, () => {
             //console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
-
+            var notes ;
             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
@@ -1197,27 +1146,26 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 }
                 // examine each note and for each note creator lookup the note formating infomation for the creator of the note
                 // this is needed to display the note in the correct format
-
-
                 return response.json();
-            }).then(initialData => {
-                console.log(initialData);
-                const promises = initialData.map(item => {
-                        if (item.creatorid) {
-                            return fetchDataFromApi2(item.creatorid).then(creatorData => {
-                                item.creatorDetails = creatorData;
-                                item.creatorDetails2 = "creatorData2";
-                            });
-                        }
-                        return Promise.resolve();
-                    });
-                console.log(promises);
-                return Promise.all(promises).then(() => initialData);
+            }).then(function(initialData) {
+                notes = initialData;
+                console.log(notes);
+                return fetchDataFromApi(notes[0].creatorid);
+
             })
-            .then(function (data) {
-                console.log(data);
-                console.log(JSON.stringify(data));
-                sendResponse(data);
+            .then(function (creatordata) {
+                console.log(creatordata);
+                console.log(JSON.stringify(creatordata));
+                var resp = {};
+                console.log(notes);
+                console.log(Array.isArray(notes));
+                resp.notes_found = notes;
+                resp.creatorDetails = creatordata;
+                
+                console.log(resp);
+                console.log(JSON.stringify(resp));
+                //data.creatorDetails = 
+                 sendResponse(resp);
             });
         }
     } catch (e) {
@@ -1292,6 +1240,14 @@ function fetchDataFromApi2(creatorId) {
             console.log(JSON.stringify(cachedData));
             return cachedData;
         } else {
+
+            var sessiontoken, installationUniqueId;
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                installationUniqueId = result[plugin_uuid_header_name];
+                sessiontoken = result[plugin_session_header_name];
+                console.debug("ynInstallationUniqueId: " + installationUniqueId);
+                console.debug("xYellownotesSession: " + sessiontoken);
+
             console.log('fetchDataFromApi2: Fetching data from API_URL_2: ' + server_url + '/api/v1.0/get_note_properties');
             return fetch(server_url + '/api/v1.0/get_note_properties', {
                 method: 'POST',
@@ -1303,7 +1259,8 @@ function fetchDataFromApi2(creatorId) {
                 body: JSON.stringify({
                     creatorid: creatorId
                 })
-            })
+            });
+        })
             .then(response => {
                 console.log(response);
                 if (!response.ok) {
@@ -1319,20 +1276,141 @@ function fetchDataFromApi2(creatorId) {
     });
 }
 
-function openUrlAndScrollToElement(url, selector, uuid) {
-    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' and scrolling to element ' + selector + ' with uuid ' + uuid);
-    chrome.tabs.create({
-        url: url
-    }, function (tab) {
-        chrome.scripting.executeScript({
-            target: {
-                tabId: tab.id
-            },
-            function : scrollToElement,
-            args: [selector, uuid]
+
+function fetchDataFromApi(creatorId) {
+    console.log('fetchDataFromApi: Fetching data for creatorId:', creatorId);
+
+    // Start by fetching the cached data
+    return getCachedData(creatorId).then(cachedData => {
+        console.log('fetchDataFromApi: Cached data:', cachedData);
+        if (cachedData) {
+            console.log('fetchDataFromApi: Returning cached data for creatorId:', creatorId);
+            return cachedData;
+        }
+
+        // If no cached data, fetch new data from the API
+        return chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(result => {
+            const installationUniqueId = result[plugin_uuid_header_name];
+            const sessiontoken = result[plugin_session_header_name];
+            console.debug("ynInstallationUniqueId: " + installationUniqueId);
+            console.debug("xYellownotesSession: " + sessiontoken);
+
+            const url = server_url + '/api/v1.0/get_note_properties';
+            console.log('fetchDataFromApi2: Fetching data from API:', url);
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: installationUniqueId,
+                    [plugin_session_header_name]: sessiontoken
+                },
+                body: JSON.stringify({ creatorid: creatorId })
+            });
+        })
+        .then(response => {
+            console.log(response);
+            if (!response.ok) {
+                throw new Error('API Fetch Error: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            cacheData(creatorId, data);  // Assuming cacheData is an async but does not need to be awaited here
+            return data;
+        });
     });
+}
+
+
+function openUrlAndScrollToElement(url, noteid, datarow) {
+    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' and scrolling to element with noteid ' + noteid);
+console.debug(datarow);
+const creatorid = datarow.creatorid;
+//console.debug(JSON.parse(datarow));
+var creatorDetails;
+var notes=[];
+notes[0] = datarow;
+fetchDataFromApi(creatorid)
+            .then(function (creatordata) {
+                console.log(creatordata);
+                console.log(JSON.stringify(creatordata));
+                var resp = {};
+                console.log(notes);
+                console.log(Array.isArray(notes));
+                resp.notes_found = notes;
+                resp.creatorDetails = creatordata;
+    console.debug(resp);
+   // Search for tabs with the specified URL
+   chrome.tabs.query({url: url}, function(tabs) {
+    if (tabs.length > 0) {
+        console.debug("An existing tab was found with this URL.");
+        // If tabs with the URL are found, use the first one
+        let tabId = tabs[0].id;
+        console.log('Using existing tab:', tabId);
+        sendMessageToContentScript(tabId, resp, noteid);
+    } else {
+        // If no tabs with the URL are found, create a new one
+        chrome.tabs.create({url: url}, function(tab) {
+            console.log('Created new tab:', tab.id);
+            // Ensure the tab is completely loaded before sending the message
+            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+                if (tabId === tab.id && changeInfo.status === 'complete') {
+                    chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
+                    sendMessageToContentScript(tab.id, resp, noteid);
+                }
+            });
+        });
+    }
+});
 });
 }
+
+
+function sendMessageToContentScript(tabId, resp, noteid) {
+    // Send a message to the content script in the given tab
+console.debug('sendMessageToContentScript: Sending message to tab ' + tabId);
+const datarow = resp.notes_found[0];
+console.log(datarow);
+
+const node_obj = datarow.json;
+console.log(node_obj);
+
+var note = JSON.parse(datarow.json);
+
+const creatorid = datarow.creatorid;
+
+const note_type = note.note_type;
+
+
+    // send message to the active tab
+    const msg = {
+        sharedsecret: "qwertyui",
+        action: "create_and_scroll_to_note",
+        notes: resp,
+        noteid: noteid,
+        note_type: note_type,
+        creatorid: datarow.creatorid,
+        node_obj: node_obj
+    }
+    console.debug(msg);
+
+var creatorDetails;
+
+console.debug(creatorid);
+// if no creatorid is present - use default values
+
+
+
+return chrome.tabs.sendMessage(tabId, msg  ).then(function (res) {
+    // read response
+    console.debug("# response " + JSON.stringify(res));
+});
+
+
+       
+      
+}
+
 
 function scrollToElement(selector, uuid) {
     // This part of the function will be injected and executed in the context of the webpage

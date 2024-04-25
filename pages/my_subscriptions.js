@@ -22,7 +22,7 @@ const url = window.location.href.trim();
 console.log(url);
 console.log(url.replace(/.*add_distributionlistid=/, ""));
 // accept the submitted value for the distribution list id
-// the API has security meachinasm in place the screen the value for undesirable content
+// the API has security mechanism in place the screen the value for undesirable content
 
 addSubscriptionByUUIDinBackground(url.replace(/.*add_distributionlistid=/, ""));
 
@@ -575,7 +575,7 @@ function addSubscriptionTableRow(tableBody, row) {
 
 // Create an anchor element
 const link2 = document.createElement('a');
-link2.href = '/pages/view_a_distribution_list.html?distributionlistid' + row.distributionlistid; // Set the destination URL
+link2.href = '/pages/view_a_distribution_list.html?distributionlistid=' + row.distributionlistid; // Set the destination URL
 link2.target = "_blank"; // open this link in another tab
 link2.textContent = row.name; // Set the display text
 cell2.appendChild(link2);

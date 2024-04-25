@@ -40,7 +40,18 @@ document.querySelector('.remove-icon').addEventListener('click', function(event)
       .then(function(result) {
         xYellownotesSession = result[plugin_session_header_name];
     
-        // If you need to perform more operations after fetching these values, continue here
+        // remove the banner image from the page
+
+        const bannerImgElement = document.getElementById('bannerImage');
+        console.log(bannerImgElement);
+        if (bannerImgElement) {
+            bannerImgElement.src = "";
+        } else {
+            console.log('Banner image data not found on page');
+        }
+
+
+
         console.log("Installation Unique ID:", ynInstallationUniqueId);
         console.log("Session:", xYellownotesSession);
       })

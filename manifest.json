@@ -4,7 +4,7 @@
     "author": "The BrowserSolutions Team",
     "description": "__MSG_appDesc__",
     "homepage_url": "https://www.yellownotes.cloud/",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "icons": {
         "32": "icons/yellownotecloud-32x32.png",
         "48": "icons/yellownotecloud-48x48.png",
@@ -52,7 +52,7 @@
             "use_dynamic_url": true
         }
     ],
-    "host_permissions": ["*://www.yellownotes.cloud/*"],
+    "host_permissions": ["<all_urls>"],
     "permissions": [
         "activeTab",
         "contextMenus",

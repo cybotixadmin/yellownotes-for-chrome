@@ -29,24 +29,30 @@ Display the user's account information.
     <table id="dataTable" class="notesTable">
       <thead>
         <tr class="fixed-header">
-         
-          <th class="sortableCol" >created <span class="sort-icon"">&#9650;</span></th>
-          <th class="sortableCol" >last modified <span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" >location</th>
+          <th>ID</th>
+          <th class="sortableCol" >last modified</th>
+          <th class="sortableCol" >created</th>
+          <th class="sortableCol" >type<span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" >feed </th>
+          <th class="sortableCol" >location(URL)</th>
           <th class="sortableCol" >text</th>
           <th>action</th>
-          <th class="serialized_note">remote page</th>
+          
         </tr>
-    
+        
         <!-- Add a filter row -->
         <tr class="fixed-header">
-          
-          <th class="filterableCol">filter:<input type="text" class="filterContent" placeholder="Filter " ></th>
-          <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
-          <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
-          <th class="filterableCol"><input type="text" class="filterContent" placeholder="Filter " ></th>
           <th class="filterableCol"></th>
+          <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+          <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+          <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
+    
+          <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+          <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+          <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+          <th ></th>
         </tr>
+    
       </thead>
       <tbody>
         <!-- Rows will be added here -->
