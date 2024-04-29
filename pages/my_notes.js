@@ -54,8 +54,23 @@ async function goThere(datarow) {
 
         const userid = "";
         console.log("go to url: " + datarow.url);
-        console.log("go lookup noteid: " + datarow.noteid);
+        
         console.log("go lookup creatorid: " + datarow.creatorid);
+const noteid = datarow.noteid;
+
+console.log("go lookup noteid: " + noteid);
+
+console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
+
+const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim(); 
+console.log(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim() );
+
+
+
+        // lookup the target url in the table (the user may have changed it !)
+
+
+
 
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();
@@ -65,7 +80,8 @@ async function goThere(datarow) {
             message: {
                 action: "scroll_to_note",
                 scroll_to_note_details: {
-                    datarow: datarow
+                    datarow: datarow,
+                    url: url
 
                 }
             }
@@ -487,8 +503,11 @@ function render() {
                 console.log(JSON.stringify(row));
                 console.log(row.noteid);
 
+               
+
                 // Create new row
                 const newRow = tableBody.insertRow();
+                newRow.setAttribute('noteid', row.noteid);
 
                 // Create cells and populate them with data
                 const cell_noteid = newRow.insertCell(0);

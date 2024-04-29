@@ -57,6 +57,12 @@ async function addSubscriptionByUUIDinBackground(distributionlistid) {
 
         // Parse JSON data
         const data = await response.json();
+
+        // go se what you have just subscribed to
+// redirect to the feed's own page
+console.debug("redirect to the feed's own page");
+
+
     } catch (error) {
         console.error(error);
     }
@@ -575,7 +581,7 @@ function addSubscriptionTableRow(tableBody, row) {
 
 // Create an anchor element
 const link2 = document.createElement('a');
-link2.href = '/pages/view_a_distribution_list.html?distributionlistid=' + row.distributionlistid; // Set the destination URL
+link2.href = '/pages/view_distributionlist.html?distributionlistid=' + row.distributionlistid; // Set the destination URL
 link2.target = "_blank"; // open this link in another tab
 link2.textContent = row.name; // Set the display text
 cell2.appendChild(link2);

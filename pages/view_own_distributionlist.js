@@ -62,12 +62,12 @@ async function deleteDataRow(noteid) {
  * Include all note information in the message
  * @param {*} url
  */
-async function goThere(url, datarow) {
+async function goThere(noteid, url, distributionlistid , datarow) {
     try {
 
         
-        console.log("go to url: " + datarow.url);
-        console.log("go lookup noteid: " + datarow.noteid);
+        console.log("go to url: " + url);
+        console.log("go lookup noteid: " + noteid);
 
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();
@@ -271,7 +271,7 @@ async function fetchData(distributionlistid) {
     const msg = {
         distributionlistid: distributionlistid
     };
-    const response = await fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {
+    const response = await fetch(server_url + "/api/v1.0/plugin_user_get_all_own_distributionlist_notes", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -392,13 +392,19 @@ async function fetchData(distributionlistid) {
         //   goThereButton.textContent = 'locate';
         goThereButton.onclick = function () {
             // call to API to delete row from data base
-            goThere(obj.url, row);
+            goThere(row.noteid, row.url, distributionlistid, row);
         };
 
         goThereButtonContainer.appendChild(goThereButton);
         cell_buttons.appendChild(goThereButtonContainer);
 
-        //cell_buttons.appendChild(goThereButton);
+        // add a "shareable" link to note
+        var shareable_url = document.createElement('a');
+shareable_url.setAttribute('href', 'https://www.yellownotes.cloud/gothere?noteid='+row.noteid ); // Set href to '#' or an appropriate URL
+shareable_url.innerHTML = 'go_to_location_button'; // Set the link text
+
+
+        cell_buttons.appendChild(shareable_url);
 
         // const cell8 = newRow.insertCell(6);
 
@@ -447,8 +453,15 @@ async function setNoteActiveStatusByUUID(noteid, status) {
 }
 
 
+const automaticallyGoToNoteId = getQueryStringParameter('noteid');
+console.log("getting noteid: " + automaticallyGoToNoteId);
+if (automaticallyGoToNoteId ==null){
+    console.log("or not");
+    fetchData(getQueryStringParameter('distributionlistid'));
+}else{
+    fetchNote(getQueryStringParameter('distributionlistid'), automaticallyGoToNoteId);
 
-fetchData(getQueryStringParameter('distributionlistid'));
+}
 
 //traverse_text(document.documentElement);
 console.debug("################################################");

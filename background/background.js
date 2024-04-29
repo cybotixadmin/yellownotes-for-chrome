@@ -38,6 +38,8 @@ const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_
 
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 
+
+const URI_plugin_user_get_authorized_yellownote = "/api/v1.0/plugin_user_get_authorized_yellownote";
 let salt;
 
 // at installation time a unique identifies is ser for this browser extension. Make this available to the server for identification purposes.
@@ -120,7 +122,7 @@ function cacheData(url, data) {
 }
 
 // Function to retrieve cached data
-function getCachedData(url) {
+function DELgetCachedData(url) {
     console.log("getCachedData (" + url + ")");
     return new Promise(resolve => {
         chrome.storage.local.get(url, result => {
@@ -136,7 +138,7 @@ console.log("fetch (" + event.request.url + ")");
 const url = event.request.url;
 if (matchesCachePattern(url)) {
 event.respondWith(
-getCachedData(url).then(cacheEntry => {
+getCachedData(url, timeout).then(cacheEntry => {
 if (cacheEntry && Date.now() - cacheEntry.timestamp < CACHE_DURATION) {
 return new Response(new Blob([cacheEntry.data]));
 } else {
@@ -356,10 +358,13 @@ function pinYellowNote(info, tab, note_type, brand) {
     }).then(function (response) {
         console.log(response);
         if (!response.ok) {
-            throw new Error('API_URL_2 Fetch Error: ' + response.statusText);
-        }
+            console.log('API_URL_2 Fetch Error: ' + response.statusText);
+            // return blank (lower-priority values, or defaults, will be used later.)
+            return {};
+        }else{
         //note_properties = response.json();
         return response.json();
+        }
     }).then(function (data) {
         note_properties = data;
         console.log("note_properties");
@@ -602,6 +607,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
                     console.debug("xYellownotesSession: " + xYellownotesSession);
 
+// Create an AbortController instance
+const controller = new AbortController();
+const signal = controller.signal;
+
+// Set a timeout of 5 seconds (in milliseconds)
+const timeout = setTimeout(() => {
+    controller.abort();
+}, 5000);
+
                     const opts = {
                         method: 'GET',
                         headers: {
@@ -609,6 +623,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                             [plugin_uuid_header_name]: ynInstallationUniqueId,
                             [plugin_session_header_name]: xYellownotesSession
                         },
+                        signal: signal
 
                     };
                     console.debug(opts);
@@ -812,6 +827,25 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             const brand = message.brand;
 
             const note_type = message.note_type;
+            console.debug("calling getTemplate");
+            getTemplate(brand, note_type).then(function (result) {
+                //console.debug(result);
+                sendResponse(result);
+            });
+
+            return true;
+
+        } else if (action == 'go_there') {
+
+            console.debug("action: go_there");
+            console.debug(message);
+            
+// verify if the user is authorized
+
+
+            const brand = message.brand;
+
+            const note_type = message.note_type;
 
             getTemplate(brand, note_type).then(function (result) {
                 //console.debug(result);
@@ -819,11 +853,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             });
 
             return true;
+
+
+
         } else if (action == 'get_webframe_template') {
 
             console.debug("action: get_webframe_template");
             const brand = message.brand;
-
+            console.debug("calling getTemplate");
             getTemplate(brand, "webframe").then(function (result) {
                 console.debug(result);
                 sendResponse(result);
@@ -834,7 +871,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             console.debug("action: get_yellownote_template");
             const brand = message.brand;
-
+console.debug("calling getTemplate");
             getTemplate(brand, "yellownote").then(function (result) {
                 // console.debug(result);
                 sendResponse(result);
@@ -988,29 +1025,84 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             });
 
+
+        } else if (action == 'focusTab') {
+           
+                // Use the tab ID to focus the tab
+                chrome.tabs.update(sender.tab.id, {active: true});
+        
+
         } else if (action == 'scroll_to_note') {
             console.debug("request: scroll_to_note");
             console.debug(message);
             const datarow = message.message.scroll_to_note_details.datarow;
-            const uuid = message.message.scroll_to_note_details.uuid;
-            const url = datarow.url;
-
-            openUrlAndScrollToElement(datarow.url, datarow.noteid, datarow);
+          
+            openUrlAndScrollToElement(message.message.scroll_to_note_details.url, datarow.noteid, datarow);
 //return true;
         
-        } else if (action == 'DELget_all_available_stickynotes') {
-            console.debug("get all notes for " + message.message.url);
+        } else if (action == 'get_authorized_note') {
+            console.debug("get authorized note" );
+            console.debug( message);
+const noteid = message.noteid;
+            // call out to database
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
+                xYellownotesSession = result[plugin_session_header_name];
 
-            // loop up in the in-memory has hashtable_url
+                installationUniqueId = result[plugin_uuid_header_name];
+                sessiontoken = result[plugin_session_header_name];
 
-            var s_notes = {};
+                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
-            s_notes = in_memory_policies["sourceURLYellowNotesDB_url_uuid"][message.message.url];
-            // console.debug("notes found: " + Object.keys(s_notes).length);
+                console.debug("installationUniqueId: " + installationUniqueId);
+                console.debug("sessiontoken: " + sessiontoken);
 
-            console.debug("notes returned: " + JSON.stringify(s_notes));
+                const opts = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession
+                    },
+                    body: JSON.stringify({
+                        'noteid': noteid
+                    }),
+                };
+                console.log(opts);
+                return fetch(server_url + URI_plugin_user_get_authorized_yellownote, opts);
+            }).then(function (response) {
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Initial Fetch Error: ' + response.statusText);
+                }
+                // examine each note and for each note creator lookup the note formating infomation for the creator of the note
+                // this is needed to display the note in the correct format
 
-            sendResponse(s_notes);
+
+                return response.json();
+            }).then(initialData => {
+                console.log(initialData);
+                const promises = initialData.map(item => {
+                        if (item.creatorid) {
+                            return fetchDataFromApi2(item.creatorid).then(creatorData => {
+                                item.creatorDetails = creatorData;
+                                item.creatorDetails2 = "creatorData2";
+                            });
+                        }
+                        return Promise.resolve();
+                    });
+                console.log(promises);
+                return Promise.all(promises).then(() => initialData);
+            })
+            .then(function (data) {
+                console.log(data);
+                console.log(JSON.stringify(data));
+
+                sendResponse(data);
+
+            });
+            return true;
 
         } else if (action == 'get_url_subscribed_yellownotes') {
             // make call to API to get all notes for this URL that are attached to feeds the user is subscribing to.
@@ -1191,47 +1283,42 @@ function cacheData(key, data) {
     });
 }
 
-// Helper to get cached data
-function getCachedData(key) {
-    console.log('getCachedData: Getting cached data for key:', key);
+// Helper to get cached data , timeout in seconds
+function getCachedData(key, cachetimeout) {
+    console.log('getCachedData: Getting cached data for key:', key, ", timeout:", cachetimeout );
     return new Promise((resolve, reject) => {
         try {
             chrome.storage.local.get([key], function (result) {
-
                 if (result[key]) {
-
                     console.log(`Cached data for key: ${key}`, result[key].timestamp);
                     console.log((new Date().getTime() - result[key].timestamp));
 
                     // only accept data less than 3 hours old
                     //            if (result[key] && (new Date().getTime() - result[key].timestamp) < 3 * 3600 * 1000) {
                     // only accept data less than 10 seconds old
-                    if (result[key] && (new Date().getTime() - result[key].timestamp) < 10 * 1000) {
+                    if (result[key] && (new Date().getTime() - result[key].timestamp) < cachetimeout * 1000) {
                         console.log(result[key].data);
                         resolve(result[key].data);
                     } else {
                         console.log("return null");
                         resolve(null);
                     }
-
                 } else {
                     console.log("return null - cache miss");
                     resolve(null);
                 }
-
             });
         } catch (e) {
             console.debug(e);
             reject();
         }
-
     });
 }
 
 // Helper to fetch data from API_URL_2
 function fetchDataFromApi2(creatorId) {
     console.log('fetchDataFromApi2: Fetching data for creatorId:', creatorId);
-    return getCachedData(creatorId).then(cachedData => {
+    return getCachedData(creatorId, 10).then(cachedData => {
         console.log('fetchDataFromApi2: Cached data:', cachedData);
         console.log(JSON.stringify(cachedData));
         if (cachedData) {
@@ -1248,6 +1335,16 @@ function fetchDataFromApi2(creatorId) {
                 console.debug("ynInstallationUniqueId: " + installationUniqueId);
                 console.debug("xYellownotesSession: " + sessiontoken);
 
+// Create an AbortController instance
+const controller = new AbortController();
+const signal = controller.signal;
+
+// Set a timeout of 5 seconds (in milliseconds)
+const timeout = setTimeout(() => {
+    controller.abort();
+}, 5000);
+
+
             console.log('fetchDataFromApi2: Fetching data from API_URL_2: ' + server_url + '/api/v1.0/get_note_properties');
             return fetch(server_url + '/api/v1.0/get_note_properties', {
                 method: 'POST',
@@ -1256,6 +1353,7 @@ function fetchDataFromApi2(creatorId) {
                     [plugin_uuid_header_name]: installationUniqueId,
                     [plugin_session_header_name]: sessiontoken
                 },
+                signal: signal,
                 body: JSON.stringify({
                     creatorid: creatorId
                 })
@@ -1281,7 +1379,7 @@ function fetchDataFromApi(creatorId) {
     console.log('fetchDataFromApi: Fetching data for creatorId:', creatorId);
 
     // Start by fetching the cached data
-    return getCachedData(creatorId).then(cachedData => {
+    return getCachedData(creatorId, 10).then(cachedData => {
         console.log('fetchDataFromApi: Cached data:', cachedData);
         if (cachedData) {
             console.log('fetchDataFromApi: Returning cached data for creatorId:', creatorId);
@@ -1341,7 +1439,9 @@ fetchDataFromApi(creatorid)
                 resp.creatorDetails = creatordata;
     console.debug(resp);
    // Search for tabs with the specified URL
+   console.debug(url);
    chrome.tabs.query({url: url}, function(tabs) {
+    console.debug(tabs);
     if (tabs.length > 0) {
         console.debug("An existing tab was found with this URL.");
         // If tabs with the URL are found, use the first one
@@ -1816,7 +1916,7 @@ function pinContentNote(info, tab, note_type, brand) {
         console.log(JSON.stringify(result));
         const sessiontoken = result[plugin_session_header_name];
         console.log(sessiontoken);
-
+console.debug("calling getTemplate");
         return getTemplate(brand, note_type);
     }).then(function (result) {
         //console.log(result);

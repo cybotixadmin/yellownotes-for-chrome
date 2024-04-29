@@ -571,15 +571,18 @@ console.log(rowData.createdtime);
     };
 
     // Add View button
-    const viewButton = document.createElement("button");
-    viewButton.textContent = "View";
-    viewButton.classList.add("viewBtn");
-
-    viewButton.onclick = function () {
-
+    //const viewButton = document.createElement("button");
+    //viewButton.textContent = "View";
+    //viewButton.classList.add("viewBtn");
+   // viewButton.onclick = function () {
         // call to API to delete row from data base
-        viewDistributionlist(rowData.distributionlistid);
-    };
+   //     viewDistributionlist(rowData.distributionlistid);
+   // };
+const viewButton = document.createElement("a");
+viewButton.classList.add("viewBtn");
+//viewButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>' 
+
+viewButton.innerHTML =  '<a href="/pages/view_own_distributionlist.html?distributionlistid=' + rowData.distributionlistid + '"><button>View</button></a>' 
 
     // Add save button
     const saveButton = document.createElement("button");

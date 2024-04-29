@@ -33,15 +33,27 @@ if ( aboutpage.test(window.location.href )) {
 chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/about_yellownotes.html"});
 }
 
-// intercept inviations to subscribe to feeds
+// intercept inviation-links to subscribe to feeds
 const inviteregexp =  new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe/);
 
 const distributionlistid = new URLSearchParams(window.location.search).get("distributionlistid");
 console.log(inviteregexp.test(window.location.href ));
 if ( inviteregexp.test(window.location.href )) {
   console.log("send subscripition request to plugin");
+// Notify the background script to redirect to the subscription page and instruc the page to add a subscription for this distributionlist for the user
+chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid +"&redirecturi=/view_distributionlist.html"});
+}
+
+
+const view_distributionlist =  new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/view_distributionlist.html/);
+console.log(view_distributionlist.test(window.location.href ));
+if ( view_distributionlist.test(window.location.href )) {
+    // Extract the query string
+    const queryString = window.location.search;
+
+  console.log("redirect this link to plugin")
 // Notify the background script to redirect
-chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid});
+chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/view_distributionlist.html"+ queryString});
 }
 
 
@@ -92,12 +104,76 @@ if ( targetURL.test(window.location.href )) {
   chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/view_yellownotes.html"});
 }
 
+const gothere =  new RegExp(/\/gothere/);
+if ( gothere.test(window.location.href )) {
+    console.log("redirect to go to note")
+
+// first check if user is authorized for note
+const noteid = getQueryStringParameter('noteid');
+console.debug(noteid);
+chrome.runtime.sendMessage({
+  action: "get_authorized_note",
+  noteid: noteid
+
+}).then(function (note_data) {
+console.log("note_data");
+console.log(note_data);
+console.log(note_data[0].json);
+const note_obj = JSON.parse(note_data[0].json);
+console.log(note_obj);
+const note_type=note_obj.notetype;
+const brand = "default";
+
+const msg ={
+  action: "get_template",
+  brand: brand,
+  note_type: note_type };
+  console.log(msg);
+ return chrome.runtime.sendMessage(msg);
+
+}).then(function (response) {
+
+  //console.debug("browsersolutions message sent to background.js with response: " + JSON.stringify(response));
+  const note_template = response;
+   console.debug("browsersolutions note_template: " );
+  // console.debug( note_template);
+  console.debug("browsersolutions resolve");
+  var template = safeParseInnerHTML(note_template, 'div');
+  console.debug("browsersolutions placeStickyNote");
+  placeStickyNote(note_data, template, creatorDetails, isOwner, newNote, true);
+  resolve({
+      note_data,
+      note_template
+  });
+}).catch(reject);
+
+  // Notify the background script to redirect
+  chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/view_yellownotes.html"});
+}
+
+
 /*
  leave this intercept out for now
- run the welcome page of the server to make updateing it faster
+ run the welcome page of the server to make updating it quicker
+ */
 const welcomeURL =  new RegExp(/welcome.html/);
 if ( welcomeURL.test(window.location.href )) {
     console.log("redirect this link to plugin")
   chrome.runtime.sendMessage({action: "local_pages_intercept", redirect: true, uri: "/pages/welcome.html"});
 }
-*/
+
+
+
+ // Function to get the value of the 'dist' query string parameter
+ function getQueryStringParameter(param) {
+  var queryString = window.location.search.substring(1);
+  var queryParams = queryString.split('&');
+
+  for (var i = 0; i < queryParams.length; i++) {
+      var pair = queryParams[i].split('=');
+      if (pair[0] == param) {
+          return decodeURIComponent(pair[1]);
+      }
+  }
+  return null;
+}
