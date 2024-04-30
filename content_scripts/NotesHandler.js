@@ -284,6 +284,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         console.error(e);
     }
 
+   
     // render template into a complete note object (with values)
 
     var node_root = document.createElement('container');
@@ -389,7 +390,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
             note_object_data.highlightuniqueid = highlightuniqueid;
         //}
     }
-    // include the highlight id with the note object
+    
 
     note_object_data.selection_text = selection_text;
     note_object_data.message_display_text = selection_text;
@@ -423,9 +424,9 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     // set background color of the note
     updateBackground(box_background, node_root);
 
- // set sizing
- console.debug("calling update_note_internal_size");
- update_note_internal_size(box_width , box_height, node_root);
+    // set sizing
+    console.debug("calling update_note_internal_size");
+    update_note_internal_size(box_width , box_height, node_root);
 
     // attach event listeners to buttons and icons
     //attachEventlistenersToYellowStickynote(node_root);
@@ -527,6 +528,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.debug(node_root);
     console.debug("browsersolutions: calling placeYellowNote");
     const inserted = placeYellowNote(node_root);
+    
     console.log(inserted);
     // set the flag that contral which button are shown
     inserted.setAttribute("button_arrangment", 'new');
@@ -842,6 +844,8 @@ function placeYellowNote(newGloveboxNode) {
     return inserted;
 
 }
+
+
 
 function getXYPositionOfDOMElement(element) {
     console.debug("getXYPositionofDOMElement");
@@ -2267,8 +2271,26 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                             if(moveFocus){
                                 moveFocusToNote(noteid);
                             }
+                            var highlightuniqueid;
+                            if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
+                                // Usage: Call this function with the text you want to highlight
+                                console.debug("selection_text: " + selection_text);
+                                console.debug(selection_text);
+                                console.debug("calling highlightTextOccurrences");
+                                highlightuniqueid = highlightTextOccurrences(selection_text);
+                                console.log("Highlights added with ID: ", highlightuniqueid);
+                        
+                                // only include the highlight id with the note object if it is not null
+                                //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
+                                   // note_object_data.highlightuniqueid = highlightuniqueid;
+                                //}
+                            }
+                            newGloveboxNode.setAttribute("highlightuniqueid", highlightuniqueid);
                             //return;
                         });
+
+                      
+
 
                     } else {
                         // the selection text was not found in the document...
@@ -4486,8 +4508,8 @@ function setComponentVisibility(note, visibility) {
         //  note.setAttribute("box_height", number_h);
         //  element = note.querySelector('[name="whole_note_table"]');
         //   const w= element.style.width;
-        console.debug("setting to " + note.getAttribute("box_height") + "px");
-        note.querySelector('table[name="whole_note_table"]').style.height = note.getAttribute("box_height") + "px";
+        console.debug("setting height to " + note.getAttribute("box_height") );
+        note.querySelector('table[name="whole_note_table"]').style.height = note.getAttribute("box_height") ;
 
     }
 

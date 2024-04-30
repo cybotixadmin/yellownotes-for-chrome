@@ -140,13 +140,36 @@ function processFile(file) {
         note_properties.banner_image = base64Image;
 
         // update the banner image on screen
-        const bannerImgElement = document.getElementById('bannerImage');
+        // <img id="bannerImage" style="z-index: 1400; position: relative;" alt="Banner Image"/>
+//        const bannerImgElement = document.getElementById('bannerImage');
+        const bannerImgElement = document.createElement('img');
+        bannerImgElement.setAttribute( "id", "bannerImage");
+        bannerImgElement.setAttribute( "style", "z-index: 1400; position: relative;");
+        bannerImgElement.setAttribute( "alt", "Banner Image");
+        bannerImgElement.setAttribute( "src", base64Image);
+
         console.log(bannerImgElement);
-        if (bannerImgElement) {
-            bannerImgElement.src = base64Image;
-        } else {
-            console.log('Banner image data not found in response');
+        const contElem = document.getElementById('drop_zone');
+        try{
+      // Insert the new node as the first child of the parent node
+if (contElem.firstChild) {
+    // If the parent already has a first child, insert before it
+    contElem.insertBefore(bannerImgElement, contElem.firstChild);
+} else {
+    // If the parent has no children, simply append the new node
+    contElem.appendChild(bannerImgElement);
+}
+   }catch(e){
+
         }
+
+
+
+     //   if (bannerImgElement) {
+     //       bannerImgElement.src = base64Image;
+     //   } else {
+     //       console.log('Banner image data not found in response');
+     //   }
     };
     reader.readAsDataURL(file);
 }
@@ -157,24 +180,41 @@ function changeBannerColor(evt) {
 
 async function saveData() {
     console.log("saveData()");
-    const bannerImgElement = document.getElementById('bannerImage');
+    var newdata;
     //console.log(bannerImgElement);
     //console.log(bannerImgElement.src);
-    var img = "";
-        if (bannerImgElement.src) {
-            img = bannerImgElement.src;
-        }
-        const color = document.getElementById('colorPicker').value;
+
+    const color = document.getElementById('colorPicker').value;
     const banner = document.getElementById('bannerContainer');
     const width = banner.offsetWidth;
     const height = banner.offsetHeight;
 
-    const newdata = {
+    const bannerImgElement = document.getElementById('bannerImage');
+        if (bannerImgElement) {
+            
+            var img = "";
+    
+            img = bannerImgElement.src;
+    
+    newdata = {
         banner_image: img,
         note_color: color,
         box_width: width + "px",
         box_height: height + "px"
     };
+}else{
+    newdata = {
+        note_color: color,
+        box_width: width + "px",
+        box_height: height + "px"
+    };
+
+
+}
+
+
+
+
 
     let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
     let session = await chrome.storage.local.get([plugin_session_header_name]);
