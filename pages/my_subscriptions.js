@@ -13,113 +13,104 @@ const URI_plugin_user_set_all_subscriptions_active_status = "/api/v1.0/plugin_us
 
 const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subscriptions";
 
-
 const browser_id = chrome.runtime.id;
-
-
 
 const url = window.location.href.trim();
 console.log(url);
 console.log(url.replace(/.*add_distributionlistid=/, ""));
 // accept the submitted value for the distribution list id
 // the API has security mechanism in place the screen the value for undesirable content
-try{
-if ( getQueryStringParameter("add_distributionlistid")){
-console.debug("add_distributionlistid parameter found ");
-
-addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid")).then(function (data) {
-
-     // it a post action URL has been prescribed using the quertstring parameter "redirecturi", then redirect to that URL now
-
-
-  uri = getQueryStringParameter("redirecturi");
-  console.debug("redirect to ", uri);
-  if ( uri){
-      // Redirect to a new URL - do not present a page
-  window.location.href = uri;
-  //chrome.runtime.sendMessage({
-    //  action: "local_pages_intercept",
-     // redirect: true,
-     // uri: uri
-  //});
-  
-  }else{
-// no redirect URL has been prescribed, so present the page
-
-
-// Fetch data on current subscriptions on page-load
-fetchData();
-
-uri = getQueryStringParameter("redirecturi");
-console.debug("redirect to ", uri);
-if ( uri){
-chrome.runtime.sendMessage({
-    action: "local_pages_intercept",
-    redirect: true,
-    uri: uri
-});
-}
-
-
 try {
-    document
-    .getElementById("subscriptionsActivateAllButton")
-    .addEventListener("click", async function () {
-        activateAllSubscriptions();
-    });
+    if (getQueryStringParameter("add_distributionlistid")) {
+        console.debug("add_distributionlistid parameter found ");
+
+        addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid")).then(function (data) {
+
+            // it a post action URL has been prescribed using the quertstring parameter "redirecturi", then redirect to that URL now
+            uri = getQueryStringParameter("redirecturi");
+            console.debug("redirect to ", uri);
+            if (uri) {
+                // Redirect to a new URL - do not present a page
+                window.location.href = uri;
+            } else {
+                // no redirect URL has been prescribed, so present the page
+                render_page();
+            }
+        }).catch(function (error) {
+            console.error(error);
+        }
+        );
+    }else{
+        uri = getQueryStringParameter("redirecturi");
+        console.debug("redirect to ", uri);
+        if (uri) {
+            // Redirect to a new URL - do not present a page
+            window.location.href = uri;
+        } else {
+            // no redirect URL has been prescribed, so present the page
+            render_page();
+        }
+    }
 } catch (e) {
     console.error(e);
 }
 
-try {
-    document
-    .getElementById("subscriptionsSuspendAllButton")
-    .addEventListener("click", function () {
-        deactivateAllSubscriptions();
-    });
-} catch (e) {
-    console.error(e);
-}
+function render_page() {
+ // Fetch data on current subscriptions on page-load
+ fetchData();
 
-try {
-    document
-    .getElementById("subscriptionsAddButton")
-    .addEventListener("click", function () {
-        add_subscription();
-    });
-} catch (e) {
-    console.error(e);
-}
+             
+ try {
+     document
+     .getElementById("subscriptionsActivateAllButton")
+     .addEventListener("click", async function () {
+         activateAllSubscriptions();
+     });
+ } catch (e) {
+     console.error(e);
+ }
 
-  }
+ try {
+     document
+     .getElementById("subscriptionsSuspendAllButton")
+     .addEventListener("click", function () {
+         deactivateAllSubscriptions();
+     });
+ } catch (e) {
+     console.error(e);
+ }
 
-});
+ try {
+     document
+     .getElementById("subscriptionsAddButton")
+     .addEventListener("click", function () {
+         add_subscription();
+     });
+ } catch (e) {
+     console.error(e);
+ }
 }
-}catch(e){
-    console.error(e);
-}
-
 
 // Function to use "fetch" to delete a data row
 function addSubscriptionByUUIDinBackground(distributionlistid) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
         console.log("addSubscriptionByUUIDinBackground (" + distributionlistid + ")");
         try {
             console.log("addSubscriptionByUUIDinBackground");
             //let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
             let plugin_uuid = await new Promise(resolve => {
-                chrome.storage.local.get([plugin_uuid_header_name], result => {
-                    resolve(result[plugin_uuid_header_name] || null);
+                    chrome.storage.local.get([plugin_uuid_header_name], result => {
+                        resolve(result[plugin_uuid_header_name] || null);
+                    });
                 });
-            });
             console.log("plugin_uuid: ", plugin_uuid);
             var session = "null";
             try {
                 session = await new Promise(resolve => {
-                    chrome.storage.local.get([plugin_session_header_name], result => {
-                        resolve(result[plugin_session_header_name] || null);
+                        chrome.storage.local.get([plugin_session_header_name], result => {
+                            resolve(result[plugin_session_header_name] || null);
+                        });
                     });
-                });
             } catch (e) {
                 console.error(e);
             }
@@ -127,8 +118,8 @@ function addSubscriptionByUUIDinBackground(distributionlistid) {
 
             const userid = "";
             const message_body = JSON.stringify({
-                distributionlistid: distributionlistid,
-            });
+                    distributionlistid: distributionlistid,
+                });
             console.log(message_body);
             fetch(server_url + URI_plugin_user_add_subscription_v10, {
                 method: "POST",
@@ -141,23 +132,22 @@ function addSubscriptionByUUIDinBackground(distributionlistid) {
             })
             .then(response => {
                 // Check for errors
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+               // if (!response.ok) {
+               //     throw new Error(`HTTP error! status: ${response.status}`);
+               // }
                 // Parse JSON data
                 return response.json();
             })
             .then(data => {
                 // Handle parsed JSON data
-                console.log("completed with: "+JSON.stringify(data));
+                console.log("completed with: " + JSON.stringify(data));
                 resolve(data);
             })
             .catch(error => {
                 // Handle errors
                 console.error(error);
             });
-            
-            
+
         } catch (error) {
             console.error(error);
             reject(error);
@@ -614,7 +604,6 @@ async function fetchData() {
         console.error(error);
     }
 
-  
     // if there is a querystring parameter, then highlight the distribution list spiecified by that parameter
     var distValue = getQueryStringParameter('distributionlistid');
     if (distValue) {
@@ -676,20 +665,19 @@ function addSubscriptionTableRow(tableBody, row) {
     //cell1.textContent = row.subscriptionid;
     //cell2.textContent = row.name;
 
-// Create an anchor element
-const link2 = document.createElement('a');
-link2.href = '/pages/view_distributionlist.html?distributionlistid=' + row.distributionlistid; // Set the destination URL
-link2.target = "_blank"; // open this link in another tab
-link2.textContent = row.name; // Set the display text
-cell2.appendChild(link2);
+    // Create an anchor element
+    const link2 = document.createElement('a');
+    link2.href = '/pages/view_distributionlist.html?distributionlistid=' + row.distributionlistid; // Set the destination URL
+    link2.target = "_blank"; // open this link in another tab
+    link2.textContent = row.name; // Set the display text
+    cell2.appendChild(link2);
     cell3.textContent = row.description;
     cell4.textContent = row.creatordisplayname;
     cell5.textContent = row.postcount;
     cell9.textContent = row.subscribedate;
 
     newRow.setAttribute("subscriptionid", row.subscriptionid);
-newRow.setAttribute("distributionlistid", row.distributionlistid);    
-
+    newRow.setAttribute("distributionlistid", row.distributionlistid);
 
     // Add delete button
     const deleteButton = document.createElement("button");
@@ -1049,7 +1037,6 @@ function extractAgreementIds() {
     return agreementIds;
 }
 
-
 async function add_subscription() {
     console.log("add_subscription");
     // clean up the space
@@ -1209,84 +1196,81 @@ async function add_subscription() {
             cell7.appendChild(subscribeButton);
 
         });
-   
 
-    if (available_count > 0) {
-        // create button to send data to API
-        const button = document.createElement('button');
-        button.id = 'new-subscriber';
-        button.textContent = 'add';
-        const container = document.getElementById('add_subscription_form');
-        container.appendChild(button);
-        console.log(container);
+        if (available_count > 0) {
+            // create button to send data to API
+            const button = document.createElement('button');
+            button.id = 'new-subscriber';
+            button.textContent = 'add';
+            const container = document.getElementById('add_subscription_form');
+            container.appendChild(button);
+            console.log(container);
 
-        // Find the button and add an event listener
-        const sendDataButton = document.getElementById('new-subscriber');
-       
-        sendDataButton.addEventListener('click', function () {
-            console.log("sendDataButton");
-            // Extract data from table
-            const email = table.rows[0].cells[1].textContent; // Get text from second cell of the first row
-            var ynInstallationUniqueId = "";
-            var xYellownotesSession = "";
-            const msg = {
-                "email": email,
-                "distributionlistid": distributionlistid
-            }
-            console.log(msg);
-            chrome.storage.local.get([plugin_uuid_header_name]).then(
-                function (result) {
-                ynInstallationUniqueId = result[plugin_uuid_header_name];
-                console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                return chrome.storage.local.get([plugin_session_header_name]);
-            }).then(function (result) {
-                xYellownotesSession = result[plugin_session_header_name];
-                console.log("xYellownotesSession: " + xYellownotesSession);
-                return fetch('https://api.yellownotes.cloud/api/v1.0/plugin_user_add_distribution_list_subscriber', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [plugin_uuid_header_name]: ynInstallationUniqueId,
-                        [plugin_session_header_name]: xYellownotesSession,
-                    },
-                    body: JSON.stringify(msg)
-                });
-            })
-            .then(response => response.json())
-            .then(function (data) {
-                console.log('Success:', data);
-                // Usage: Pass the ID of the parent element to cleanup
-                removeAllChildren('add_subscription_form');
+            // Find the button and add an event listener
+            const sendDataButton = document.getElementById('new-subscriber');
 
-            }).catch((error) => console.error('Error:', error));
-        });
-    } else {
-        console.log("no available distribution lists to can be subscribed to");
-        const msg = document.createElement('p');
-        msg.textContent = 'no feeds available for subscription';
-        msg.setAttribute('class', 'message_to_user');
-        const container = document.getElementById('add_subscription_form');
-        container.appendChild(msg);
-        console.log(container);
+            sendDataButton.addEventListener('click', function () {
+                console.log("sendDataButton");
+                // Extract data from table
+                const email = table.rows[0].cells[1].textContent; // Get text from second cell of the first row
+                var ynInstallationUniqueId = "";
+                var xYellownotesSession = "";
+                const msg = {
+                    "email": email,
+                    "distributionlistid": distributionlistid
+                }
+                console.log(msg);
+                chrome.storage.local.get([plugin_uuid_header_name]).then(
+                    function (result) {
+                    ynInstallationUniqueId = result[plugin_uuid_header_name];
+                    console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    return chrome.storage.local.get([plugin_session_header_name]);
+                }).then(function (result) {
+                    xYellownotesSession = result[plugin_session_header_name];
+                    console.log("xYellownotesSession: " + xYellownotesSession);
+                    return fetch('https://api.yellownotes.cloud/api/v1.0/plugin_user_add_distribution_list_subscriber', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [plugin_uuid_header_name]: ynInstallationUniqueId,
+                            [plugin_session_header_name]: xYellownotesSession,
+                        },
+                        body: JSON.stringify(msg)
+                    });
+                })
+                .then(response => response.json())
+                .then(function (data) {
+                    console.log('Success:', data);
+                    // Usage: Pass the ID of the parent element to cleanup
+                    removeAllChildren('add_subscription_form');
+
+                }).catch((error) => console.error('Error:', error));
+            });
+        } else {
+            console.log("no available distribution lists to can be subscribed to");
+            const msg = document.createElement('p');
+            msg.textContent = 'no feeds available for subscription';
+            msg.setAttribute('class', 'message_to_user');
+            const container = document.getElementById('add_subscription_form');
+            container.appendChild(msg);
+            console.log(container);
+        }
+    } catch (error) {
+        console.error(error);
     }
-} catch (error) {
-    console.error(error);
-}
 }
 
-
- // Function to highlight the row
- function highlightRow(value) {
- //   var table = document.getElementById('myTable');
-//    var rows = table.getElementsByTagName('tr');
+// Function to highlight the row
+function highlightRow(value) {
+    //   var table = document.getElementById('myTable');
+    //    var rows = table.getElementsByTagName('tr');
 
     var rows = document.querySelectorAll('[distributionlistid="' + value + '"]');
-console.log(rows);
-   // for (var i = 0; i < rows.length; i++) {
-     //   if (rows[i].getAttribute('rs') === value) {
-            rows[0].classList.add('highlighted');
-      //      break;
-      //  }
+    console.log(rows);
+    // for (var i = 0; i < rows.length; i++) {
+    //   if (rows[i].getAttribute('rs') === value) {
+    rows[0].classList.add('highlighted');
+    //      break;
+    //  }
     //}
 }
-
