@@ -30,6 +30,7 @@ const URI_plugin_user_get_all_url_yellownotes = "/api/plugin_user_get_all_url_ye
 
 const URI_plugin_user_get_all_yellownotes = "/api/plugin_user_get_all_yellownotes";
 
+
 const URI_plugin_user_get_subscribed_url_yellownotes = "/api/v1.0/plugin_user_get_subscribed_url_yellownotes";
 
 const URI_plugin_user_get_own_url_yellownotes = "/api/v1.0/plugin_user_get_own_url_yellownotes";
@@ -414,6 +415,8 @@ var in_memory_policies = {};
 
 // listener for messages from the content scripts or the admin pages
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    console.debug("####################################################");
+    console.debug("####################################################");
     console.debug(message);
     console.debug(sender);
     console.debug(message.action);
@@ -434,14 +437,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         }
 
         try {
-            if (message.stickynote.request) {
+            if (isUndefined(message.stickynote)) {
+                if (isUndefined(message.stickynote.request)) {
+                    if (message.stickynote.request) {
 
                 action = message.stickynote.request;
-            }
+            }}
+        }
         } catch (f) {
             console.debug(f);
         }
-
     } catch (e) {
         console.debug(e);
     }
@@ -1030,8 +1035,48 @@ console.debug("calling getTemplate");
            
                 // Use the tab ID to focus the tab
                 chrome.tabs.update(sender.tab.id, {active: true});
-        
 
+        } else if (action == 'gothere') {
+                console.debug("request: gothere");
+                console.debug(message);
+                // lookup the details of the not in the database
+
+                const noteid = message.message.gothere.noteid;
+                console.debug("noteid: " + noteid);
+                chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                    ynInstallationUniqueId = result[plugin_uuid_header_name];
+                    xYellownotesSession = result[plugin_session_header_name];
+                    console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    console.debug("xYellownotesSession: " + xYellownotesSession);
+    
+                    const opts = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [plugin_uuid_header_name]: ynInstallationUniqueId,
+                            [plugin_session_header_name]: xYellownotesSession
+                        },
+                        body: JSON.stringify({
+                            noteid: noteid
+                           
+                        })
+                    };
+                    console.debug(JSON.stringify(opts));
+                    return fetch(server_url + URI_plugin_user_get_authorized_yellownote, opts);
+                }).then(function (response) {
+                    console.debug(response);
+                    return response.json();
+                }).then(function (data) {
+                   
+                    console.debug(data);
+                    const datarow = data[0];
+console.debug(datarow);
+
+                openUrlAndScrollToElement(datarow.url, datarow.noteid, datarow);
+
+    //return true;
+                });
+                return true;
         } else if (action == 'scroll_to_note') {
             console.debug("request: scroll_to_note");
             console.debug(message);
@@ -1039,6 +1084,7 @@ console.debug("calling getTemplate");
           
             openUrlAndScrollToElement(message.message.scroll_to_note_details.url, datarow.noteid, datarow);
 //return true;
+return true;
         
         } else if (action == 'get_authorized_note') {
             console.debug("get authorized note" );

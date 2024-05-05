@@ -958,15 +958,25 @@ function get_displayname_from_sessiontoken(token) {
 }
 
 function utf8_to_b64(str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+    try{
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
             return String.fromCharCode('0x' + p1);
         }));
+    }catch(e){
+        console.error(e);
+        return "";
+    }
 }
 
 function b64_to_utf8(str) {
+    try{
     return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
+    }catch(e){
+        console.error(e);
+        return "";
+    }
 }
 
 function isUndefined(variable) {
@@ -3476,14 +3486,17 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
              */
             console.debug("browsersolutions calling renderNoteHeader");
             renderNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+            console.debug(cont1);
 
             // set background color of note
             // what color to use for the note
             var note_color = "#ffff00"; // set default value, override with more specific values if available
             // attempt to read size parameters from the note properties of the creator
-            if (creatorDetails.note_color) {
+            if (creatorDetails != undefined) {
+            if (creatorDetails.hasOwnProperty("note_color") && creatorDetails.note_color) {
                 note_color = creatorDetails.note_color
                     console.debug("creator's note_properties has note_color, use it " + note_color);
+            }
 
             } else {
                 // brand-level not implemted yet
@@ -3698,6 +3711,7 @@ function renderNoteHeader(note_object_data, note_container, creatorDetails, isOw
         }
 
     } else {
+        console.log("no creator details, consequently no banner image")
         // no creator details, therefore no banner image
         // There is no option for setting image at the level of the feed or the individial note at this time
     }
@@ -3727,11 +3741,13 @@ function renderNoteHeader(note_object_data, note_container, creatorDetails, isOw
         aElement.setAttribute('rel', "noopener noreferrer");
 
         aElement.appendChild(imgElement);
+        // return the top bar field
         topbarfield.appendChild(aElement);
     } else {
         // no image, use text
         headerhtml = '<div style="word-wrap: break-word; line-height: 1; letter-spacing: -0.5px;">feed: <a href="' + link_target + '" target="_blank" rel="noopener noreferrer"><b>' + display_text + '</b></a></div>\n<br/>\n';
 
+        // return the top bar field
         topbarfield.innerHTML = headerhtml;
 
     }

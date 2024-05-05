@@ -660,12 +660,17 @@ const sortStates = {
 
 
 // create the URL that when clicked on adds the user to the distribution list
+// append a redirecturi that redicts the the page showing the distribution list
+
 function createOpenInvitation(distributionlistid) {
     console.log("createOpenInvitation ("+distributionlistid+")");
     // create a small window/form to add a new distribution list
-    const textToCopy = "https://www.yellownotes.cloud/subscribe?distributionlistid="+distributionlistid;
+
+const redirectUri = encodeURIComponent("/pages/view_distributionlist.html?distributionlistid=" + distributionlistid );
+
+    const textToCopy = "https://www.yellownotes.cloud/subscribe?distributionlistid="+distributionlistid  + "&redirecturi=" + redirectUri;
     navigator.clipboard.writeText(textToCopy).then(() => {
-        console.log('Invitation URL copied to clipboard');
+        console.log('Invitation URL copied to clipboard: ' + textToCopy);
     }).catch(err => {
         console.error('Error in copying text: ', err);
     });

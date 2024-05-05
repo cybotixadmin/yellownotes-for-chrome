@@ -23,9 +23,29 @@ console.log(url);
 console.log(url.replace(/.*add_distributionlistid=/, ""));
 // accept the submitted value for the distribution list id
 // the API has security mechanism in place the screen the value for undesirable content
+try{
+if ( getQueryStringParameter("add_distributionlistid")){
 
-addSubscriptionByUUIDinBackground(url.replace(/.*add_distributionlistid=/, ""));
+addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid"));
+}
+}catch(e){
+    console.error(e);
 
+}
+ // it a post action URL has been prescribed using the quertstring parameter "redirecturi", then redirect to that URL now
+
+
+  uri = getQueryStringParameter("redirecturi");
+  console.debug("redirect to ", uri);
+  if ( uri){
+      // Redirect to a new URL
+  window.location.href = uri;
+  //chrome.runtime.sendMessage({
+    //  action: "local_pages_intercept",
+     // redirect: true,
+     // uri: uri
+  //});
+  }
 
 // Function to use "fetch" to delete a data row
 async function addSubscriptionByUUIDinBackground(distributionlistid) {
@@ -58,11 +78,7 @@ async function addSubscriptionByUUIDinBackground(distributionlistid) {
         // Parse JSON data
         const data = await response.json();
 
-        // go se what you have just subscribed to
-// redirect to the feed's own page
-console.debug("redirect to the feed's own page");
-
-
+      
     } catch (error) {
         console.error(error);
     }
@@ -954,6 +970,17 @@ function extractAgreementIds() {
 
 // Fetch data on current subscriptions on page-load
 fetchData();
+
+uri = getQueryStringParameter("redirecturi");
+console.debug("redirect to ", uri);
+if ( uri){
+chrome.runtime.sendMessage({
+    action: "local_pages_intercept",
+    redirect: true,
+    uri: uri
+});
+}
+
 
 try {
     document

@@ -54,22 +54,18 @@ async function goThere(datarow) {
 
         const userid = "";
         console.log("go to url: " + datarow.url);
-        
+
         console.log("go lookup creatorid: " + datarow.creatorid);
-const noteid = datarow.noteid;
+        const noteid = datarow.noteid;
 
-console.log("go lookup noteid: " + noteid);
+        console.log("go lookup noteid: " + noteid);
 
-console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
+        console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
 
-const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim(); 
-console.log(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim() );
-
-
+        const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
+        console.log(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim());
 
         // lookup the target url in the table (the user may have changed it !)
-
-
 
 
         // issue a http redirect to open the URL in another browser tab
@@ -97,6 +93,65 @@ console.log(document.querySelector('tr[noteid="' + noteid + '"]').querySelector(
     } catch (error) {
         console.error(error);
     }
+}
+
+// create the URL that when clicked on adds the user to the distribution list
+// append a redirecturi that redicts the the page showing the distribution list
+
+function createNoteShareLink(datarow) {
+    console.log("createNoteShareLink (datarow)");
+    console.log(datarow);
+
+    // link must make the user subscribe to the feed the note belongs to, before directing the user to the note.
+    // if the feed/distributionlist allowd anonymous access, the unknown/unauthenticated user will be directed to the note directly after subscribing to the feed
+
+    // first part of the URL is the one to invite the user to subscribe to the feed of which the note is a part
+
+    // the second part is to redirect to displaying  the note in the location where it is attached (the "gothere" functionality)
+
+    // noteid
+    // distributionlistid
+    // url
+
+
+    const userid = "";
+    console.log("go to url: " + datarow.url);
+
+    const noteid = datarow.noteid;
+
+    console.log("go lookup noteid: " + noteid);
+
+    console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
+
+    const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
+    console.log(url);
+
+
+
+    var textToCopy;
+    var distributionlistid;
+    try{
+    
+        distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
+    console.log(distributionlistid);
+    const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
+    textToCopy = "https://www.yellownotes.cloud/subscribe?distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
+}catch(e){
+            console.log(e);
+            textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
+        }
+    
+    
+
+
+// place the url value in the clipboard
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        console.log('Invitation URL copied to clipboard: ' + textToCopy);
+        
+    }).catch(err => {
+        console.error('Error in copying text: ', err);
+    });
+    return textToCopy;
 }
 
 /**
@@ -503,8 +558,6 @@ function render() {
                 console.log(JSON.stringify(row));
                 console.log(row.noteid);
 
-               
-
                 // Create new row
                 const newRow = tableBody.insertRow();
                 newRow.setAttribute('noteid', row.noteid);
@@ -621,6 +674,19 @@ function render() {
                 }
                 cell_payload.setAttribute('contenteditable', 'true');
                 cell_payload.setAttribute('data-label', 'text');
+                cell_payload.setAttribute('name', 'payload');
+
+
+                        // Create the dropdown list for the distribution list
+                        const dropdown = createDropdown(distributionListData, row.distributionlistid);
+                        console.log(dropdown);
+                        cell_distributionlist.appendChild(dropdown);
+                        //cell_distributionlist.setAttribute('name', 'distributionlistid');
+                        cell_distributionlist.firstChild.setAttribute('name', 'distributionlistid');
+                        // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
+                        //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
+
+                        
                 // create small table to contain the action buttons
 
                 // Add button container
@@ -668,16 +734,37 @@ function render() {
                 // Add location "go there" button
                 const goThereButtonContainer = document.createElement('div');
                 goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+                const link = document.createElement('a');
+                console.log(row);
+                const u = createNoteShareLink(row);
+                console.log(u);
+                link.href = u;
+                link.target = "_blank";
                 const goThereButton = document.createElement('img');
                 goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
                 goThereButton.alt = 'go there';
                 goThereButton.setAttribute('class', 'go_to_location_button');
-                goThereButton.onclick = function () {
-                    // call to API to delete row from data base
-                    goThere(row);
-                };
-                goThereButtonContainer.appendChild(goThereButton);
+                //goThereButton.onclick = function () {
+                //    goThere(row);
+                //};
+                link.appendChild(goThereButton);
+                goThereButtonContainer.appendChild(link);
                 actionButtonContainer.appendChild(goThereButtonContainer);
+
+                // button to create a link to this note that can be shared with others - subsume this functionaility into the "goto" button
+
+                //const shareButtonContainer = document.createElement('div');
+                //shareButtonContainer.setAttribute('class', 'share_button');
+                //const shareButton = document.createElement('img');
+                //shareButton.src = "../icons/share.40.png";
+                //shareButton.style = "height: 20px; width: 20px;";
+                //shareButton.alt = 'share';
+                //shareButton.setAttribute('class', 'share_button');
+                //shareButton.onclick = function () {
+                //    createNoteShareLink(row);
+                //};
+                //shareButtonContainer.appendChild(shareButton);
+                //actionButtonContainer.appendChild(shareButtonContainer);
 
                 // add enable/disable button
                 const ableButton = document.createElement('button');
@@ -702,26 +789,20 @@ function render() {
                 cell_actions.setAttribute('data-label', 'text');
                 // create drop-down of feeds
                 // Add location "go there" button
-                const selectionList = document.createElement('select');
+                //const selectionList = document.createElement('select');
+                //selectionList.setAttribute('name', 'distributionlistid');
                 //  selectionContainer.setAttribute('class', 'go_to_location_button');
-                const option0 = document.createElement('option');
-                option0.value = "";
-                option0.textContent = "";
-                selectionList.appendChild(option0);
+                //const option0 = document.createElement('option');
+                //option0.value = "";
+                //option0.textContent = "";
+                //selectionList.appendChild(option0);
 
-                const option = document.createElement('option');
-                option.value = row.distributionlistid;
-                option.textContent = row.distributionlistname;
-                selectionList.appendChild(option);
+                //const option = document.createElement('option');
+                //option.value = row.distributionlistid;
+                //option.textContent = row.distributionlistname;
+                //selectionList.appendChild(option);
 
-                // Create the dropdown list
-                const dropdown = createDropdown(distributionListData, row.distributionlistid);
-                console.log(dropdown);
-                cell_distributionlist.appendChild(dropdown);
-
-                // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
-                //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
-
+        
                 // Adding data-label for mobile responsive
                 cell_createtime.setAttribute('data-label', 'createtime');
                 cell_createtime.setAttribute('class', 'timestamp');
@@ -822,10 +903,9 @@ async function setNoteActiveStatusByUUID(noteid, status) {
  */
 async function saveChanges(noteid, event) {
     console.debug("saveChanges: " + noteid);
-   
+
     console.debug(event.target.parentNode.parentNode.parentNode.parentNode);
 
-   
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);

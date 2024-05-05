@@ -183,15 +183,25 @@ console.log(claims);
 
 
 function utf8_to_b64(str) {
+  try {
   return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
       return String.fromCharCode('0x' + p1);
   }));
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 function b64_to_utf8(str) {
+  try{
   return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
       return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
   }).join(''));
+}catch(e){
+  console.error(e);
+  return null;
+}
 }
 
 
