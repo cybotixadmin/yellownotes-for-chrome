@@ -322,7 +322,7 @@ async function fetchData(distributionlistid) {
 
         // Create new row
         const newRow = tableBody.insertRow();
-
+        newRow.setAttribute('noteid', row.noteid);
         // Create cells and populate them with data
         const cell1 = newRow.insertCell(0);
         const cell_lastmodifiedtime = newRow.insertCell(1);
@@ -357,6 +357,7 @@ async function fetchData(distributionlistid) {
 
         try {
             type_cell.textContent = obj.note_type;
+            type_cell.setAttribute('name', 'note_type');
 
         } catch (e) {
             console.log(e);
@@ -365,13 +366,14 @@ async function fetchData(distributionlistid) {
         // name
         try {
             cell_name.textContent = row.distributionlistname;
+            cell_name.setAttribute('name', 'distributionlistname');
         } catch (e) {
             console.debug(e);
         }
 
         // url where note is attached
         cell_url.textContent = obj.url;
-
+        cell_url.setAttribute('name', 'url');
         // display/message text
         cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
 
@@ -390,24 +392,26 @@ async function fetchData(distributionlistid) {
          */
         // Add location "go there" button
 
+                // Add location "go there" button
+                const goThereButtonContainer = document.createElement('div');
+                goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+                const link = document.createElement('a');
+                console.log(row);
+                const u = createNoteShareLink(row);
+                console.log(u);
+                link.href = u;
+                link.target = "_blank";
+                const goThereButton = document.createElement('img');
+                goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
+                goThereButton.alt = 'go there';
+                goThereButton.setAttribute('class', 'go_to_location_button');
+                //goThereButton.onclick = function () {
+                //    goThere(row);
+                //};
+                link.appendChild(goThereButton);
+                goThereButtonContainer.appendChild(link);
+               
 
-        const goThereButtonContainer = document.createElement('div');
-        goThereButtonContainer.setAttribute('class', 'go_to_location_button');
-
-        const goThereButton = document.createElement('img');
-        goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
-
-        goThereButton.alt = 'go there';
-
-        goThereButton.setAttribute('class', 'go_to_location_button');
-
-        //   goThereButton.textContent = 'locate';
-        goThereButton.onclick = function () {
-            // call to API to delete row from data base
-            goThere(obj.url, row);
-        };
-
-        goThereButtonContainer.appendChild(goThereButton);
         cell_buttons.appendChild(goThereButtonContainer);
 
         //cell_buttons.appendChild(goThereButton);
@@ -474,7 +478,7 @@ async function fetchNote(distributionlistid, noteid) {
 
         // Create new row
         const newRow = tableBody.insertRow();
-
+        newRow.setAttribute('noteid', row.noteid);
         // Create cells and populate them with data
         const cell1 = newRow.insertCell(0);
         const cell_lastmodifiedtime = newRow.insertCell(1);
@@ -509,7 +513,7 @@ async function fetchNote(distributionlistid, noteid) {
 
         try {
             type_cell.textContent = obj.note_type;
-
+            type_cell.setAttribute('name', 'note_type');
         } catch (e) {
             console.log(e);
         }
@@ -523,7 +527,7 @@ async function fetchNote(distributionlistid, noteid) {
 
         // url where note is attached
         cell_url.textContent = obj.url;
-
+        cell_url.setAttribute('name', 'url');
         // display/message text
         cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
 
@@ -541,25 +545,44 @@ async function fetchNote(distributionlistid, noteid) {
         cell_buttons.appendChild(deleteButton);
          */
         // Add location "go there" button
+                // Add location "go there" button
+                const goThereButtonContainer = document.createElement('div');
+                goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+                const link = document.createElement('a');
+                console.log(row);
+                const u = createNoteShareLink(row);
+                console.log(u);
+                link.href = u;
+                link.target = "_blank";
+                const goThereButton = document.createElement('img');
+                goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
+                goThereButton.alt = 'go there';
+                goThereButton.setAttribute('class', 'go_to_location_button');
+                //goThereButton.onclick = function () {
+                //    goThere(row);
+                //};
+                link.appendChild(goThereButton);
+                goThereButtonContainer.appendChild(link);
+                actionButtonContainer.appendChild(goThereButtonContainer);
 
 
-        const goThereButtonContainer = document.createElement('div');
-        goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+       // const goThereButtonContainer = document.createElement('div');
+        //goThereButtonContainer.setAttribute('class', 'go_to_location_button');
 
-        const goThereButton = document.createElement('img');
-        goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
+    //    const goThereButton = document.createElement('img');
+      //  goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
 
-        goThereButton.alt = 'go there';
+        //goThereButton.alt = 'go there';
 
-        goThereButton.setAttribute('class', 'go_to_location_button');
+        //goThereButton.setAttribute('class', 'go_to_location_button');
 
         //   goThereButton.textContent = 'locate';
-        goThereButton.onclick = function () {
+       // goThereButton.onclick = function () {
             // call to API to delete row from data base
-            goThere(obj.url, row);
-        };
+        //    goThere(obj.url, row);
+        //};
 
-        goThereButtonContainer.appendChild(goThereButton);
+        //goThereButtonContainer.appendChild(goThereButton);
         cell_buttons.appendChild(goThereButtonContainer);
 
         //cell_buttons.appendChild(goThereButton);
@@ -570,6 +593,55 @@ async function fetchNote(distributionlistid, noteid) {
 
 }
 
+
+
+
+// create the URL that when clicked on adds the user to the distribution list
+// append a redirecturi that redicts the the page showing the distribution list
+// user is already a subscriber since this list is the one the user is viewing, so the subscribe redirect is not needed
+function createNoteShareLink(datarow) {
+    console.log("createNoteShareLink (datarow)");
+    console.log(datarow);
+  
+    // link must make the user subscribe to the feed the note belongs to, before directing the user to the note.
+    // if the feed/distributionlist allowd anonymous access, the unknown/unauthenticated user will be directed to the note directly after subscribing to the feed
+  
+    // first part of the URL is the one to invite the user to subscribe to the feed of which the note is a part
+  
+    // the second part is to redirect to displaying  the note in the location where it is attached (the "gothere" functionality)
+  
+    // noteid
+    // distributionlistid
+    // url
+  
+  
+    const userid = "";
+    console.log("go to url: " + datarow.url);
+  
+    const noteid = datarow.noteid;
+  
+    console.log("go lookup noteid: " + noteid);
+  
+    console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
+  
+    const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
+    console.log(url);
+  
+  
+  
+    var textToCopy;
+
+        textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
+    console.log(textToCopy);
+  // place the url value in the clipboard
+    //navigator.clipboard.writeText(textToCopy).then(() => {
+    //    console.log('Invitation URL copied to clipboard: ' + textToCopy); 
+    //}).catch(err => {
+    //    console.error('Error in copying text: ', err);
+    //});
+    return textToCopy;
+  }
+  
 
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;

@@ -169,12 +169,16 @@ console.log("creatorDetails: " );
                 console.log(creatorDetails);
                 // make sure the note is there
                 const newNote = false;
-                // change this to compare authenticated user with creatorid inside note
-                console.log("note_creatorid: " + note_creatorid);
-                console.log("note_data: " );
+
                 console.log(note_data);
 
+                // change this to compare authenticated user with creatorid inside note data
+                console.log("note_creatorid: " + note_creatorid);
+                console.log("note_data: creatorid: ", note_data.creatorid );
+              
                 const isOwner = true;
+
+
 const moveFocus = true;
                 var promiseArray = [];
                 if (isNoteOnPage(noteid)) {
@@ -2077,7 +2081,7 @@ moveFocus       boolean     If set to true, move the focus to this note
  * */
 
 function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNote, moveFocus) {
-    console.debug("browsersolutions: ###placeStickyNote.start");
+    console.debug("browsersolutions: placeStickyNote.start");
     // contenttype
     // permitted values: text, html, embeded, linked
     console.debug(note_obj);
@@ -2240,12 +2244,6 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                         console.debug("browsersolutions: end_range_node end_offset " + end_offset);
                         console.debug("browsersolutions: end_range_node total text length: " + end_range_node.textContent.length);
                         console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
-                        // create message box and anchor it
-                        //console.debug("1.1.3");
-                        // create html of tooltip
-                        //var it2 = document.createElement("div");
-
-                        //it2.setAttribute("class", 'xstooltip');
 
                         // create the yellow note, later attach it to the right location in the DOM
                         console.debug("browsersolutions: calling: create_stickynote_node");
@@ -2343,11 +2341,7 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
 
                                     console.debug("calling makeDragAndResize");
                                     makeDragAndResize(newGloveboxNode);
-                                    //newGloveboxNode.addEventListener('mouseenter',
-                                    //    function () {
-                                    //    console.debug("browsersolutions ### mouseover");
-                                    //});
-
+                             
                                     if (isOwner) {
                                         console.debug(newGloveboxNode);
                                         newGloveboxNode.setAttribute("isOwner", "true");
@@ -3352,6 +3346,8 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
         if (note_object_data.note_type == "http_get_url" || note_object_data.note_type == "webframe" || note_object_data.type == "webframe") {
             // part pertain only to notes of type http_get_url (looking up URLs)
             // Locate the form element
+            console.debug("webframe note type");
+
             console.debug("#### perform url lookup ####");
 
             // check for content_url for notes that collect content from elsewhere
@@ -3445,7 +3441,7 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
             }
         } else {
             // "regular" yellow note type, use this as the default but type="yellownote should be set regardless"
-            console.debug(cont1);
+            console.debug("yellownote note type");
             // insert the note metatdata and other permanent content
             cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
             cont1.querySelector('input[type="hidden"][name="noteid"]').replaceChildren(document.createTextNode(note_object_data.noteid));
@@ -3508,6 +3504,8 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
 
             // set up the drop-down menu for distribution lists/feeds
             // pre-select the distribution list drop down menu
+            // only do this for note where the authenticated user is the note owner
+            if (isOwner) {
             const dl_container = cont1.querySelector('[name="distributionlistdropdown"]');
 
             if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
@@ -3538,9 +3536,9 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                         console.error(e);
                     }
                 });
-            } catch (f) {
-                console.error(f);
-            }
+                } catch (f) {
+                    console.error(f);
+                }
             } else {
                 console.debug("calling: get_distributionlist");
                 get_distributionlist().then(function (response) {
@@ -3562,7 +3560,7 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
 
                 });
             }
-
+        }
         }
         //console.debug(noteForm);
 
@@ -3591,20 +3589,33 @@ var box_height = "250px";
 
 // check for brand/organization-specific values - not implemented yet
 
-
+try{
 // check for creator specific values
 if (creatorDetails.box_width) {
     box_width = creatorDetails.box_width;
         console.debug("creator's note_properties has box_width, use it " + box_width);
-} 
+}
+} catch (e) {
+    console.error(e);
+}
+
+try{
 if (creatorDetails.box_height) {
     box_height = creatorDetails.box_height;
         console.debug("creator's note_properties has box_width, use it " + box_height);
 } 
+} catch (e) {
+    console.error(e);
+}
 // check for feed-specific values - not implemented yet
 
 
-// check for note specific value
+// check for note specific values
+
+
+cont1.setAttribute("box_height", box_height); 
+cont1.setAttribute("box_width", box_width); 
+
       
 console.debug(cont1);
 
@@ -4641,7 +4652,10 @@ function delete_note(event) {
 function isNoteOnPage(noteid) {
     console.debug("browsersolutions isNoteOnPage (" + noteid + ")");
     console.debug(document.querySelectorAll('[noteid="' + noteid + '"][class="yellownotecontainer"]'));
-    return document.querySelectorAll('[noteid="' + noteid + '"][class="yellownotecontainer"]').length > 0;
+    const result = (document.querySelectorAll('[noteid="' + noteid + '"][class="yellownotecontainer"]').length > 0);
+    console.debug("browsersolutions isNoteOnPage (" + noteid + ")", result);
+    
+    return result;
 }
 
 /**

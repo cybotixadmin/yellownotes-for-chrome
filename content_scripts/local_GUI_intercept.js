@@ -69,10 +69,7 @@ console.log("intercept to ", uri);
 
 
 // intercept links to individual notes
-const gothereregexp = new RegExp(/\/\/www\.yellownotes\.cloud\/gothere/);
-//const gothereregexp = new RegExp(/\/gothere/);
-
-if ((new RegExp(/\/gothere/)).test(window.location.href)) {
+if ((new RegExp(/\/\/www\.yellownotes\.cloud\/gothere/)).test(window.location.href)) {
   console.log("/gothere")
 console.log("redirect to go to note")
 const noteid = new URLSearchParams(window.location.search).get("noteid");
@@ -174,6 +171,25 @@ if (targetURL.test(window.location.href)) {
         action: "local_pages_intercept",
         redirect: true,
         uri: "/pages/view_yellownotes.html"
+    });
+}
+
+
+const gotherehtml = new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/gothere.html/);
+if (gotherehtml.test(window.location.href)) {
+    console.log("redirect this link to plugin")
+    // Notify the background script to redirect
+
+
+// Extract query string (everything after the '?' character)
+const queryString = (window.location.href).split('?')[1] || '';
+
+const new_uri = "/pages/gothere.html?" + queryString;
+
+    chrome.runtime.sendMessage({
+        action: "local_pages_intercept",
+        redirect: true,
+        uri: new_uri
     });
 }
 

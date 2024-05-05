@@ -5,6 +5,8 @@ const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellowno
 
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
+const URI_plugin_user_get_all_subscribed_notes =  "/api/v1.0/plugin_user_get_all_subscribed_notes";
+
 
 //const browser_id = chrome.runtime.id;
 
@@ -260,18 +262,16 @@ function filterTable(colheader) {
 async function fetchData() {
     console.log("fetchData");
 
-
-  
-            var ynInstallationUniqueId = "";
-            var xYellownotesSession = "";
+        var ynInstallationUniqueId = "";
+        var xYellownotesSession = "";
     
-            let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-            let session = await chrome.storage.local.get([plugin_session_header_name]);
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
     
         ynInstallationUniqueId = plugin_uuid[plugin_uuid_header_name];
         xYellownotesSession = session[plugin_session_header_name];
     
-        const response  = await   fetch(server_url + "/api/v1.0/plugin_user_get_all_subscribed_notes", {
+        const response  = await   fetch(server_url + URI_plugin_user_get_all_subscribed_notes, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

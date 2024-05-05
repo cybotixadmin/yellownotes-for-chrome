@@ -25,63 +25,144 @@ console.log(url.replace(/.*add_distributionlistid=/, ""));
 // the API has security mechanism in place the screen the value for undesirable content
 try{
 if ( getQueryStringParameter("add_distributionlistid")){
+console.debug("add_distributionlistid parameter found ");
 
-addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid"));
-}
-}catch(e){
-    console.error(e);
+addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid")).then(function (data) {
 
-}
- // it a post action URL has been prescribed using the quertstring parameter "redirecturi", then redirect to that URL now
+     // it a post action URL has been prescribed using the quertstring parameter "redirecturi", then redirect to that URL now
 
 
   uri = getQueryStringParameter("redirecturi");
   console.debug("redirect to ", uri);
   if ( uri){
-      // Redirect to a new URL
+      // Redirect to a new URL - do not present a page
   window.location.href = uri;
   //chrome.runtime.sendMessage({
     //  action: "local_pages_intercept",
      // redirect: true,
      // uri: uri
   //});
+  
+  }else{
+// no redirect URL has been prescribed, so present the page
+
+
+// Fetch data on current subscriptions on page-load
+fetchData();
+
+uri = getQueryStringParameter("redirecturi");
+console.debug("redirect to ", uri);
+if ( uri){
+chrome.runtime.sendMessage({
+    action: "local_pages_intercept",
+    redirect: true,
+    uri: uri
+});
+}
+
+
+try {
+    document
+    .getElementById("subscriptionsActivateAllButton")
+    .addEventListener("click", async function () {
+        activateAllSubscriptions();
+    });
+} catch (e) {
+    console.error(e);
+}
+
+try {
+    document
+    .getElementById("subscriptionsSuspendAllButton")
+    .addEventListener("click", function () {
+        deactivateAllSubscriptions();
+    });
+} catch (e) {
+    console.error(e);
+}
+
+try {
+    document
+    .getElementById("subscriptionsAddButton")
+    .addEventListener("click", function () {
+        add_subscription();
+    });
+} catch (e) {
+    console.error(e);
+}
+
   }
 
+});
+}
+}catch(e){
+    console.error(e);
+}
+
+
 // Function to use "fetch" to delete a data row
-async function addSubscriptionByUUIDinBackground(distributionlistid) {
-    console.log("addSubscriptionByUUIDinBackground ("+distributionlistid+")");
-    try {
-        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-        let session = await chrome.storage.local.get([plugin_session_header_name]);
-        const userid = "";
-        const message_body = JSON.stringify({
-            distributionlistid: distributionlistid,
-            }, );
-        console.log(message_body);
-        // Fetch data from web service (replace with your actual API endpoint)
-        const response = await fetch(
-                server_url + URI_plugin_user_add_subscription_v10, {
+function addSubscriptionByUUIDinBackground(distributionlistid) {
+    return new Promise(async (resolve, reject) => {
+        console.log("addSubscriptionByUUIDinBackground (" + distributionlistid + ")");
+        try {
+            console.log("addSubscriptionByUUIDinBackground");
+            //let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+            let plugin_uuid = await new Promise(resolve => {
+                chrome.storage.local.get([plugin_uuid_header_name], result => {
+                    resolve(result[plugin_uuid_header_name] || null);
+                });
+            });
+            console.log("plugin_uuid: ", plugin_uuid);
+            var session = "null";
+            try {
+                session = await new Promise(resolve => {
+                    chrome.storage.local.get([plugin_session_header_name], result => {
+                        resolve(result[plugin_session_header_name] || null);
+                    });
+                });
+            } catch (e) {
+                console.error(e);
+            }
+            console.log("session: ", session);
+
+            const userid = "";
+            const message_body = JSON.stringify({
+                distributionlistid: distributionlistid,
+            });
+            console.log(message_body);
+            fetch(server_url + URI_plugin_user_add_subscription_v10, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
-                    [plugin_session_header_name]: session[plugin_session_header_name],
+                    [plugin_uuid_header_name]: plugin_uuid,
+                    [plugin_session_header_name]: session,
                 },
                 body: message_body, // example IDs, replace as necessary
+            })
+            .then(response => {
+                // Check for errors
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // Parse JSON data
+                return response.json();
+            })
+            .then(data => {
+                // Handle parsed JSON data
+                console.log("completed with: "+JSON.stringify(data));
+                resolve(data);
+            })
+            .catch(error => {
+                // Handle errors
+                console.error(error);
             });
-        //console.log(response);
-        // Check for errors
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            
+            
+        } catch (error) {
+            console.error(error);
+            reject(error);
         }
-
-        // Parse JSON data
-        const data = await response.json();
-
-      
-    } catch (error) {
-        console.error(error);
-    }
+    });
 }
 
 // Function to use "fetch" to delete a data row
@@ -968,49 +1049,6 @@ function extractAgreementIds() {
     return agreementIds;
 }
 
-// Fetch data on current subscriptions on page-load
-fetchData();
-
-uri = getQueryStringParameter("redirecturi");
-console.debug("redirect to ", uri);
-if ( uri){
-chrome.runtime.sendMessage({
-    action: "local_pages_intercept",
-    redirect: true,
-    uri: uri
-});
-}
-
-
-try {
-    document
-    .getElementById("subscriptionsActivateAllButton")
-    .addEventListener("click", async function () {
-        activateAllSubscriptions();
-    });
-} catch (e) {
-    console.error(e);
-}
-
-try {
-    document
-    .getElementById("subscriptionsSuspendAllButton")
-    .addEventListener("click", function () {
-        deactivateAllSubscriptions();
-    });
-} catch (e) {
-    console.error(e);
-}
-
-try {
-    document
-    .getElementById("subscriptionsAddButton")
-    .addEventListener("click", function () {
-        add_subscription();
-    });
-} catch (e) {
-    console.error(e);
-}
 
 async function add_subscription() {
     console.log("add_subscription");

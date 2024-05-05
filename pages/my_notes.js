@@ -725,6 +725,7 @@ function render() {
                     console.debug(event.target.parentNode.parentNode);
                     console.debug(event.target.parentNode.parentNode.firstChild.textContent);
 
+                    
                     // call to API to save changes to data base
                     saveChanges(row.noteid, event);
                 };
@@ -909,24 +910,34 @@ async function saveChanges(noteid, event) {
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+
         var message_display_text;
         var content_url
         try {
-            message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent);
+            //message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent);
+ 
+ console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
+
+
+            message_display_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="payload"]').textContent.trim());
         } catch (e) {
             console.debug(e);
         }
-        try {
-            content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
-        } catch (e) {
-            console.debug(e);
-        }
-        const url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="url"]').textContent;
-        const note_type = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="note_type"]').textContent;
+       
+        const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent;
+        const note_type = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="note_type"]').textContent;
 
         var message_body;
         if (note_type == "webframe") {
             console.debug("webframe");
+            try {
+                //content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
+                content_url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="content_url"]').textContent.trim();
+    
+            } catch (e) {
+                console.debug(e);
+            }
             message_body = JSON.stringify({
                     noteid: noteid,
                     note_type: note_type,
@@ -942,7 +953,7 @@ async function saveChanges(noteid, event) {
                 });
         }
 
-        //console.log(message_body);
+        console.log(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_savechanges_yellownote, {
