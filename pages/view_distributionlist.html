@@ -25,40 +25,49 @@ Display the user's account information.
 
 -->
      <!-- Empty table structure -->
-<div class="scrollable-table">
-    <table id="dataTable" class="notesTable">
-      <thead>
-        <tr class="fixed-header">
-          <th>ID</th>
-          <th class="sortableCol" >last modified</th>
-          <th class="sortableCol" >created</th>
-          <th class="sortableCol" >type<span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" >feed </th>
-          <th class="sortableCol" >location(URL)</th>
-          <th class="sortableCol" >text</th>
-          <th>action</th>
+     <div class="header">
+      <hr>note</hr>
+    
+</div>
+
+
+    <div class="scrollable-table">
+      <table id="subscribersTable" class="subscribersTable">
+        <thead>
+          <tr class="fixed-header">
+            <th>ID</th>
+            <th class="sortableCol" >last modified</th>
+            <th class="sortableCol" >created</th>
+            <th class="sortableCol" >type<span class="sort-icon" ">&#9650;</span></th>
+            <th class="sortableCol" >feed </th>
+            <th class="sortableCol" >location(URL)</th>
+            <th class="sortableCol" >text</th>
+            <th>action</th>
+            
+          </tr>
           
-        </tr>
-        
-        <!-- Add a filter row -->
-        <tr class="fixed-header">
-          <th class="filterableCol"></th>
-          <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-          <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-          <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
-    
-          <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-          <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
-          <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
-          <th ></th>
-        </tr>
-    
-      </thead>
-      <tbody>
-        <!-- Rows will be added here -->
-      </tbody>
-    </table>
-    </div>
+          <!-- Add a filter row -->
+          <tr class="fixed-header">
+            <th class="filterableCol"></th>
+            <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
+      
+            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+            <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+            <th ></th>
+          </tr>
+      
+        </thead>
+        <tbody>
+          <!-- Rows will be added here -->
+        </tbody>
+      </table>
+      </div>
+  
+
+
     </div>
 
 <!-- main page end -->

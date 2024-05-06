@@ -7,6 +7,43 @@ const URI_plugin_user_set_note_active_status = "/api/v1.0/plugin_user_setstatus_
 
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
+
+// call to database to get noets and place them in a table
+render().then(function (d) {
+    console.debug("render notes");
+    console.debug(d);
+    // kick of the process of rendering the yellow sticky notes in the graphic form
+
+
+    var doc = window.document;
+
+    var root_node = doc.documentElement;
+    console.debug(root_node);
+
+    // start analyzing the DOM (the page/document)
+
+    var note_template = null;
+    // collect the template, for later use
+    fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
+    then((response) => response.text())
+    .then((html) => {
+        //console.debug(html);
+        //note_template_html = html;
+        //const note_template = document.createElement('div');
+        // container.innerHTML = html;
+        note_template = safeParseInnerHTML(html, 'div');
+        console.log("browsersolutions " + note_template);
+        console.debug(note_template);
+
+        //replaceLink(root_node, note_template);
+
+    });
+
+    console.debug(note_template);
+
+});
+
+
 // Function to use "fetch" to delete a data row
 async function deleteDataRow(noteid) {
     try {
@@ -193,55 +230,6 @@ async function editNote(noteid) {
     }
 }
 
-// Function to fetch data and populate the table
-function fetchData() {
-    console.debug("fetchData");
-    try {
-
-        return new Promise(
-            function (resolve, reject) {
-
-            // const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
-
-            console.log(installationUniqueId);
-            //  let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-            //  let session = await chrome.storage.local.get([plugin_session_header_name]);
-            var ynInstallationUniqueId;
-            var xYellownotesSession;
-            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
-            .then(function (ins) {
-                console.log(ins);
-                ynInstallationUniqueId = ins[plugin_uuid_header_name];
-                xYellownotesSession = ins[plugin_session_header_name];
-                console.log(ynInstallationUniqueId);
-                console.log(xYellownotesSession);
-                //ynInstallationUniqueId = "dummy";
-
-                // Fetch data from web service (replace with your actual API endpoint)
-                return fetch(server_url + URI_plugin_user_get_own_yellownotes, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [plugin_uuid_header_name]: ynInstallationUniqueId,
-                        [plugin_session_header_name]: xYellownotesSession
-                    },
-                    body: JSON.stringify({}) // example IDs, replace as necessary
-                });
-            });
-            // Check for errors
-            //  if (!response.ok) {
-            //      throw new Error(`HTTP error! status: ${response.status}`);
-            //  }
-
-
-            //resolve('Data saved OK');
-
-        });
-
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 // Locate all elements with the class "my-button"
 const buttons = document.querySelectorAll('.sortableCol');
@@ -852,6 +840,13 @@ function createDropdown(optionsArray, selectedDistributionListId) {
 
             setNoteDistributionlistId(noteid, selectedId);
 
+        }else{
+            console.debug("no distributionlist selected");
+            // remove distributionlist from note
+
+            setNoteDistributionlistId(noteid, "");
+
+
         }
     });
 
@@ -1066,142 +1061,3 @@ function enable_note_with_noteid(noteid) {
     }
 }
 
-/*
- * recursively go down the DOM tree below the specified node
- *
- */
-function replaceLink(node, note_template) {
-    try {
-        //  console.debug("# replaceLink");
-        //console.debug(node);
-
-        if (node) {
-
-            // recursively call to analyse child nodes
-
-            for (var i = 0; i < node.childNodes.length; i++) {
-                //console.debug("call childnodes");
-                try {
-                    replaceLink(node.childNodes[i], note_template);
-                } catch (f) {}
-            }
-
-            /*
-             * Node.ELEMENT_NODE 	1 	An Element node like <p> or <div>.
-            Node.ATTRIBUTE_NODE 	2 	An Attribute of an Element.
-            Node.TEXT_NODE 	3 	The actual Text inside an Element or Attr.
-            Node.CDATA_SECTION_NODE 	4 	A CDATASection, such as <!CDATA[[ … ]]>.
-            Node.PROCESSING_INSTRUCTION_NODE 	7 	A ProcessingInstruction of an XML document, such as <?xml-stylesheet … ?>.
-            Node.COMMENT_NODE 	8 	A Comment node, such as <!-- … -->.
-            Node.DOCUMENT_NODE 	9 	A Document node.
-            Node.DOCUMENT_TYPE_NODE 	10 	A DocumentType node, such as <!DOCTYPE html>.
-            Node.DOCUMENT_FRAGMENT_NODE 	11 	A DocumentFragment node.
-             *
-             */
-
-            if (node.nodeType == Node.ELEMENT_NODE || node.nodeType == Node.DOCUMENT_NODE) {
-                // console.debug("1.0.1");
-
-                // exclude elements with invisible text nodes
-                //  if (ignore(node)) {
-                //      return
-                //  }
-            }
-
-            // if this node is a textnode, look for the
-            if (node.nodeType === Node.TEXT_NODE) {
-                // check for visibility
-
-
-                // apply regexp identifying yellownote
-
-                // exclude elements with invisible text nodes
-
-                // ignore any textnode that is not at least xx characters long
-                if (node.textContent.length >= 150) {
-
-                    //console.debug("look for sticky note in (" + node.nodeType + "): " + node.textContent);
-                    // regexp to match begining and end of a stickynote serialization. The regex pattern is such that multiple note objects may be matched.
-                    var yellownote_regexp = new RegExp(/yellownote=.*=yellownote/);
-
-                    if (yellownote_regexp.test(node.textContent)) {
-                        console.debug("HIT");
-                        // carry out yellow sticky note presentation on this textnode
-
-                        showStickyNote(node, note_template);
-
-                    }
-
-                }
-            }
-        }
-    } catch (e) {
-        console.debug(e);
-    }
-
-}
-
-render().then(function (d) {
-    console.debug("render notes");
-    console.debug(d);
-    // kick of the process of rendering the yellow sticky notes in the graphic form
-
-
-    var doc = window.document;
-
-    var root_node = doc.documentElement;
-    console.debug(root_node);
-
-    // start analyzing the DOM (the page/document)
-
-    var note_template = null;
-    // collect the template, for later use
-    fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
-    then((response) => response.text())
-    .then((html) => {
-        //console.debug(html);
-        //note_template_html = html;
-        //const note_template = document.createElement('div');
-        // container.innerHTML = html;
-        note_template = safeParseInnerHTML(html, 'div');
-        console.log("browsersolutions " + note_template);
-        console.debug(note_template);
-
-        replaceLink(root_node, note_template);
-
-    });
-
-    console.debug(note_template);
-
-});
-
-//traverse_text(document.documentElement);
-console.debug("################################################");
-//console.debug(all_page_text);
-//console.debug(textnode_map);
-
-
-var doc = window.document;
-
-var root_node = doc.documentElement;
-console.debug(root_node);
-
-// start analyzing the DOM (the page/document)
-
-var note_template = null;
-// collect the template, for later use
-fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
-then((response) => response.text())
-.then((html) => {
-    //console.debug(html);
-    //note_template_html = html;
-    //const note_template = document.createElement('div');
-    // container.innerHTML = html;
-    note_template = safeParseInnerHTML(html, 'div');
-    console.log("browsersolutions " + note_template);
-    console.debug(note_template);
-
-    //console.debug("browsersolutions url: " + url);
-    replaceLink(root_node, note_template);
-
-});

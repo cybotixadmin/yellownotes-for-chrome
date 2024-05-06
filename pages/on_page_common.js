@@ -180,6 +180,24 @@ console.log(claims);
 }
 
 
+function safeParseInnerHTML(rawHTML, targetElementName) {
+
+  // list of acceptable html tags
+
+
+  // list of unacceptable html tags
+  const unaccep = ["script"];
+
+  unaccep.forEach(function (item, index) {
+      console.log(item);
+  });
+
+  const container = document.createElement(targetElementName);
+  // Populate it with the raw HTML content
+  container.innerHTML = rawHTML;
+
+  return container;
+}
 
 function utf8_to_b64(str) {
   console.debug("utf8_to_b64("+str+")");

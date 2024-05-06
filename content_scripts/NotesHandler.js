@@ -2950,20 +2950,23 @@ function attachEventlistenersToYellowStickynote(note) {
         console.error(e);
     }
 
+    // goto
     try {
+// no event handler, simply a link to the note location that is actioned by the background script
 
-        const mylocate_note = (event) => {
-            console.log("event.stopPropagation();");
-            locate_note(event);
-            event.stopPropagation();
-
-        };
-        // for button going to note location
-        var allGoTo11 = note.querySelectorAll('[js_action="locate_note"]');
+// for button going to note location
+const noteid = note.getAttribute("noteid");
+console.log("noteid: " + noteid);
+        var allGoTo11 = note.querySelectorAll('[name="goto_notetarget_link"]');
         for (var i = 0; i < allGoTo11.length; i++) {
-            allGoTo11[i].removeEventListener("click", mylocate_note);
-            allGoTo11[i].addEventListener("click", mylocate_note);
+console.log("goto_notetarget_link");
+console.log(allGoTo11[i]);
+console.log(allGoTo11[i].target);
+//console.log(allGoTo11[i].href);
 
+allGoTo11[i].setAttribute("href", "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid);
+
+            
         }
 
     } catch (e) {

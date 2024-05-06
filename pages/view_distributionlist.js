@@ -268,8 +268,8 @@ function filterTable(colheader) {
 // Fetch data on page load
 
 
-async function fetchData(distributionlistid) {
-    console.log("fetchData");
+async function fetchNotes(distributionlistid) {
+    console.log("fetchNotes");
 
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
@@ -421,6 +421,8 @@ async function fetchData(distributionlistid) {
     });
 
 }
+
+
 
 
 async function fetchNote(distributionlistid, noteid) {
@@ -687,7 +689,7 @@ const automaticallyGoToNoteId = getQueryStringParameter('noteid');
 console.log("getting noteid: " + automaticallyGoToNoteId);
 if (automaticallyGoToNoteId ==null){
     console.log("or not");
-    fetchData(getQueryStringParameter('distributionlistid'));
+    fetchNotes(getQueryStringParameter('distributionlistid'));
 }else{
     fetchNote(getQueryStringParameter('distributionlistid'), automaticallyGoToNoteId);
 

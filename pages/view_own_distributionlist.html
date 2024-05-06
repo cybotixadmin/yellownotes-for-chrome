@@ -16,15 +16,12 @@
 
 <!-- main page start-->
 <div class="pageBody">
-<!-- depending on the login status of the user, display dfferent content
-If the user IS NOT authenticated:
-Display a message to the user to login or register.
-Followed by the front page of the app.
-If the user IS authenticated:
-Display the user's account information.
-
+<!-- 
 -->
      <!-- Empty table structure -->
+<div class="header">
+  <hr>notes</hr>
+
 <div class="scrollable-table">
     <table id="dataTable" class="notesTable">
       <thead>
@@ -59,7 +56,46 @@ Display the user's account information.
       </tbody>
     </table>
     </div>
+    <div class="header">
+      <hr>subscribers</hr>
+    <div class="scrollable-table">
+      <table id="subscribersTable" class="notesTable">
+        <thead>
+          <tr class="fixed-header">
+            <th>ID</th>
+            <th class="sortableCol" >username</th>
+            <th class="sortableCol" >subscriber since</th>
+            <th class="sortableCol" >type<span class="sort-icon" ">&#9650;</span></th>
+            <th class="sortableCol" >feed </th>
+            <th class="sortableCol" >location(URL)</th>
+            <th class="sortableCol" >text</th>
+            <th>action</th>
+            
+          </tr>
+          
+          <!-- Add a filter row -->
+          <tr class="fixed-header">
+            <th class="filterableCol"></th>
+            <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
+      
+            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+            <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+            <th ></th>
+          </tr>
+      
+        </thead>
+        <tbody>
+          <!-- Rows will be added here -->
+        </tbody>
+      </table>
+      </div>
+
     </div>
+
+    <hr>automatic rules and restrictions</hr>
 
 <!-- main page end -->
 

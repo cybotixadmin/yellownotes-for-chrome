@@ -453,11 +453,167 @@ async function setNoteActiveStatusByUUID(noteid, status) {
 }
 
 
+
+async function fetchSubscribers(distributionlistid) {
+    console.log("fetchSubscribers");
+
+    var ynInstallationUniqueId = "";
+    var xYellownotesSession = "";
+
+    let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+    let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+    ynInstallationUniqueId = plugin_uuid[plugin_uuid_header_name];
+    xYellownotesSession = session[plugin_session_header_name];
+
+    const msg = {
+        distributionlistid: distributionlistid
+    };
+    const response = await fetch(server_url + "/api/v1.0/plugin_user_get_all_distributionlist_notes", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [plugin_uuid_header_name]: ynInstallationUniqueId,
+                [plugin_session_header_name]: xYellownotesSession,
+            },
+            body: JSON.stringify(msg)
+        });
+
+    if (!response.ok) {
+        reject(new Error('Network response was not ok'));
+    }
+
+    const data = await response.json();
+    // Parse JSON data
+
+    console.log(data);
+
+    var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+    console.log(utc);
+    console.log(Date.now());
+    var now = new Date;
+    var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+    console.log(utc_timestamp);
+    console.log(new Date().toISOString());
+
+    // Get table body element
+    const tableBody = document.getElementById('subscribersTable').getElementsByTagName('tbody')[0];
+
+    // Loop through data and populate the table
+    data.forEach(row => {
+        console.log(row);
+        console.log(JSON.stringify(row));
+        console.log(row.noteid);
+
+        // Create new row
+        const newRow = tableBody.insertRow();
+        newRow.setAttribute('noteid', row.noteid);
+        // Create cells and populate them with data
+        const cell1 = newRow.insertCell(0);
+        const cell_lastmodifiedtime = newRow.insertCell(1);
+        const cell_createtime = newRow.insertCell(2);
+        const type_cell = newRow.insertCell(3);
+        const cell_name = newRow.insertCell(4);
+        const cell_url = newRow.insertCell(5);
+        const cell_message_text = newRow.insertCell(6);
+        const cell_buttons = newRow.insertCell(7);
+        // do not include a option for notes in this release
+        //const cell_notes = newRow.insertCell(7);
+
+
+        // parse the JSON of the note
+        const obj = JSON.parse(row.json);
+        console.log(obj);
+
+        cell1.textContent = row.noteid;
+        // last create timestamp
+        try {
+            cell_createtime.textContent = integerstring2timestamp(row.createtime);
+        } catch (e) {
+            console.debug(e);
+        }
+
+        // last modified timestamp
+        try {
+            cell_lastmodifiedtime.textContent = integerstring2timestamp(row.lastmodifiedtime);
+        } catch (e) {
+            console.debug(e);
+        }
+
+        try {
+            type_cell.textContent = obj.note_type;
+            type_cell.setAttribute('name', 'note_type');
+
+        } catch (e) {
+            console.log(e);
+        }
+
+        // name
+        try {
+            cell_name.textContent = row.distributionlistname;
+            cell_name.setAttribute('name', 'distributionlistname');
+        } catch (e) {
+            console.debug(e);
+        }
+
+        // url where note is attached
+        cell_url.textContent = obj.url;
+        cell_url.setAttribute('name', 'url');
+        // display/message text
+        cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
+
+        // buttons
+        // Add delete button
+        /*
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = function () {
+        // Remove the row from the table
+        newRow.remove();
+        // call to API to delete row from data base
+        deleteDataRow(row.uuid);
+        };
+        cell_buttons.appendChild(deleteButton);
+         */
+        // Add location "go there" button
+
+                // Add location "go there" button
+                const goThereButtonContainer = document.createElement('div');
+                goThereButtonContainer.setAttribute('class', 'go_to_location_button');
+                const link = document.createElement('a');
+                console.log(row);
+                const u = createNoteShareLink(row);
+                console.log(u);
+                link.href = u;
+                link.target = "_blank";
+                const goThereButton = document.createElement('img');
+                goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
+                goThereButton.alt = 'go there';
+                goThereButton.setAttribute('class', 'go_to_location_button');
+                //goThereButton.onclick = function () {
+                //    goThere(row);
+                //};
+                link.appendChild(goThereButton);
+                goThereButtonContainer.appendChild(link);
+               
+
+        cell_buttons.appendChild(goThereButtonContainer);
+
+        //cell_buttons.appendChild(goThereButton);
+
+        // const cell8 = newRow.insertCell(6);
+
+    });
+
+}
+
 const automaticallyGoToNoteId = getQueryStringParameter('noteid');
 console.log("getting noteid: " + automaticallyGoToNoteId);
 if (automaticallyGoToNoteId ==null){
     console.log("or not");
     fetchData(getQueryStringParameter('distributionlistid'));
+    fetchSubscribers(getQueryStringParameter('distributionlistid'));
 }else{
     fetchNote(getQueryStringParameter('distributionlistid'), automaticallyGoToNoteId);
 

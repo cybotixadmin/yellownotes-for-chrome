@@ -417,6 +417,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     console.debug(message.action);
     console.debug("received from page: " + JSON.stringify(message));
 
+const tab_id = sender.tab.id;
+
     try {
         var action = "";
         action = message.action;
@@ -1067,7 +1069,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 const datarow = data[0];
                 console.debug(datarow);
 
-                openUrlAndScrollToElement(datarow.url, datarow.noteid, datarow);
+                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow);
 
                 //return true;
             });
@@ -1077,7 +1079,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(message);
             const datarow = message.message.scroll_to_note_details.datarow;
 
-            openUrlAndScrollToElement(message.message.scroll_to_note_details.url, datarow.noteid, datarow);
+            openUrlAndScrollToElement( tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow);
             //return true;
             return true;
 
@@ -1304,7 +1306,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     } catch (e) {
         console.debug(e);
     }
+
     return true;
+
 });
 
 // Helper to cache data with a timestamp
@@ -1461,54 +1465,65 @@ function fetchDataFromApi(creatorId) {
     });
 }
 
-function openUrlAndScrollToElement(url, noteid, datarow) {
-    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' and scrolling to element with noteid ' + noteid);
+// rewrite this to return a promise
+
+
+   function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
+    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab_id + ' and scrolling to element with noteid ' + noteid);
     console.debug(datarow);
     const creatorid = datarow.creatorid;
-    //console.debug(JSON.parse(datarow));
-    var creatorDetails;
-    var notes = [];
-    notes[0] = datarow;
-    fetchDataFromApi(creatorid)
-    .then(function (creatordata) {
-        console.log(creatordata);
-        console.log(JSON.stringify(creatordata));
-        var resp = {};
-        console.log(notes);
-        console.log(Array.isArray(notes));
-        resp.notes_found = notes;
-        resp.creatorDetails = creatordata;
-        console.debug(resp);
-        // Search for tabs with the specified URL
-        console.debug(url);
-        chrome.tabs.query({
-            url: url
-        }, function (tabs) {
-            console.debug(tabs);
-            if (tabs.length > 0) {
-                console.debug("An existing tab was found with this URL.");
-                // If tabs with the URL are found, use the first one
-                let tabId = tabs[0].id;
-                console.log('Using existing tab:', tabId);
-                sendMessageToContentScript(tabId, resp, noteid);
-            } else {
-                // If no tabs with the URL are found, create a new one
-                chrome.tabs.update({
-                    url: url
-                }, function (tab) {
-                    console.log('update tab:', tab.id);
-                    // Ensure the tab is completely loaded before sending the message
-                    chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-                        if (tabId === tab.id && changeInfo.status === 'complete') {
-                            chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
-                            sendMessageToContentScript(tab.id, resp, noteid);
-                        }
-                    });
+    var notes = [datarow];
+
+    return new Promise((resolve, reject) => {
+        fetchDataFromApi(creatorid)
+            .then((creatordata) => {
+                console.log(creatordata);
+                console.log(JSON.stringify(creatordata));
+                var resp = {
+                    notes_found: notes,
+                    creatorDetails: creatordata
+                };
+                console.debug(resp);
+
+                // Search for tabs with the specified URL
+                chrome.tabs.query({url: url}, function(tabs) {
+                    console.debug(tabs);
+                    if (tabs.length > 0) {
+                        console.debug("An existing tab was found with this URL.");
+                        let tabId = tabs[0].id;
+                        console.log('Using existing tab:', tab_id);
+                        sendMessageToContentScript(tab_id, resp, noteid);
+                        resolve(`Message sent to tab ${tab_id}`);
+                    } else {
+                        // If no tabs with the URL are found, create a new one
+                        chrome.tabs.update({url: url}, function(tab) {
+                            console.log('Updated tab:', tab.id);
+                            // Ensure the tab is completely loaded before sending the message
+                            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+                                if (tabId === tab.id && changeInfo.status === 'complete') {
+                                    chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
+                                    sendMessageToContentScript(tab.id, resp, noteid);
+                                    resolve(`Message sent to new tab ${tab.id}`);
+                                }
+                            });
+                        });
+                    }
                 });
-            }
-        });
+            })
+            .catch((error) => {
+                reject(error);
+            });
     });
 }
+
+
+function sendMessageToContentScript(tabId, data, noteId) {
+    chrome.tabs.sendMessage(tabId, {data: data, noteId: noteId}, function(response) {
+        console.log('Response from content script:', response);
+    });
+}
+
+
 
 function sendMessageToContentScript(tabId, resp, noteid) {
     // Send a message to the content script in the given tab

@@ -68,3 +68,24 @@ console.log(window.location.href);
     }
     return null;
   }
+
+
+  
+function listener(request, sender, sendResponse) {
+
+    try {
+        console.debug("browsersolutions request: ");
+        console.debug(request);
+        console.debug(request.info);
+        console.debug(request.tab);
+        console.debug(request.action);
+        console.debug(request.sharedsecret);
+
+
+
+    } catch (e) {
+        console.debug(e);
+    }
+   
+   
+}
