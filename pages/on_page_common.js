@@ -45,6 +45,73 @@ async function page_display_login_status() {
 }
 }
 
+async function is_authenticated() {
+    console.log("is_authenticated()");
+    //con
+
+    let session = await chrome.storage.local.get([plugin_session_header_name]);
+    console.debug(session);
+    console.debug(session[plugin_session_header_name]);
+    var userid = null;
+    try{
+    userid = get_username_from_sessiontoken(session[plugin_session_header_name]);
+    } catch (e) {
+        console.error(e);
+    }
+    console.debug("userid: " + userid);
+    if (userid == null) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+
+// Function to extract claim from JWT
+function extractClaimFromJWT(jwt, claimName) {
+  // JWT consists of three parts separated by '.'
+  const parts = jwt.split('.');
+  if (parts.length !== 3) {
+      throw new Error('Invalid JWT format');
+  }
+  // Decode the payload (second part)
+  const payload = JSON.parse(atob(parts[1]));
+  console.debug("payload");
+  console.debug(payload);
+  return payload[claimName];
+}
+
+// Procedure to check if JWT contains a claim "displayname" with valid length
+function checkJWTValidity() {
+  return new Promise((resolve, reject) => {
+    console.log("checkJWTValidity()", ['plugin_session_header_name']);
+      chrome.storage.local.get(['plugin_session_header_name'], (result) => {
+        console.log(result);
+          const jwt = result.plugin_session_header_name;
+          if (!jwt) {
+            console.log("No JWT found");
+              resolve(false); // No JWT found
+          } else {
+              try {
+                  const displayName = extractClaimFromJWT(jwt, 'displayname');
+                  console.debug("displayname: " + displayName);
+                  if (typeof displayName === 'string' && displayName.length > 4 && displayName.length < 100) {
+                      resolve(true); // Valid display name found
+                  } else {
+                      resolve(false); // Invalid display name
+                  }
+              } catch (error) {
+                  reject(error); // Error while extracting claim
+              }
+          }
+      });
+  });
+}
+
+
+
+
 async function logout() {
    
     // wipe the locate storage where the session token is stored
@@ -80,6 +147,7 @@ function fetchAndDisplayStaticContent(url, dom_id) {
     return new Promise((resolve, reject) => {
       console.log("fetchAndDisplayStaticContent()");
       console.log(url);
+      console.log(dom_id);
   
       // Security measure 1
       // only accept URLs matching a specific pattern - URLs pointing to a subset of local files
@@ -155,7 +223,55 @@ document.getElementById("login_status").textContent =  userid ;
     }
 }
 
-  
+
+// call to the API to determine authentication status
+function getStatusValue(url, header1, value1, header2, value2) {
+  return new Promise((resolve, reject) => {
+      fetch(url, {
+          method: 'GET',
+          headers: {
+              [header1]: value1,
+              [header2]: value2
+          }
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (data && data.status) {
+              resolve(data.status);
+          } else {
+              reject(new Error('Status object not found in the response'));
+          }
+      })
+      .catch(error => {
+          reject(error);
+      });
+  });
+}
+
+
+
+// Example usage:
+const url = 'https://example.com/api/data';
+const header1 = 'Authorization';
+const value1 = 'Bearer your_token';
+const header2 = 'Content-Type';
+const value2 = 'application/json';
+
+getStatusValue(url, header1, value1, header2, value2)
+  .then(status => {
+      console.log('Status:', status);
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
+
+
+
 // the session token is not completed as yet
 function get_username_from_sessiontoken(token) {
 
@@ -163,6 +279,9 @@ function get_username_from_sessiontoken(token) {
 console.log("get_username_from_sessiontoken()");
 console.log(token);
 
+if (token == null) {
+    return null;
+}else{
 try{
 
 // Example usage
@@ -177,6 +296,7 @@ console.log(claims);
       console.error(e);
       return null;
   }
+}
 }
 
 
@@ -280,11 +400,3 @@ function getClaimsFromJwt(token, claimNames) {
 }
 
 
-
-fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
-  //page_display_login_status();
-  login_logout_action();
-
-});
-
-page_display_login_status();

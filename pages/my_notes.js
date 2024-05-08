@@ -1,6 +1,4 @@
 
-
-
 const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 const URI_plugin_user_set_note_active_status = "/api/v1.0/plugin_user_setstatus_yellownote";
@@ -8,12 +6,24 @@ const URI_plugin_user_set_note_active_status = "/api/v1.0/plugin_user_setstatus_
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
 
+console.log("is_authenticated: ", is_authenticated());
+
+
+// Example usage:
+checkJWTValidity()
+  .then(isValid => {
+      console.log('JWT is valid:', isValid);
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
+
+
 // call to database to get noets and place them in a table
 render().then(function (d) {
     console.debug("render notes");
     console.debug(d);
     // kick of the process of rendering the yellow sticky notes in the graphic form
-
 
     var doc = window.document;
 
@@ -35,12 +45,8 @@ render().then(function (d) {
         console.log("browsersolutions " + note_template);
         console.debug(note_template);
 
-        //replaceLink(root_node, note_template);
-
     });
-
     console.debug(note_template);
-
 });
 
 
@@ -82,10 +88,8 @@ async function deleteDataRow(noteid) {
     }
 }
 
-/**
- * Navigate to the page where the note is attached
- * @param {*} url
- */
+
+
 async function goThere(datarow) {
     try {
 
@@ -163,8 +167,6 @@ function createNoteShareLink(datarow) {
     const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
     console.log(url);
 
-
-
     var textToCopy;
     var distributionlistid;
     try{
@@ -172,8 +174,8 @@ function createNoteShareLink(datarow) {
         distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
     console.log(distributionlistid);
     const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
-    textToCopy = "https://www.yellownotes.cloud/subscribe?distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
-}catch(e){
+    textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
+    }catch(e){
             console.log(e);
             textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
         }
@@ -191,10 +193,7 @@ function createNoteShareLink(datarow) {
     return textToCopy;
 }
 
-/**
- * Open the note for editing
- * @param {*} noteid
- */
+
 
 async function editNote(noteid) {
     try {
@@ -205,7 +204,6 @@ async function editNote(noteid) {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
-        //console.log(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(server_url, {
                 method: 'POST',
@@ -804,6 +802,7 @@ function render() {
     });
 }
 
+
 function createDropdown(optionsArray, selectedDistributionListId) {
     // Create a select element
     const selectElement = document.createElement('select');
@@ -845,11 +844,8 @@ function createDropdown(optionsArray, selectedDistributionListId) {
             // remove distributionlist from note
 
             setNoteDistributionlistId(noteid, "");
-
-
         }
     });
-
     return selectElement;
 }
 
@@ -892,6 +888,7 @@ async function setNoteActiveStatusByUUID(noteid, status) {
     }
 }
 
+
 /**
  * save changes to the notes attachment url and content text ( or URL incase of webframe)
  * @param {
@@ -913,7 +910,6 @@ async function saveChanges(noteid, event) {
             //message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent);
  
  console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
-
 
             message_display_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="payload"]').textContent.trim());
         } catch (e) {
@@ -974,6 +970,7 @@ async function saveChanges(noteid, event) {
     }
 }
 
+
 async function setNoteDistributionlistId(noteid, distributionlistid) {
     console.debug("setNoteDistributionlistId: " + noteid + " distributionlistid: " + distributionlistid);
     try {
@@ -984,8 +981,7 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
                 noteid: noteid,
                 distributionlistid: distributionlistid,
             });
-        //console.log(message_body);
-        // Fetch data from web service (replace with your actual API endpoint)
+       
         const response = await fetch(
                 server_url + URI_plugin_user_setdistributionlist_yellownote, {
                 method: "POST",
@@ -1010,9 +1006,9 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
     }
 }
 
+
 function disable_note_with_noteid(noteid) {
     console.debug("disable_note_with_noteid: " + noteid);
-
     console.debug(valid_noteid_regexp.test(noteid));
     if (valid_noteid_regexp.test(noteid)) {
         // send save request back to background
@@ -1026,11 +1022,7 @@ function disable_note_with_noteid(noteid) {
             }
         }, function (response) {
             console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-            // finally, call "close" on the note
-            //  try{
-            //  	close_note(event);
-            //  }catch(g){console.debug(g);}
-
+           
         });
 
     }
@@ -1038,7 +1030,6 @@ function disable_note_with_noteid(noteid) {
 
 function enable_note_with_noteid(noteid) {
     console.debug("enable_note_with_noteid: " + noteid);
-
     console.debug(valid_noteid_regexp.test(noteid));
     if (valid_noteid_regexp.test(noteid)) {
         // send save request back to background
@@ -1051,13 +1042,65 @@ function enable_note_with_noteid(noteid) {
             }
         }, function (response) {
             console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-            // finally, call "close" on the note
-            //  try{
-            //  	close_note(event);
-            //  }catch(g){console.debug(g);}
-
+           
         });
-
     }
 }
+
+if (is_authenticated()){
+    console.debug("user is authenticated - show menu accordingly");
+    fetchAndDisplayStaticContent("/fragments/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    
+}else{
+    console.debug("user is not authenticated - show menu accordingly");
+    fetchAndDisplayStaticContent("/fragments/sidebar_fragment unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+
+}
+
+
+
+// Example usage:
+checkJWTValidity()
+  .then(isValid => {
+      console.log('JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("/fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+
+    fetchAndDisplayStaticContent("/fragments/sidebar_fragment authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+
+}else{
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("/fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("/fragments/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    }
+
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
 

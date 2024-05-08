@@ -17,7 +17,7 @@ const browser_id = chrome.runtime.id;
 
 const url = window.location.href.trim();
 console.log(url);
-console.log(url.replace(/.*add_distributionlistid=/, ""));
+//console.log(url.replace(/.*add_distributionlistid=/, ""));
 // accept the submitted value for the distribution list id
 // the API has security mechanism in place the screen the value for undesirable content
 try {

@@ -206,7 +206,9 @@ async function saveData() {
     newdata = {
         note_color: color,
         box_width: width + "px",
-        box_height: height + "px"
+        box_height: height + "px",
+        banner_image: ""
+        
     };
 
 

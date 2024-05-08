@@ -38,7 +38,7 @@ const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_
 
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 
-const URI_plugin_user_get_authorized_yellownote = "/api/v1.0/plugin_user_get_authorized_yellownote";
+const URI_plugin_user_get_a_subscribed_note = "/api/v1.0/plugin_user_get_a_subscribed_note";
 let salt;
 
 // at installation time a unique identifies is ser for this browser extension. Make this available to the server for identification purposes.
@@ -1059,7 +1059,7 @@ const tab_id = sender.tab.id;
                     })
                 };
                 console.debug(JSON.stringify(opts));
-                return fetch(server_url + URI_plugin_user_get_authorized_yellownote, opts);
+                return fetch(server_url + URI_plugin_user_get_a_subscribed_note, opts);
             }).then(function (response) {
                 console.debug(response);
                 return response.json();
@@ -1069,7 +1069,10 @@ const tab_id = sender.tab.id;
                 const datarow = data[0];
                 console.debug(datarow);
 
-                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow);
+                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow).then(function (res) {
+                    console.debug("response: " + JSON.stringify(res));
+                        sendResponse(res);
+                });
 
                 //return true;
             });
@@ -1079,9 +1082,12 @@ const tab_id = sender.tab.id;
             console.debug(message);
             const datarow = message.message.scroll_to_note_details.datarow;
 
-            openUrlAndScrollToElement( tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow);
+            openUrlAndScrollToElement( tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow).then(function (res) {
+            console.debug("response: " + JSON.stringify(res));
+                sendResponse(res);
+        });
             //return true;
-            return true;
+            //return true;
 
         } else if (action == 'get_authorized_note') {
             console.debug("get authorized note");
@@ -1113,7 +1119,7 @@ const tab_id = sender.tab.id;
                     }),
                 };
                 console.log(opts);
-                return fetch(server_url + URI_plugin_user_get_authorized_yellownote, opts);
+                return fetch(server_url + URI_plugin_user_get_a_subscribed_note, opts);
             }).then(function (response) {
                 console.log(response);
                 if (!response.ok) {

@@ -163,6 +163,21 @@ if (logout_silentTargetURL.test(window.location.href)) {
     });
 }
 
+
+if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe.html\?/)).test(window.location.href)) {
+    console.log("redirect to subscribe page")
+    // Extract query string (everything after the '?' character)
+    const queryString = (window.location.href).split('?')[1] || '';
+
+    // Notify the background script to redirect
+    chrome.runtime.sendMessage({
+        action: "local_pages_intercept",
+        redirect: true,
+        uri: "/pages/subscribe.html?"+queryString
+    });
+}
+
+
 const targetURL = new RegExp(/\/\/www\.yellownotes\.cloud\/view_yellownotes/);
 if (targetURL.test(window.location.href)) {
     console.log("redirect this link to plugin")
@@ -192,6 +207,7 @@ const new_uri = "/pages/gothere.html?" + queryString;
         uri: new_uri
     });
 }
+
 
 
 const gothere = new RegExp(/\/\/www\.yellownotes\.cloud\/DISABLEgothere/);
