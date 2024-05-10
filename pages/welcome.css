@@ -1,0 +1,29 @@
+
+.left-img {
+    float: left;
+    margin-right: 20px; /* Add space between the image and the text */
+    margin: 5px;
+    height: auto;
+}
+
+.right-img {
+    float: right;
+    margin-left: 20px; /* Add space between the image and the text */
+    height: auto;
+    margin: 5px;
+}
+
+.container {
+    width: 600px;
+    overflow: auto; /* Clears the float, ensuring that container wraps around the floated img */
+    background: rgb(240, 240, 240);
+    border-width: 1px;
+    border-color: yellow;
+    border-style: dashed;
+    margin: 5px;
+}
+
+p {
+    text-align: justify; /* This is optional, for better text alignment */
+}
+

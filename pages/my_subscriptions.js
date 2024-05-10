@@ -1,4 +1,3 @@
-
 const URI_plugin_user_get_all_agreements = "/api/plugin_user_get_all_data_agreements";
 const URI_plugin_user_delete_data_agreement = "/api/plugin_user_delete_distribution_list";
 const URI_plugin_user_get_data_agreement = "/api/plugin_user_get_data_agreement";
@@ -15,9 +14,9 @@ const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subsc
 
 const browser_id = chrome.runtime.id;
 
-const url = window.location.href.trim();
-console.log(url);
-console.log(url.replace(/.*add_distributionlistid=/, ""));
+//const url = window.location.href.trim();
+//console.log(url);
+//console.log(url.replace(/.*add_distributionlistid=/, ""));
 // accept the submitted value for the distribution list id
 // the API has security mechanism in place the screen the value for undesirable content
 try {
@@ -55,6 +54,42 @@ try {
     console.error(e);
 }
 
+
+
+// check if the user is authenticated
+checkSessionJWTValidity()
+  .then(isValid => {
+      console.log('session JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_header_authenticated.html", "my_subscriptions_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+       // login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+
+}else{
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_header_unauthenticated.html", "my_subscriptions_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        //login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    }
+
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
+
+
+
 function render_page() {
  // Fetch data on current subscriptions on page-load
  fetchData();
@@ -90,6 +125,10 @@ function render_page() {
      console.error(e);
  }
 }
+
+
+
+
 
 // Function to use "fetch" to delete a data row
 function addSubscriptionByUUIDinBackground(distributionlistid) {

@@ -3,7 +3,46 @@ const URI_plugin_user_download_data = "/api/v1.0/plugin_user_retrieve_all_data";
 
 const URI_plugin_user_delete_all_data = "/api/v1.0/plugin_user_delete_all_data";
 
+
+
+
+// check if the user is authenticated
+checkSessionJWTValidity()
+  .then(isValid => {
+      console.log('JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+       // login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+
+}else{
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        //login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    }
+
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
+
+
 // determine if the user is authneticted or not
+
+
+
 
 chrome.storage.local.get([plugin_session_header_name ]).then( (session) => {  
   console.debug(session);
@@ -12,6 +51,8 @@ chrome.storage.local.get([plugin_session_header_name ]).then( (session) => {
 
 
   const userid = get_username_from_sessiontoken(session[plugin_session_header_name]);
+
+
 console.debug(userid  );
 if (userid == null) {
     document.getElementById("login_status").textContent = "Not logged in";

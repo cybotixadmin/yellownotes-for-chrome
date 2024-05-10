@@ -83,13 +83,18 @@ function extractClaimFromJWT(jwt, claimName) {
 }
 
 // Procedure to check if JWT contains a claim "displayname" with valid length
-function checkJWTValidity() {
+function checkSessionJWTValidity() {
   return new Promise((resolve, reject) => {
-    console.log("checkJWTValidity()", ['plugin_session_header_name']);
-      chrome.storage.local.get(['plugin_session_header_name'], (result) => {
+    console.log("checkSessionJWTValidity()", plugin_session_header_name);
+      chrome.storage.local.get(plugin_session_header_name, (result) => {
         console.log(result);
-          const jwt = result.plugin_session_header_name;
-          if (!jwt) {
+          const jwt = result[plugin_session_header_name];
+console.debug(jwt);
+if (jwt == "DELETED") {
+  console.log("No JWT found");
+  resolve(false); // No JWT found
+
+}else if (!jwt) {
             console.log("No JWT found");
               resolve(false); // No JWT found
           } else {
@@ -102,7 +107,8 @@ function checkJWTValidity() {
                       resolve(false); // Invalid display name
                   }
               } catch (error) {
-                  reject(error); // Error while extracting claim
+                console.error(error);
+                resolve(false); // Error while extracting claim
               }
           }
       });
@@ -151,7 +157,7 @@ function fetchAndDisplayStaticContent(url, dom_id) {
   
       // Security measure 1
       // only accept URLs matching a specific pattern - URLs pointing to a subset of local files
-      const notespage = new RegExp(/^\/fragments\//);
+      const notespage = new RegExp(/^\.\.\/fragments\//);
       console.debug(notespage.test(url));
       if (notespage.test(url)) {
         fetch(url)

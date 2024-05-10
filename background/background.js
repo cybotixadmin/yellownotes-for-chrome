@@ -105,16 +105,16 @@ function matchesCachePattern(url) {
 }
 
 // Function to cache data
-function cacheData(url, data) {
-    console.log("cacheData (" + url + ")");
+function DELETEcacheData(key, data) {
+    console.log("cacheData (" + key + ")");
     const cacheEntry = {
         data: data,
         timestamp: Date.now()
     };
     chrome.storage.local.set({
-        [url]: cacheEntry
+        [key]: cacheEntry
     }, () => {
-        console.log(`Data cached for ${url}`);
+        console.log(`Data cached for ${key}`);
     });
 }
 
@@ -276,6 +276,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 function pinYellowNote(info, tab, note_type, brand) {
+
+    try{
     // contenttype
     // permitted values: text, html, embeded, http_get_url
 
@@ -320,8 +322,8 @@ function pinYellowNote(info, tab, note_type, brand) {
         sessionToken = result[plugin_session_header_name];
         console.log(sessionToken);
         uuid = getUuid(sessionToken);
-        console.log("uuid" + uuid);
-
+        console.log("uuid: " + uuid);
+        // get a template, even if it is the default one
         return getTemplate(brand, note_type);
     }).then(function (result) {
         console.log(result);
@@ -331,40 +333,39 @@ function pinYellowNote(info, tab, note_type, brand) {
 
         // get personal template related informaton
         console.log("uuid" + uuid);
-
+        console.debug("calling fetchDataFromApi2");
         return fetchDataFromApi2(uuid);
 
     }).then(function (result) {
+        console.log(result);
 
         note_properties = result;
         console.log("note_properties");
         console.log(note_properties);
 
-        return fetch(server_url + '/api/v1.0/get_note_properties', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [plugin_uuid_header_name]: installationUniqueId,
-                [plugin_session_header_name]: sessiontoken
-            },
-            body: JSON.stringify({
-                creatorid: uuid
-            })
-        });
-    }).then(function (response) {
-        console.log(response);
-        if (!response.ok) {
-            console.log('API_URL_2 Fetch Error: ' + response.statusText);
-            // return blank (lower-priority values, or defaults, will be used later.)
-            return {};
-        } else {
-            //note_properties = response.json();
-            return response.json();
-        }
-    }).then(function (data) {
-        note_properties = data;
-        console.log("note_properties");
-        console.log(note_properties);
+        //      return fetch(server_url + '/api/v1.0/get_note_properties', {
+        //          method: 'POST',
+        //          headers: {
+        //              'Content-Type': 'application/json',
+        //              [plugin_uuid_header_name]: installationUniqueId,
+        //              [plugin_session_header_name]: sessiontoken
+        //          },
+        //          body: JSON.stringify({
+        //              creatorid: uuid
+        //           })
+        //       });
+        //   }).then(function (response) {
+        //       console.log(response);
+        //       if (!response.ok) {
+        //           console.log('API_URL_2 Fetch Error: ' + response.statusText);
+        //           // return blank (lower-priority values, or defaults, will be used later.)
+        //           return {};
+        //      } else {
+        //          //note_properties = response.json();
+        //          return response.json();
+        //      }
+        //  }).then(function (data) {
+        //      note_properties = data;
         // execute script in active tab
         //    return chrome.scripting.executeScript({
         //        target: {
@@ -375,7 +376,7 @@ function pinYellowNote(info, tab, note_type, brand) {
         //})
         // .then(function (result) {
         // send message to the active tab
-        return chrome.tabs.sendMessage(tab.id, {
+        const msg = {
             action: "createnode",
             sharedsecret: PinToSelectedHTML_sharedsecret,
             note_type: note_type,
@@ -385,11 +386,18 @@ function pinYellowNote(info, tab, note_type, brand) {
             session: sessionToken,
             info: info,
             tab: tab
-        });
+        };
+        console.debug("sending message back to tab: " + JSON.stringify(msg) );
+        return chrome.tabs.sendMessage(tab_id, msg);
     }).then(function (res) {
         console.debug("###### pinYellowNote response " + JSON.stringify(res));
 
     });
+
+    }catch(e){
+        console.log(e);
+    }
+
 }
 
 // for access to admin page there is a separate listener
@@ -417,7 +425,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     console.debug(message.action);
     console.debug("received from page: " + JSON.stringify(message));
 
-const tab_id = sender.tab.id;
+    const tab_id = sender.tab.id;
 
     try {
         var action = "";
@@ -1071,7 +1079,7 @@ const tab_id = sender.tab.id;
 
                 openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow).then(function (res) {
                     console.debug("response: " + JSON.stringify(res));
-                        sendResponse(res);
+                    sendResponse(res);
                 });
 
                 //return true;
@@ -1082,10 +1090,10 @@ const tab_id = sender.tab.id;
             console.debug(message);
             const datarow = message.message.scroll_to_note_details.datarow;
 
-            openUrlAndScrollToElement( tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow).then(function (res) {
-            console.debug("response: " + JSON.stringify(res));
+            openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow).then(function (res) {
+                console.debug("response: " + JSON.stringify(res));
                 sendResponse(res);
-        });
+            });
             //return true;
             //return true;
 
@@ -1134,6 +1142,7 @@ const tab_id = sender.tab.id;
                 console.log(initialData);
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
+                            console.debug("calling fetchDataFromApi2");
                             return fetchDataFromApi2(item.creatorid).then(creatorData => {
                                 item.creatorDetails = creatorData;
                                 item.creatorDetails2 = "creatorData2";
@@ -1198,6 +1207,7 @@ const tab_id = sender.tab.id;
                 console.log(initialData);
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
+                            console.debug("calling fetchDataFromApi2");
                             return fetchDataFromApi2(item.creatorid).then(creatorData => {
                                 item.creatorDetails = creatorData;
                                 item.creatorDetails2 = "creatorData2";
@@ -1291,7 +1301,7 @@ const tab_id = sender.tab.id;
             }).then(function (initialData) {
                 notes = initialData;
                 console.log(notes);
-                return fetchDataFromApi(notes[0].creatorid);
+                return fetchDataFromApi2(notes[0].creatorid);
 
             })
             .then(function (creatordata) {
@@ -1369,63 +1379,71 @@ function getCachedData(key, cachetimeout) {
 // Helper to fetch data from API_URL_2
 function fetchDataFromApi2(creatorId) {
     console.log('fetchDataFromApi2: Fetching data for creatorId:', creatorId);
-    return getCachedData(creatorId, 10).then(cachedData => {
-        console.log('fetchDataFromApi2: Cached data:', cachedData);
-        console.log(JSON.stringify(cachedData));
-        if (cachedData) {
-            console.log('fetchDataFromApi2: Returning cached data for creatorId:', creatorId);
-            console.log(cachedData);
-            console.log(JSON.stringify(cachedData));
-            return cachedData;
-        } else {
 
-            var sessiontoken,
-            installationUniqueId;
-            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
-                installationUniqueId = result[plugin_uuid_header_name];
-                sessiontoken = result[plugin_session_header_name];
-                console.debug("ynInstallationUniqueId: " + installationUniqueId);
-                console.debug("xYellownotesSession: " + sessiontoken);
+    if (!creatorId) {
+        // If no creator ID is supplied, resolve immediately with null
+        return Promise.resolve(null);
+    }
 
-                // Create an AbortController instance
-                const controller = new AbortController();
-                const signal = controller.signal;
+    const cacheKey = creatorId + "_creator_data";
+    
+    return getCachedData(cacheKey, 10)
+        .then(cachedData => {
+            console.log('fetchDataFromApi2: Cached data:', cachedData);
 
-                // Set a timeout of 5 seconds (in milliseconds)
-                const timeout = setTimeout(() => {
-                        controller.abort();
-                    }, 5000);
-
-                console.log('fetchDataFromApi2: Fetching data from API_URL_2: ' + server_url + '/api/v1.0/get_note_properties');
-                return fetch(server_url + '/api/v1.0/get_note_properties', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [plugin_uuid_header_name]: installationUniqueId,
-                        [plugin_session_header_name]: sessiontoken
-                    },
-                    signal: signal,
-                    body: JSON.stringify({
-                        creatorid: creatorId
-                    })
-                });
-            })
-            .then(response => {
-                console.log(response);
-                if (!response.ok) {
-                    throw new Error('API_URL_2 Fetch Error: ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                cacheData(creatorId, data);
-                return data;
-            });
-        }
-    });
+            if (cachedData) {
+                console.log('Returning cached data for creatorId:', creatorId, "cacheKey:", cacheKey);
+                return cachedData;
+            } else {
+                return fetchNewData(creatorId, cacheKey);
+            }
+        })
+        .catch(error => {
+            console.error("Error during fetchDataFromApi2:", error);
+            throw error;  // Propagate the error to be handled in the next link of the promise chain
+        });
 }
 
-function fetchDataFromApi(creatorId) {
+function fetchNewData(creatorId, cacheKey) {
+    return chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
+        .then(result => {
+            const installationUniqueId = result[plugin_uuid_header_name];
+            const sessionToken = result[plugin_session_header_name];
+
+            const controller = new AbortController();
+            setTimeout(() => controller.abort(), 8000);
+
+            console.log('fetchDataFromApi2: Fetching new data from API');
+            return fetch(server_url + '/api/v1.0/get_note_properties', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: installationUniqueId,
+                    [plugin_session_header_name]: sessionToken
+                },
+                signal: controller.signal,
+                body: JSON.stringify({ creatorid: creatorId })
+            });
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Caching data for', creatorId);
+            return cacheData(cacheKey, data)
+                .then(() => data);
+        })
+        .catch(error => {
+            console.error("Error in fetchNewData:", error);
+            throw error;  // Propagate the error to maintain the integrity of the promise chain
+        });
+}
+
+
+function DELETEfetchDataFromApi(creatorId) {
     console.log('fetchDataFromApi: Fetching data for creatorId:', creatorId);
 
     // Start by fetching the cached data
@@ -1474,7 +1492,7 @@ function fetchDataFromApi(creatorId) {
 // rewrite this to return a promise
 
 
-   function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
+function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
     console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab_id + ' and scrolling to element with noteid ' + noteid);
     console.debug(datarow);
     const creatorid = datarow.creatorid;
@@ -1482,54 +1500,58 @@ function fetchDataFromApi(creatorId) {
 
     return new Promise((resolve, reject) => {
         fetchDataFromApi(creatorid)
-            .then((creatordata) => {
-                console.log(creatordata);
-                console.log(JSON.stringify(creatordata));
-                var resp = {
-                    notes_found: notes,
-                    creatorDetails: creatordata
-                };
-                console.debug(resp);
+        .then((creatordata) => {
+            console.log(creatordata);
+            console.log(JSON.stringify(creatordata));
+            var resp = {
+                notes_found: notes,
+                creatorDetails: creatordata
+            };
+            console.debug(resp);
 
-                // Search for tabs with the specified URL
-                chrome.tabs.query({url: url}, function(tabs) {
-                    console.debug(tabs);
-                    if (tabs.length > 0) {
-                        console.debug("An existing tab was found with this URL.");
-                        let tabId = tabs[0].id;
-                        console.log('Using existing tab:', tab_id);
-                        sendMessageToContentScript(tab_id, resp, noteid);
-                        resolve(`Message sent to tab ${tab_id}`);
-                    } else {
-                        // If no tabs with the URL are found, create a new one
-                        chrome.tabs.update({url: url}, function(tab) {
-                            console.log('Updated tab:', tab.id);
-                            // Ensure the tab is completely loaded before sending the message
-                            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-                                if (tabId === tab.id && changeInfo.status === 'complete') {
-                                    chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
-                                    sendMessageToContentScript(tab.id, resp, noteid);
-                                    resolve(`Message sent to new tab ${tab.id}`);
-                                }
-                            });
+            // Search for tabs with the specified URL
+            chrome.tabs.query({
+                url: url
+            }, function (tabs) {
+                console.debug(tabs);
+                if (tabs.length > 0) {
+                    console.debug("An existing tab was found with this URL.");
+                    let tabId = tabs[0].id;
+                    console.log('Using existing tab:', tab_id);
+                    sendMessageToContentScript(tab_id, resp, noteid);
+                    resolve(`Message sent to tab ${tab_id}`);
+                } else {
+                    // If no tabs with the URL are found, create a new one
+                    chrome.tabs.update({
+                        url: url
+                    }, function (tab) {
+                        console.log('Updated tab:', tab.id);
+                        // Ensure the tab is completely loaded before sending the message
+                        chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+                            if (tabId === tab.id && changeInfo.status === 'complete') {
+                                chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
+                                sendMessageToContentScript(tab.id, resp, noteid);
+                                resolve(`Message sent to new tab ${tab.id}`);
+                            }
                         });
-                    }
-                });
-            })
-            .catch((error) => {
-                reject(error);
+                    });
+                }
             });
+        })
+        .catch((error) => {
+            reject(error);
+        });
     });
 }
 
-
 function sendMessageToContentScript(tabId, data, noteId) {
-    chrome.tabs.sendMessage(tabId, {data: data, noteId: noteId}, function(response) {
+    chrome.tabs.sendMessage(tabId, {
+        data: data,
+        noteId: noteId
+    }, function (response) {
         console.log('Response from content script:', response);
     });
 }
-
-
 
 function sendMessageToContentScript(tabId, resp, noteid) {
     // Send a message to the content script in the given tab
@@ -1650,7 +1672,7 @@ let cookiesInMemory = {};
 
 /* #############################
 
-Authentication to Yellow Notes Cloud takes place here
+Authentication to Yellow Notes Cloud infrastructure takes place here
 
  * pick up the session header set back from the login process in the www.yellowsnotes.cloud domain
 
@@ -1668,7 +1690,7 @@ chrome.webRequest.onHeadersReceived.addListener(
         chrome.storage.local.set({
             [plugin_session_header_name]: xSessionHeader.value
         }, () => {
-            console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
+            console.log('Yellownotes Value saved in local storage (on ', plugin_session_header_name, '): ', xSessionHeader.value);
         });
     }
 }, {
@@ -2490,9 +2512,12 @@ function getUuid(sessiontoken) {
     const parsed = parseJwt(sessiontoken);
     const tokendata = getClaimsFromJwt(parsed, ["uuid"]);
     console.log(tokendata);
+    if (tokendata != null) {
+        return uuid = tokendata.uuid;
+    } else {
+        return null;
 
-    return uuid = tokendata.uuid;
-
+    }
 }
 
 function parseJwt(token) {

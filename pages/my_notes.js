@@ -6,18 +6,55 @@ const URI_plugin_user_set_note_active_status = "/api/v1.0/plugin_user_setstatus_
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
 
-console.log("is_authenticated: ", is_authenticated());
+//console.log("is_authenticated: ", is_authenticated());
+
+
+
+
+// check if the user is authenticated
+checkSessionJWTValidity()
+  .then(isValid => {
+      console.log('JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+       // login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+
+}else{
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        //login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    }
+
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
+
 
 
 // Example usage:
-checkJWTValidity()
+/*
+checkSessionJWTValidity()
   .then(isValid => {
       console.log('JWT is valid:', isValid);
   })
   .catch(error => {
       console.error('Error:', error.message);
   });
-
+*/
 
 // call to database to get noets and place them in a table
 render().then(function (d) {
@@ -1049,58 +1086,24 @@ function enable_note_with_noteid(noteid) {
 
 if (is_authenticated()){
     console.debug("user is authenticated - show menu accordingly");
-    fetchAndDisplayStaticContent("/fragments/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+    //fetchAndDisplayStaticContent("/fragments/sidebar_fragment_authenticated.html", "sidebar").then(() => {
         //page_display_login_status();
-        login_logout_action();
+       // login_logout_action();
       
-      });
+      //});
       
       page_display_login_status();
     
 }else{
     console.debug("user is not authenticated - show menu accordingly");
-    fetchAndDisplayStaticContent("/fragments/sidebar_fragment unauthenticated.html", "sidebar").then(() => {
+    //fetchAndDisplayStaticContent("/fragments/sidebar_fragment unauthenticated.html", "sidebar").then(() => {
         //page_display_login_status();
-        login_logout_action();
+     //   login_logout_action();
       
-      });
+      //});
       
       page_display_login_status();
 
 }
 
-
-
-// Example usage:
-checkJWTValidity()
-  .then(isValid => {
-      console.log('JWT is valid:', isValid);
-if (isValid){
-    console.debug("JWT is valid - show menu accordingly");
-    fetchAndDisplayStaticContent("/fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
-
-    fetchAndDisplayStaticContent("/fragments/sidebar_fragment authenticated.html", "sidebar").then(() => {
-        //page_display_login_status();
-        login_logout_action();
-      
-      });
-      
-      page_display_login_status();
-
-}else{
-    console.debug("JWT is not valid - show menu accordingly");
-    fetchAndDisplayStaticContent("/fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
-    fetchAndDisplayStaticContent("/fragments/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
-        //page_display_login_status();
-        login_logout_action();
-      
-      });
-      
-      page_display_login_status();
-    }
-
-  })
-  .catch(error => {
-      console.error('Error:', error.message);
-  });
 

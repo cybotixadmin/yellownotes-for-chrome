@@ -1,42 +1,23 @@
 <!doctype html>
 <html>
     <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="my_notes.css">
+        <link rel="stylesheet" href="on_page_common.css">
+        <link rel="stylesheet" href="sidebar.css">
+        
         <title>Welcome to the Yellow Notes Cloud</title>
     </head>
     <body>
  <!-- Main component for a primary marketing message or call to action -->
 
-<style >
 
-.left-img {
-    float: left;
-    margin-right: 20px; /* Add space between the image and the text */
-    margin: 5px;
-    height: auto;
-}
-
-.right-img {
-    float: right;
-    margin-left: 20px; /* Add space between the image and the text */
-    height: auto;
-    margin: 5px;
-}
-
-.container {
-    width: 600px;
-    overflow: auto; /* Clears the float, ensuring that container wraps around the floated img */
-    background: rgb(240, 240, 240);
-    border-width: 1px;
-    border-color: yellow;
-    border-style: dashed;
-    margin: 5px;
-}
-
-p {
-    text-align: justify; /* This is optional, for better text alignment */
-}
-
-</style>
+ <!-- side bar start here-->
+ <div id="sidebar"></div>
+ <!-- side bar end here -->
+  
+  <!-- main page start-->
+<div class="pageBody">
 
       <div >
         <h1>Welcome to the Yellow Notes in the Cloud</h1>
@@ -72,33 +53,53 @@ It is a sliding button with three positions. Operate it by clicking or touching 
             <img height="400" width="305" src="../images/sliderposition3with_note.png" alt="sliderposition3with_note.png" class="left-img"/>
             <p>show all applicable notes. Notes will be placed in the position they are assigned to by their creator. </p>
         </div>
-        <h2 class="section_title">how to create yellow notes</h2>
+
+        <h1 class="chapter_title">how to create yellow notes</h1>
         <p>Yellownotes are created from the context menu. Either highlight the part of the page you want to attach a note to and right click. 
             Or place the cursor where you want the not, and then rigth click.</p>
             <p>If you are using a touch screen it is much the same with the difference that you simply press and hold, to open the context menu</p>
+            <br/>
+            Yellow Notes come in two types, the "classic" or plain yellow note - much like the yellow paper sticky note made digital, and the web content note. 
         </div>
+
+        <h2 class="section_title">"plain" yellow notes</h2>
+        <p>a plain square you can type a message text into.</p>
         <div class="container">
-            <p>attach a yellow note to a selection</p>
-            <img height="400" width="305" src="../images/sliderp" alt="sliderposition3with_note.png" class="left-img"/>
+            <h3 class="section_title">attach a yellow note to a selection</h3>
+            <p></p>
+            <img height="114" width="305" src="../images/attach-yellownote-to-selection.png" alt="attach-yellownote-to-selection" class="left-img"/>
             <p> </p>
         </div>
         <div class="container">
-            <p>attach a webcontent note to a selection</p>
-            <img height="400" width="305" src="../images/sliderp" alt="sliderposition3with_note.png" class="left-img"/>
-            <p> </p>
-        </div>
-        <div class="container">
+            <h3 class="section_title">attach a yellow note to a page</h3>
             <p>attach a yellow note to a page</p>
-            <img height="400" width="305" src="../images/sliderp" alt="sliderposition3with_note.png" class="left-img"/>
+            <img height="73" width="305" src="../images/attach-webframe-to-page.png" alt="sliderposition3with_note.png" class="left-img"/>
+            <p> </p>
+        </div>
+        
+        <h2 class="section_title">web content notes</h2>
+        <p>This note contains the content refered to by a URL. It is a window into another webpage.</p>
+
+        <div class="container">
+            <h3 class="section_title">attach a webcontent note to a selection</h3>
+            <p></p>
+            <img height="128" width="305" src="../images/attach-webframe-to-selection.png" alt="sliderposition3with_note.png" class="left-img"/>
             <p> </p>
         </div>
         <div class="container">
-            <p>attach a webcontent note to a page</p>
-            <img height="400" width="305" src="../images/sliderp" alt="sliderposition3with_note.png" class="left-img"/>
+            <h3 class="section_title">attach a webcontent note to a page</h3>
+            <p></p>
+            <img height="67" width="305" src="../images/attach-webframe-to-page.png" alt="attach-webframe-to-page" class="left-img"/>
             <p> </p>
         </div>
 
-        <p/><a href="https://www.yellownotes.cloud/pages/my_account.html">your Yellow Notes dashboard</a>
+
+
+
+        <p/><a href="https://www.yellownotes.cloud/pages/my_notes.html">your Yellow Notes dashboard</a>
+    </div>
+        <script  src="on_page_common.js"></script>
+        <script src="./welcome.js"></script>
     </body>
 </html>
 
