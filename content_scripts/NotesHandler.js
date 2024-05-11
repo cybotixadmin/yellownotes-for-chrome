@@ -906,6 +906,7 @@ function highlightTextOccurrences(text) {
                     lastIdx = match.index + match[0].length;
                 });
                 span.appendChild(document.createTextNode(node.nodeValue.slice(lastIdx)));
+                console.debug(span);
                 node.parentNode.replaceChild(span, node);
                 return seqNum;
             }

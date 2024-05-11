@@ -342,6 +342,16 @@ function pinYellowNote(info, tab, note_type, brand) {
         note_properties = result;
         console.log("note_properties");
         console.log(note_properties);
+// if not was returned, use default
+
+if (note_properties == null) {
+// use default for note properties
+note_properties = {
+"box_height" :"250px",
+"box_width": "250px",
+"note_color": "#ffff00" 
+};
+}
 
         //      return fetch(server_url + '/api/v1.0/get_note_properties', {
         //          method: 'POST',
@@ -1499,7 +1509,7 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
     var notes = [datarow];
 
     return new Promise((resolve, reject) => {
-        fetchDataFromApi(creatorid)
+        fetchDataFromApi2(creatorid)
         .then((creatordata) => {
             console.log(creatordata);
             console.log(JSON.stringify(creatordata));

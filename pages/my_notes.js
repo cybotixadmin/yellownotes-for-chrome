@@ -961,7 +961,7 @@ async function saveChanges(noteid, event) {
             console.debug("webframe");
             try {
                 //content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
-                content_url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="content_url"]').textContent.trim();
+                content_url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="payload"]').textContent.trim();
     
             } catch (e) {
                 console.debug(e);
