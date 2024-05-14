@@ -1086,24 +1086,40 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug(data);
                 const datarow = data[0];
                 console.debug(datarow);
-
-                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow).then(function (res) {
+try{
+                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow, false).then(function (res) {
                     console.debug("response: " + JSON.stringify(res));
                     sendResponse(res);
                 });
-
+            }catch(e){
+                console.log(e);
+                // try again, but with opening a fresh tab this time
+                openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true).then(function (res) {
+                    console.debug("response: " + JSON.stringify(res));
+                    sendResponse(res);
+                });
                 //return true;
+            }
             });
             return true;
         } else if (action == 'scroll_to_note') {
             console.debug("request: scroll_to_note");
             console.debug(message);
             const datarow = message.message.scroll_to_note_details.datarow;
-
-            openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow).then(function (res) {
+try{
+            openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow, false).then(function (res) {
                 console.debug("response: " + JSON.stringify(res));
                 sendResponse(res);
             });
+        }catch(e){
+            console.log(e);
+            // try again, but with opening a fresh tab this time
+            openUrlAndScrollToElement(null, message.message.scroll_to_note_details.url, datarow.noteid, datarow, true).then(function (res) {
+                console.debug("response: " + JSON.stringify(res));
+                sendResponse(res);
+            });
+
+        }
             //return true;
             //return true;
 
@@ -1287,7 +1303,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
                 console.debug("xYellownotesSession: " + xYellownotesSession);
 
-                const opts = {
+                const opts = {  
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1502,8 +1518,8 @@ function DELETEfetchDataFromApi(creatorId) {
 // rewrite this to return a promise
 
 
-function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
-    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab_id + ' and scrolling to element with noteid ' + noteid);
+function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
+    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab_id + ' and scrolling to element with noteid ' + noteid + " openNewTab: " + openNewTab);
     console.debug(datarow);
     const creatorid = datarow.creatorid;
     var notes = [datarow];
@@ -1524,14 +1540,9 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
                 url: url
             }, function (tabs) {
                 console.debug(tabs);
-                if (tabs.length > 0) {
-                    console.debug("An existing tab was found with this URL.");
-                    let tabId = tabs[0].id;
-                    console.log('Using existing tab:', tab_id);
-                    sendMessageToContentScript(tab_id, resp, noteid);
-                    resolve(`Message sent to tab ${tab_id}`);
-                } else {
-                    // If no tabs with the URL are found, create a new one
+                var rc;
+                if (tabs.length = 0 || openNewTab) {
+                    // If no tabs with the URL are found, or openNewTab=true, create a new tab
                     chrome.tabs.update({
                         url: url
                     }, function (tab) {
@@ -1540,12 +1551,73 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
                         chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
                             if (tabId === tab.id && changeInfo.status === 'complete') {
                                 chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
-                                sendMessageToContentScript(tab.id, resp, noteid);
-                                resolve(`Message sent to new tab ${tab.id}`);
+                                //rc = sendMessageToContentScript(tab.id, resp, noteid);
+                                sendMessageToContentScript(tabId, resp, noteid)
+                                .then(result => {
+                                    console.log('Result:', result); // This will log '0' for success or '1' for error
+                                    resolve(`Message sent to new tab ${tab.id}`);
+                                })
+                                .catch(error => {
+                                    console.error('Unexpected error:', error);
+                                });
+                            
+
+                                
                             }
                         });
                     });
+                } else {
+                    try{
+                    console.debug("An existing tab was found with this URL.");
+                    //let tabId = tabs[0].id;
+                    console.log('Using existing tab:', tab_id);
+                    //rc = sendMessageToContentScript(tab_id, resp, noteid);
+                    sendMessageToContentScript(tab_id, resp, noteid)
+                    .then(result => {
+                        console.log('Result:', result); // This will log '0' for success or '1' for error
+// sending failed try opening in the current tab
+ // Query to get the current active tab
+ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    if (tabs.length > 0) {
+        let activeTab = tabs[0];
+        // Update the URL of the current active tab
+        chrome.tabs.update(activeTab.id, {url: url}, tab => {
+            console.log("Tab updated with URL:", url);
+
+            // Wait for the tab to finish loading the new URL
+            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+                if (tabId === tab.id && changeInfo.status === 'complete') {
+                    // Remove the listener once the URL is loaded
+                    chrome.tabs.onUpdated.removeListener(listener);
+
+                    sendMessageToContentScript(tabId, resp, noteid)
+                    .then(result => {
+                        console.log('Result:', result); // This will log '0' for success or '1' for error
+                        resolve(`Message sent to new tab ${tab.id}`);
+                    })
+                    .catch(error => {
+                        console.error('Unexpected error:', error);
+                    });
                 }
+            });
+        });
+    } else {
+        console.error("No active tab found.");
+    }
+});
+
+
+                        resolve(`Message sent to new tab ${tab_id}`);
+                    })
+                    .catch(error => {
+                        console.error('Unexpected error:', error);
+                    });
+                    }catch(e){
+                        console.log(e);
+                        reject(e);
+                    }
+                }
+
             });
         })
         .catch((error) => {
@@ -1554,7 +1626,45 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow) {
     });
 }
 
-function sendMessageToContentScript(tabId, data, noteId) {
+
+
+function sendMessageToContentScript(tabId, resp, noteid) {
+    console.debug('sendMessageToContentScript: Sending message to tab ' + tabId);
+    const datarow = resp.notes_found[0];
+    console.log(datarow);
+
+    const note = JSON.parse(datarow.json); // Assuming JSON.parse is necessary
+    const creatorid = datarow.creatorid;
+    const note_type = note.note_type;
+
+    // Construct the message object
+    const msg = {
+        sharedsecret: "qwertyui",
+        action: "create_and_scroll_to_note",
+        notes: resp,
+        noteid: noteid,
+        note_type: note_type,
+        creatorid: creatorid,
+        node_obj: note // using parsed JSON directly
+    };
+    console.debug(msg);
+
+    // Send the message and handle the promise
+    return chrome.tabs.sendMessage(tabId, msg)
+        .then(res => {
+            console.debug("# response " + JSON.stringify(res));
+            return 0; // success
+        })
+        .catch(error => {
+            console.debug("# error " + JSON.stringify(error));
+            // This error typically occurs when the tab is open but the plugin has been restarted.
+            // The tab should be refreshed in this case, but as it is not the desired behavior, return 1
+            return 1; // error or other undesirable situation
+        });
+}
+
+
+function DELETEsendMessageToContentScript(tabId, data, noteId) {
     chrome.tabs.sendMessage(tabId, {
         data: data,
         noteId: noteId
@@ -1563,7 +1673,7 @@ function sendMessageToContentScript(tabId, data, noteId) {
     });
 }
 
-function sendMessageToContentScript(tabId, resp, noteid) {
+function DELETE2sendMessageToContentScript(tabId, resp, noteid) {
     // Send a message to the content script in the given tab
     console.debug('sendMessageToContentScript: Sending message to tab ' + tabId);
     const datarow = resp.notes_found[0];
@@ -1595,13 +1705,28 @@ function sendMessageToContentScript(tabId, resp, noteid) {
     console.debug(creatorid);
     // if no creatorid is present - use default values
 
-
-    return chrome.tabs.sendMessage(tabId, msg).then(function (res) {
+try{
+     chrome.tabs.sendMessage(tabId, msg).then(function (res) {
         // read response
         console.debug("# response " + JSON.stringify(res));
+        return 0;
+    }).catch(function (error) {
+        console.debug("# error " + JSON.stringify(error));
+/* this error usually occure when the tab is open byt the plugin has been restarted. The tab should in that case also be refreshed but this is not desired behavior. 
+In this scenario the desired url is open fresh  in the current tab instead. 
+*/
+return 1;
+console.debug("# error " + JSON.stringify(error));
+
     });
+}catch(e){
+    console.log(e);
+    return 1;
+}
 
 }
+
+
 
 function scrollToElement(selector, uuid) {
     // This part of the function will be injected and executed in the context of the webpage

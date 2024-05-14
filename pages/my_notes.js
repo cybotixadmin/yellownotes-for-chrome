@@ -265,6 +265,7 @@ async function editNote(noteid) {
     }
 }
 
+// setup table items for sorting and filtering
 
 // Locate all elements with the class "my-button"
 const buttons = document.querySelectorAll('.sortableCol');
@@ -275,9 +276,10 @@ for (var i = 0; i < buttons.length; i++) {
     // set column index number for each column
     buttons[i].setAttribute("colindex", i);
     buttons[i].addEventListener('click', function (event) {
-        sortTa();
+        sortTa(event);
     }, false);
 }
+
 
 // Locate all cells that are used for filtering of search results
 const f_cells = document.getElementById("dataTable").querySelectorAll("thead tr:nth-child(2) th");
@@ -299,10 +301,12 @@ const sortStates = {
     1: 'none'
 };
 
-function sortTa() {
-    console.log("sortTa");
+function sortTa(event) {
+    console.log("sortTa()");
+    console.log(event);
     console.log(event.target);
-    sortTable("dataTable", event.target.getAttribute("colindex"));
+    console.log(event.target.parentNode);
+    sortTable("dataTable", parseInt( event.target.parentNode.getAttribute("colindex"), 10) );
 }
 
 function timestampstring2timestamp(str) {
@@ -347,10 +351,11 @@ function integerstring2timestamp(int) {
 
 // Function to sort the table
 function sortTable(table_id, columnIndex) {
-    console.log("sortable: " + columnIndex)
-    const table = document.getElementById(table_id);
-
-    let rows = Array.from(table.rows).slice(1); // Ignore the header
+    console.log("sortTabl: " + columnIndex)
+    console.log("sortTabl: " + table_id)
+    const table = document.querySelector('[id="' + table_id + '"]');
+console.log(table);
+    let rows = Array.from(table.rows).slice(2); // Ignore the header rows
     let sortedRows;
 
     // Toggle sort state for the column

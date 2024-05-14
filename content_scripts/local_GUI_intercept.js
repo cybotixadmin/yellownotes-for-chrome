@@ -5,9 +5,8 @@
 console.log("Browsersolutions: local_GUI_intercept.js loaded");
 
 console.log(window.location.href);
-const accountTargetURL = new RegExp(/\/\/www\.yellownotes\.cloud\/.*my_account.html/);
-console.log(accountTargetURL.test(window.location.href));
-if (accountTargetURL.test(window.location.href)) {
+
+if ((new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/my_account.html|my_account.html)/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({
@@ -17,9 +16,10 @@ if (accountTargetURL.test(window.location.href)) {
     });
 }
 
-const notespage = new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/my_notes.html|my_notes.html)/);
-console.log(notespage.test(window.location.href));
-if (notespage.test(window.location.href)) {
+/**
+ *
+ */
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/my_notes.html|my_notes.html)/)).test(window.location.href)) {
     const url = window.location.href;
     console.log("redirect this link to plugin")
     // remove protocol, host and port
@@ -32,9 +32,9 @@ if (notespage.test(window.location.href)) {
     });
 }
 
-const aboutpage = new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/about_yellownotes.html/);
-console.log(aboutpage.test(window.location.href));
-if (aboutpage.test(window.location.href)) {
+/*
+ */
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/about_yellownotes.html/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({
@@ -44,20 +44,21 @@ if (aboutpage.test(window.location.href)) {
     });
 }
 
-// intercept inviation-links to subscribe to feeds
-const inviteregexp = new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe/);
-if (inviteregexp.test(window.location.href)) {
+/*
+intercept inviation-links to subscribe to feeds
+ */
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe/)).test(window.location.href)) {
 
-const distributionlistid = new URLSearchParams(window.location.search).get("distributionlistid");
-const redirecturi = new URLSearchParams(window.location.search).get("redirecturi");
-console.log(inviteregexp.test(window.location.href));
-var uri;
-if (redirecturi) {
-    uri = "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + encodeURIComponent(redirecturi);
-} else {
-  uri = "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid ;
-}
-console.log("intercept to ", uri);
+    const distributionlistid = new URLSearchParams(window.location.search).get("distributionlistid");
+    const redirecturi = new URLSearchParams(window.location.search).get("redirecturi");
+    console.log("inviteregexp.test(window.location.href)");
+    var uri;
+    if (redirecturi) {
+        uri = "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + encodeURIComponent(redirecturi);
+    } else {
+        uri = "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid;
+    }
+    console.log("intercept to ", uri);
     console.log("send subscripition request to plugin");
     // Notify the background script to redirect to the subscription page and instruc the page to add a subscription for this distributionlist for the user
     chrome.runtime.sendMessage({
@@ -67,39 +68,37 @@ console.log("intercept to ", uri);
     });
 }
 
-
 // intercept links to individual notes
 if ((new RegExp(/\/\/www\.yellownotes\.cloud\/gothere/)).test(window.location.href)) {
-  console.log("/gothere")
-console.log("redirect to go to note")
-const noteid = new URLSearchParams(window.location.search).get("noteid");
+    console.log("/gothere")
+    console.log("redirect to go to note")
+    const noteid = new URLSearchParams(window.location.search).get("noteid");
 
-//const redirecturi = new URLSearchParams(window.location.search).get("redirecturi");
-//console.log(gothereregexp.test(window.location.href));
-
-
- // invoke the background script to scroll to the note in question
- chrome.runtime.sendMessage({
-  message: {
-      action: "gothere",
-      gothere: {
-          noteid: noteid
-      }
-  }
-}, function (response) {
-  console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-  // finally, call "close" on the note
-  //  try{
-  //  	close_note(event);
-  //  }catch(g){console.debug(g);}
-
-});
-}
+    //const redirecturi = new URLSearchParams(window.location.search).get("redirecturi");
+    //console.log(gothereregexp.test(window.location.href));
 
 
-const view_distributionlist = new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/view_distributionlist.html/);
-console.log(view_distributionlist.test(window.location.href));
-if (view_distributionlist.test(window.location.href)) {
+    // invoke the background script to scroll to the note in question
+    chrome.runtime.sendMessage({
+        message: {
+            action: "gothere",
+            gothere: {
+                noteid: noteid
+            }
+        }
+    }, function (response) {
+        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+        // finally, call "close" on the note
+        //  try{
+        //  	close_note(event);
+        //  }catch(g){console.debug(g);}
+
+    });
+    /*
+
+*/
+
+} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/view_distributionlist.html/)).test(window.location.href)) {
     // Extract the query string
     const queryString = window.location.search;
 
@@ -112,9 +111,12 @@ if (view_distributionlist.test(window.location.href)) {
     });
 }
 
-const subpage = new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/);
-console.log(subpage.test(window.location.href));
-if (subpage.test(window.location.href)) {
+/*
+intercept the my_subscriptions page
+This show the feeds/distributionlist the user is subscribing to
+It is alaviable to authentucated and unauthenticated users both
+ */
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/)).test(window.location.href)) {
     // Extract the query string
     const queryString = window.location.search;
 
@@ -125,11 +127,10 @@ if (subpage.test(window.location.href)) {
         redirect: true,
         uri: "/pages/my_subscriptions.html" + queryString
     });
-}
+/*
 
-const subscribedpage = new RegExp(/\/\/www\.yellownotes\.cloud\/subscribed_notes.html/);
-console.log(subscribedpage.test(window.location.href));
-if (subscribedpage.test(window.location.href)) {
+*/
+} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribed_notes.html/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({
@@ -137,11 +138,10 @@ if (subscribedpage.test(window.location.href)) {
         redirect: true,
         uri: "/pages/subscribed_notes.html"
     });
-}
+/*
 
-const loginTargetURL = new RegExp(/\/\/www\.yellownotes\.cloud\/login.html/);
-console.log(loginTargetURL.test(window.location.href));
-if (loginTargetURL.test(window.location.href)) {
+*/
+} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/login.html/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({
@@ -149,11 +149,10 @@ if (loginTargetURL.test(window.location.href)) {
         redirect: true,
         uri: "/pages/login.html"
     });
-}
+/*
 
-const logout_silentTargetURL = new RegExp(/\/\/www\.yellownotes\.cloud\/logout_silent/);
-console.log(logout_silentTargetURL.test(window.location.href));
-if (logout_silentTargetURL.test(window.location.href)) {
+*/
+} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/logout_silent/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({
@@ -161,10 +160,10 @@ if (logout_silentTargetURL.test(window.location.href)) {
         redirect: true,
         uri: "/logout_silent"
     });
-}
+/*
 
-
-if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe.html\?/)).test(window.location.href)) {
+*/
+} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe.html\?/)).test(window.location.href)) {
     console.log("redirect to subscribe page")
     // Extract query string (everything after the '?' character)
     const queryString = (window.location.href).split('?')[1] || '';
@@ -173,13 +172,14 @@ if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe.html\?/)).test(window.lo
     chrome.runtime.sendMessage({
         action: "local_pages_intercept",
         redirect: true,
-        uri: "/pages/subscribe.html?"+queryString
+        uri: "/pages/subscribe.html?" + queryString
     });
 }
 
-
-const targetURL = new RegExp(/\/\/www\.yellownotes\.cloud\/view_yellownotes/);
-if (targetURL.test(window.location.href)) {
+/**
+ * intercept the view_yellownotes page
+ */
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/view_yellownotes/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({
@@ -189,17 +189,18 @@ if (targetURL.test(window.location.href)) {
     });
 }
 
+/*
 
-const gotherehtml = new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/gothere.html/);
-if (gotherehtml.test(window.location.href)) {
+*/
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/gothere.html/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
 
 
-// Extract query string (everything after the '?' character)
-const queryString = (window.location.href).split('?')[1] || '';
+    // Extract query string (everything after the '?' character)
+    const queryString = (window.location.href).split('?')[1] || '';
 
-const new_uri = "/pages/gothere.html?" + queryString;
+    const new_uri = "/pages/gothere.html?" + queryString;
 
     chrome.runtime.sendMessage({
         action: "local_pages_intercept",
@@ -207,11 +208,11 @@ const new_uri = "/pages/gothere.html?" + queryString;
         uri: new_uri
     });
 }
+/*
 
+*/
 
-
-const gothere = new RegExp(/\/\/www\.yellownotes\.cloud\/DISABLEgothere/);
-if (gothere.test(window.location.href)) {
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/DISABLEgothere/)).test(window.location.href)) {
     console.log("redirect to go to note")
 
     // first check if user is authorized for note
@@ -266,8 +267,7 @@ if (gothere.test(window.location.href)) {
 leave this intercept out for now
 run the welcome page of the server to make updating it quicker
  */
-const welcomeURL = new RegExp(/\/\/www\.yellownotes\.cloud\/welcome.html/);
-if (welcomeURL.test(window.location.href)) {
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/welcome.html|welcome.html)/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     chrome.runtime.sendMessage({
         action: "local_pages_intercept",

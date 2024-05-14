@@ -19,15 +19,42 @@ document.addEventListener('mousemove', (event) => {
 
 });
 
-document.addEventListener('contextmenu ', (event) => {
-    console.log("contextmenu detected at " + mouseX + " " + mouseY);
-    // keep the current cursor postion
 
+// Attach event listener to the contextmenu event on the document
+document.addEventListener('contextmenu', function(event) {
+    // Capture mouse position when right-click occurs
+    var mouseX = event.clientX;
+    var mouseY = event.clientY;
+    
+    // Store or process the mouse position as needed
+    console.log('Mouse position - X:', mouseX, 'Y:', mouseY);
+    
+    // You can perform additional actions here, such as displaying a custom context menu
+    
+    // Delay the appearance of the default context menu
+    setTimeout(function() {
+        // Allow the default context menu to appear after a short delay
+    }, 0);
 });
+
+
 
 document.addEventListener('oncontextmenu ', (event) => {
     console.log("oncontextmenu detected at " + mouseX + " " + mouseY);
     // keep the current cursor postion
+
+    var mouseX = event.clientX;
+    var mouseY = event.clientY;
+    
+    // Store or process the mouse position as needed
+    console.log('oncontextmenu Mouse position - X:', mouseX, 'Y:', mouseY);
+    
+    // You can perform additional actions here, such as displaying a custom context menu
+    
+    // Delay the appearance of the default context menu
+    setTimeout(function() {
+        // Allow the default context menu to appear after a short delay
+    }, 0);
 
 });
 
@@ -1438,6 +1465,9 @@ function update_note(event) {
         try {
             distributionlistid = note_root.querySelector('[name="distributionlistdropdown"]').value;
             console.log('Selected distributionlistid:', distributionlistid);
+
+            // update the reference to the current distributionlist for this note in the root node of the note
+            note_root.setAttribute("distributionlistid", distributionlistid);
         } catch (e) {
             console.error(e);
         }
@@ -2274,6 +2304,11 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                 newGloveboxNode.setAttribute("button_arrangment", "ro")
                             }
 
+if (note_obj.hasOwnProperty('distributionlistid')) {
+                                newGloveboxNode.setAttribute("distributionlistid", note_obj.distributionlistid);
+                            
+}
+
                             // Make the stickynote draggable:
                             console.debug("browsersolutions: makeDragAndResize");
                             makeDragAndResize(newGloveboxNode);
@@ -2337,12 +2372,15 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                         setComponentVisibility(newGloveboxNode, ",ro,.*normalsized,");
                                         newGloveboxNode.setAttribute("button_arrangment", "ro")
                                     }
+                                    if (note_obj.hasOwnProperty('distributionlistid')) {
+                                        newGloveboxNode.setAttribute("distributionlistid", note_obj.distributionlistid);                           
+                                    }
                                     console.debug("calling attachEventlistenersToYellowStickynote");
                                     attachEventlistenersToYellowStickynote(newGloveboxNode);
 
                                     console.debug("calling makeDragAndResize");
                                     makeDragAndResize(newGloveboxNode);
-                             
+                                    
                                     if (isOwner) {
                                         console.debug(newGloveboxNode);
                                         newGloveboxNode.setAttribute("isOwner", "true");
@@ -2350,7 +2388,6 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                         newGloveboxNode.setAttribute("isOwner", "false");
                                     }
                                     console.debug("######################################################");
-
 
                                     if(moveFocus){
                                         moveFocusToNote(noteid);
@@ -2782,7 +2819,7 @@ function longest_common_substring(lcstest_raw, lcstarget_raw) {
 
 function attachEventlistenersToYellowStickynote(note) {
     console.log("attachEventlistenersToYellowStickynote.start");
-    console.debug(note);
+    console.debug(JSON.stringify(note));
 
     try {
 
@@ -2953,22 +2990,34 @@ function attachEventlistenersToYellowStickynote(note) {
 
     // goto
     try {
-// no event handler, simply a link to the note location that is actioned by the background script
+/* no event handler, simply a link to the note location that is actioned by the background script
 
-// for button going to note location
-const noteid = note.getAttribute("noteid");
+the gothere functionality depends on the recieving user having access to the note, and access is controlled through being a subscriber to the feed the note is attached to
+
+When the note creator asigns a feed to the note, is is like makign the nore shared and assigning it to one specific shared feed. The note is not shared with the general public, but only with the subscribers to the feed the note is attached to.
+
+Gothere may in the future work in the absense of the note being asigned to a feed, but this but this has not been implemented yet.
+
+*/
+        // for button going to note location
+        const noteid = note.getAttribute("noteid");
+        const distributionlistid = note.getAttribute("distributionlistid");
+
 console.log("noteid: " + noteid);
-        var allGoTo11 = note.querySelectorAll('[name="goto_notetarget_link"]');
-        for (var i = 0; i < allGoTo11.length; i++) {
+console.log("distributionlistid: " + distributionlistid);
+
+        var allGoTo112 = note.querySelectorAll('[name="goto_notetarget_link"]');
+        if (distributionlistid != null && distributionlistid != "" && distributionlistid != undefined){
+            for (var i = 0; i < allGoTo112.length; i++) {
+                console.log("goto_notetarget_link");
+                            allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/page/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
+                        }
+        }else{
+        for (var i = 0; i < allGoTo112.length; i++) {
 console.log("goto_notetarget_link");
-console.log(allGoTo11[i]);
-console.log(allGoTo11[i].target);
-//console.log(allGoTo11[i].href);
-
-allGoTo11[i].setAttribute("href", "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid);
-
-            
+            allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/page/subscribe.html?gothere.html?noteid=" + noteid);
         }
+    }
 
     } catch (e) {
         console.error(e);
@@ -3343,6 +3392,9 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
         // use this attribute to mark this as a stickynote object
         cont1.setAttribute("note_type", note_object_data.note_type);
         cont1.setAttribute("noteid", note_object_data.noteid);
+            if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
+            cont1.setAttribute("distributionlistid", note_object_data.distributionlistid);
+        }
 
         //cont1.appendChild(create_note_table(note_object_data,note_template));
         cont1.appendChild(note_template);
@@ -4654,10 +4706,10 @@ function delete_note(event) {
 
 // check if a yellownote is already on the page
 function isNoteOnPage(noteid) {
-    console.debug("browsersolutions isNoteOnPage (" + noteid + ")");
+    console.debug("isNoteOnPage (" + noteid + ") ?");
     console.debug(document.querySelectorAll('[noteid="' + noteid + '"][class="yellownotecontainer"]'));
     const result = (document.querySelectorAll('[noteid="' + noteid + '"][class="yellownotecontainer"]').length > 0);
-    console.debug("browsersolutions isNoteOnPage (" + noteid + ")", result);
+    console.debug("isNoteOnPage (" + noteid + ")", result);
     
     return result;
 }
@@ -4818,7 +4870,9 @@ var box_height = "250px";
 
     insertedNode.setAttribute("box_width", box_width);
     insertedNode.setAttribute("box_height", box_height);
+    console.debug(insertedNode);
 
+console.debug("browsersolutions: " + "#size_and_place_note_based_on_coordinates.end");
 }
 
 const note_internal_height_padding = 57;
