@@ -47,7 +47,7 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/about_yellownotes.html
 /*
 intercept inviation-links to subscribe to feeds
  */
-else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe/)).test(window.location.href)) {
+else if ((new RegExp(/\/\/www\.yellownotes\.cloudDISABLED\/subscribe/)).test(window.location.href)) {
 
     const distributionlistid = new URLSearchParams(window.location.search).get("distributionlistid");
     const redirecturi = new URLSearchParams(window.location.search).get("redirecturi");
@@ -67,9 +67,23 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe/)).test(window.loca
         uri: uri
     });
 }
+/*
 
+*/
+ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/subscribe.html|subscribe.html)/)).test(window.location.href)) {
+    console.log("redirect to subscribe page")
+    // Extract query string (everything after the '?' character)
+    const queryString = (window.location.href).split('?')[1] || '';
+
+    // Notify the background script to redirect
+    chrome.runtime.sendMessage({
+        action: "local_pages_intercept",
+        redirect: true,
+        uri: "/pages/subscribe.html?" + queryString
+    });
+}
 // intercept links to individual notes
-if ((new RegExp(/\/\/www\.yellownotes\.cloud\/gothere/)).test(window.location.href)) {
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/gothere/)).test(window.location.href)) {
     console.log("/gothere")
     console.log("redirect to go to note")
     const noteid = new URLSearchParams(window.location.search).get("noteid");
@@ -94,11 +108,14 @@ if ((new RegExp(/\/\/www\.yellownotes\.cloud\/gothere/)).test(window.location.hr
         //  }catch(g){console.debug(g);}
 
     });
-    /*
+   
+
+} 
+ /*
 
 */
 
-} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/view_distributionlist.html/)).test(window.location.href)) {
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/view_distributionlist.html/)).test(window.location.href)) {
     // Extract the query string
     const queryString = window.location.search;
 
@@ -160,22 +177,8 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/
         redirect: true,
         uri: "/logout_silent"
     });
-/*
 
-*/
-} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribe.html\?/)).test(window.location.href)) {
-    console.log("redirect to subscribe page")
-    // Extract query string (everything after the '?' character)
-    const queryString = (window.location.href).split('?')[1] || '';
-
-    // Notify the background script to redirect
-    chrome.runtime.sendMessage({
-        action: "local_pages_intercept",
-        redirect: true,
-        uri: "/pages/subscribe.html?" + queryString
-    });
 }
-
 /**
  * intercept the view_yellownotes page
  */

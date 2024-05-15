@@ -558,6 +558,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             });
             //return true;
 
+        } else if (action === "whoami") {
+            // return minimal current user information sufficient to check it a note is owned by the current user or not
+            console.log("whoami: " )
+            // Relay the state to all open tabs
+
+            sendResponse({
+                creatorid: "dummy_value"
+            });
+            //return true;
+
 
         } else if (action === "execute_notesupdate_on_page") {
             console.debug("execute_notesupdate_on_page");
@@ -1082,10 +1092,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug(response);
                 return response.json();
             }).then(function (data) {
-
                 console.debug(data);
                 const datarow = data[0];
-                console.debug(datarow);
+ // the API returns note that hte user does not own, so we need to mark them all accordingly
+ datarow.
+ console.debug(datarow);
+ datarow.isowner = false;
 try{
                 openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow, false).then(function (res) {
                     console.debug("response: " + JSON.stringify(res));
@@ -1093,6 +1105,7 @@ try{
                 });
             }catch(e){
                 console.log(e);
+                datarow.isowner = false;
                 // try again, but with opening a fresh tab this time
                 openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true).then(function (res) {
                     console.debug("response: " + JSON.stringify(res));
@@ -1107,7 +1120,7 @@ try{
             console.debug(message);
             const datarow = message.message.scroll_to_note_details.datarow;
 try{
-            openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow, false).then(function (res) {
+            openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow).then(function (res) {
                 console.debug("response: " + JSON.stringify(res));
                 sendResponse(res);
             });
@@ -1165,7 +1178,7 @@ try{
 
                 return response.json();
             }).then(initialData => {
-                console.log(initialData);
+                console.log(JSON.stringify(initialData));
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
                             console.debug("calling fetchDataFromApi2");
@@ -1431,6 +1444,7 @@ function fetchDataFromApi2(creatorId) {
 }
 
 function fetchNewData(creatorId, cacheKey) {
+    console.debug('fetchNewData: Fetching new data for creatorId:', creatorId);
     return chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
         .then(result => {
             const installationUniqueId = result[plugin_uuid_header_name];
@@ -1535,13 +1549,15 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
             };
             console.debug(resp);
 
-            // Search for tabs with the specified URL
+            // Search for already open tabs with the specified URL
             chrome.tabs.query({
                 url: url
             }, function (tabs) {
+                console.debug(tabs.length);
                 console.debug(tabs);
                 var rc;
-                if (tabs.length = 0 || openNewTab) {
+
+                if (tabs.length == 0 || openNewTab) {
                     // If no tabs with the URL are found, or openNewTab=true, create a new tab
                     chrome.tabs.update({
                         url: url
@@ -1567,6 +1583,7 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
                         });
                     });
                 } else {
+                    // an existing tab with this url was found - try to use it.
                     try{
                     console.debug("An existing tab was found with this URL.");
                     //let tabId = tabs[0].id;

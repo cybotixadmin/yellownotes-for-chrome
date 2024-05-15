@@ -501,13 +501,6 @@ function filterTableAllCols() {
     }
 }
 
-function escapeRegex(text) {
-    // Escapes the regular expression special characters in text except for '*' and '?'
-    // '*' is converted to '.*' and '?' to '.'
-    return text.replace(/[-[\]{}()+.,\\^$|#\s]/g, "\\$&")
-    .replace(/\*/g, '.*')
-    .replace(/\?/g, '.');
-}
 
 // Fetch data on page load
 

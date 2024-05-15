@@ -15,6 +15,7 @@ const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subsc
 
 const browser_id = chrome.runtime.id;
 
+console.debug("browser_id: ", browser_id);
 //console.log(url.replace(/.*add_distributionlistid=/, ""));
 // accept the submitted value for the distribution list id
 // the API has security mechanism in place the screen the value for undesirable content

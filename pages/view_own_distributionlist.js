@@ -12,12 +12,6 @@ const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_a
 //const browser_id = chrome.runtime.id;
 
 
-const url = window.location.href.trim();
-console.log(url);
-console.log(url.replace(/.*distributionlistid=/, ""));
-// accept the submitted value for the distribution list id
-
-
 // Function to use "fetch" to delete a data row
 async function deleteDataRow(noteid) {
     try {
@@ -608,16 +602,10 @@ async function fetchSubscribers(distributionlistid) {
 
 }
 
-const automaticallyGoToNoteId = getQueryStringParameter('noteid');
-console.log("getting noteid: " + automaticallyGoToNoteId);
-if (automaticallyGoToNoteId ==null){
-    console.log("or not");
+// start populating data tables
+
     fetchData(getQueryStringParameter('distributionlistid'));
     fetchSubscribers(getQueryStringParameter('distributionlistid'));
-}else{
-    fetchNote(getQueryStringParameter('distributionlistid'), automaticallyGoToNoteId);
-
-}
 
 //traverse_text(document.documentElement);
 console.debug("################################################");
@@ -657,7 +645,36 @@ if (distValue) {
 
 }
 
-fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
-    page_display_login_status();
 
-});
+// check if the user is authenticated
+checkSessionJWTValidity()
+  .then(isValid => {
+      console.log('JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+       // login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+
+}else{
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        //login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    }
+
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
+

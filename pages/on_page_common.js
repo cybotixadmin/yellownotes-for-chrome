@@ -19,13 +19,13 @@ const URI_plugin_user_savechanges_yellownote = '/api/v1.0/plugin_user_savechange
 async function page_display_login_status() {
     console.log("display_login_status()");
     //con
-
+    try{
     let session = await chrome.storage.local.get([plugin_session_header_name]);
     console.debug(session);
     console.debug(session[plugin_session_header_name]);
     var userid = null;
 
-    try{
+   
         userid = await get_username_from_sessiontoken(session[plugin_session_header_name]);
     } catch (e) {
         console.error(e);
@@ -67,6 +67,13 @@ async function is_authenticated() {
 }
 
 
+function escapeRegex(text) {
+  // Escapes the regular expression special characters in text except for '*' and '?'
+  // '*' is converted to '.*' and '?' to '.'
+  return text.replace(/[-[\]{}()+.,\\^$|#\s]/g, "\\$&")
+  .replace(/\*/g, '.*')
+  .replace(/\?/g, '.');
+}
 
 // Function to extract claim from JWT
 function extractClaimFromJWT(jwt, claimName) {
@@ -268,13 +275,13 @@ const value1 = 'Bearer your_token';
 const header2 = 'Content-Type';
 const value2 = 'application/json';
 
-getStatusValue(url, header1, value1, header2, value2)
-  .then(status => {
-      console.log('Status:', status);
-  })
-  .catch(error => {
-      console.error('Error:', error.message);
-  });
+//getStatusValue(url, header1, value1, header2, value2)
+ // .then(status => {
+ //     console.log('Status:', status);
+ // })
+ // .catch(error => {
+ //     console.error('Error:', error.message);
+ // });
 
 
 

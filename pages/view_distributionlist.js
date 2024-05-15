@@ -13,60 +13,18 @@ const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_a
 
 
 /**
- * this page takes parmeters
+ * this page takes parameters
  * 
  * required
  * distributionlistid: the id of the distribution list to be shown
  * 
- * 
+ * The script renders a table with all notes in the distribution list and provides a "go there" button for each note
+ * The distribution list is one the user does not own, but is a subscriber to
  * 
  * options
  * noteid: the id of the note for which a goto should be automatically triggered
  */
 
-const url = window.location.href.trim();
-console.log(url);
-console.log(url.replace(/.*distributionlistid=/, ""));
-// accept the submitted value for the distribution list id
-
-
-// Function to use "fetch" to delete a data row
-async function deleteDataRow(noteid) {
-    try {
-
-        const userid = "";
-        console.log("deleting: " + noteid);
-        const message_body = '{ "noteid":"' + noteid + '" }';
-        //console.log(message_body);
-        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
-
-        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-        let session = await chrome.storage.local.get([plugin_session_header_name]);
-
-        console.log(installationUniqueId);
-        // Fetch data from web service (replace with your actual API endpoint)
-        const response = await fetch(server_url + URI_plugin_user_delete_yellownote, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
-                    [plugin_session_header_name]: session[plugin_session_header_name],
-                },
-                body: message_body // example IDs, replace as necessary
-            });
-        console.log(response);
-        // Check for errors
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Parse JSON data
-        const data = await response.json();
-
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 /**
  * Navigate to the page where the note is attached
@@ -111,6 +69,8 @@ async function goThere(url, datarow) {
 
 
 
+// setup table items for sorting and filtering
+
 // Locate all elements with the class "my-button"
 const buttons = document.querySelectorAll('.sortableCol');
 len = buttons.length;
@@ -120,12 +80,14 @@ for (var i = 0; i < buttons.length; i++) {
     // set column index number for each column
     buttons[i].setAttribute("colindex", i);
     buttons[i].addEventListener('click', function (event) {
-        sortTa();
+        sortTa(event);
     }, false);
 }
 
+
+
 // Locate all cells that are used for filtering of search results
-const f_cells = document.querySelectorAll('.filterableCol');
+const f_cells = document.getElementById("subcribedDistributionlistNotesTable").querySelectorAll("thead tr:nth-child(2) th");
 console.log(f_cells);
 len = f_cells.length;
 for (var i = 0; i < f_cells.length; i++) {
@@ -134,7 +96,7 @@ for (var i = 0; i < f_cells.length; i++) {
     // set column index number for each column
     f_cells[i].setAttribute("colindex", i);
     f_cells[i].addEventListener('input', function (event) {
-        filterTable_a();
+        filterTableAllCols();
     }, false);
 }
 
@@ -144,11 +106,7 @@ const sortStates = {
     1: 'none'
 };
 
-function sortTa() {
-    console.log("sortTa");
-    console.log(event.target);
-    sortTable("dataTable", event.target.getAttribute("colindex"));
-}
+
 
 function timestampstring2timestamp(str) {
     console.log("timestampstring2timestamp: " + str);
@@ -174,11 +132,11 @@ function integerstring2timestamp(int) {
     console.log("integerstring2timestamp: " + int);
     try {
         const year = int.substring(0, 4);
-        const month = int.substring(5, 6);
-        const day = int.substring(8, 9);
-        const hour = int.substring(8, 9);
-        const minute = int.substring(10, 11);
-        const second = int.substring(12, 13);
+        const month = int.substring(5, 7);
+        const day = int.substring(8, 10);
+        const hour = int.substring(11, 13);
+        const minute = int.substring(14, 16);
+        const second = int.substring(17, 19);
 
         var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
         console.log("timestamp: " + timestamp);
@@ -190,12 +148,23 @@ function integerstring2timestamp(int) {
     }
 }
 
+
+function sortTa(event) {
+    console.log("sortTa()");
+    console.log(event);
+    console.log(event.target);
+    console.log(event.target.parentNode);
+    sortTable("subcribedDistributionlistNotesTable", parseInt( event.target.parentNode.getAttribute("colindex"), 10) );
+}
+
+
 // Function to sort the table
 function sortTable(table_id, columnIndex) {
-    console.log("sortable: " + columnIndex)
-    const table = document.getElementById(table_id);
-
-    let rows = Array.from(table.rows).slice(1); // Ignore the header
+    console.log("sortTabl: " + columnIndex)
+    console.log("sortTabl: " + table_id)
+    const table = document.querySelector('[id="' + table_id + '"]');
+console.log(table);
+    let rows = Array.from(table.rows).slice(2); // Ignore the header rows
     let sortedRows;
 
     // Toggle sort state for the column
@@ -231,6 +200,117 @@ function sortTable(table_id, columnIndex) {
     sortedRows.forEach(row => tbody.appendChild(row));
 }
 
+/*
+apply all filters simmultaneously
+
+TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
+and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
+ */
+function filterTableAllCols() {
+    console.log("filterTableAllCols");
+    var table = document.getElementById("subcribedDistributionlistNotesTable");
+    var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
+    var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    //console.debug(filtersCols);
+
+    // Loop through each row of the table
+    for (var i = 0; i < rows.length; i++) {
+        ///  for (var i = 0; i < 1; i++) {
+        var showRow = true;
+        // console.debug(rows[i]);
+        // check each cell against the corresponding filter for the column, if any
+        for (var j = 0; j < filtersCols.length; j++) {
+            //console.log(j + " ##########");
+            //            console.log(j);
+            //console.log(filtersCols[j]);
+            //console.log(filtersCols[j].value);
+            //console.debug(filtersCols[j].tagName);
+            //console.debug(filtersCols[j].tagName == "SELECT");
+            //console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.debug(filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
+
+            if (filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch") {
+                // filter on whether or not a checkbox has been checked
+                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                //console.log("filter on col: " + comparingCol)
+                var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                //console.log(cell);
+                if (cell) {
+                    //console.log(cell.querySelector('input[type="checkbox"]'));
+                    var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                    //console.log("isChecked: " + isChecked);
+                    var filterValue = filtersCols[j].value;
+                    //console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
+                    if (filterValue === "active" && !isChecked ||
+                        filterValue === "inactive" && isChecked) {
+                        showRow = false;
+                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                    }
+                }
+            } else if (filtersCols[j].value && filtersCols[j].getAttribute("filtertype") == "selectmatch") {
+                console.log("selectmatch");
+                // filter on whether or not a checkbox has been checked
+                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                console.log("filter on col: " + comparingCol)
+                var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                console.log(cell);
+                if (cell) {
+                    console.log(cell.getElementsByTagName("select"));
+
+                    var selectElement = cell.getElementsByTagName("select")[0];
+                    var selectedText = selectElement.options[selectElement.selectedIndex].text;
+
+                    // Log the selected text to the console or return it from the function
+                    console.log('Currently selected text:', selectedText);
+
+                    console.log(cell.getElementsByTagName("select")[0].value);
+                    //var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                    //console.log("isChecked: " + isChecked);
+                    var filterValue = filtersCols[j].value;
+                    console.log("filterValue: " + filterValue + " selectedText: " + selectedText);
+
+                    var regex = new RegExp(escapeRegex(filterValue), "i");
+                    //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                    // Test the regex against the cell content
+                    if (!regex.test(selectedText.trim())) {
+                        showRow = false;
+                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                    }
+                }
+
+            } else {
+
+                try {
+                    if (filtersCols[j].value) { // Only process filters with a value
+                        var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                        //console.log("filter on col: " + comparingCol)
+                        var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                        if (cell) {
+                            var filterValue = filtersCols[j].value;
+                            var regex = new RegExp(escapeRegex(filterValue), "i");
+                            //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                            // Test the regex against the cell content
+                            if (!regex.test(cell.textContent.trim())) {
+                                showRow = false;
+                                break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                            }
+                        }
+
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+
+            }
+        }
+        // Show or hide the row based on the filter results
+        rows[i].style.display = showRow ? "" : "none";
+    }
+}
+
+
 function filterTable_a() {
     //  console.log("filterTable_a " );
 
@@ -243,10 +323,11 @@ function filterTable(colheader) {
     console.log("filter on col: " + columnIndex)
     //const input = colheader;
     const filter = colheader.value.toUpperCase();
-    const table = document.getElementById('dataTable');
+    const table = document.getElementById('subcribedDistributionlistNotesTable');
     const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    //console.log("filter column:" + columnIndex);
-    //console.log("filter value:" + filter);
+    console.debug(rows);
+    console.log("filter column:" + columnIndex);
+    console.log("filter value:" + filter);
 
     for (let i = 0; i < rows.length; i++) {
         const cell = rows[i].getElementsByTagName('td')[columnIndex];
@@ -267,6 +348,9 @@ function filterTable(colheader) {
 
 // Fetch data on page load
 
+// start populating data tables
+
+fetchNotes(getQueryStringParameter('distributionlistid'));
 
 async function fetchNotes(distributionlistid) {
     console.log("fetchNotes");
@@ -312,7 +396,7 @@ async function fetchNotes(distributionlistid) {
     console.log(new Date().toISOString());
 
     // Get table body element
-    const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+    const tableBody = document.getElementById('subcribedDistributionlistNotesTable').getElementsByTagName('tbody')[0];
 
     // Loop through data and populate the table
     data.forEach(row => {
@@ -470,7 +554,7 @@ async function fetchNote(distributionlistid, noteid) {
     console.log(new Date().toISOString());
 
     // Get table body element
-    const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+    const tableBody = document.getElementById('subcribedDistributionlistNotesTable').getElementsByTagName('tbody')[0];
 
     // Loop through data and populate the table
     data.forEach(row => {
@@ -648,92 +732,38 @@ function createNoteShareLink(datarow) {
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
-// Function to use "fetch" to re-activate a data agreement
-async function setNoteActiveStatusByUUID(noteid, status) {
-    console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status);
-    try {
-        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-        let session = await chrome.storage.local.get([plugin_session_header_name]);
-        const userid = "";
-        const message_body = JSON.stringify({
-                noteid: noteid,
-                status: status,
-            });
-        //console.log(message_body);
-        // Fetch data from web service (replace with your actual API endpoint)
-        const response = await fetch(
-                server_url + URI_plugin_user_set_note_active_status, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
-                    [plugin_session_header_name]: session[plugin_session_header_name],
-                },
-                body: message_body, // example IDs, replace as necessary
-            });
-        //console.log(response);
-        // Check for errors
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        // update the row in the table
 
-        // Parse JSON data
-        const data = await response.json();
-    } catch (error) {
-        console.error(error);
-    }
-}
 
-const automaticallyGoToNoteId = getQueryStringParameter('noteid');
-console.log("getting noteid: " + automaticallyGoToNoteId);
-if (automaticallyGoToNoteId ==null){
-    console.log("or not");
-    fetchNotes(getQueryStringParameter('distributionlistid'));
+
+// check if the user is authenticated
+checkSessionJWTValidity()
+  .then(isValid => {
+      console.log('JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+       // login_logout_action();
+      
+      });
+      
+      //page_display_login_status();
+
 }else{
-    fetchNote(getQueryStringParameter('distributionlistid'), automaticallyGoToNoteId);
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        //login_logout_action();
+      
+      });
+      
+      //page_display_login_status();
+    }
 
-}
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
 
-//traverse_text(document.documentElement);
-console.debug("################################################");
-//console.debug(all_page_text);
-//console.debug(textnode_map);
-
-
-var doc = window.document;
-
-var root_node = doc.documentElement;
-console.debug(root_node);
-
-// start analyzing the DOM (the page/document)
-
-var note_template = null;
-// collect the template, for later use
-fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
-then((response) => response.text())
-.then((html) => {
-    //console.debug(html);
-    //note_template_html = html;
-    //const note_template = document.createElement('div');
-    // container.innerHTML = html;
-    note_template = safeParseInnerHTML(html, 'div');
-    console.log("browsersolutions " + note_template);
-    console.debug(note_template);
-
-    //console.debug("browsersolutions url: " + url);
-    replaceLink(root_node, note_template);
-
-});
-
-// if there is a querystring parameter, lokk up distribution list spiecified by that parameter
-var distValue = getQueryStringParameter('distributionlistid');
-if (distValue) {
-    console.debug(distValue);
-
-}
-
-fetchAndDisplayStaticContent("/fragments/sidebar_fragment.html", "sidebar").then(() => {
-    page_display_login_status();
-
-});

@@ -637,7 +637,7 @@ function hexToRGB(hex) {
 }
 
 function save_new_note(event) {
-    console.debug("browsersolutions ### save new note");
+    console.debug("save_new_note (event)");
     console.debug(event);
 
     // save note to database
@@ -1386,7 +1386,7 @@ function getOwnNotes() {
 }
 
 function update_note(event) {
-    console.debug("browsersolutions #update_note");
+    console.debug("update_note (event)");
     console.debug(event);
 
     // save note to database
@@ -3010,12 +3010,12 @@ console.log("distributionlistid: " + distributionlistid);
         if (distributionlistid != null && distributionlistid != "" && distributionlistid != undefined){
             for (var i = 0; i < allGoTo112.length; i++) {
                 console.log("goto_notetarget_link");
-                            allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/page/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
+                            allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
                         }
         }else{
         for (var i = 0; i < allGoTo112.length; i++) {
 console.log("goto_notetarget_link");
-            allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/page/subscribe.html?gothere.html?noteid=" + noteid);
+            allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?gothere.html?noteid=" + noteid);
         }
     }
 
@@ -4756,7 +4756,7 @@ var valid_stickynote_position_coordinate_regexp = new RegExp(/^[0-9][0-9]*[a-z][
  */
 
 function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote) {
-    console.debug("browsersolutions: " + "#size_and_place_note_based_on_coordinates.start");
+    console.debug("" + "#size_and_place_note_based_on_coordinates.start");
     // final placement
     // check if note contains position coordinates/parameters. If so, try to use them to place the note
 
