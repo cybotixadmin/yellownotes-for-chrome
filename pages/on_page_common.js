@@ -15,6 +15,52 @@ const URI_plugin_user_setdistributionlist_yellownote = '/api/v1.0/plugin_user_se
 
 const URI_plugin_user_savechanges_yellownote = '/api/v1.0/plugin_user_savechanges_yellownote';
 
+const URI_plugin_user_delete_subscription = "/api/v1.0/plugin_user_delete_subscription";
+
+const URI_plugin_user_set_subscription_active_status = "/api/v1.0/plugin_user_set_subscription_active_status";
+
+const URI_plugin_user_delete_distribution_list = "/api/v1.0/plugin_user_delete_distribution_list";
+const URI_plugin_user_get_distribution_list = "/api/v1.0/plugin_user_get_distribution_list";
+
+const URI_plugin_user_update_own_distributionlist = "/api/v1.0/plugin_user_update_own_distribution_list";
+const URI_plugin_user_get_all_agreements = "/api/plugin_user_get_all_data_agreements";
+const URI_plugin_user_delete_data_agreement = "/api/plugin_user_delete_distribution_list";
+const URI_plugin_user_add_subscription_v10 = "/api/v1.0/plugin_user_add_subscription";
+const URI_plugin_user_set_agreement_active_status = "/api/v1.0/plugin_user_set_subscription_active_status";
+
+const URI_plugin_user_set_all_subscriptions_active_status = "/api/v1.0/plugin_user_set_all_subscriptions_active_status";
+
+const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subscriptions";
+
+
+const URI_plugin_user_set_distributionlist_active_status = "/api/plugin_user_set_distributionlist_active_status";
+const URI_plugin_user_deactivate_agreements = "/api/plugin_user_deactivate_distribution_list";
+const URI_plugin_user_activate_agreements = "/api/plugin_user_activate_distribution_list";
+const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_distribution_lists";
+
+const URI_plugin_user_download_data = "/api/v1.0/plugin_user_retrieve_all_data";
+
+const URI_plugin_user_delete_all_data = "/api/v1.0/plugin_user_delete_all_data";
+const URI_plugin_user_update_yellownote_attributes = "/api/v1.0/update_note_properties";
+
+const URI_plugin_user_get_all_yellownotes = "/api/plugin_user_get_all_yellownotes";
+
+
+const URI_plugin_user_get_all_subscribed_notes =  "/api/v1.0/plugin_user_get_all_subscribed_notes";
+
+
+
+const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
+const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
+const URI_plugin_user_set_note_active_status = "/api/plugin_user_setstatus_yellownote";
+
+const URI_plugin_user_get_active_feed_notes = "/api/v1.0/plugin_user_get_active_feed_notes";
+
+const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
+
+
+
+
 
 async function page_display_login_status() {
     console.log("display_login_status()");

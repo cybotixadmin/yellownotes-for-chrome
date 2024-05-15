@@ -1,14 +1,4 @@
 
-const URI_plugin_user_delete_distribution_list = "/api/v1.0/plugin_user_delete_distribution_list";
-const URI_plugin_user_get_distribution_list = "/api/v1.0/plugin_user_get_distribution_list";
-
-const URI_plugin_user_update_own_distributionlist = "/api/v1.0/plugin_user_update_own_distribution_list";
-
-const URI_plugin_user_delete_subscription = "/api/plugin_user_delete_subscription";
-const URI_plugin_user_set_distributionlist_active_status = "/api/plugin_user_set_distributionlist_active_status";
-const URI_plugin_user_deactivate_agreements = "/api/plugin_user_deactivate_distribution_list";
-const URI_plugin_user_activate_agreements = "/api/plugin_user_activate_distribution_list";
-const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_distribution_lists";
 
 
 const browser_id = chrome.runtime.id;
@@ -519,7 +509,6 @@ function newTableRow2(tableBody, rowData) {
 console.log(rowData.createdtime);    
     cell10.textContent = reformatTimestamp(rowData.createdtime);
 
-    
 
     //Suspend/Active check switch
     const suspendActButton = document.createElement("span");
@@ -570,19 +559,35 @@ console.log(rowData.createdtime);
         deleteDataRowByDistributionlistId(rowData.distributionlistid);
     };
 
-    // Add View button
-    //const viewButton = document.createElement("button");
-    //viewButton.textContent = "View";
-    //viewButton.classList.add("viewBtn");
-   // viewButton.onclick = function () {
+    // Add View Notes button
+    //const viewNotesButton = document.createElement("button");
+    //viewNotesButton.textContent = "View";
+    //viewNotesButton.classList.add("viewBtn");
+   // viewNotesButton.onclick = function () {
         // call to API to delete row from data base
    //     viewDistributionlist(rowData.distributionlistid);
    // };
-const viewButton = document.createElement("a");
-viewButton.classList.add("viewBtn");
-//viewButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>' 
 
-viewButton.innerHTML =  '<a href="/pages/view_own_distributionlist.html?distributionlistid=' + rowData.distributionlistid + '"><button>View</button></a>' 
+    const viewNotesButton = document.createElement("a");
+    viewNotesButton.classList.add("viewBtn");
+//viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>' 
+
+    viewNotesButton.innerHTML =  '<a href="/pages/view_own_distributionlist.html?distributionlistid=' + rowData.distributionlistid + '"><button>Notes</button></a>' 
+
+        // Add View subscribers button
+    //const viewNotesButton = document.createElement("button");
+    //viewNotesButton.textContent = "View";
+    //viewNotesButton.classList.add("viewBtn");
+   // viewNotesButton.onclick = function () {
+        // call to API to delete row from data base
+   //     viewDistributionlist(rowData.distributionlistid);
+   // };
+
+   const viewSubscribersButton = document.createElement("a");
+   viewSubscribersButton.classList.add("viewBtn");
+//viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>' 
+
+    viewSubscribersButton.innerHTML =  '<a href="/pages/view_own_subscribers.html?distributionlistid=' + rowData.distributionlistid + '"><button>Subscribers</button></a>' 
 
     // Add save button
     const saveButton = document.createElement("button");
@@ -608,7 +613,8 @@ viewButton.innerHTML =  '<a href="/pages/view_own_distributionlist.html?distribu
 
 
     const cell7 = newRow.insertCell(9);
-    cell7.appendChild(viewButton);
+    cell7.appendChild(viewNotesButton);
+    cell7.appendChild(viewSubscribersButton);
     cell7.appendChild(deleteButton);
     cell7.appendChild(saveButton);
     cell7.appendChild(createInviteButton);
@@ -666,14 +672,7 @@ function createOpenInvitation(distributionlistid) {
     console.log("createOpenInvitation ("+distributionlistid+")");
     // create a small window/form to add a new distribution list
 
-const redirectUri = encodeURIComponent("/pages/view_distributionlist.html?distributionlistid=" + distributionlistid );
 
-    const textToCopy = "https://www.yellownotes.cloud/subscribe?distributionlistid="+distributionlistid  + "&redirecturi=" + redirectUri;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        console.log('Invitation URL copied to clipboard: ' + textToCopy);
-    }).catch(err => {
-        console.error('Error in copying text: ', err);
-    });
 }
 
 function sortTa() {
@@ -787,17 +786,20 @@ document
     activateAllDistributions();
 });
 
+
 document
 .getElementById("distributionsSuspendAllButton")
 .addEventListener("click", function () {
     deactivateAllDistributions();
 });
 
+
 document
 .getElementById("distributionsAddButton")
 .addEventListener("click", function () {
     add_distribution();
 });
+
 
 async function add_distribution() {
     console.log("add_distribution");
@@ -880,7 +882,6 @@ async function add_distribution() {
 
         const visibility = document.getElementById('visibilityDropdown').value; // Get text from second cell of the second row
 
-
         console.log("name: " + name);
         console.log("description: " + description);
 
@@ -920,7 +921,6 @@ async function add_distribution() {
                     },
                     body: JSON.stringify(msg)
                 });
-
             })
             .then(response => response.json())
             .then(function (data) {
@@ -954,7 +954,6 @@ data.postcount = 0;
         } else {
             alert("Please enter a name and a description");
         }
-
     });
 
     // create button to cancel distributionlist/feed to API
@@ -1129,10 +1128,10 @@ async function add_subscriber(distributionlistid) {
 
 }
 
+
 async function remove_subscriber(subscriptionid, distributionlistid) {
     console.log("remove_subscriber");
     // create a small window/form to add a new distribution list
-
 
     //document.addEventListener('DOMContentLoaded', function() {
     // Find the element where the table will be added

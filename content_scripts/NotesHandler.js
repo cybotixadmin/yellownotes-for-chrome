@@ -1468,6 +1468,13 @@ function update_note(event) {
 
             // update the reference to the current distributionlist for this note in the root node of the note
             note_root.setAttribute("distributionlistid", distributionlistid);
+
+            // update the goto-link
+            var goto_link = note_root.querySelector('[name="goto_notetarget_link"]');
+            goto_link.setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
+                        console.debug("browsersolutions: goto_link update to ", goto_link.getAttribute("href"));
+
+
         } catch (e) {
             console.error(e);
         }

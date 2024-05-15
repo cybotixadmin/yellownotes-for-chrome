@@ -1,15 +1,4 @@
 
-const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
-const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
-const URI_plugin_user_set_note_active_status = "/api/v1.0/plugin_user_setstatus_yellownote";
-
-const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
-
-
-//console.log("is_authenticated: ", is_authenticated());
-
-
-
 
 // check if the user is authenticated
 checkSessionJWTValidity()
@@ -21,11 +10,9 @@ if (isValid){
     fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
         //page_display_login_status();
        // login_logout_action();
-      
       });
-      
+    
       page_display_login_status();
-
 }else{
     console.debug("JWT is not valid - show menu accordingly");
     fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
@@ -1084,8 +1071,7 @@ function enable_note_with_noteid(noteid) {
 
 if (is_authenticated()){
     console.debug("user is authenticated - show menu accordingly");
-    //fetchAndDisplayStaticContent("/fragments/sidebar_fragment_authenticated.html", "sidebar").then(() => {
-        //page_display_login_status();
+       //page_display_login_status();
        // login_logout_action();
       
       //});
@@ -1094,7 +1080,6 @@ if (is_authenticated()){
     
 }else{
     console.debug("user is not authenticated - show menu accordingly");
-    //fetchAndDisplayStaticContent("/fragments/sidebar_fragment unauthenticated.html", "sidebar").then(() => {
         //page_display_login_status();
      //   login_logout_action();
       

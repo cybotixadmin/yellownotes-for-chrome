@@ -1,13 +1,5 @@
 
 
-const URI_plugin_user_get_all_yellownotes = "/api/plugin_user_get_all_yellownotes";
-const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
-
-const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
-
-const URI_plugin_user_get_all_subscribed_notes =  "/api/v1.0/plugin_user_get_all_subscribed_notes";
-
-
 
 
 // check if the user is authenticated
@@ -659,52 +651,4 @@ function DELreplaceLink(node, note_template) {
 }
 
 fetchData();
-
-    
-
-
-
-
-
-//traverse_text(document.documentElement);
-console.debug("################################################");
-//console.debug(all_page_text);
-//console.debug(textnode_map);
-
-
-var doc = window.document;
-
-
-var root_node = doc.documentElement;
-console.debug(root_node);
-
-// start analyzing the DOM (the page/document)
-
-var note_template = null;
- // collect the template, for later use
- fetch(chrome.runtime.getURL('stickynotetemplate.html')).
- then((response) => response.text())
- .then((html) => {
-     console.debug(html);
-     //note_template_html = html;
-     //const note_template = document.createElement('div');
-     // container.innerHTML = html;
-     note_template = safeParseInnerHTML(html, 'div');
-     console.log("browsersolutions " + note_template);
-     console.debug(note_template);
-     
-
-     //console.debug("browsersolutions url: " + url);
-     replaceLink(root_node, note_template);
-
- });
-
-
- console.debug(note_template);
- console.debug("RenderEmbeddedNotes.js: end");
-
-
- fetchAndDisplayStaticContent( "/fragments/sidebar_fragment.html", "sidebar").then(() => {   
-    page_display_login_status();
-  });
 

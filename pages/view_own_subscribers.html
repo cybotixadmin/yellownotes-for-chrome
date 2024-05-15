@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="on_page_common.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="view_own_subscribers.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>view feed</title>
+</head>
+<body>
+ <!-- side bar start here-->
+ <div id="sidebar"></div>
+<!-- side bar end here -->
+
+<!-- main page start-->
+<div class="pageBody">
+<!-- 
+-->
+     <!-- Empty table structure -->
+
+
+    <div class="header">
+      <hr>subscribers</hr>
+    <div class="scrollable-table">
+      <table id="subscribersTable" class="ownSubscribersTable">
+        <thead>
+          <tr class="fixed-header">
+            
+            <th class="sortableCol">subscrptionid</th>
+            <th class="sortableCol">name<span class="sort-icon" ">&#9650;</span></th>
+            <th class="sortableCol">subscriber since<span class="sort-icon" ">&#9650;</span></th>
+            <th class="sortableCol">active</th>
+            <th class="sortableCol">status</th>
+            <th>action</th>
+          </tr>
+          
+          <!-- Add a filter row -->
+          <tr class="fixed-header">
+            <th class="filterableCol"></th>
+            <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"></option><option class="filterableCol">active</option><option class="filterableCol">inactive</option><option class="filterableCol">applied</option></select></th>
+            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th ></th>
+          </tr>
+      
+        </thead>
+        <tbody>
+          <!-- Rows will be added here -->
+        </tbody>
+      </table>
+      </div>
+
+    </div>
+
+    <hr>automatic rules and restrictions</hr>
+
+<!-- main page end -->
+
+<script src="./on_page_common.js"></script>
+<script src="./view_own_subscribers.js"></script>
+
+
+</body>
+</html>
+    

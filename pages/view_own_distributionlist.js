@@ -1,14 +1,6 @@
 
 
 
-const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
-const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
-const URI_plugin_user_set_note_active_status = "/api/plugin_user_setstatus_yellownote";
-
-const URI_plugin_user_get_active_feed_notes = "/api/v1.0/plugin_user_get_active_feed_notes";
-
-const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
-
 //const browser_id = chrome.runtime.id;
 
 
@@ -93,6 +85,8 @@ async function goThere(noteid, url, distributionlistid , datarow) {
 
 
 
+// setup table items for sorting and filtering
+
 // Locate all elements with the class "my-button"
 const buttons = document.querySelectorAll('.sortableCol');
 len = buttons.length;
@@ -102,12 +96,14 @@ for (var i = 0; i < buttons.length; i++) {
     // set column index number for each column
     buttons[i].setAttribute("colindex", i);
     buttons[i].addEventListener('click', function (event) {
-        sortTa();
+        sortTa(event);
     }, false);
 }
 
+
+
 // Locate all cells that are used for filtering of search results
-const f_cells = document.querySelectorAll('.filterableCol');
+const f_cells = document.getElementById("ownDistributionlistNotesTable").querySelectorAll("thead tr:nth-child(2) th");
 console.log(f_cells);
 len = f_cells.length;
 for (var i = 0; i < f_cells.length; i++) {
@@ -116,9 +112,11 @@ for (var i = 0; i < f_cells.length; i++) {
     // set column index number for each column
     f_cells[i].setAttribute("colindex", i);
     f_cells[i].addEventListener('input', function (event) {
-        filterTable_a();
+        filterTableAllCols();
     }, false);
 }
+
+
 
 // Sort states for each column
 const sortStates = {
@@ -126,11 +124,13 @@ const sortStates = {
     1: 'none'
 };
 
-function sortTa() {
+
+function sortTa(event) {
     console.log("sortTa");
     console.log(event.target);
-    sortTable("dataTable", event.target.getAttribute("colindex"));
+    sortTable("ownDistributionlistNotesTable", parseInt( event.target.parentNode.getAttribute("colindex"), 10) );
 }
+
 
 function timestampstring2timestamp(str) {
     console.log("timestampstring2timestamp: " + str);
@@ -152,15 +152,16 @@ function timestampstring2timestamp(str) {
     }
 }
 
+
 function integerstring2timestamp(int) {
     console.log("integerstring2timestamp: " + int);
     try {
         const year = int.substring(0, 4);
-        const month = int.substring(5, 6);
-        const day = int.substring(8, 9);
-        const hour = int.substring(8, 9);
-        const minute = int.substring(10, 11);
-        const second = int.substring(12, 13);
+        const month = int.substring(5, 7);
+        const day = int.substring(8, 10);
+        const hour = int.substring(11, 13);
+        const minute = int.substring(14, 16);
+        const second = int.substring(17, 19);
 
         var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
         console.log("timestamp: " + timestamp);
@@ -177,7 +178,7 @@ function sortTable(table_id, columnIndex) {
     console.log("sortable: " + columnIndex)
     const table = document.getElementById(table_id);
 
-    let rows = Array.from(table.rows).slice(1); // Ignore the header
+    let rows = Array.from(table.rows).slice(2); // Ignore the header and filter rows
     let sortedRows;
 
     // Toggle sort state for the column
@@ -204,8 +205,8 @@ function sortTable(table_id, columnIndex) {
 
     console.log(sortedRows);
     // Remove existing rows
-    while (table.rows.length > 1) {
-        table.deleteRow(1);
+    while (table.rows.length > 2) {
+        table.deleteRow(2);
     }
 
     // Append sorted rows
@@ -213,11 +214,127 @@ function sortTable(table_id, columnIndex) {
     sortedRows.forEach(row => tbody.appendChild(row));
 }
 
+
+
+/*
+apply all filters simmultaneously
+
+TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
+and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
+ */
+function filterTableAllCols() {
+    console.log("filterTableAllCols");
+    var table = document.getElementById("ownDistributionlistNotesTable");
+    var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
+    var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    //console.debug(filtersCols);
+
+    // Loop through each row of the table
+    for (var i = 0; i < rows.length; i++) {
+        ///  for (var i = 0; i < 1; i++) {
+        var showRow = true;
+        // console.debug(rows[i]);
+        // check each cell against the corresponding filter for the column, if any
+        for (var j = 0; j < filtersCols.length; j++) {
+            //console.log(j + " ##########");
+            //            console.log(j);
+            //console.log(filtersCols[j]);
+            //console.log(filtersCols[j].value);
+            //console.debug(filtersCols[j].tagName);
+            //console.debug(filtersCols[j].tagName == "SELECT");
+            //console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.debug(filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+            //console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
+
+            if (filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch") {
+                // filter on whether or not a checkbox has been checked
+                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                //console.log("filter on col: " + comparingCol)
+                var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                //console.log(cell);
+                if (cell) {
+                    //console.log(cell.querySelector('input[type="checkbox"]'));
+                    var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                    //console.log("isChecked: " + isChecked);
+                    var filterValue = filtersCols[j].value;
+                    //console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
+                    if (filterValue === "active" && !isChecked ||
+                        filterValue === "inactive" && isChecked) {
+                        showRow = false;
+                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                    }
+                }
+            } else if (filtersCols[j].value && filtersCols[j].getAttribute("filtertype") == "selectmatch") {
+                console.log("selectmatch");
+                // filter on whether or not a checkbox has been checked
+                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                console.log("filter on col: " + comparingCol)
+                var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                console.log(cell);
+                if (cell) {
+                    console.log(cell.getElementsByTagName("select"));
+
+                    var selectElement = cell.getElementsByTagName("select")[0];
+                    var selectedText = selectElement.options[selectElement.selectedIndex].text;
+
+                    // Log the selected text to the console or return it from the function
+                    console.log('Currently selected text:', selectedText);
+
+                    console.log(cell.getElementsByTagName("select")[0].value);
+                    //var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                    //console.log("isChecked: " + isChecked);
+                    var filterValue = filtersCols[j].value;
+                    console.log("filterValue: " + filterValue + " selectedText: " + selectedText);
+
+                    var regex = new RegExp(escapeRegex(filterValue), "i");
+                    //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                    // Test the regex against the cell content
+                    if (!regex.test(selectedText.trim())) {
+                        showRow = false;
+                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                    }
+                }
+
+            } else {
+
+                try {
+                    if (filtersCols[j].value) { // Only process filters with a value
+                        var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                        //console.log("filter on col: " + comparingCol)
+                        var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                        if (cell) {
+                            var filterValue = filtersCols[j].value;
+                            var regex = new RegExp(escapeRegex(filterValue), "i");
+                            //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                            // Test the regex against the cell content
+                            if (!regex.test(cell.textContent.trim())) {
+                                showRow = false;
+                                break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                            }
+                        }
+
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+
+            }
+        }
+        // Show or hide the row based on the filter results
+        rows[i].style.display = showRow ? "" : "none";
+    }
+}
+
+
+
+
 function filterTable_a() {
     //  console.log("filterTable_a " );
 
     filterTable(event.target);
 }
+
 
 function filterTable(colheader) {
     const columnIndex = colheader.parentNode.getAttribute("colindex");
@@ -225,7 +342,7 @@ function filterTable(colheader) {
     console.log("filter on col: " + columnIndex)
     //const input = colheader;
     const filter = colheader.value.toUpperCase();
-    const table = document.getElementById('dataTable');
+    const table = document.getElementById('ownDistributionlistNotesTable');
     const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     //console.log("filter column:" + columnIndex);
     //console.log("filter value:" + filter);
@@ -294,7 +411,7 @@ async function fetchData(distributionlistid) {
     console.log(new Date().toISOString());
 
     // Get table body element
-    const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+    const tableBody = document.getElementById('ownDistributionlistNotesTable').getElementsByTagName('tbody')[0];
 
     // Loop through data and populate the table
     data.forEach(row => {
@@ -378,32 +495,31 @@ async function fetchData(distributionlistid) {
 
         const goThereButton = document.createElement('img');
         goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
+        goThereButton.setAttribute('height', '25px' ); 
 
         goThereButton.alt = 'go there';
 
         goThereButton.setAttribute('class', 'go_to_location_button');
 
         //   goThereButton.textContent = 'locate';
-        goThereButton.onclick = function () {
-            // call to API to delete row from data base
-            goThere(row.noteid, row.url, distributionlistid, row);
-        };
+       // goThereButton.onclick = function () {
+       //     // call to API to delete row from data base
+       //     goThere(row.noteid, row.url, distributionlistid, row);
+       // };
 
-        goThereButtonContainer.appendChild(goThereButton);
-        cell_buttons.appendChild(goThereButtonContainer);
+        //goThereButtonContainer.appendChild(goThereButton);
+        //cell_buttons.appendChild(goThereButtonContainer);
 
         // add a "shareable" link to note
         var shareable_url = document.createElement('a');
-shareable_url.setAttribute('href', 'https://www.yellownotes.cloud/gothere?noteid='+row.noteid ); // Set href to '#' or an appropriate URL
-shareable_url.innerHTML = 'go_to_location_button'; // Set the link text
+        shareable_url.setAttribute('href', 'https://www.yellownotes.cloud/pages/gothere.html?noteid='+row.noteid ); // Set href to '#' or an appropriate URL
 
+        shareable_url.appendChild(goThereButton);
 
         cell_buttons.appendChild(shareable_url);
 
-        // const cell8 = newRow.insertCell(6);
-
+       
     });
-
 }
 
 
@@ -605,7 +721,7 @@ async function fetchSubscribers(distributionlistid) {
 // start populating data tables
 
     fetchData(getQueryStringParameter('distributionlistid'));
-    fetchSubscribers(getQueryStringParameter('distributionlistid'));
+    //fetchSubscribers(getQueryStringParameter('distributionlistid'));
 
 //traverse_text(document.documentElement);
 console.debug("################################################");

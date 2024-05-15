@@ -1,7 +1,4 @@
 
-const URI_plugin_user_download_data = "/api/v1.0/plugin_user_retrieve_all_data";
-
-const URI_plugin_user_delete_all_data = "/api/v1.0/plugin_user_delete_all_data";
 
 
 

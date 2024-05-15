@@ -6,7 +6,6 @@ document.getElementById('drop_zone').addEventListener('click', function () {
     document.getElementById('file_input').click();
 });
 
-const URI_plugin_user_update_yellownote_attributes = "/api/v1.0/update_note_properties";
 
 var note_properties = {
     note_color: "#FFFF00",

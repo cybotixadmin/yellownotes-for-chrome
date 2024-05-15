@@ -1,7 +1,7 @@
 
 
 
-table.ownNotesTable th {
+table.ownSubscribersTable th {
     font-size: .8em;
     text-indent: initial;
     border-spacing: 2px;
@@ -22,7 +22,11 @@ table.ownNotesTable th {
     background-color: yellow;
   }
   
-    table.ownNotesTable th th {
+
+
+ 
+
+    table.ownSubscribersTable th th {
       font-size: .5em;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -31,60 +35,61 @@ table.ownNotesTable th {
     }
 
     
-    table.ownNotesTable tr th:nth-child(1){
+    table.ownSubscribersTable tr th:nth-child(1){
         display: none;
-    
      }
   
 
-    table.ownNotesTable tr th:nth-child(2){
-      display: none;
-  
+    table.ownSubscribersTable tr th:nth-child(2){
+      width: 120px;
    }
+   table.ownSubscribersTable tr th input:nth-child(2){
+    width: 120px;
+ }
   
   
-   table.ownNotesTable tr th:nth-child(3) {
+   table.ownSubscribersTable tr th:nth-child(3) {
     max-width: 200px;
   }
   
-  table.ownNotesTable tr th:nth-child(4) {
+  table.ownSubscribersTable tr th:nth-child(4) {
     width: 40px;
   }
   
   
-  table.ownNotesTable tr th:nth-child(5) {
-    display: none;
-  }
-  
-  table.ownNotesTable tr th:nth-child(6) {
+  table.ownSubscribersTable tr th:nth-child(5) {
     width: 80px;
   }
   
-  table.ownNotesTable tr th:nth-child(7) {
+  table.ownSubscribersTable tr th:nth-child(6) {
+    width: 80px;
+  }
+  
+  table.ownSubscribersTable tr th:nth-child(7) {
     width: 35px;
   }
   
-  table.ownNotesTable tr th:nth-child(8) {
+  table.ownSubscribersTable tr th:nth-child(8) {
     width: 80px;
   }
   
-  table.ownNotesTable tr th:nth-child(9) {
+  table.ownSubscribersTable tr th:nth-child(9) {
     width: 120px;
   }
   
-  table.ownNotesTable tr th:nth-child(10) {
+  table.ownSubscribersTable tr th:nth-child(10) {
     width: 20px;
   }
   
   
-  table.ownNotesTable tr th:nth-child(11) {
+  table.ownSubscribersTable tr th:nth-child(11) {
     width: 80px;
     min-width: 70px;
     max-width: 70px;
   }
   
   
-  table.ownNotesTable td {
+  table.ownSubscribersTable td {
     padding: 0px;
     width: 50px;
     height: 15px;
@@ -104,50 +109,50 @@ table.ownNotesTable th {
   
   }
   
-  table.ownNotesTable tr td:nth-child(1){
+  table.ownSubscribersTable tr td:nth-child(1){
     display: none;
   
   }
-  table.ownNotesTable tr td:nth-child(2){
-    display: none;
+  table.ownSubscribersTable tr td:nth-child(2){
+    width: 120px;
   
   }
   
   
-  table.ownNotesTable tr td:nth-child(3) {
+  table.ownSubscribersTable tr td:nth-child(3) {
     max-width: 200px;
   }
   
-  table.ownNotesTable tr td:nth-child(4) {
+  table.ownSubscribersTable tr td:nth-child(4) {
     max-width: 40px;
   }
   
-  table.ownNotesTable tr td:nth-child(5) {
-    display: none;
-  }
-  
-  table.ownNotesTable tr td:nth-child(6) {
+  table.ownSubscribersTable tr td:nth-child(5) {
     width: 80px;
   }
   
-  table.ownNotesTable tr td:nth-child(7) {
+  table.ownSubscribersTable tr td:nth-child(6) {
+    width: 80px;
+  }
+  
+  table.ownSubscribersTable tr td:nth-child(7) {
     width: 35px;
   }
   
-  table.ownNotesTable tr td:nth-child(8) {
+  table.ownSubscribersTable tr td:nth-child(8) {
     width: 80px;
   }
   
-  table.ownNotesTable tr td:nth-child(9) {
+  table.ownSubscribersTable tr td:nth-child(9) {
     width: 120px;
   }
   
-  table.ownNotesTable tr td:nth-child(10) {
+  table.ownSubscribersTable tr td:nth-child(10) {
     width: 20px;
   }
   
   
-  table.ownNotesTable tr td:nth-child(11) {
+  table.ownSubscribersTable tr td:nth-child(11) {
     width: 80px;
     min-width: 70px;
     max-width: 70px;

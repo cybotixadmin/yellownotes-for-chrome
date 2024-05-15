@@ -1,13 +1,6 @@
 
 
 
-const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
-const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
-const URI_plugin_user_set_note_active_status = "/api/plugin_user_setstatus_yellownote";
-
-const URI_plugin_user_get_active_feed_notes = "/api/v1.0/plugin_user_get_active_feed_notes";
-
-const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
 //const browser_id = chrome.runtime.id;
 
@@ -164,7 +157,7 @@ function sortTable(table_id, columnIndex) {
     console.log("sortTabl: " + table_id)
     const table = document.querySelector('[id="' + table_id + '"]');
 console.log(table);
-    let rows = Array.from(table.rows).slice(2); // Ignore the header rows
+    let rows = Array.from(table.rows).slice(2); //  Ignore the header and filter rows
     let sortedRows;
 
     // Toggle sort state for the column
@@ -191,14 +184,15 @@ console.log(table);
 
     console.log(sortedRows);
     // Remove existing rows
-    while (table.rows.length > 1) {
-        table.deleteRow(1);
+    while (table.rows.length > 2) {
+        table.deleteRow(2);
     }
 
     // Append sorted rows
     const tbody = table.getElementsByTagName('tbody')[0];
     sortedRows.forEach(row => tbody.appendChild(row));
 }
+
 
 /*
 apply all filters simmultaneously
@@ -313,9 +307,10 @@ function filterTableAllCols() {
 
 function filterTable_a() {
     //  console.log("filterTable_a " );
-
     filterTable(event.target);
 }
+
+
 
 function filterTable(colheader) {
     const columnIndex = colheader.parentNode.getAttribute("colindex");
