@@ -36,6 +36,8 @@ const URI_plugin_user_get_own_url_yellownotes = "/api/v1.0/plugin_user_get_own_u
 
 const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_distribution_lists";
 
+const URI_plugin_user_get_an_authorized_note = "/api/v1.0/plugin_user_get_an_authorized_note";
+
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 
 const URI_plugin_user_get_a_subscribed_note = "/api/v1.0/plugin_user_get_a_subscribed_note";
@@ -1055,18 +1057,21 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             });
 
         } else if (action == 'focusTab') {
-
+            console.debug("action: focusTab");
             // Use the tab ID to focus the tab
             chrome.tabs.update(sender.tab.id, {
                 active: true
             });
 
         } else if (action == 'gothere') {
-            console.debug("request: gothere");
+            console.debug("action: gothere");
             console.debug(message);
             // lookup the details of the not in the database
+            
+            //console.debug(message.go_to_note_details);
 
-            const noteid = message.message.gothere.noteid;
+            const noteid = message.go_to_note_details.noteid;
+            const session_uuid = message.go_to_note_details.session_uuid;
             console.debug("noteid: " + noteid);
             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
@@ -1094,12 +1099,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             }).then(function (data) {
                 console.debug(data);
                 const datarow = data[0];
- // the API returns note that hte user does not own, so we need to mark them all accordingly
- datarow.
- console.debug(datarow);
- datarow.isowner = false;
+ // the API returns notes that the user may not own, so we need to mark them all accordingly
+// datarow.
+// console.debug(datarow);
+// datarow.isowner = false;
 try{
-                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow, false).then(function (res) {
+                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow, false, session_uuid).then(function (res) {
                     console.debug("response: " + JSON.stringify(res));
                     sendResponse(res);
                 });
@@ -1107,7 +1112,7 @@ try{
                 console.log(e);
                 datarow.isowner = false;
                 // try again, but with opening a fresh tab this time
-                openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true).then(function (res) {
+                openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true, session_uuid).then(function (res) {
                     console.debug("response: " + JSON.stringify(res));
                     sendResponse(res);
                 });
@@ -1116,44 +1121,54 @@ try{
             });
             return true;
         } else if (action == 'scroll_to_note') {
+            /*
+             * scroll to a note on a page - 
+             */
             console.debug("request: scroll_to_note");
             console.debug(message);
+            console.debug(JSON.stringify(message));
+            
             const datarow = message.message.scroll_to_note_details.datarow;
-try{
-            openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow).then(function (res) {
+            try{
+                openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow, false, null).then(function (res) {
                 console.debug("response: " + JSON.stringify(res));
                 sendResponse(res);
             });
-        }catch(e){
-            console.log(e);
-            // try again, but with opening a fresh tab this time
-            openUrlAndScrollToElement(null, message.message.scroll_to_note_details.url, datarow.noteid, datarow, true).then(function (res) {
+            }catch(e){
+              console.log(e);
+                // try again, but with opening a fresh tab this time
+                openUrlAndScrollToElement(null, message.message.scroll_to_note_details.url, datarow.noteid, datarow, true, null).then(function (res) {
                 console.debug("response: " + JSON.stringify(res));
                 sendResponse(res);
             });
 
-        }
+            }
             //return true;
             //return true;
 
         } else if (action == 'get_authorized_note') {
             console.debug("get authorized note");
             console.debug(message);
+            var session_uuid;
             const noteid = message.noteid;
             // call out to database
             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
-
                 installationUniqueId = result[plugin_uuid_header_name];
                 sessiontoken = result[plugin_session_header_name];
-
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
                 console.debug("xYellownotesSession: " + xYellownotesSession);
-
                 console.debug("installationUniqueId: " + installationUniqueId);
                 console.debug("sessiontoken: " + sessiontoken);
+                session_uuid = getUuid(sessiontoken);
+        console.log("session_uuid: " + session_uuid);
+        if (session_uuid == null) {
+            session_uuid = "UNAUTHENTICATED";
+        }else{
 
+        }
+        console.log("session_uuid: " + session_uuid);
                 const opts = {
                     method: 'POST',
                     headers: {
@@ -1166,7 +1181,7 @@ try{
                     }),
                 };
                 console.log(opts);
-                return fetch(server_url + URI_plugin_user_get_a_subscribed_note, opts);
+                return fetch(server_url + URI_plugin_user_get_an_authorized_note, opts);
             }).then(function (response) {
                 console.log(response);
                 if (!response.ok) {
@@ -1194,9 +1209,14 @@ try{
             })
             .then(function (data) {
                 console.log(data);
-                console.log(JSON.stringify(data));
+                console.log("session_uuid: " + session_uuid);
+                const msg = {
+                    session_uuid: session_uuid,
+                    data: data
+                } 
+                console.log(JSON.stringify(msg));
 
-                sendResponse(data);
+                sendResponse(msg);
 
             });
             return true;
@@ -1341,9 +1361,7 @@ try{
                 notes = initialData;
                 console.log(notes);
                 return fetchDataFromApi2(notes[0].creatorid);
-
-            })
-            .then(function (creatordata) {
+            }).then(function (creatordata) {
                 console.log(creatordata);
                 console.log(JSON.stringify(creatordata));
                 var resp = {};
@@ -1351,20 +1369,17 @@ try{
                 console.log(Array.isArray(notes));
                 resp.notes_found = notes;
                 resp.creatorDetails = creatordata;
-
                 console.log(resp);
                 console.log(JSON.stringify(resp));
-                //data.creatorDetails =
                 sendResponse(resp);
             });
         }
     } catch (e) {
         console.debug(e);
     }
-
     return true;
-
 });
+
 
 // Helper to cache data with a timestamp
 function cacheData(key, data) {
@@ -1382,6 +1397,7 @@ function cacheData(key, data) {
         });
     });
 }
+
 
 // Helper to get cached data , timeout in seconds
 function getCachedData(key, cachetimeout) {
@@ -1532,12 +1548,12 @@ function DELETEfetchDataFromApi(creatorId) {
 // rewrite this to return a promise
 
 
-function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
-    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab_id + ' and scrolling to element with noteid ' + noteid + " openNewTab: " + openNewTab);
+function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab, session_uuid) {
+    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab_id + ' and scrolling to element with noteid ' + noteid + " openNewTab: " + openNewTab + " session_uuid: " + session_uuid);
     console.debug(datarow);
     const creatorid = datarow.creatorid;
     var notes = [datarow];
-
+    // lookup creator information needed to render the note
     return new Promise((resolve, reject) => {
         fetchDataFromApi2(creatorid)
         .then((creatordata) => {
@@ -1545,7 +1561,8 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
             console.log(JSON.stringify(creatordata));
             var resp = {
                 notes_found: notes,
-                creatorDetails: creatordata
+                creatorDetails: creatordata,
+                session_uuid: session_uuid
             };
             console.debug(resp);
 
@@ -1567,8 +1584,7 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
                         chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
                             if (tabId === tab.id && changeInfo.status === 'complete') {
                                 chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
-                                //rc = sendMessageToContentScript(tab.id, resp, noteid);
-                                sendMessageToContentScript(tabId, resp, noteid)
+                                sendMessageToContentScript(tabId, resp, noteid, session_uuid)
                                 .then(result => {
                                     console.log('Result:', result); // This will log '0' for success or '1' for error
                                     resolve(`Message sent to new tab ${tab.id}`);
@@ -1576,9 +1592,6 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
                                 .catch(error => {
                                     console.error('Unexpected error:', error);
                                 });
-                            
-
-                                
                             }
                         });
                     });
@@ -1588,8 +1601,8 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
                     console.debug("An existing tab was found with this URL.");
                     //let tabId = tabs[0].id;
                     console.log('Using existing tab:', tab_id);
-                    //rc = sendMessageToContentScript(tab_id, resp, noteid);
-                    sendMessageToContentScript(tab_id, resp, noteid)
+                    //rc = sendMessageToContentScript(tab_id, resp, noteid, session_uuid);
+                    sendMessageToContentScript(tab_id, resp, noteid, session_uuid)
                     .then(result => {
                         console.log('Result:', result); // This will log '0' for success or '1' for error
 // sending failed try opening in the current tab
@@ -1607,7 +1620,7 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
                     // Remove the listener once the URL is loaded
                     chrome.tabs.onUpdated.removeListener(listener);
 
-                    sendMessageToContentScript(tabId, resp, noteid)
+                    sendMessageToContentScript(tabId, resp, noteid, session_uuid)
                     .then(result => {
                         console.log('Result:', result); // This will log '0' for success or '1' for error
                         resolve(`Message sent to new tab ${tab.id}`);
@@ -1645,7 +1658,7 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab) {
 
 
 
-function sendMessageToContentScript(tabId, resp, noteid) {
+function sendMessageToContentScript(tabId, resp, noteid, session_uuid) {
     console.debug('sendMessageToContentScript: Sending message to tab ' + tabId);
     const datarow = resp.notes_found[0];
     console.log(datarow);
@@ -1662,6 +1675,7 @@ function sendMessageToContentScript(tabId, resp, noteid) {
         noteid: noteid,
         note_type: note_type,
         creatorid: creatorid,
+        session_uuid: session_uuid,
         node_obj: note // using parsed JSON directly
     };
     console.debug(msg);
@@ -1854,17 +1868,13 @@ chrome.webRequest.onHeadersReceived.addListener(
 chrome.webRequest.onHeadersReceived.addListener(
     (details) => {
     // console.log(details);
-    console.log(details.responseHeaders);
-    const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === plugin_session_header_name);
-    console.log('Yellownotes session header detected');
-    if (xSessionHeader) {
-        console.log('Yellownotes session value:' + xSessionHeader.value);
-        chrome.storage.local.set({
-            [plugin_session_header_name]: xSessionHeader.value
-        }, () => {
-            console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
+    // execute logout
+    console.log('Logout detected');
+        chrome.storage.local.remove(
+            [plugin_session_header_name]
+        , () => {
+            console.log('Yellownotes session token removed local storage:');
         });
-    }
 }, {
     urls: ["*://www.yellownotes.cloud/logout_silent*"]
 },

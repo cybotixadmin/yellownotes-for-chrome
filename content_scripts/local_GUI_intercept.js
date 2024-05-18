@@ -83,32 +83,35 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloudDISABLED\/subscribe/)).test(win
     });
 }
 // intercept links to individual notes
-else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/gothere/)).test(window.location.href)) {
-    console.log("/gothere")
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/gothere.html|gothere.html)/)).test(window.location.href)) {
+    console.log("/gothere.html")
     console.log("redirect to go to note")
     const noteid = new URLSearchParams(window.location.search).get("noteid");
 
     //const redirecturi = new URLSearchParams(window.location.search).get("redirecturi");
     //console.log(gothereregexp.test(window.location.href));
 
+    const queryString = window.location.search;
+
+    console.log("redirect this link to plugin")
+    // Notify the background script to redirect
+    chrome.runtime.sendMessage({
+        action: "local_pages_intercept",
+        redirect: true,
+        uri: "/pages/gothere.html" + queryString
+    });
 
     // invoke the background script to scroll to the note in question
-    chrome.runtime.sendMessage({
-        message: {
-            action: "gothere",
-            gothere: {
-                noteid: noteid
-            }
-        }
-    }, function (response) {
-        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-        // finally, call "close" on the note
-        //  try{
-        //  	close_note(event);
-        //  }catch(g){console.debug(g);}
-
-    });
-   
+  //  chrome.runtime.sendMessage({
+  //      message: {
+  //          action: "gothere",
+  //          gothere: {
+  //              noteid: noteid
+  //          }
+  //      }
+  //  }, function (response) {
+  //      console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+  //  });
 
 } 
  /*
@@ -169,8 +172,8 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/
 /*
 
 */
-} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/logout_silent/)).test(window.location.href)) {
-    console.log("redirect this link to plugin")
+} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/DISABLEDlogout_silent/)).test(window.location.href)) {
+    console.log("redirect /logout_silent to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({
         action: "local_pages_intercept",
@@ -195,8 +198,8 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/view_yellownotes/)).test(wind
 /*
 
 */
-else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/gothere.html/)).test(window.location.href)) {
-    console.log("redirect this link to plugin")
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/DISABLEDgothere.html/)).test(window.location.href)) {
+    console.log("redirect this link to plugin /pages/gothere.html")
     // Notify the background script to redirect
 
 

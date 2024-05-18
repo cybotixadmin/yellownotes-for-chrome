@@ -2,7 +2,7 @@
  * This script intercept cliks to links that should be redirected to /pages/ hosted on the plugin
  *
  */
-console.log("Browsersolutions: gotheret.js loaded");
+console.log("gothere.js loaded");
 
 console.log(window.location.href);
 
@@ -15,7 +15,14 @@ chrome.runtime.sendMessage({
     action: "get_authorized_note",
     noteid: noteid
 
-}).then(function (note_data) {
+}).then(function (ret) {
+    console.debug("ret: ");
+    console.debug(ret);
+    console.debug(ret.session_uuid);
+    const uuid  = ret.session_uuid
+    console.log("uuid: ", uuid);
+
+    note_data = ret.data
     console.log("note_data");
     console.log(note_data);
     datarow = note_data[0];
@@ -30,18 +37,22 @@ chrome.runtime.sendMessage({
     const url = datarow.url;
     // issue a http redirect to open the URL in another browser tab
     //window.open(url, '_blank').focus();
+
+    const msg = {
+        action: "gothere",
+        go_to_note_details: {
+            session_uuid: uuid,
+            noteid: noteid,
+            datarow: datarow,
+            url: url
+
+        }
+    }
+    console.log(msg);
     // add functionality to scroll to the note in question
     // invoke the background script to scroll to the note in question
-    return chrome.runtime.sendMessage({
-        message: {
-            action: "scroll_to_note",
-            scroll_to_note_details: {
-                datarow: datarow,
-                url: url
+    return chrome.runtime.sendMessage( msg );
 
-            }
-        }
-    });
 }).then(function (response) {
     console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
     // finally, call "close" on the note

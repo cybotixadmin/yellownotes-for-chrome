@@ -227,7 +227,7 @@ function fetchAndDisplayStaticContent(url, dom_id) {
             scripts.forEach(script => script.remove());
   
   
-            console.log(doc.body.querySelector('div'));
+            console.debug(doc.body.querySelector('div'));
             // Append the content to the DOM node with ID 'form'
             const formElement = document.getElementById(dom_id);
             if (formElement) {

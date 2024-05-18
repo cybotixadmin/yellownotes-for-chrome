@@ -1,5 +1,36 @@
 
 
+// check if the user is authenticated
+checkSessionJWTValidity()
+  .then(isValid => {
+      console.log('JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+       // login_logout_action();
+      });
+    
+      page_display_login_status();
+}else{
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        //login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    }
+
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
+
+
 
 document.getElementById('drop_zone').addEventListener('click', function () {
     console.log("drop_zone clicked");
@@ -41,10 +72,11 @@ document.querySelector('.remove-icon').addEventListener('click', function(event)
     
         // remove the banner image from the page
 
+
         const bannerImgElement = document.getElementById('bannerImage');
         console.log(bannerImgElement);
         if (bannerImgElement) {
-            bannerImgElement.src = "";
+            bannerImgElement.remove();
         } else {
             console.log('Banner image data not found on page');
         }
@@ -139,6 +171,13 @@ function processFile(file) {
         note_properties.banner_image = base64Image;
 
         // update the banner image on screen
+
+// delete any image already present
+const exitingBannerImgElement = document.getElementById('bannerImage');
+if (exitingBannerImgElement) {
+    exitingBannerImgElement.remove();
+}
+
         // <img id="bannerImage" style="z-index: 1400; position: relative;" alt="Banner Image"/>
 //        const bannerImgElement = document.getElementById('bannerImage');
         const bannerImgElement = document.createElement('img');
@@ -281,14 +320,29 @@ async function fetchAndUpdateBannerImage() {
         console.log('Success:');
         console.log(data);
 
-        const bannerImgElement = document.getElementById('bannerImage');
+        var bannerImgElement; // = document.getElementById('bannerImage');
+console.log(bannerImgElement);
         console.log(bannerImgElement);
+
+        
         if (data.banner_image) {
+            // image was returned from the storeprofile
+            bannerImgElement = document.createElement("img");
             bannerImgElement.src = data.banner_image;
+            bannerImgElement.id = "bannerImage";
+            bannerImgElement.setAttribute( "style", "z-index: 1400; position: relative;");
+            bannerImgElement.setAttribute( "alt", "Banner Image");
+            
         } else {
             console.log('Banner image data not found in response');
         }
-
+        if (data.banner_image !== "" && data.banner_image !== null) {
+            console.log("data.banner_image is not null");
+            document.getElementById('bannerContainer').querySelector('#drop_zone').appendChild(bannerImgElement);
+            const n = document.getElementById('bannerContainer').querySelector('#drop_zone');
+            n.insertBefore(bannerImgElement, n.firstChild);
+ 
+         }
         const colorElement = document.getElementById('colorPicker');
         if (data.note_color) {
             colorElement.value = data.note_color;
