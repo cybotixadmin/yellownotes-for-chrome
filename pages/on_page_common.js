@@ -52,7 +52,7 @@ const URI_plugin_user_get_all_subscribed_notes =  "/api/v1.0/plugin_user_get_all
 
 const URI_plugin_user_get_own_yellownotes = "/api/v1.0/plugin_user_get_own_yellownotes";
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
-const URI_plugin_user_set_note_active_status = "/api/plugin_user_setstatus_yellownote";
+const URI_plugin_user_set_note_active_status = "/api/v1.0/plugin_user_setstatus_yellownote";
 
 const URI_plugin_user_get_active_feed_notes = "/api/v1.0/plugin_user_get_active_feed_notes";
 

@@ -1092,7 +1092,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     })
                 };
                 console.debug(JSON.stringify(opts));
-                return fetch(server_url + URI_plugin_user_get_a_subscribed_note, opts);
+                return fetch(server_url + URI_plugin_user_get_an_authorized_note, opts);
             }).then(function (response) {
                 console.debug(response);
                 return response.json();
@@ -1110,7 +1110,7 @@ try{
                 });
             }catch(e){
                 console.log(e);
-                datarow.isowner = false;
+                datarow.isowner = false; 
                 // try again, but with opening a fresh tab this time
                 openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true, session_uuid).then(function (res) {
                     console.debug("response: " + JSON.stringify(res));
