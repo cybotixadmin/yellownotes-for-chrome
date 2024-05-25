@@ -1,7 +1,8 @@
+
 const default_box_width = 250;
 const default_box_height = 250;
 
-const plugin_session_header_name = "xyellownotessession_jwt";
+const plugin_session_header_name = "xyellownotessessionjwt";
 
 var mouseX, mouseY;
 // Attach the event listener to the document to make the mouse coordinates available to the extension
@@ -102,11 +103,26 @@ function listener(request, sender, sendResponse) {
 
             console.debug("request action: " + request.action);
             // chose which function to proceed with
-            try {
-                console.debug("selection text: " + request.action.info.selectionText);
-            } catch (e) {
-                console.error(e);
-            }
+            // try {
+            //    console.debug("selection text: " + request.action.info.selectionText);
+            //} catch (e) {
+            //    console.error(e);
+            // }
+            scan_page();
+ // has page been scanned ?
+ if (!page_scanned) {
+
+    // } else {
+    // Carry out scan
+    console.debug("browsersolutions call scan_page");
+    scan_page();
+    page_scanned = true;
+} else {
+    console.debug("browsersolutions page already scanned");
+    console.debug("textnode_map size: " + textnode_map.length);
+}
+
+
             if (request.action == "createnode") {
                 // call to create a yellow note
                 console.debug("browsersolutions calling: create_newstickynote_node");
@@ -118,7 +134,7 @@ function listener(request, sender, sendResponse) {
                 });
                 return true;
             } else if (request.action == "update_notes_on_page") {
-
+                console.debug("update_notes_on_page");
                 // check if note is on page
                 console.debug(isNoteOnPage(request.noteid));
 
@@ -196,10 +212,19 @@ function listener(request, sender, sendResponse) {
                 // make sure the note is there
                 const newNote = false;
 
-// collectec distributionlist id from the note metadata and place it inside the note data object
+                var selection_text;
+                console.log("calling: scan_page");
+                scan_page();
+                // console.debug(whole_page_text);
+                // console.debug(textnode_map);
+                try {
+                    selection_text = b64_to_utf8(note_data.selection_text);
+                } catch (e) {
+                    selection_text = "";
+                }
+                console.log("selection_text: " + selection_text);
+                // collectec distributionlist id from the note metadata and place it inside the note data object
                 note_data.distributionlistid = notes.notes_found[0].distributionlistid;
-
-                console.log(note_data);
 
                 // change this to compare authenticated user with creatorid inside note data
                 console.log("note_creatorid: " + note_creatorid);
@@ -213,8 +238,6 @@ function listener(request, sender, sendResponse) {
                     isOwner = false;
                 }
 
-
-                
                 const moveFocus = true;
                 var promiseArray = [];
                 if (isNoteOnPage(noteid)) {
@@ -228,6 +251,8 @@ function listener(request, sender, sendResponse) {
 
                         // } else {
                         // Carry out scan
+                        console.debug("browsersolutions call scan_page");
+
                         scan_page();
                         page_scanned = true;
 
@@ -298,7 +323,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.debug("# create_newstickynote_node start");
 
     const isOwner = true;
-    const newNote = true;
+    const isNewNote = true;
     // create the note object data with suitable initial values for some fields
     var note_object_data = {}
     console.log("note_object_data: " + JSON.stringify(note_object_data));
@@ -422,12 +447,15 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         console.debug("selection_text: " + selection_text);
         console.debug(selection_text);
         console.debug("calling highlightTextOccurrences");
-        highlightuniqueid = highlightTextOccurrences(selection_text, highlight_background);
-        console.log("Highlights added with ID: ", highlightuniqueid);
 
+        highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
+
+        console.log("Highlights added with ID: ", highlightuniqueid);
+        console.log(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
         // only include the highlight id with the note object if it is not null
         //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
         note_object_data.highlightuniqueid = highlightuniqueid;
+        node_root.setAttribute("highlightuniqueid", highlightuniqueid);
         //}
     }
 
@@ -444,6 +472,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         // itterate trhoug hthe data container object in the not and populate them with values from the note_object_data
 
         node_root.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+        node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(utf8_to_b64(note_object_data.selection_text)));
 
         //node_root.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
         //node_root.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
@@ -460,8 +489,11 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         console.error(e);
 
     }
+    console.debug("calling createNoteHeader");
+    createNoteHeader(note_object_data, node_root, note_properties, isOwner, isNewNote)
+
     // set background color of the note
-    updateBackground(box_background, node_root);
+    setBackground(box_background, node_root);
 
     // set sizing
     console.debug("calling update_note_internal_size");
@@ -508,7 +540,91 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         //
     }
 
-    console.debug("calling getSelectionTextDOMPosition")
+    //console.debug("calling highlightTextOccurrences_old")
+    //highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
+    //console.debug("highlightuniqueid", highlightuniqueid)
+
+    //console.debug("calling getSelectionTextDOMPosition")
+    console.debug(node_root);
+        
+    var doc = window.document;
+    var doc_root = doc.documentElement;
+    //console.debug(doc_root);
+
+    const insertedNode = doc_root.insertBefore(node_root, doc_root.firstChild);
+
+    console.log(insertedNode);
+
+    insertedNode.setAttribute("isOwner", isOwner);
+    insertedNode.setAttribute("newNote", isNewNote);
+    if (highlightuniqueid !== "0") {
+        // selection was matched in the document
+        // place note next to it
+
+    
+console.log("calling size_and_place_note_based_on_texthighlight");
+        size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
+
+        // set the flag that contral which button are shown
+        insertedNode.setAttribute("button_arrangment", 'new');
+    
+        insertedNode.setAttribute("highlightuniqueid", highlightuniqueid);
+        console.debug(insertedNode);
+        // call the function that will set which part of the note will be displayed
+        console.debug("calling setComponentVisibility");
+        setComponentVisibility(insertedNode, ",new,.*normalsized,");
+    
+        // call the function that will make the note draggable
+        console.debug("browsersolutions: makeDragAndResize");
+        makeDragAndResize(insertedNode);
+    
+        // attach eventlisteners to the note
+        attachEventlistenersToYellowStickynote(insertedNode);
+    
+        // move to the default location on the screen if all else fails
+        //inserted.setAttribute("posx", 50);
+        //inserted.setAttribute("posy", 50);
+        //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
+        //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
+        // width
+        console.log("setting box:width: " + insertedNode.getAttribute("box_width"));
+        insertedNode.querySelector('[name="whole_note_table"]').style.width = insertedNode.getAttribute("box_width");
+    
+        // height
+    
+    
+        console.log("setting box_height: " + insertedNode.getAttribute("box_height"));
+        // since this is a new note, the height is padded by the control bar
+    
+        insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
+    
+       
+
+        // call the function that will make the note resizeable
+        // console.debug("browsersolutions: makeResizable");
+        // makeResizable(inserted);
+        console.debug("browsersolutions: calling dropdownlist_add_option");
+        dropdownlist_add_option(insertedNode, "", "", "");
+    
+        // place focus
+        try {
+            insertedNode.querySelector('[focus="true"]').focus();
+        } catch (e) {
+            console.error(e);
+        }
+       
+
+    }else{
+        // move to the default location on the screen if all else fails
+        //inserted.setAttribute("posx", 50);
+        //inserted.setAttribute("posy", 50);
+        //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
+        //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
+     
+
+    }
+
+   return;
 
     var out = getSelectionTextDOMPosition(info.selectionText);
     console.debug(out);
@@ -547,7 +663,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
         }
 
-    } else if (newNote) {
+    } else if (isNewNote) {
         // use x,y position of cursor for new notes
         console.debug("use x,y position of cursor for new note: " + mouseX + " " + mouseY);
         node_root.posx = mouseX + "px";
@@ -564,12 +680,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
     console.debug(node_root);
     console.debug("browsersolutions: calling placeYellowNote");
-    const insertedNode = placeYellowNote(node_root);
-
-    console.log(insertedNode);
-
-    insertedNode.setAttribute("isOwner", "true");
-    insertedNode.setAttribute("isNew", "true");
+ 
 
     // set the flag that contral which button are shown
     insertedNode.setAttribute("button_arrangment", 'new');
@@ -619,8 +730,8 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
 }
 
-function updateBackground(newBackground, note_root) {
-    console.debug("browsersolutions ### updateBackground to " + newBackground);
+function setBackground(newBackgroundRGB, note_root) {
+    console.debug("browsersolutions ### setBackground to " + newBackgroundRGB);
     // Get all elements in the note_root
     const allElements = note_root.querySelectorAll('*');
 
@@ -630,7 +741,7 @@ function updateBackground(newBackground, note_root) {
         if (element.style && element.style.background) {
             // Update the background style to the new value
             //console.log(element);
-            element.style.backgroundColor = newBackground;
+            element.style.backgroundColor = newBackgroundRGB;
             //console.log(element);
 
         }
@@ -884,7 +995,7 @@ function haveValidXYPositons(node_root) {
 
 }
 
-function placeYellowNote(newGloveboxNode) {
+function DELETEplaceYellowNote(newGloveboxNode) {
     console.debug("placeYellowNote");
     console.debug(newGloveboxNode);
     var doc = window.document;
@@ -896,10 +1007,10 @@ function placeYellowNote(newGloveboxNode) {
 
     const table = inserted.querySelector('table[name="whole_note_table"]');
     //    console.debug(table);
-    table.style.position = "absolute";
+    //table.style.position = "absolute";
 
-    table.style.left = inserted.getAttribute("posx");
-    table.style.top = inserted.getAttribute("posy");
+    //table.style.left = inserted.getAttribute("posx");
+    //table.style.top = inserted.getAttribute("posy");
 
     return inserted;
 
@@ -928,8 +1039,606 @@ function getXYPositionOfDOMElement(element) {
     return out;
 }
 
-function highlightTextOccurrences(text, rgbcolor) {
-    console.debug("highlightTextOccurrences with ",  rgbcolor);
+function highlightTextOccurrences_old(selection_text, rgbcolor) {
+    console.debug("highlightTextOccurrences_old with ", rgbcolor);
+    // Generate a unique ID for this operation
+    const uniqueId = 'highlight-' + Date.now();
+
+    let startNode = null;
+    let endNode = null;
+    let startPos = -1;
+    let endPos = -1;
+    let found = false;
+
+    console.debug("calling: getDOMplacement");
+    // fiund where in the DOM the selection text is found (if at all)
+    var {
+        selection_matched_in_document,
+        start_range_node,
+        start_offset,
+        end_range_node,
+        end_offset,
+        textnodelist
+    } = getDOMplacement(selection_text);
+
+    console.log("selection_matched_in_document: " + selection_matched_in_document);
+    console.debug("browsersolutions: start_range_node");
+    console.log(start_range_node);
+    console.log("start_offset: " + start_offset);
+    console.log(end_range_node);
+    console.log("end_offset: " + end_offset);
+    console.debug(textnodelist);
+    //console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
+
+
+    let seqNum = 1;
+    var nodecount = textnodelist.length;
+    console.log("nodecount: " + nodecount);
+
+    // one one node
+    if (nodecount == 1) {
+// the text to highlight is inside one node
+const textContent = start_range_node.nodeValue;
+console.debug(textContent);
+// Split the text node
+const firstPart = textContent.slice(0, start_offset);
+console.debug("first part: " , firstPart);
+const to_highlight_text = textContent.slice(start_offset, end_offset);
+console.debug("highlight part: ", to_highlight_text);
+const thirdPart = textContent.slice(end_offset);
+console.debug("last part: ", thirdPart);
+
+const firstSpan = document.createElement('span');
+firstSpan.textContent = firstPart;
+
+const secondSpan  = document.createElement('span');
+  // Create the highlight element
+        const highlight = document.createElement('mark');
+        highlight.textContent = to_highlight_text;
+        highlight.style.backgroundColor = rgbcolor;
+        highlight.setAttribute('data-highlight-id', uniqueId);
+        highlight.setAttribute('data-sequence-number', seqNum++);
+
+
+        // Append the highlight to the span and replace the text node with the span
+        secondSpan.appendChild(highlight);
+        // shrink the node to contain only the text that should not be highlighted
+        start_range_node.textContent = firstPart;
+
+        // append the node with highlights
+if (start_range_node.nextSibling) {
+    start_range_node.parentNode.insertBefore(secondSpan, start_range_node.nextSibling);
+} else {
+    start_range_node.parentNode.appendChild(secondSpan);
+}
+
+// append the node with the remaining text
+const thirdSpan = document.createElement('span');
+thirdSpan.textContent = thirdPart;
+if (start_range_node.nextSibling) {
+    start_range_node.parentNode.insertBefore(thirdSpan, secondSpan.nextSibling);
+}else{
+    start_range_node.parentNode.appendChild(thirdSpan);
+}
+
+
+    }
+    else if (nodecount == 2) {
+        // two nodes
+
+   // first node
+   var n=0;
+   //console.debug(start_range_node);
+   const secondSpan  = document.createElement('span');
+   const textContent = start_range_node.nodeValue;
+   //console.debug(textContent);
+   // Split the text node
+   const unhighligt_remainder = textContent.slice(0, start_offset);
+   console.debug("unhighlighted: ", unhighligt_remainder);
+   const to_highlight_text = textContent.slice(start_offset);
+   console.debug("highlighted part: ", to_highlight_text);
+
+   const firstSpan = document.createElement('span');
+   firstSpan.textContent = unhighligt_remainder;
+
+   // Create the highlight element
+   const highlight = document.createElement('mark');
+   highlight.textContent = to_highlight_text;
+   highlight.style.backgroundColor = rgbcolor;
+   highlight.setAttribute('data-highlight-id', uniqueId);
+   highlight.setAttribute('data-sequence-number', seqNum++);
+
+
+   // Append the highlight to the span and replace the text node with the span
+   secondSpan.appendChild(highlight);
+   start_range_node.textContent = unhighligt_remainder;
+
+   if (start_range_node.nextSibling) {
+       start_range_node.parentNode.insertBefore(secondSpan, start_range_node.nextSibling);
+   } else {
+       start_range_node.parentNode.appendChild(secondSpan);
+   }
+
+   // second node
+   // last node
+        //console.debug(textnodelist);
+//console.debug("last node: ", n);
+n--;
+// console.debug(textnodelist[n]);
+// console.debug(textnodelist[n].parentNode);
+//console.debug("end_offset: ", end_offset);
+//console.debug(end_range_node);
+//console.debug(end_range_node.parentNode);
+ //const secondSpan2  = document.createElement('span');
+ const firstSpan2 = document.createElement('span');
+ const textContent2 = end_range_node.nodeValue;
+ //console.debug(textContent2);
+ // Split the text node
+ const firstPart2 = textContent2.slice(0, end_offset);
+ console.debug("highlighted part: ", firstPart2);
+ //const secondPart2 = textContent2.slice(end_offset);
+ //console.debug(secondPart2);
+
+ //secondSpan2.textContent = secondPart2;
+
+ // Create the highlight element
+ const highlight2 = document.createElement('mark');
+ highlight2.textContent = firstPart2;
+ highlight2.style.backgroundColor = rgbcolor;
+ highlight2.setAttribute('data-highlight-id', uniqueId);
+ highlight2.setAttribute('data-sequence-number', seqNum++);
+
+ // Append the highlight to the span and replace the text node with the span
+ firstSpan2.appendChild(highlight2);
+ //console.debug(firstSpan2);
+ //console.debug(secondSpan2);
+ const remainder2 = textContent2.substring(end_offset);
+ console.debug("unhighlighted remainder", remainder2);
+ end_range_node.textContent = remainder2;
+ //end_range_node.parentNode.replaceChild(secondSpan2, end_range_node);
+ end_range_node.parentNode.insertBefore(firstSpan2, end_range_node);
+      
+        
+
+    } else {
+
+        // three or more nodes
+
+
+        // first node
+        var n=0;
+        //console.debug(start_range_node);
+        const secondSpan  = document.createElement('span');
+        const textContent = start_range_node.nodeValue;
+        //console.debug(textContent);
+        // Split the text node
+        const unhighligt_remainder = textContent.slice(0, start_offset);
+        //console.debug(firstPart);
+        const to_highlight_text = textContent.slice(start_offset);
+        //console.debug(secondPart);
+
+        const firstSpan = document.createElement('span');
+        firstSpan.textContent = unhighligt_remainder;
+
+        // Create the highlight element
+        const highlight = document.createElement('mark');
+        highlight.textContent = to_highlight_text;
+        highlight.style.backgroundColor = rgbcolor;
+        highlight.setAttribute('data-highlight-id', uniqueId);
+        highlight.setAttribute('data-sequence-number', seqNum++);
+
+
+        // Append the highlight to the span and replace the text node with the span
+        secondSpan.appendChild(highlight);
+        start_range_node.textContent = unhighligt_remainder;
+
+        if (start_range_node.nextSibling) {
+            start_range_node.parentNode.insertBefore(secondSpan, start_range_node.nextSibling);
+        } else {
+            start_range_node.parentNode.appendChild(secondSpan);
+        }
+
+
+       
+        // "middle" nodes
+   
+        for (var i=1; i < (nodecount - 1); i++) {
+            n++;
+            console.debug("middle node: ", n);
+            console.debug(textnodelist);
+            console.debug(textnodelist[i]);
+            console.debug(textnodelist[i].parentNode);
+            // check if this textnode has the same parent and the previous text node
+            console.debug(nodesAreIdentical(textnodelist[i-1], textnodelist[i]));
+            if (nodesAreIdentical(textnodelist[i-1], textnodelist[i])) {
+               // textnodelist[i].remove();
+               // delete textnodelist[i];
+                 textnodelist.splice(i, 1);
+                i--;
+                n--;
+            }else{
+            addHighlighting(textnodelist[i], seqNum++);
+            }
+        }
+
+        // last node
+        //console.debug(textnodelist);
+//console.debug("last node: ", n);
+n--;
+       // console.debug(textnodelist[n]);
+       // console.debug(textnodelist[n].parentNode);
+//console.debug("end_offset: ", end_offset);
+//console.debug(end_range_node);
+//console.debug(end_range_node.parentNode);
+        //const secondSpan2  = document.createElement('span');
+        const firstSpan2 = document.createElement('span');
+        const textContent2 = end_range_node.nodeValue;
+        //console.debug(textContent2);
+        // Split the text node
+        const firstPart2 = textContent2.slice(0, end_offset);
+        //console.debug(firstPart2);
+        //const secondPart2 = textContent2.slice(end_offset);
+        //console.debug(secondPart2);
+
+        //secondSpan2.textContent = secondPart2;
+
+        // Create the highlight element
+        const highlight2 = document.createElement('mark');
+        highlight2.textContent = firstPart2;
+        highlight2.style.backgroundColor = rgbcolor;
+        highlight2.setAttribute('data-highlight-id', uniqueId);
+        highlight2.setAttribute('data-sequence-number', seqNum++);
+
+        // Append the highlight to the span and replace the text node with the span
+        firstSpan2.appendChild(highlight2);
+        //console.debug(firstSpan2);
+        //console.debug(secondSpan2);
+        const remainder2 = textContent2.substring(end_offset);
+        //console.debug(remainder2);
+        end_range_node.textContent = remainder2;
+        //end_range_node.parentNode.replaceChild(secondSpan2, end_range_node);
+        end_range_node.parentNode.insertBefore(firstSpan2, end_range_node);
+
+    }
+
+    textnodelist.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '') {
+            // Create a span element to wrap the text node
+            //addHighlighting(node, seqNum++);
+        }
+    });
+
+    // get the position of the selection text in the document
+    // console.log("calling getSelectionTextDOMPosition: ");
+    // const one = getSelectionTextDOMPosition(selection_text);
+    //  console.log(one);
+
+    // get a list of nodes that contain the selection text
+
+    // wrap each node in a span with a unique id and a sequence number
+
+
+    return uniqueId;
+
+    function addHighlighting(node, count) {
+        const span = document.createElement('span');
+        const textContent = node.nodeValue;
+
+        // Create the highlight element
+        const highlight = document.createElement('mark');
+        highlight.textContent = textContent;
+        highlight.style.backgroundColor = rgbcolor;
+        highlight.setAttribute('data-highlight-id', uniqueId);
+        highlight.setAttribute('data-sequence-number', count);
+
+        // Append the highlight to the span and replace the text node with the span
+        span.appendChild(highlight);
+        node.parentNode.replaceChild(span, node);
+    }
+}
+
+function DELETEhighlightTextOccurrences(text, rgbcolor) {
+    console.debug("highlightTextOccurrences with ", rgbcolor);
+    // Generate a unique ID for this operation
+    const uniqueId = 'highlight-' + Date.now();
+
+    // Escape special characters for use in a regular expression
+    const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    console.debug(escapedText);
+
+    // Create a regular expression to match the text ignoring whitespace
+    const regex = new RegExp(escapedText.replace(/\s+/g, '\\s*'), 'i'); // Match first occurrence only
+
+    console.debug(regex);
+
+    let startNode = null;
+    let endNode = null;
+    let startPos = -1;
+    let endPos = -1;
+    let found = false;
+
+    function highlightNode(node, seqNum = 1) {
+        if (found)
+            return seqNum;
+
+        if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '') {
+            const textContent = node.nodeValue;
+            const match = regex.exec(textContent);
+
+            if (match) {
+                const span = document.createElement('span');
+                const beforeText = textContent.slice(0, match.index);
+                const matchedText = match[0];
+                const afterText = textContent.slice(match.index + matchedText.length);
+
+                span.appendChild(document.createTextNode(beforeText));
+
+                const highlight = document.createElement('mark');
+                highlight.textContent = matchedText;
+                highlight.style.backgroundColor = rgbcolor;
+                highlight.setAttribute('data-highlight-id', uniqueId);
+                highlight.setAttribute('data-sequence-number', seqNum++);
+                span.appendChild(highlight);
+
+                span.appendChild(document.createTextNode(afterText));
+                node.parentNode.replaceChild(span, node);
+
+                startNode = node;
+                endNode = node;
+                startPos = match.index;
+                endPos = match.index + matchedText.length;
+
+                found = true;
+                return seqNum;
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            let children = Array.from(node.childNodes);
+            for (let child of children) {
+                seqNum = highlightNode(child, seqNum);
+                if (found)
+                    break;
+            }
+        }
+        return seqNum;
+    }
+
+    function handleTextSpanningNodes(node, seqNum = 1) {
+        let textBuffer = '';
+        const nodesToHighlight = [];
+
+        function collectTextNodes(currentNode) {
+            if (currentNode.nodeType === Node.TEXT_NODE && currentNode.nodeValue.trim() !== '') {
+                textBuffer += currentNode.nodeValue;
+                nodesToHighlight.push(currentNode);
+            } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+                currentNode.childNodes.forEach(child => {
+                    collectTextNodes(child);
+                });
+            }
+        }
+
+        collectTextNodes(node);
+
+        const match = regex.exec(textBuffer);
+        if (match) {
+            let remainingLength = match[0].length;
+            let startIdx = match.index;
+
+            for (let i = 0; i < nodesToHighlight.length; i++) {
+                const textNode = nodesToHighlight[i];
+                const nodeValueLength = textNode.nodeValue.length;
+
+                if (startIdx < nodeValueLength) {
+                    const span = document.createElement('span');
+                    let part = document.createTextNode(textNode.nodeValue.slice(0, startIdx));
+                    span.appendChild(part);
+                    while (remainingLength > 0 && i < nodesToHighlight.length) {
+                        const nodePart = nodesToHighlight[i];
+                        const partLength = nodePart.nodeValue.length;
+                        const highlightPart = document.createElement('mark');
+
+                        if (remainingLength <= partLength - startIdx) {
+                            highlightPart.textContent = nodePart.nodeValue.slice(startIdx, startIdx + remainingLength);
+                            highlightPart.style.backgroundColor = rgbcolor;
+                            highlightPart.setAttribute('data-highlight-id', uniqueId);
+                            highlightPart.setAttribute('data-sequence-number', seqNum++);
+                            span.appendChild(highlightPart);
+
+                            const remainingPart = document.createTextNode(nodePart.nodeValue.slice(startIdx + remainingLength));
+                            span.appendChild(remainingPart);
+
+                            nodePart.nodeValue = ''; // Clear the processed part
+
+                            startNode = nodesToHighlight[0];
+                            endNode = nodePart;
+                            startPos = match.index;
+                            endPos = match.index + match[0].length;
+
+                            found = true;
+                            break;
+                        } else {
+                            highlightPart.textContent = nodePart.nodeValue.slice(startIdx);
+                            highlightPart.style.backgroundColor = rgbcolor;
+                            highlightPart.setAttribute('data-highlight-id', uniqueId);
+                            highlightPart.setAttribute('data-sequence-number', seqNum++);
+                            span.appendChild(highlightPart);
+
+                            remainingLength -= (partLength - startIdx);
+                            startIdx = 0;
+                            nodePart.nodeValue = ''; // Clear the processed part
+                        }
+
+                        i++;
+                    }
+
+                    textNode.parentNode.replaceChild(span, textNode);
+                } else {
+                    startIdx -= nodeValueLength;
+                }
+            }
+        }
+    }
+
+    handleTextSpanningNodes(document.body);
+    console.log(startNode);
+    console.log(startPos);
+    console.log(endNode);
+    console.log(endPos);
+    //return { uniqueId, startNode, endNode, startPos, endPos };
+    return uniqueId;
+}
+
+function DELETEhighlightTextOccurrences3(text, rgbcolor) {
+    console.debug("highlightTextOccurrences with ", rgbcolor);
+    console.debug("highlightTextOccurrences in ", text);
+    // Generate a unique ID for this operation
+    const uniqueId = 'highlight-' + Date.now();
+
+    // Escape special characters for use in a regular expression
+    const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    console.debug(escapedText);
+
+    // Create a regular expression to match the text ignoring whitespace
+    const regex = new RegExp(escapedText.replace(/\s+/g, '\\s*'), 'gi');
+
+    console.debug(regex);
+
+    // Function to recursively search text nodes and highlight text
+
+    function highlightNode(node, seqNum = 1) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            var m = 0;
+            let remainingText = node.nodeValue.replace(/\s+/g, ' ');
+            let match;
+            const span = document.createElement('span');
+            let lastIdx = 0;
+            while ((match = regex.exec(remainingText)) !== null) {
+                console.debug("m=", m);
+                m++;
+                const beforeText = remainingText.slice(0, match.index);
+                const matchedText = match[0];
+                const afterText = remainingText.slice(match.index + matchedText.length);
+
+                span.appendChild(document.createTextNode(beforeText));
+
+                const highlight = document.createElement('mark');
+                highlight.textContent = matchedText;
+                highlight.style.backgroundColor = rgbcolor;
+                highlight.setAttribute('data-highlight-id', uniqueId);
+                highlight.setAttribute('data-sequence-number', seqNum++);
+                span.appendChild(highlight);
+
+                remainingText = afterText;
+                regex.lastIndex = 0; // Reset the regex index for the next match
+            }
+
+            span.appendChild(document.createTextNode(remainingText));
+            node.parentNode.replaceChild(span, node);
+
+            return seqNum;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            let children = Array.from(node.childNodes);
+            children.forEach(child => {
+                seqNum = highlightNode(child, seqNum);
+            });
+        }
+        return seqNum;
+    }
+
+    function handleTextSpanningNodes(node, seqNum = 1) {
+        let textBuffer = '';
+        const nodesToHighlight = [];
+
+        function collectTextNodes(currentNode) {
+            if (currentNode.nodeType === Node.TEXT_NODE) {
+                textBuffer += currentNode.nodeValue.replace(/\s+/g, ' ');
+                nodesToHighlight.push(currentNode);
+            } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+                currentNode.childNodes.forEach(child => {
+                    collectTextNodes(child);
+                });
+            }
+        }
+
+        collectTextNodes(node);
+        console.debug(textBuffer);
+
+        let match;
+        let k = 0;
+        while ((match = regex.exec(textBuffer)) !== null) {
+            console.debug("k=", k);
+            k++;
+            console.debug(match[0]);
+            let remainingLength = match[0].length;
+            let startIdx = match.index;
+            let j = 0;
+            for (let i = 0; i < nodesToHighlight.length; i++) {
+                console.debug("j=", j);
+                j++;
+                const textNode = nodesToHighlight[i];
+                console.debug(textNode);
+                const nodeValueLength = textNode.nodeValue.replace(/\s+/g, ' ').length;
+                console.debug("nodeValueLength=", nodeValueLength);
+                if (startIdx < nodeValueLength) {
+                    const span = document.createElement('span');
+                    let part = document.createTextNode(textNode.nodeValue.slice(0, startIdx));
+                    span.appendChild(part);
+                    while (remainingLength > 0 && i < nodesToHighlight.length) {
+                        const nodePart = nodesToHighlight[i];
+                        console.debug(nodePart);
+                        console.debug((new RegExp(/^\s+$/)).test(nodePart));
+                        console.debug(nodePart.nodeValue);
+                        console.debug((new RegExp(/^\s+$/)).test(nodePart.nodeValue));
+                        if (!(new RegExp(/^\s+$/)).test(nodePart.nodeValue)) {
+                            // if (nodePart.nodeValue === null) {
+                            const partLength = nodePart.nodeValue.replace(/\s+/g, ' ').length;
+                            const highlightPart = document.createElement('mark');
+
+                            if (remainingLength <= partLength - startIdx) {
+                                highlightPart.textContent = nodePart.nodeValue.slice(startIdx, startIdx + remainingLength);
+                                highlightPart.style.backgroundColor = rgbcolor;
+                                highlightPart.setAttribute('data-highlight-id', uniqueId);
+                                highlightPart.setAttribute('data-sequence-number', seqNum++);
+                                span.appendChild(highlightPart);
+
+                                const remainingPart = document.createTextNode(nodePart.nodeValue.slice(startIdx + remainingLength));
+                                span.appendChild(remainingPart);
+
+                                nodePart.nodeValue = ''; // Clear the processed part
+                                break;
+                            } else {
+                                highlightPart.textContent = nodePart.nodeValue.slice(startIdx);
+                                highlightPart.style.backgroundColor = rgbcolor;
+                                highlightPart.setAttribute('data-highlight-id', uniqueId);
+                                highlightPart.setAttribute('data-sequence-number', seqNum++);
+                                span.appendChild(highlightPart);
+
+                                remainingLength -= (partLength - startIdx);
+                                startIdx = 0;
+                                nodePart.nodeValue = ''; // Clear the processed part
+                            }
+                        } else {
+                            console.debug("nodePart.nodeValue is null");
+                        }
+                        i++;
+                    }
+
+                    textNode.parentNode.replaceChild(span, textNode);
+                } else {
+                    startIdx -= nodeValueLength;
+                }
+            }
+        }
+    }
+
+    handleTextSpanningNodes(document.body);
+    return uniqueId;
+}
+
+function DELETEhighlightTextOccurrences_backup(text, rgbcolor) {
+    console.debug("highlightTextOccurrences with ", rgbcolor);
     // Generate a unique ID for this operation
     const uniqueId = 'highlight-' + Date.now();
 
@@ -978,10 +1687,19 @@ function highlightTextOccurrences(text, rgbcolor) {
 }
 
 function removeHighlighting(uniqueId) {
+    const highlights = document.querySelectorAll(`[data-highlight-id="${uniqueId}"]`);
+    highlights.forEach(highlight => {
+        const parent = highlight.parentNode;
+        parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+        parent.normalize();
+    });
+}
+
+function removeHighlighting_DELETE(uniqueId) {
     // Select all highlighted elements with the unique ID
     try {
         const highlightedElements = document.querySelectorAll(`[data-highlight-id='${uniqueId}']`);
-
+        console.debug(highlightedElements);
         highlightedElements.forEach(element => {
             // Create a text node with the original text
             const textNode = document.createTextNode(element.textContent);
@@ -1348,8 +2066,12 @@ function getOwnNotes() {
 
                         // } else {
                         // Carry out scan
+                        console.debug("browsersolutions call scan_page");
                         scan_page();
                         page_scanned = true;
+                    } else {
+                        console.debug("browsersolutions page already scanned");
+                        console.debug("textnode_map size: " + textnode_map.length);
                     }
                     // what brand should be used for the note. Set default it nothing else is applicable for this user (this is the user's own notes)
                     var brand = "default";
@@ -1422,14 +2144,14 @@ function update_note(event) {
 
         // var note_table = event.target.parentNode.parentNode.parentNode;
         // console.debug(note_table);
-        var selection_text = "";
+        var encoded_selection_text = "";
         try {
-            selection_text = note_root.querySelectorAll('input[name="selection_text"]')[0].textContent.trim();
+            encoded_selection_text = note_root.querySelectorAll('input[name="encoded_selection_text"]')[0].textContent.trim();
         } catch (e) {
             // set default, current timestamp
         }
 
-        console.debug(selection_text);
+        console.debug(encoded_selection_text);
 
         var note_type = "yellownote";
         try {
@@ -1523,17 +2245,11 @@ function update_note(event) {
         console.debug("url: " + url);
         console.debug("noteid: " + noteid);
 
-        console.debug("selection_text: " + selection_text);
-
-        // Encode the String
-        var encodedString = utf8_to_b64(selection_text);
-        console.log(encodedString); // Outputs: "SGVsbG8gV29ybGQh"
-        console.log(b64_to_utf8(encodedString)); // Outputs: "Hello World!"
-
+        console.debug("selection_text (encoded): " + encoded_selection_text);
 
         const json_update = {
             message_display_text: utf8_to_b64(message_display_text),
-            selection_text: encodedString,
+            selection_text: encoded_selection_text,
             url: url,
             note_type: note_type,
             noteid: noteid,
@@ -1771,9 +2487,14 @@ function getSubscribedNotes() {
 
                         // } else {
                         // Carry out scan
+                        console.debug("browsersolutions call scan_page");
+
                         scan_page();
                         page_scanned = true;
 
+                    } else {
+                        console.debug("browsersolutions page already scanned");
+                        console.debug("textnode_map size: " + textnode_map.length);
                     }
                     // what brand should be used for the note. Set default it nothing else is applicable for this user (this is the user's own notes)
                     var brand = "default";
@@ -1937,6 +2658,8 @@ function getAllNotes() {
 
                         // } else {
                         // Carry out scan
+                        console.debug("browsersolutions call scan_page");
+
                         scan_page();
                         page_scanned = true;
 
@@ -2002,7 +2725,7 @@ function getAllNotes() {
 
 // scan all the text on the page, with a view to later making a pattern match with the selected text contained in the note
 function scan_page() {
-    console.debug("browsersolutions  #scan_page");
+    console.debug("#scan_page");
     var doc = window.document,
     body = doc.body,
     selection,
@@ -2012,24 +2735,30 @@ function scan_page() {
     //   console.debug(doc.nodeName);
     // root
     var root_node = doc.documentElement;
-    //console.debug(root_node);
+
+    // reset the global variables that contain the document structure (for use in other functions)
     whole_page_text = "";
+    textnode_map = [];
     //console.debug("1.2.0");
 
     // exec traversal
     var rc = traverse(doc.documentElement);
-    //  The data describing the text strucutre of the document is no populated into textnode_map
+    //  The data describing the text structure of the document is now populated into textnode_map
     //console.debug("browsersolutions "+rc);
 
+    console.debug("whole_page_text length: ", whole_page_text.length);
+    //
     //console.debug(whole_page_text);
 
     // contain node object and the position within overall text (white space removed)
 
     //console.debug(textnode_map);
+    console.debug("textnode_map size: " + textnode_map.length);
 
 }
 
-function getSelectionTextDOMPosition(selection_text) {
+function DELETEgetSelectionTextDOMPosition(selection_text) {
+    console.debug("#getSelectionTextDOMPosition.start");
     var doc = window.document,
     body = doc.body,
     selection,
@@ -2041,8 +2770,9 @@ function getSelectionTextDOMPosition(selection_text) {
     // root
     var root_node = doc.documentElement;
     //console.debug(root_node);
-
+    // reset
     whole_page_text = "";
+    textnode_map = [];
     console.debug("browsersolutions: " + traverse(doc.documentElement));
     console.debug("browsersolutions: " + "################################################");
     // console.debug("browsersolutions: " +whole_page_text);
@@ -2068,13 +2798,15 @@ function getSelectionTextDOMPosition(selection_text) {
 
             console.debug("browsersolutions: selection_text: " + selection_text);
 
-            // fiund where in the DOM the selection text is found (if at all)
+            // find where in the DOM the selection text is found (if at all)
+            console.debug("calling getDOMplacement");
             var {
                 selection_matched_in_document,
                 start_range_node,
                 start_offset,
                 end_range_node,
-                end_offset
+                end_offset,
+                textnodelist
             } = getDOMplacement(selection_text);
 
             console.log("selection_matched_in_document: " + selection_matched_in_document);
@@ -2083,13 +2815,15 @@ function getSelectionTextDOMPosition(selection_text) {
             console.log("start_offset: " + start_offset);
             console.log(end_range_node);
             console.log("end_offset: " + end_offset);
+            console.debug(textnodelist);
             // if the selection text that should be use to anchor the note in the document found, switch to using the coordinates contained in the note
             const out = {
                 selection_matched_in_document: selection_matched_in_document,
                 start_range_node: start_range_node,
                 start_offset: start_offset,
                 end_range_node: end_range_node,
-                end_offset: end_offset
+                end_offset: end_offset,
+                textnodelist: textnodelist
 
             }
             return out;
@@ -2151,13 +2885,10 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
 
     // set a default background color for the note selection highlighting
     var highlight_background = "rgb(255, 255, 0, 0.25)";
-if (creatorDetails.hasOwnProperty('note_color')) {
+    if (creatorDetails.hasOwnProperty('note_color')) {
 
-    
-     highlight_background = "rgb(" + hexToRGB(creatorDetails.note_color) + ", 0.25)";
-} else {
-
-}
+        highlight_background = "rgb(" + hexToRGB(creatorDetails.note_color) + ", 0.25)";
+    } else {}
     // create the note object, populated with data
 
     /* determine where on the page the note goes
@@ -2239,8 +2970,9 @@ if (creatorDetails.hasOwnProperty('note_color')) {
                     //console.debug(root_node);
 
                     whole_page_text = "";
-                    console.debug("browsersolutions: " + traverse(doc.documentElement));
-                    console.debug("browsersolutions: " + "################################################");
+                    // traverse document for all visible text
+                    traverse(doc.documentElement);
+                    console.debug("################################################");
                     // console.debug("browsersolutions: " +whole_page_text);
                     // console.debug("browsersolutions: " +textnode_map);
 
@@ -2249,18 +2981,18 @@ if (creatorDetails.hasOwnProperty('note_color')) {
                     // remove all whitespace before making attempt to place selection inside larger text
 
 
-                    console.debug("browsersolutions: " + "note: " + JSON.stringify(note_obj));
+                    console.debug("note: " + JSON.stringify(note_obj));
                     // locate where this note goes.
                     var noteid = note_obj.noteid;
                     // var obj = JSON.parse(note_obj.json);
                     // Create Base64 Object
                     console.debug(note_obj);
-                            
+
                     // check if note is already on page
                     console.debug("isNoteOnPage: " + isNoteOnPage(noteid) + "");
                     if (!isNoteOnPage(noteid)) {
                         // Decode the String containing the selection text
-                        console.debug("browsersolutions: selection_text: " + note_obj.selection_text);
+                        console.debug("selection_text: " + note_obj.selection_text);
                         var selection_text = "";
                         try {
                             if (!isUndefined(note_obj.selection_text) && note_obj.selection_text != "" || note_obj.selection_text != null) {
@@ -2270,52 +3002,77 @@ if (creatorDetails.hasOwnProperty('note_color')) {
                                     selection_text = note_obj.selection_text;
 
                                 } else {
-                                    // for existing notes, the selction text has been base64 encoded before storage
+                                    // for existing notes, the selection text has been base64 encoded before storage
                                     selection_text = b64_to_utf8(note_obj.selection_text);
 
                                 }
                                 console.debug("browsersolutions: selection_text: " + selection_text);
-
+                                //console.debug("calling: getDOMplacement");
                                 // fiund where in the DOM the selection text is found (if at all)
-                                var {
-                                    selection_matched_in_document,
-                                    start_range_node,
-                                    start_offset,
-                                    end_range_node,
-                                    end_offset
-                                } = getDOMplacement(selection_text, note_obj);
+                                //  var {
+                                //      selection_matched_in_document,
+                                //      start_range_node,
+                                //      start_offset,
+                                //      end_range_node,
+                                //      end_offset,
+                                //      textnodelist
+                                //  } = getDOMplacement(selection_text, note_obj);
 
-                                console.log("selection_matched_in_document: " + selection_matched_in_document);
-                                console.debug("browsersolutions: start_range_node");
-                                console.log(start_range_node);
-                                console.log("start_offset: " + start_offset);
-                                console.log(end_range_node);
-                                console.log("end_offset: " + end_offset);
+                                //console.log("selection_matched_in_document: " + selection_matched_in_document);
+                                //console.debug("browsersolutions: start_range_node");
+                                //console.log(start_range_node);
+                                //console.log("start_offset: " + start_offset);
+                                //console.log(end_range_node);
+                                //console.log("end_offset: " + end_offset);
+                                //console.debug(textnodelist  );
+                                //console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
+                                //console.debug (findNodesBetween(start_range_node, end_range_node));
+
                                 // if the selection text that should be use to anchor the note in the document found, switch to using the coordinates contained in the note
                             } else {
                                 console.debug("browsersolutions: no selection text");
-                                selection_matched_in_document = false;
+                                //selection_matched_in_document = false;
                             }
                         } catch (e) {
                             console.error(e);
                             console.debug("browsersolutions: no selection text");
-                            selection_matched_in_document = false;
+                            //selection_matched_in_document = false;
                         }
 
-                        if (selection_matched_in_document) {
+                        var highlightuniqueid = "0";
+                        console.debug("selection_text: " + selection_text);
+                        // attempt to locate and highlight the selected text in the document
+                        if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
+                            // Usage: Call this function with the text you want to highlight
 
-                            console.debug("browsersolutions: selection_matched_in_document " + selection_matched_in_document);
+                            console.debug(selection_text);
+                            console.debug("calling highlightTextOccurrences");
+                            //console.debug(textnodelist  );
 
-                            console.debug(start_range_node.textContent);
-                            let original_start_range_node_textcontent = start_range_node.textContent;
-                            console.debug("browsersolutions: start_range_node start_offset " + start_offset);
-                            console.debug("browsersolutions: start_range_node total text length: " + start_range_node.textContent.length);
+                            highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
+                            console.log("Highlights added with ID: ", highlightuniqueid);
+                            console.log(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
 
-                            console.debug("browsersolutions: end_range_node");
-                            console.debug(end_range_node.textContent);
-                            console.debug("browsersolutions: end_range_node end_offset " + end_offset);
-                            console.debug("browsersolutions: end_range_node total text length: " + end_range_node.textContent.length);
-                            console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
+                            // only include the highlight id with the note object if it is not null
+                            //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
+                            // note_object_data.highlightuniqueid = highlightuniqueid;
+                            //}
+                        }
+                        // if the text was found in the document, the highlightuniqueid will be set to a value other than "0"
+                        if (highlightuniqueid !== "0") {
+
+                            console.debug("browsersolutions: selection_matched_in_document: true");
+
+                            //console.debug(start_range_node.textContent);
+                            //let original_start_range_node_textcontent = start_range_node.textContent;
+                            //console.debug("browsersolutions: start_range_node start_offset " + start_offset);
+                            //console.debug("browsersolutions: start_range_node total text length: " + start_range_node.textContent.length);
+
+                            //console.debug("browsersolutions: end_range_node");
+                            //console.debug(end_range_node.textContent);
+                            //console.debug("browsersolutions: end_range_node end_offset " + end_offset);
+                            //console.debug("browsersolutions: end_range_node total text length: " + end_range_node.textContent.length);
+                            //console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
 
                             // create the yellow note, later attach it to the right location in the DOM
                             console.debug("browsersolutions: calling: create_stickynote_node");
@@ -2323,12 +3080,11 @@ if (creatorDetails.hasOwnProperty('note_color')) {
                             create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (response) {
                                 var newGloveboxNode = response;
 
+                                // connect the note to the selection text
+                                newGloveboxNode.setAttribute("highlightuniqueid", highlightuniqueid);
                                 console.debug(newGloveboxNode);
-                                var newGloveboxNode = response;
-
-                                console.debug(newGloveboxNode);
-                                console.debug("browsersolutions: calling: size_and_place_note_based_on_coordinates");
-                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
+                                console.debug("browsersolutions: calling: size_and_place_note_based_on_texthighlight");
+                                size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, isOwner, newNote);
                                 console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
                                 attachEventlistenersToYellowStickynote(newGloveboxNode);
                                 // make some parts visible and other not visible
@@ -2357,21 +3113,7 @@ if (creatorDetails.hasOwnProperty('note_color')) {
                                 if (moveFocus) {
                                     moveFocusToNote(noteid);
                                 }
-                                var highlightuniqueid;
-                                if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
-                                    // Usage: Call this function with the text you want to highlight
-                                    console.debug("selection_text: " + selection_text);
-                                    console.debug(selection_text);
-                                    console.debug("calling highlightTextOccurrences");
-                                    highlightuniqueid = highlightTextOccurrences(selection_text, highlight_background);
-                                    console.log("Highlights added with ID: ", highlightuniqueid);
 
-                                    // only include the highlight id with the note object if it is not null
-                                    //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
-                                    // note_object_data.highlightuniqueid = highlightuniqueid;
-                                    //}
-                                }
-                                newGloveboxNode.setAttribute("highlightuniqueid", highlightuniqueid);
                                 //return;
                             });
 
@@ -2662,10 +3404,10 @@ Taking account of the fact that selction may spand multiple DOM node, the functi
 and the one it ends inside of. As well as the character position of the start and endpoint in those node
 
  */
-function getDOMposition(textnode_map, selection_text) {
+function getDOMposition(selection_text) {
 
-    console.log("browsersolutions getDOMposition, locate in the body of the document the selection text: \"" + selection_text + "\"");
-
+    console.log("getDOMposition.start, locate in the body of the document the selection text: \"" + selection_text + "\"");
+    var textnodelist = [];
     try {
 
         if (selection_text !== undefined && selection_text.length > 0) {
@@ -2677,32 +3419,39 @@ function getDOMposition(textnode_map, selection_text) {
             var end_range_node;
             var end_offset = 0;
 
-            var start_pos = whole_page_text.replace(/\s/g, "").indexOf(selection_text.replace(/\s/g, ""));
-            console.debug("browsersolutions start pos: " + start_pos);
-            // step through the array of all text nodes to find the one that contains the start pos
-
+            // compact the section text to enable white space-agnostic matching
+            var selection_text_compact = selection_text.replace(/\s/g, "");
+            console.debug("look for selection_text_compact: " + selection_text_compact);
+            //console.debug("in whole_page_text: " + whole_page_text);
+            var start_pos = whole_page_text.replace(/\s/g, "").indexOf(selection_text_compact);
+            console.debug("text match start pos: " + start_pos);
+            // textnode_map contains the text nodes of the document, and the position (start and stop) of the text node in the document
+            // step through the array of all text nodes to find the one that contains the start position
 
             var i = 0,
             j = 0;
             try {
                 // put a cap on max nodes / array entries to examine
                 while (i < textnode_map.length && i < 5000) {
-                    //console.debug(i + " " + textnode_map[i][0] + " " + textnode_map[i][1]);
+                    // console.debug(i + " " + textnode_map[i][0] + " " + textnode_map[i][1]);
+                    //console.debug(textnode_map[i]);
+
                     j = i;
                     // first occurrence the start pos, capture the node and exit the iteration
                     if ((textnode_map[i][0] <= start_pos) && (start_pos <= textnode_map[i][1])) {
                         // textnode_map[i][0];
                         console.debug("browsersolutions hit!");
+                        // Now the DOM node where the selection begins to match, has been found
                         start_range_node = textnode_map[i][2];
-                        // who far out in the textnode does the selection actually begin (on compacted text, so only approx.)
+                        // How far out in the textnode does the selection actually begin (on compacted text, so only approx.)
                         //start_offset = start_pos - textnode_map[i][0];
-                        //console.debug(i + " " + textnode_map[i][0]);
+                        console.debug(i + " " + textnode_map[i][0]);
                         // break out of iteration
                         i = 10000000;
 
                         // if the selection is fully contained inside the start node..
                         var indexofSelection = start_range_node.textContent.indexOf(selection_text);
-                        console.debug("browsersolutions indexOfSelection: " + indexofSelection);
+                        console.debug("browsersolutions indexOfSelection (a '-1' means the match spans multiple nodes): " + indexofSelection);
 
                         if (indexofSelection > 0) {
                             // selection is fully contained inside start node
@@ -2721,7 +3470,7 @@ function getDOMposition(textnode_map, selection_text) {
                             console.debug("browsersolutions #and")
                             //console.debug(start_range_node.textContent.replace(/\W/g, ""))
                             //console.debug(start_range_node.textContent.replace(/\w/g, ""))
-                            //console.debug(start_range_node.textContent)
+                            console.debug(start_range_node.textContent)
                             console.debug(align_characterspace(start_range_node.textContent))
 
                             var lcs = longest_common_substring(align_characterspace(selection_text), align_characterspace(start_range_node.textContent));
@@ -2741,11 +3490,12 @@ function getDOMposition(textnode_map, selection_text) {
             console.debug(start_range_node);
             console.debug(start_offset);
             // start_range_node now contains the DOM node where the selection range begins
-
-
+            // add start node to output list
+            //textnodelist.push(start_range_node);
+            //console.debug(textnodelist);
             // find end node
-            var end_pos = start_pos + selection_text.replace(/\s/g, "").length
-                console.debug("end pos: " + end_pos);
+            var end_pos = start_pos + selection_text.replace(/\s/g, "").length;
+            console.debug("end pos: " + end_pos);
             // Step through the array of all text nodes to find the one that contains the end pos
 
             // When iterating though all textnodes, Start where left off when looking for start node
@@ -2753,7 +3503,10 @@ function getDOMposition(textnode_map, selection_text) {
                 // put a cap on max nodes / array entries to examine
                 while (j < textnode_map.length && j < 5000) {
                     console.debug(j + " " + textnode_map[j][0] + " " + textnode_map[j][1]);
-
+                    console.debug(textnode_map[j][2]);
+                    console.debug((textnode_map[j][2]).parentNode);
+                    textnodelist.push(textnode_map[j][2]);
+                    console.debug(textnodelist);
                     // first occurrence the start pos, capture the node and exit the iteration
                     if ((textnode_map[j][0] <= end_pos) && (end_pos <= textnode_map[j][1])) {
                         //                	textnode_map[i][0];
@@ -2764,27 +3517,31 @@ function getDOMposition(textnode_map, selection_text) {
                         // the selection text will in general begin prior to the text node and the textnode may match only a piece at the end of the selection
 
                         // find overlap of selection_text and endnode text
-                        console.debug("determine overlap between")
-                        console.debug(align_characterspace(selection_text));
-                        console.debug("and")
-                        console.debug(align_characterspace(end_range_node.textContent));
-                        console.debug(longest_common_substring(align_characterspace(selection_text), align_characterspace(end_range_node.textContent)));
+                        console.debug("determine overlap between");
+                        const normalized_selection_text = align_characterspace(selection_text);
+                        console.debug(normalized_selection_text);
+                        console.debug("and");
+                        const normalized_end_node_text = align_characterspace(end_range_node.textContent);
+                        console.debug(normalized_end_node_text);
+                        var lcs = longest_common_substring(normalized_selection_text, normalized_end_node_text);
 
-                        var indexofSelection = align_characterspace(end_range_node.textContent).indexOf(align_characterspace(selection_text));
-                        console.debug(indexofSelection);
+                        console.debug("overlap is: " + lcs);
+                        // compute where in the end node the match actually ends
+                        // this will be the end of the section where the endnode and the selection text overlaps
+                        //var indexofSelection = normalized_end_node_text.indexOf(normalized_selection_text);
+                        var indexInSelection = normalized_end_node_text.indexOf(lcs);
+                        console.debug(indexInSelection);
 
-                        if (indexofSelection > 0) {
+                        if (indexInSelection > 0) {
                             // if the selection text IS contained inside the
-                            // the end offset is the start of the overlap match plus the length of it (which is the length of the selection)
-                            var lcs = longest_common_substring(align_characterspace(selection_text), align_characterspace(end_range_node.textContent));
-                            end_offset = indexofSelection + lcs.length;
+                            // the end offset is the start of the overlap match plus the length of it.
+                            end_offset = indexInSelection + lcs.length;
                             console.debug(lcs.length);
                             console.debug(selection_text.length);
                         } else {
 
                             // If the selection text is NOT contained inside the end node
                             // the length of the common match is the end offset point in the endnode
-                            var lcs = longest_common_substring(align_characterspace(selection_text), align_characterspace(end_range_node.textContent));
                             end_offset = lcs.length;
                         }
 
@@ -2799,12 +3556,26 @@ function getDOMposition(textnode_map, selection_text) {
                 console.error(e);
             }
             const selection_matched_in_document = true;
+            console.debug("browsersolutions: start_range_node");
+            console.debug(start_range_node);
+            console.debug(start_range_node.parentNode);
+            console.debug("browsersolutions: start_offset");
+            console.debug(start_offset);
+            console.debug("browsersolutions: end_range_node");
+            console.debug(end_range_node);
+            console.debug(end_range_node.parentNode);
+            console.debug("browsersolutions: end_offset");
+            console.debug(end_offset);
+            console.debug("textnodelist");
+            console.debug(textnodelist);
+
             return {
                 selection_matched_in_document,
                 start_range_node,
                 start_offset,
                 end_range_node,
-                end_offset
+                end_offset,
+                textnodelist
             }
 
         } else {
@@ -3221,6 +3992,9 @@ function getYellowStickyNoteRoot(currentElement) {
 }
 
 function nodesAreIdentical(node1, node2) {
+    console.debug("#nodesAreIdentical.start");
+    console.debug(node1);
+    console.debug(node2);
     // Check if node types are the same
     if (node1.nodeType !== node2.nodeType)
         return false;
@@ -3259,6 +4033,7 @@ function nodesAreIdentical(node1, node2) {
 }
 
 function getDOMplacement(selection_text) {
+    console.debug("getDOMplacement.start");
     if (selection_text !== undefined && selection_text.length > 0) {
 
         //var message_display_text = note_obj.message_display_text;
@@ -3267,13 +4042,15 @@ function getDOMplacement(selection_text) {
         // start
         var start_range_node;
         var start_offset = 0;
+        var textnodelist = [];
         // end
         var end_range_node;
         var end_offset = 0;
         // using the position of the start of the selection text within the whole text, determine the start node where the selection begins
         // try to match the selection text to the text in the document
-        var one = getDOMposition(textnode_map, selection_text);
-        console.debug("browsersolutions " + JSON.stringify(one));
+        console.debug("getDOMposition: " + "selection_text: " + selection_text);
+        var one = getDOMposition(selection_text);
+        console.debug("getDOMposition output " + JSON.stringify(one));
         // Now the starting node for the selection is found, as well as the end node (and character offset within the nodes)
         if (one === undefined) {
             console.log("browsersolutions: " + "This is undefined");
@@ -3299,6 +4076,7 @@ function getDOMplacement(selection_text) {
                 end_range_node = one.end_range_node;
                 start_offset = one.start_offset;
                 end_offset = one.end_offset;
+                textnodelist = one.textnodelist;
             }
         }
     } else {
@@ -3309,12 +4087,18 @@ function getDOMplacement(selection_text) {
         end_range_node = start_range_node;
         end_offset = 0;
     }
+    console.debug("start_range_node");
+    console.debug(start_range_node);
+    console.debug("end_range_node");
+    console.debug(end_range_node);
+    console.debug(textnodelist);
     return {
         selection_matched_in_document,
         start_range_node,
         start_offset,
         end_range_node,
-        end_offset
+        end_offset,
+        textnodelist
     };
 }
 
@@ -3372,7 +4156,7 @@ function get_brand_from_sessiontoken(token) {
 
 }
 
-// create a node array of text content nodes in document order
+// create a node array of all text nodes present in the document, in document order
 function traverse(elm) {
     // produce a string of all test concatenated
     //var text_str = "";
@@ -3410,6 +4194,9 @@ function traverse(elm) {
         textnode_map.push([start_position, end_position, elm]);
 
     }
+
+    return [whole_page_text, textnode_map];
+
 }
 
 function create_stickynote_node(note_object_data, note_template, creatorDetails, isOwner, newNote) {
@@ -3437,7 +4224,7 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
         // use this attribute to mark this as a stickynote object
         cont1.setAttribute("note_type", note_object_data.note_type);
         cont1.setAttribute("noteid", note_object_data.noteid);
-        cont1.setAttribute("isOwner",isOwner);
+        cont1.setAttribute("isOwner", isOwner);
 
         if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
             cont1.setAttribute("distributionlistid", note_object_data.distributionlistid);
@@ -3484,8 +4271,8 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                 /*
                 the note header contains source info on the note
                  */
-                console.debug("browsersolutions calling renderNoteHeader");
-                renderNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+                console.debug("browsersolutions calling createNoteHeader");
+                createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
                 // set up the drop-down menu for distribution lists/feeds
                 // pre-select the distribution list drop down menu
                 const dl_container = cont1.querySelector('[name="distributionlistdropdown"]');
@@ -3546,7 +4333,9 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
             // "regular" yellow note type, use this as the default but type="yellownote should be set regardless"
             console.debug("yellownote note type");
             // insert the note metatdata and other permanent content
-            cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+            cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.selection_text)));
+            cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+
             cont1.querySelector('input[type="hidden"][name="noteid"]').replaceChildren(document.createTextNode(note_object_data.noteid));
             cont1.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
             cont1.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
@@ -3583,8 +4372,8 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
             /* the note header contains source info on the note
 
              */
-            console.debug("browsersolutions calling renderNoteHeader");
-            renderNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+            console.debug("browsersolutions calling createNoteHeader");
+            createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
             console.debug(cont1);
 
             // set background color of note
@@ -3603,7 +4392,7 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
             var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
             console.log("box_background" + box_background);
 
-            updateBackground(box_background, cont1);
+            setBackground(box_background, cont1);
 
             // set up the drop-down menu for distribution lists/feeds
             // pre-select the distribution list drop down menu
@@ -3775,9 +4564,10 @@ If the note is one the user is subscribing to, the link goes to the feed in the 
 
 
  */
-function renderNoteHeader(note_object_data, note_container, creatorDetails, isOwner, isNewNote) {
-    console.debug("browsersolutions #renderNoteHeader");
+function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, isNewNote) {
+    console.debug("browsersolutions #createNoteHeader");
     console.debug(note_object_data);
+    console.debug(note_root);
     console.debug(isOwner);
     console.debug(creatorDetails);
     console.debug(isNewNote);
@@ -3830,7 +4620,7 @@ function renderNoteHeader(note_object_data, note_container, creatorDetails, isOw
         // There is no option for setting image at the level of the feed or the individial note at this time
     }
 
-    const topbarfield = note_container.querySelector('td[name="topbar_filler"]');
+    const topbarfield = note_root.querySelector('td[name="topbar_filler"]');
     if (banner_image != "") {
         //console.debug(topbarfield);
         //topbarfield.innerHTML = headerhtml;
@@ -4631,7 +5421,7 @@ function setComponentVisibility(note, visibility) {
         if (note.getAttribute("isOwner") === "false") {
             console.debug("note owner? false");
             note.querySelector('table[name="whole_note_table"]').style.height = note.getAttribute("box_height");
-        }else{
+        } else {
             console.debug("note owner? true");
             note.querySelector('table[name="whole_note_table"]').style.height = (parseInt(note.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
 
@@ -4787,6 +5577,217 @@ function processBoxParameterInput(input, fallback, lowerLimit, upperLimit) {
 
 var valid_stickynote_position_coordinate_regexp = new RegExp(/^[0-9][0-9]*[a-z][a-z]$/);
 
+function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, isOwner, newNote) {
+    console.debug("" + "size_and_place_note_based_on_texthighlight.start");
+    console.debug(newGloveboxNode);
+    // the text the note is connected to has been located in the text of the page
+// the unique id of the highlight, highlightuniqueid, has been added to the porperties of the root object of the note
+
+
+    //console.debug("highlightuniqueid: " + newGloveboxNode.getAttribute("highlightuniqueid"));
+
+
+    console.debug(note_obj);
+    var posx = note_obj.posx;
+    var posy = note_obj.posy;
+
+    console.debug("browsersolutions posx:" + posx);
+    console.debug("browsersolutions posy:" + posy);
+
+    //console.debug("browsersolutions " + valid_stickynote_position_coordinate_regexp.test(posx));
+    //console.debug("browsersolutions " + valid_stickynote_position_coordinate_regexp.test(posy));
+
+    const rootElement = document.documentElement;
+    //console.debug(rootElement);
+    let insertedNode = rootElement.insertBefore(newGloveboxNode, rootElement.firstChild.nextSibling);
+    //let insertedNode = rootElement.appendChild(newGloveboxNode);
+
+    console.debug(insertedNode);
+
+    const highlightuniqueid = newGloveboxNode.getAttribute("highlightuniqueid" );
+    console.debug(highlightuniqueid);
+    const firstNode = document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]');
+    const secondNode = insertedNode;
+    console.debug(firstNode);
+    console.debug(secondNode);
+    console.debug("calling placeNodeRelativeTo  ");
+    const[rel_x_pos, rel_y_pos] = placeNodeRelativeTo(firstNode, insertedNode.querySelector('[name="whole_note_table"]'), 50, 50);
+    console.debug("rel_x_pos: " + rel_x_pos);
+    console.debug("rel_y_pos: " + rel_y_pos);
+    //insertedNode.style.visibility = 'visible';
+    //insertedNode.style.zIndex = "10000";
+
+    //return
+    console.debug("moving to posx:" + rel_x_pos + " posy:" + rel_y_pos);
+
+    //insertedNode.style.top = rel_y_pos;
+    //insertedNode.querySelector('[name="whole_note_table"]').style.top = posy;
+    //insertedNode.style.left = rel_x_pos;
+    //insertedNode.querySelector('[name="whole_note_table"]').style.left = posx;
+
+    insertedNode.style.visibility = 'visible';
+    insertedNode.style.zIndex = "10000";
+
+    //newGloveboxNode.style.position = 'relative';
+
+    // set default values first
+    // then replace those values with more specific ones if they are available
+    var box_width = "250px";
+    var box_height = "250px";
+
+    // check for brand/organization-specific values - not implemented yet
+
+
+    // check for creator specific values
+
+    // check for feed-specific values - not implemented yet
+
+
+    // check for note specific value
+
+
+    // if note has valid size settings, use those, otherwise go with defaults
+    box_width = note_obj.box_width;
+    box_height = note_obj.box_height;
+
+    console.debug("using box_width:" + box_width + " box_height:" + box_height);
+
+    // examine options to make the width context sensitive
+
+    // Set overall size of the note
+    // adjust if the note is owned by the current user or is new. In both cases the bottom controll bar will be appended
+    insertedNode.style.width = box_width;
+    insertedNode.querySelector('[name="whole_note_table"]').style.width = box_width;
+    insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = (parseInt(box_height) - note_internal_height_padding) + 'px';
+
+    if (isOwner || newNote) {
+        // the note much be expanded to show the edit bar at the bottom
+
+        insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(box_height) + note_owners_control_bar_height) + 'px';
+        insertedNode.style.height = (parseInt(box_height) + note_owners_control_bar_height) + 'px';
+
+    } else {
+        // keep configured height
+        insertedNode.style.height = box_height;
+
+        insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height + 'px';
+    }
+    insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height;
+
+    insertedNode.querySelector('[name="whole_note_table"]').style.position = "absolute";
+
+    // update the size of some other fields in the note object
+
+
+    var usable_height;
+    if (isOwner) {
+        usable_height = (parseInt(box_height) - note_internal_height_padding);
+
+    } else {
+        // if the note is not owned by the current user, the note will be smaller as the bottom bar is removed
+
+        usable_height = (parseInt(box_height) - (note_internal_height_padding - note_owners_control_bar_height));
+    }
+
+    // update some internal objects in the note object to reflect the new overall size of the note
+    const usable_width = (parseInt(box_width) - note_internal_width_padding);
+
+    console.debug("setting new content frame usable width " + usable_width);
+    console.debug("setting new content frame usable height " + usable_height);
+
+    // one of the following two will fail, depeding on the type of note this is
+    try {
+        insertedNode.querySelector('[name="contentFrame"]').style.width = usable_width + 'px';
+        insertedNode.querySelector('[name="contentFrame"]').style.height = usable_height + 'px';
+
+    } catch (e) {
+        //console.error(e);
+    }
+    try {
+        insertedNode.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
+        insertedNode.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
+    } catch (e) {
+       // console.error(e);
+    }
+
+    try {
+
+        insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';
+    } catch (e) {
+        console.error(e);
+    }
+
+    insertedNode.setAttribute("box_width", box_width);
+    insertedNode.setAttribute("box_height", box_height);
+    console.debug(insertedNode);
+
+    console.debug("size_and_place_note_based_on_texthighlight.end");
+}
+
+function placeNodeRelativeTo(firstNode, secondNode, x, y) {
+    console.debug("placeNodeRelativeTo.start");
+    console.debug(firstNode);
+    console.debug(secondNode);
+    console.debug(x);
+    console.debug(y);
+    // Ensure both nodes are styled with position absolute
+    //firstNode.style.position = 'absolute';
+    //secondNode.style.position = 'absolute';
+
+    // Get the position of the first node
+    const firstRect = firstNode.getBoundingClientRect();
+
+    // Calculate the new position for the second node
+    console.debug("firstRect.left: ", firstRect.left);
+    console.debug("firstRect.top: ", firstRect.top);
+    console.debug("window.scrollX: ", window.scrollX);
+    console.debug("window.scrollY: ", window.scrollY);
+    console.debug("x: ", x);
+    console.debug("y: ", y);
+
+    const newLeft = Math.round(firstRect.left + window.scrollX + x);
+    const newTop = Math.round(firstRect.top + window.scrollY + y);
+
+    console.debug("newLeft: ", newLeft);
+    console.debug("newTop: ", newTop);
+
+    // Set the position of the second node
+    secondNode.style.left = `${newLeft}px`;
+    secondNode.style.top = `${newTop}px`;
+    //console.debug("r_x: ",newLeft );
+    //console.debug("r_y: ",newTop );
+    try{
+    
+        if (!document.body.contains(firstNode)) {
+            console.debug("first node missing from body");
+        }else{
+            console.debug( "first node present in the DOM" )
+        }
+        // Append the second node to the body if it's not already in the DOM
+        if (!document.body.contains(secondNode)) {
+            console.debug("second node missing from body");
+            //document.body.appendChild(secondNode);
+        }else{
+            console.debug( "second node present in the DOM" )
+    
+        }
+
+    }catch(e){
+
+    }
+    // compte the new position of the second node with respect to the first node
+    //const r_x = Math.round(newLeft - firstRect.left);
+    //const r_y = Math.round(newTop - firstRect.top);
+    //console.debug("r_x: ",r_x );
+    //console.debug("r_y: ",r_y );
+
+    // Set the position of the second node
+    //secondNode.style.left = `${r_x}px`;
+    //secondNode.style.top = `${r_y}px`;
+
+    return [newLeft, newTop];
+}
+
 /**
  *
  * @param {*} newGloveboxNode
@@ -4936,4 +5937,3 @@ This is height is added to the heigh the note will ordinarily have and is substr
 
  */
 const note_owners_control_bar_height = 23;
-

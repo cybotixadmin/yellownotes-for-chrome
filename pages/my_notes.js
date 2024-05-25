@@ -2,46 +2,44 @@
 
 // check if the user is authenticated
 checkSessionJWTValidity()
-  .then(isValid => {
-      console.log('JWT is valid:', isValid);
-if (isValid){
-    console.debug("JWT is valid - show menu accordingly");
-    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
-    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
-        //page_display_login_status();
-       // login_logout_action();
-      });
-    
-      page_display_login_status();
-}else{
-    console.debug("JWT is not valid - show menu accordingly");
-    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
-    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
-        //page_display_login_status();
-        //login_logout_action();
-      
-      });
-      
-      page_display_login_status();
+.then(isValid => {
+    console.log('JWT is valid:', isValid);
+    if (isValid) {
+        console.debug("JWT is valid - show menu accordingly");
+        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+            //page_display_login_status();
+            // login_logout_action();
+        });
+
+        page_display_login_status();
+    } else {
+        console.debug("JWT is not valid - show menu accordingly");
+        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+            //page_display_login_status();
+            //login_logout_action();
+
+        });
+
+        page_display_login_status();
     }
 
-  })
-  .catch(error => {
-      console.error('Error:', error.message);
-  });
-
-
+})
+.catch(error => {
+    console.error('Error:', error.message);
+});
 
 // Example usage:
 /*
 checkSessionJWTValidity()
-  .then(isValid => {
-      console.log('JWT is valid:', isValid);
-  })
-  .catch(error => {
-      console.error('Error:', error.message);
-  });
-*/
+.then(isValid => {
+console.log('JWT is valid:', isValid);
+})
+.catch(error => {
+console.error('Error:', error.message);
+});
+ */
 
 // call to database to get noets and place them in a table
 render().then(function (d) {
@@ -72,7 +70,6 @@ render().then(function (d) {
     });
     console.debug(note_template);
 });
-
 
 // Function to use "fetch" to delete a data row
 async function deleteDataRow(noteid) {
@@ -111,8 +108,6 @@ async function deleteDataRow(noteid) {
         console.error(error);
     }
 }
-
-
 
 async function goThere(datarow) {
     try {
@@ -193,31 +188,26 @@ function createNoteShareLink(datarow) {
 
     var textToCopy;
     var distributionlistid;
-    try{
-    
+    try {
+
         distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
-    console.log(distributionlistid);
-    const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
-    textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
-    }catch(e){
-            console.log(e);
-            textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
-        }
-    
-    
+        console.log(distributionlistid);
+        const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
+        textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
+    } catch (e) {
+        console.log(e);
+        textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
+    }
 
-
-// place the url value in the clipboard
+    // place the url value in the clipboard
     navigator.clipboard.writeText(textToCopy).then(() => {
         console.log('Invitation URL copied to clipboard: ' + textToCopy);
-        
+
     }).catch(err => {
         console.error('Error in copying text: ', err);
     });
     return textToCopy;
 }
-
-
 
 async function editNote(noteid) {
     try {
@@ -267,7 +257,6 @@ for (var i = 0; i < buttons.length; i++) {
     }, false);
 }
 
-
 // Locate all cells that are used for filtering of search results
 const f_cells = document.getElementById("dataTable").querySelectorAll("thead tr:nth-child(2) th");
 console.log(f_cells);
@@ -293,7 +282,7 @@ function sortTa(event) {
     console.log(event);
     console.log(event.target);
     console.log(event.target.parentNode);
-    sortTable("dataTable", parseInt( event.target.parentNode.getAttribute("colindex"), 10) );
+    sortTable("dataTable", parseInt(event.target.parentNode.getAttribute("colindex"), 10));
 }
 
 function timestampstring2timestamp(str) {
@@ -341,7 +330,7 @@ function sortTable(table_id, columnIndex) {
     console.log("sortTabl: " + columnIndex)
     console.log("sortTabl: " + table_id)
     const table = document.querySelector('[id="' + table_id + '"]');
-console.log(table);
+    console.log(table);
     let rows = Array.from(table.rows).slice(2); // Ignore the header rows
     let sortedRows;
 
@@ -488,7 +477,6 @@ function filterTableAllCols() {
     }
 }
 
-
 // Fetch data on page load
 
 
@@ -522,9 +510,31 @@ function render() {
             });
         }).then(response => {
             if (!response.ok) {
-                reject(new Error('Network response was not ok'));
+                // if an invalid session token was sent, it should be removed from the local storage
+                console.log(response);
+
+                if (response.status == 401) {
+                    // compare the response body with the string "Invalid session token" to determine if the session token is invalid
+
+                    response.text().then(body => {
+                        if (body.includes("Session token invalid")) {
+                            console.log("Session token is invalid, remove it from local storage.");
+                            chrome.storage.local.remove([plugin_session_header_name]);
+                            // redirect to the front page returning the user to unauthenticated status.
+                            // unauthenticated functionality will be in effect until the user authenticates
+                            window.location.href = "/pages/my_account.html";
+                            reject('logout');
+                        } else {
+                            reject(new Error('Network response was not ok'));
+                        }
+                    });
+                } else {
+
+                    reject(new Error('Network response was not ok'));
+                }
+            } else {
+                return response.json();
             }
-            return response.json();
         }).then(function (resp) {
             data = resp;
 
@@ -684,17 +694,16 @@ function render() {
                 cell_payload.setAttribute('data-label', 'text');
                 cell_payload.setAttribute('name', 'payload');
 
+                // Create the dropdown list for the distribution list
+                const dropdown = createDropdown(distributionListData, row.distributionlistid);
+                console.log(dropdown);
+                cell_distributionlist.appendChild(dropdown);
+                //cell_distributionlist.setAttribute('name', 'distributionlistid');
+                cell_distributionlist.firstChild.setAttribute('name', 'distributionlistid');
+                // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
+                //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
 
-                        // Create the dropdown list for the distribution list
-                        const dropdown = createDropdown(distributionListData, row.distributionlistid);
-                        console.log(dropdown);
-                        cell_distributionlist.appendChild(dropdown);
-                        //cell_distributionlist.setAttribute('name', 'distributionlistid');
-                        cell_distributionlist.firstChild.setAttribute('name', 'distributionlistid');
-                        // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
-                        //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
 
-                        
                 // create small table to contain the action buttons
 
                 // Add button container
@@ -733,7 +742,6 @@ function render() {
                     console.debug(event.target.parentNode.parentNode);
                     console.debug(event.target.parentNode.parentNode.firstChild.textContent);
 
-                    
                     // call to API to save changes to data base
                     saveChanges(row.noteid, event);
                 };
@@ -749,6 +757,8 @@ function render() {
                 console.log(u);
                 link.href = u;
                 link.target = "_blank";
+                link.name = "go_to_note";
+
                 const goThereButton = document.createElement('img');
                 goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
                 goThereButton.alt = 'go there';
@@ -811,7 +821,7 @@ function render() {
                 //option.textContent = row.distributionlistname;
                 //selectionList.appendChild(option);
 
-        
+
                 // Adding data-label for mobile responsive
                 cell_createtime.setAttribute('data-label', 'createtime');
                 cell_createtime.setAttribute('class', 'timestamp');
@@ -823,7 +833,6 @@ function render() {
         });
     });
 }
-
 
 function createDropdown(optionsArray, selectedDistributionListId) {
     // Create a select element
@@ -861,12 +870,37 @@ function createDropdown(optionsArray, selectedDistributionListId) {
 
             setNoteDistributionlistId(noteid, selectedId);
 
-        }else{
+        } else {
             console.debug("no distributionlist selected");
             // remove distributionlist from note
 
             setNoteDistributionlistId(noteid, "");
         }
+        // update the "gothere" url
+        var textToCopy;
+        const link_obj = event.target.parentNode.parentNode.querySelector('[name="go_to_note"]');
+        try {
+            console.debug(link_obj);
+
+            distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
+            console.log(distributionlistid);
+            if (distributionlistid == "") {
+                //        throw "no distributionlistid";
+                textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
+                link_obj.href = textToCopy;
+            } else {
+
+                const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
+                textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
+
+                link_obj.href = textToCopy;
+            }
+        } catch (e) {
+            console.log(e);
+            textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
+            link_obj.href = textToCopy;
+        }
+
     });
     return selectElement;
 }
@@ -910,7 +944,6 @@ async function setNoteActiveStatusByUUID(noteid, status) {
     }
 }
 
-
 /**
  * save changes to the notes attachment url and content text ( or URL incase of webframe)
  * @param {
@@ -925,19 +958,18 @@ async function saveChanges(noteid, event) {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
-
         var message_display_text;
         var content_url
         try {
             //message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent);
- 
- console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
+
+            console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
 
             message_display_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="payload"]').textContent.trim());
         } catch (e) {
             console.debug(e);
         }
-       
+
         const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent;
         const note_type = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="note_type"]').textContent;
 
@@ -947,7 +979,7 @@ async function saveChanges(noteid, event) {
             try {
                 //content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
                 content_url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="payload"]').textContent.trim();
-    
+
             } catch (e) {
                 console.debug(e);
             }
@@ -992,7 +1024,6 @@ async function saveChanges(noteid, event) {
     }
 }
 
-
 async function setNoteDistributionlistId(noteid, distributionlistid) {
     console.debug("setNoteDistributionlistId: " + noteid + " distributionlistid: " + distributionlistid);
     try {
@@ -1003,7 +1034,7 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
                 noteid: noteid,
                 distributionlistid: distributionlistid,
             });
-       
+
         const response = await fetch(
                 server_url + URI_plugin_user_setdistributionlist_yellownote, {
                 method: "POST",
@@ -1028,7 +1059,6 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
     }
 }
 
-
 function disable_note_with_noteid(noteid) {
     console.debug("disable_note_with_noteid: " + noteid);
     console.debug(valid_noteid_regexp.test(noteid));
@@ -1044,7 +1074,7 @@ function disable_note_with_noteid(noteid) {
             }
         }, function (response) {
             console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-           
+
         });
 
     }
@@ -1064,29 +1094,27 @@ function enable_note_with_noteid(noteid) {
             }
         }, function (response) {
             console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-           
+
         });
     }
 }
 
-if (is_authenticated()){
+if (is_authenticated()) {
     console.debug("user is authenticated - show menu accordingly");
-       //page_display_login_status();
-       // login_logout_action();
-      
-      //});
-      
-      page_display_login_status();
-    
-}else{
+    //page_display_login_status();
+    // login_logout_action();
+
+    //});
+
+    page_display_login_status();
+
+} else {
     console.debug("user is not authenticated - show menu accordingly");
-        //page_display_login_status();
-     //   login_logout_action();
-      
-      //});
-      
-      page_display_login_status();
+    //page_display_login_status();
+    //   login_logout_action();
+
+    //});
+
+    page_display_login_status();
 
 }
-
-

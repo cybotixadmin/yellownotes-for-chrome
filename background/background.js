@@ -54,7 +54,7 @@ var uuid;
 const plugin_uuid_header_name = "ynInstallationUniqueId";
 
 // name of HTTP header contaning the session token
-const plugin_session_header_name = "xyellownotessession_jwt";
+const plugin_session_header_name = "xyellownotessessionjwt";
 
 // the session cookie will look something like
 // {"userid":"lars.reinertsen@browsersolutions.no","name":"Lars Reinertsen","sessionid":"109be0df-6787-4ab1-cf28-7a329f6b1bed"}
