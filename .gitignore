@@ -1,23 +1,21 @@
 
 archive
 
-terraform/*/*/.aws/credentials
-terraform/*/*/*/.aws/credentials
 
 .terraform
 .aws
 .ssh
 .settings
 
-terraform/notes.txt
+
 *.tfstate
 *.backup
 *.exe
 *.hcl
 */providers/*
-
+.git/
 *privkey*
 
 n*.txt
 
-*/*/.ssh/
+

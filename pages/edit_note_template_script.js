@@ -140,7 +140,7 @@ function handleFileDrop(evt) {
 }
 
 try {
-    fetchAndDisplayStaticContent("/fragments/notetemplate_information.html", "notetemplate_information").then(() => {
+    fetchAndDisplayStaticContent("/fragments/en_US/editnotetemplate_information.html", "editnotetemplate_information").then(() => {
         console.log("fetchAndDisplayStaticContent() done");
         page_display_login_status();
         // login_logout_action();

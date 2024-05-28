@@ -4,6 +4,17 @@ const default_box_height = 250;
 
 const plugin_session_header_name = "xyellownotessessionjwt";
 
+let startX, startY, endX, endY;
+const overlay = document.createElement('div');
+document.documentElement.appendChild(overlay);
+overlay.style.position = 'fixed';
+overlay.style.border = '3px solid rgba(255, 255, 0, 0.75)'; // Yellow border
+overlay.style.zIndex = '10001';
+overlay.style.pointerEvents = 'none';
+overlay.style.display = 'none';
+
+const messageBox = document.createElement('div');
+
 var mouseX, mouseY;
 // Attach the event listener to the document to make the mouse coordinates available to the extension
 // in order to correctly place notes
@@ -109,19 +120,18 @@ function listener(request, sender, sendResponse) {
             //    console.error(e);
             // }
             scan_page();
- // has page been scanned ?
- if (!page_scanned) {
+            // has page been scanned ?
+            if (!page_scanned) {
 
-    // } else {
-    // Carry out scan
-    console.debug("browsersolutions call scan_page");
-    scan_page();
-    page_scanned = true;
-} else {
-    console.debug("browsersolutions page already scanned");
-    console.debug("textnode_map size: " + textnode_map.length);
-}
-
+                // } else {
+                // Carry out scan
+                console.debug("browsersolutions call scan_page");
+                scan_page();
+                page_scanned = true;
+            } else {
+                console.debug("browsersolutions page already scanned");
+                console.debug("textnode_map size: " + textnode_map.length);
+            }
 
             if (request.action == "createnode") {
                 // call to create a yellow note
@@ -132,6 +142,139 @@ function listener(request, sender, sendResponse) {
                     success: true,
                     data: "value"
                 });
+                return true;
+
+            } else if (request.action == "initiateSelection") {
+
+                console.log("initiateSelection");
+                showMessage("Click and drag to select the area for capture.");
+
+                document.addEventListener('mousedown', startSelection);
+
+                console.debug(overlay);
+
+                function showMessage(text) {
+                    console.debug("showMessage");
+                    const messageBox = document.createElement('div');
+                    messageBox.style.position = 'absolute';
+                    messageBox.style.top = '10%';
+                    messageBox.style.left = '50%';
+                    messageBox.style.transform = 'translate(-50%, -50%)';
+                    messageBox.style.padding = '10px';
+                    messageBox.style.background = 'white';
+                    messageBox.style.border = '3px solid yellow';
+                    messageBox.style.zIndex = '10000';
+                    messageBox.style.display = 'none'; // Initially hidden
+                    document.body.appendChild(messageBox);
+                    messageBox.textContent = text;
+                    messageBox.style.display = 'block'; // Show the message
+                }
+
+                function startSelection(event) {
+                    console.log('Selection started');
+                    startX = event.pageX;
+                    startY = event.pageY;
+
+                    overlay.style.left = `${startX}px`;
+                    overlay.style.top = `${startY}px`;
+                    overlay.style.width = '0px';
+                    overlay.style.height = '0px';
+                    overlay.style.display = 'block';
+
+                    messageBox.style.display = 'none'; // Hide the message once selection starts
+
+                    document.addEventListener('mousemove', expandSelection);
+                    document.addEventListener('mouseup', endSelection);
+                }
+
+                function expandSelection(event) {
+                    console.log('Expanding selection');
+                    const currentX = event.pageX;
+                    const currentY = event.pageY;
+                    const width = currentX - startX;
+                    const height = currentY - startY;
+
+                    overlay.style.width = `${Math.abs(width)}px`;
+                    overlay.style.height = `${Math.abs(height)}px`;
+                    overlay.style.left = `${Math.min(startX, currentX)}px`;
+                    overlay.style.top = `${Math.min(startY, currentY)}px`;
+                }
+
+                function endSelection(event) {
+                    console.log("Selection ended")
+                    endX = event.pageX;
+                    endY = event.pageY;
+                    document.removeEventListener('mousemove', expandSelection);
+                    document.removeEventListener('mouseup', endSelection);
+                    // Capture the selection and process the data
+                    captureAndProcessSelection(startX, startY, endX, endY);
+                }
+
+                function captureAndProcessSelection(x1, y1, x2, y2) {
+                    // Placeholder for capturing and processing logic
+                    const captureData = {
+                        x1,
+                        y1,
+                        x2,
+                        y2
+                    }; // Simulated capture data
+                    processData(captureData)
+                    .then(processedData => displayTable(processedData, x1, y1))
+                    .catch(error => console.error("Error processing data:", error));
+                }
+
+                function processData(data) {
+                    console.log("Processing data...");
+                    // Simulate processing data and return a promise
+                    console.debug(data);
+                    // Send save request back to background to get the required information for creting a blank sticky note
+                    // Stickynotes are always enabled when created.
+                    var resp;
+                    chrome.runtime.sendMessage({
+                        message: {
+                            "action": "create_capture_note",
+                            coords: data
+                        }
+                    }).then(function (response) {
+                        resp = response;
+                        console.debug("message sent to backgroup.js with response: ");
+                        console.debug(resp);
+
+                        // call the function that will crop the image
+                        return cropImage(resp.dataUrl, data);
+                    }).then(function (croppedImage) {
+                        console.log(croppedImage);
+                        // update the with the just cropped image
+                        resp.dataUrl = croppedImage;
+                        console.debug(resp);
+
+                        // call the function that will create the note
+
+                        create_newstickynote_node(resp, "capture_note", resp.note_template, resp.note_properties, resp.sessiontoken);
+
+                        // call the function that will set which part of the note will be displayed
+                        // setComponentVisibility(note_root, ",rw,.*normalsized,");
+
+                        //  attachEventlistenersToYellowStickynote(note_root);
+
+                    });
+
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => resolve({
+                                result: "Processed Data"
+                            }), 1000); // Simulate async operation
+                    });
+                }
+
+                function displayTable(data, x, y) {
+                    const table = document.createElement('table');
+                    table.style.position = 'fixed';
+                    table.style.left = `${x}px`;
+                    table.style.top = `${y}px`;
+                    table.style.zIndex = '10001';
+                    table.innerHTML = `<tr><td>${data.result}</td></tr>`; // Simplified table content
+                    document.body.appendChild(table);
+                }
                 return true;
             } else if (request.action == "update_notes_on_page") {
                 console.debug("update_notes_on_page");
@@ -196,6 +339,7 @@ function listener(request, sender, sendResponse) {
                 } else {
                     console.log('Element not found: ' + elementId);
                 }
+                return true;
             } else if (request.action == "create_and_scroll_to_note") {
                 console.log("create_and_scroll_to_note");
                 const noteid = request.noteid;
@@ -317,10 +461,53 @@ function listener(request, sender, sendResponse) {
 
 chrome.runtime.onMessage.addListener(listener);
 
+function cropImage(base64Image, coords, scale = window.devicePixelRatio) {
+    return new Promise((resolve, reject) => {
+        // Create an Image element
+        const img = new Image();
+        img.onload = () => {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Calculate the scaled coordinates
+            const scaledX1 = coords.x1 * scale;
+            const scaledY1 = coords.y1 * scale;
+            const scaledWidth = (coords.x2 - coords.x1) * scale;
+            const scaledHeight = (coords.y2 - coords.y1) * scale;
+
+            // Set canvas size to the desired crop size (scaled)
+            canvas.width = scaledWidth;
+            canvas.height = scaledHeight;
+
+            // Draw the image on the canvas, cropped and scaled
+            ctx.drawImage(
+                img,
+                scaledX1, scaledY1, // Start clipping
+                scaledWidth, scaledHeight, // Width and height of clipped image
+                0, 0, // Place the image at the top left corner of the canvas
+                scaledWidth, scaledHeight // Size of the image to use
+            );
+
+            // Convert the canvas content into a data URL
+            const croppedImageDataURL = canvas.toDataURL("image/png");
+            resolve(croppedImageDataURL);
+        };
+
+        img.onerror = () => {
+            reject(new Error('Failed to load the image for cropping.'));
+        };
+
+        // Set the source of the image to the data URL
+        img.src = base64Image;
+    });
+}
+
 /* creates DOM object of the stick note */
 function create_newstickynote_node(info, note_type, html, note_properties, session) {
 
     console.debug("# create_newstickynote_node start");
+    console.log(info);
 
     const isOwner = true;
     const isNewNote = true;
@@ -330,7 +517,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.log("note_properties: " + JSON.stringify(note_properties));
     var userid = "";
     console.debug("session: " + JSON.stringify(session));
-    console.debug("selection text: " + info.selectionText);
+    // console.debug("selection text: " + info.selectionText);
 
     try {
 
@@ -362,7 +549,8 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     node_root.setAttribute("note_type", note_type);
     node_root.setAttribute("button_arrangment", 'new');
 
-    node_root.setAttribute("isOwner", "true");
+    node_root.setAttribute("isOwner", isOwner);
+    node_root.setAttribute("isNewNote", isNewNote);
 
     const note_table = note_template.querySelector('[name="whole_note_table"]');
     //console.debug(note_table);
@@ -375,8 +563,6 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     If not set, parameter specfied for the brand the creator is part of, is used;
     if not set, the default values are used
     Default values are specified in the template itself
-
-
      */
 
     var box_width = "250px"; // set default value, override with more specific values if available
@@ -424,14 +610,18 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     /* where on the page is the note going to be placed ?
 
     If the not contains coordinates, use them. If not, use the cursor position
-
-
      */
 
     console.debug("mouseX: " + mouseX);
     console.debug("mouseY: " + mouseY);
-
-    var selection_text = info.selectionText;
+    var selection_text = "";
+    try {
+        if (info.selectionText != null && info.selectionText != "" && info.selectionText != undefined) {
+            selection_text = info.selectionText;
+        }
+    } catch (e) {
+        console.error(e);
+    }
     // place the note there the cursor is placed
     node_root.setAttribute("posx", mouseX + "px");
     node_root.setAttribute("posy", mouseY + "px");
@@ -441,7 +631,9 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.debug((!isUndefined(selection_text)));
     console.debug(selection_text != null);
     console.debug(selection_text != '');
-    var highlightuniqueid;
+    var highlightuniqueid = "";
+
+    // is selection_text set ?
     if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
         // Usage: Call this function with the text you want to highlight
         console.debug("selection_text: " + selection_text);
@@ -457,25 +649,32 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         note_object_data.highlightuniqueid = highlightuniqueid;
         node_root.setAttribute("highlightuniqueid", highlightuniqueid);
         //}
-    }
 
-    note_object_data.selection_text = selection_text;
-    note_object_data.message_display_text = selection_text;
+        note_object_data.selection_text = selection_text;
+        note_object_data.message_display_text = selection_text;
+
+    } else {
+        // no selection_text
+        console.debug("selection_text is not set or is blank: ");
+
+    }
+    console.log("highlightuniqueid: ", highlightuniqueid);
 
     console.log("note_object_data: " + JSON.stringify(note_object_data));
 
-    //  node_root.setAttribute("style", 'width: 100px; height: 100px; background-color: yellow; position: absolute; z-index: 103;');
-
-    //cont1.appendChild(create_note_table(note_object_data,note_template));
     node_root.appendChild(note_template);
     try {
-        // itterate trhoug hthe data container object in the not and populate them with values from the note_object_data
+        // itterate through the data container object in the not and populate them with values from the note_object_data
 
         node_root.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
-        node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(utf8_to_b64(note_object_data.selection_text)));
 
-        //node_root.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
-        //node_root.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
+        if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
+            node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(utf8_to_b64(note_object_data.selection_text)));
+        } else {
+            node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(""));
+
+        }
+
         // capture local url
         node_root.querySelector('input[type="hidden"][name="url"]').replaceChildren(document.createTextNode(note_object_data.url));
 
@@ -489,6 +688,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         console.error(e);
 
     }
+
     console.debug("calling createNoteHeader");
     createNoteHeader(note_object_data, node_root, note_properties, isOwner, isNewNote)
 
@@ -536,7 +736,41 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         } catch (e) {
             console.error(e);
         }
+    } else if (note_type == "capture_note") {
+        console.debug("capture_note");
+
+        // place the note on the orignal capture coordinates
+
+        node_root.setAttribute("posx", info.coords.x1 + "px");
+        node_root.setAttribute("posy", info.coords.y1 + "px");
+        const img = new Image();
+        img.src = info.dataUrl;
+        img.style.position = 'fixed';
+        img.style.left = overlay.style.left;
+        img.style.top = overlay.style.top;
+        img.style.width = overlay.style.width;
+        img.style.height = overlay.style.height;
+        img.style.border = '3px solid yellow';
+        img.style.zIndex = '10000';
+        console.log(img);
+        // Add a close icon
+        const closeIcon = document.createElement('div');
+        closeIcon.textContent = '✖'; // Simple text close icon
+        closeIcon.style.position = 'absolute';
+        closeIcon.style.top = '-3';
+        closeIcon.style.right = '-3';
+        closeIcon.style.cursor = 'pointer';
+        closeIcon.style.zIndex = '10001';
+        closeIcon.addEventListener('click', function () {
+            console.debug("removing overlay image frame");
+            document.documentElement.removeChild(img);
+        });
+
+        img.appendChild(closeIcon);
+        const ins = document.documentElement.appendChild(img);
+        console.debug(ins);
     } else if (note_type == "webframe") {
+        console.debug("webframe");
         //
     }
 
@@ -546,7 +780,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
     //console.debug("calling getSelectionTextDOMPosition")
     console.debug(node_root);
-        
+
     var doc = window.document;
     var doc_root = doc.documentElement;
     //console.debug(doc_root);
@@ -555,32 +789,33 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
     console.log(insertedNode);
 
-    insertedNode.setAttribute("isOwner", isOwner);
-    insertedNode.setAttribute("newNote", isNewNote);
-    if (highlightuniqueid !== "0") {
-        // selection was matched in the document
-        // place note next to it
+    //insertedNode.setAttribute("isOwner: ", isOwner);
+    //insertedNode.setAttribute("newNote: ", isNewNote);
+    console.log("highlightuniqueid: ", highlightuniqueid);
+    if (highlightuniqueid && highlightuniqueid !== "0") {
+        // selection text was matched in the document
+        // place note next to where the text is highlighted
 
-    
-console.log("calling size_and_place_note_based_on_texthighlight");
+
+        console.log("calling size_and_place_note_based_on_texthighlight");
         size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
 
         // set the flag that contral which button are shown
         insertedNode.setAttribute("button_arrangment", 'new');
-    
+
         insertedNode.setAttribute("highlightuniqueid", highlightuniqueid);
         console.debug(insertedNode);
         // call the function that will set which part of the note will be displayed
         console.debug("calling setComponentVisibility");
         setComponentVisibility(insertedNode, ",new,.*normalsized,");
-    
+
         // call the function that will make the note draggable
         console.debug("browsersolutions: makeDragAndResize");
         makeDragAndResize(insertedNode);
-    
+
         // attach eventlisteners to the note
         attachEventlistenersToYellowStickynote(insertedNode);
-    
+
         // move to the default location on the screen if all else fails
         //inserted.setAttribute("posx", 50);
         //inserted.setAttribute("posy", 50);
@@ -589,42 +824,65 @@ console.log("calling size_and_place_note_based_on_texthighlight");
         // width
         console.log("setting box:width: " + insertedNode.getAttribute("box_width"));
         insertedNode.querySelector('[name="whole_note_table"]').style.width = insertedNode.getAttribute("box_width");
-    
+
         // height
-    
-    
+
+
         console.log("setting box_height: " + insertedNode.getAttribute("box_height"));
         // since this is a new note, the height is padded by the control bar
-    
+
         insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
-    
-       
 
         // call the function that will make the note resizeable
         // console.debug("browsersolutions: makeResizable");
         // makeResizable(inserted);
         console.debug("browsersolutions: calling dropdownlist_add_option");
         dropdownlist_add_option(insertedNode, "", "", "");
-    
+
         // place focus
         try {
             insertedNode.querySelector('[focus="true"]').focus();
         } catch (e) {
             console.error(e);
         }
-       
 
-    }else{
+    } else {
+        // selection text was not matched in the document, or there is no selection text
+        console.log("selection text was not matched in the document, or there is no selection text");
+
         // move to the default location on the screen if all else fails
         //inserted.setAttribute("posx", 50);
         //inserted.setAttribute("posy", 50);
         //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
         //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
-     
+
 
     }
 
-   return;
+    // call the function that will set which part of the note will be displayed
+    console.debug("calling setComponentVisibility");
+    setComponentVisibility(insertedNode, ",new,.*normalsized,");
+
+    // call the function that will make the note draggable
+    console.debug("browsersolutions: makeDragAndResize");
+    makeDragAndResize(insertedNode);
+
+    // attach eventlisteners to the note
+    attachEventlistenersToYellowStickynote(insertedNode);
+
+    // call the function that will make the note resizeable
+    // console.debug("browsersolutions: makeResizable");
+    // makeResizable(inserted);
+    console.debug("browsersolutions: calling dropdownlist_add_option");
+    dropdownlist_add_option(insertedNode, "", "", "");
+
+    // place focus
+    try {
+        insertedNode.querySelector('[focus="true"]').focus();
+    } catch (e) {
+        console.error(e);
+    }
+    return;
 
     var out = getSelectionTextDOMPosition(info.selectionText);
     console.debug(out);
@@ -680,7 +938,6 @@ console.log("calling size_and_place_note_based_on_texthighlight");
 
     console.debug(node_root);
     console.debug("browsersolutions: calling placeYellowNote");
- 
 
     // set the flag that contral which button are shown
     insertedNode.setAttribute("button_arrangment", 'new');
@@ -1051,7 +1308,7 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
     let found = false;
 
     console.debug("calling: getDOMplacement");
-    // fiund where in the DOM the selection text is found (if at all)
+    // find where in the DOM the selection text is found (if at all)
     var {
         selection_matched_in_document,
         start_range_node,
@@ -1075,30 +1332,32 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
     var nodecount = textnodelist.length;
     console.log("nodecount: " + nodecount);
 
-    // one one node
-    if (nodecount == 1) {
-// the text to highlight is inside one node
-const textContent = start_range_node.nodeValue;
-console.debug(textContent);
-// Split the text node
-const firstPart = textContent.slice(0, start_offset);
-console.debug("first part: " , firstPart);
-const to_highlight_text = textContent.slice(start_offset, end_offset);
-console.debug("highlight part: ", to_highlight_text);
-const thirdPart = textContent.slice(end_offset);
-console.debug("last part: ", thirdPart);
+    if (nodecount == 0) {
+        // No match. return nothing
+        uniqueId = "";
+        // one one node
+    } else if (nodecount == 1) {
+        // the text to highlight is inside one node
+        const textContent = start_range_node.nodeValue;
+        console.debug(textContent);
+        // Split the text node
+        const firstPart = textContent.slice(0, start_offset);
+        console.debug("first part: ", firstPart);
+        const to_highlight_text = textContent.slice(start_offset, end_offset);
+        console.debug("highlight part: ", to_highlight_text);
+        const thirdPart = textContent.slice(end_offset);
+        console.debug("last part: ", thirdPart);
 
-const firstSpan = document.createElement('span');
-firstSpan.textContent = firstPart;
+        const firstSpan = document.createElement('span');
+        firstSpan.textContent = firstPart;
 
-const secondSpan  = document.createElement('span');
-  // Create the highlight element
+        const secondSpan = document.createElement('span');
+        // Create the highlight element
         const highlight = document.createElement('mark');
         highlight.textContent = to_highlight_text;
         highlight.style.backgroundColor = rgbcolor;
         highlight.setAttribute('data-highlight-id', uniqueId);
         highlight.setAttribute('data-sequence-number', seqNum++);
-
 
         // Append the highlight to the span and replace the text node with the span
         secondSpan.appendChild(highlight);
@@ -1106,99 +1365,94 @@ const secondSpan  = document.createElement('span');
         start_range_node.textContent = firstPart;
 
         // append the node with highlights
-if (start_range_node.nextSibling) {
-    start_range_node.parentNode.insertBefore(secondSpan, start_range_node.nextSibling);
-} else {
-    start_range_node.parentNode.appendChild(secondSpan);
-}
+        if (start_range_node.nextSibling) {
+            start_range_node.parentNode.insertBefore(secondSpan, start_range_node.nextSibling);
+        } else {
+            start_range_node.parentNode.appendChild(secondSpan);
+        }
 
-// append the node with the remaining text
-const thirdSpan = document.createElement('span');
-thirdSpan.textContent = thirdPart;
-if (start_range_node.nextSibling) {
-    start_range_node.parentNode.insertBefore(thirdSpan, secondSpan.nextSibling);
-}else{
-    start_range_node.parentNode.appendChild(thirdSpan);
-}
+        // append the node with the remaining text
+        const thirdSpan = document.createElement('span');
+        thirdSpan.textContent = thirdPart;
+        if (start_range_node.nextSibling) {
+            start_range_node.parentNode.insertBefore(thirdSpan, secondSpan.nextSibling);
+        } else {
+            start_range_node.parentNode.appendChild(thirdSpan);
+        }
 
-
-    }
-    else if (nodecount == 2) {
+    } else if (nodecount == 2) {
         // two nodes
 
-   // first node
-   var n=0;
-   //console.debug(start_range_node);
-   const secondSpan  = document.createElement('span');
-   const textContent = start_range_node.nodeValue;
-   //console.debug(textContent);
-   // Split the text node
-   const unhighligt_remainder = textContent.slice(0, start_offset);
-   console.debug("unhighlighted: ", unhighligt_remainder);
-   const to_highlight_text = textContent.slice(start_offset);
-   console.debug("highlighted part: ", to_highlight_text);
+        // first node
+        var n = 0;
+        //console.debug(start_range_node);
+        const secondSpan = document.createElement('span');
+        const textContent = start_range_node.nodeValue;
+        //console.debug(textContent);
+        // Split the text node
+        const unhighligt_remainder = textContent.slice(0, start_offset);
+        console.debug("unhighlighted: ", unhighligt_remainder);
+        const to_highlight_text = textContent.slice(start_offset);
+        console.debug("highlighted part: ", to_highlight_text);
 
-   const firstSpan = document.createElement('span');
-   firstSpan.textContent = unhighligt_remainder;
+        const firstSpan = document.createElement('span');
+        firstSpan.textContent = unhighligt_remainder;
 
-   // Create the highlight element
-   const highlight = document.createElement('mark');
-   highlight.textContent = to_highlight_text;
-   highlight.style.backgroundColor = rgbcolor;
-   highlight.setAttribute('data-highlight-id', uniqueId);
-   highlight.setAttribute('data-sequence-number', seqNum++);
+        // Create the highlight element
+        const highlight = document.createElement('mark');
+        highlight.textContent = to_highlight_text;
+        highlight.style.backgroundColor = rgbcolor;
+        highlight.setAttribute('data-highlight-id', uniqueId);
+        highlight.setAttribute('data-sequence-number', seqNum++);
 
+        // Append the highlight to the span and replace the text node with the span
+        secondSpan.appendChild(highlight);
+        start_range_node.textContent = unhighligt_remainder;
 
-   // Append the highlight to the span and replace the text node with the span
-   secondSpan.appendChild(highlight);
-   start_range_node.textContent = unhighligt_remainder;
+        if (start_range_node.nextSibling) {
+            start_range_node.parentNode.insertBefore(secondSpan, start_range_node.nextSibling);
+        } else {
+            start_range_node.parentNode.appendChild(secondSpan);
+        }
 
-   if (start_range_node.nextSibling) {
-       start_range_node.parentNode.insertBefore(secondSpan, start_range_node.nextSibling);
-   } else {
-       start_range_node.parentNode.appendChild(secondSpan);
-   }
-
-   // second node
-   // last node
+        // second node
+        // last node
         //console.debug(textnodelist);
-//console.debug("last node: ", n);
-n--;
-// console.debug(textnodelist[n]);
-// console.debug(textnodelist[n].parentNode);
-//console.debug("end_offset: ", end_offset);
-//console.debug(end_range_node);
-//console.debug(end_range_node.parentNode);
- //const secondSpan2  = document.createElement('span');
- const firstSpan2 = document.createElement('span');
- const textContent2 = end_range_node.nodeValue;
- //console.debug(textContent2);
- // Split the text node
- const firstPart2 = textContent2.slice(0, end_offset);
- console.debug("highlighted part: ", firstPart2);
- //const secondPart2 = textContent2.slice(end_offset);
- //console.debug(secondPart2);
+        //console.debug("last node: ", n);
+        n--;
+        // console.debug(textnodelist[n]);
+        // console.debug(textnodelist[n].parentNode);
+        //console.debug("end_offset: ", end_offset);
+        //console.debug(end_range_node);
+        //console.debug(end_range_node.parentNode);
+        //const secondSpan2  = document.createElement('span');
+        const firstSpan2 = document.createElement('span');
+        const textContent2 = end_range_node.nodeValue;
+        //console.debug(textContent2);
+        // Split the text node
+        const firstPart2 = textContent2.slice(0, end_offset);
+        console.debug("highlighted part: ", firstPart2);
+        //const secondPart2 = textContent2.slice(end_offset);
+        //console.debug(secondPart2);
 
- //secondSpan2.textContent = secondPart2;
+        //secondSpan2.textContent = secondPart2;
 
- // Create the highlight element
- const highlight2 = document.createElement('mark');
- highlight2.textContent = firstPart2;
- highlight2.style.backgroundColor = rgbcolor;
- highlight2.setAttribute('data-highlight-id', uniqueId);
- highlight2.setAttribute('data-sequence-number', seqNum++);
+        // Create the highlight element
+        const highlight2 = document.createElement('mark');
+        highlight2.textContent = firstPart2;
+        highlight2.style.backgroundColor = rgbcolor;
+        highlight2.setAttribute('data-highlight-id', uniqueId);
+        highlight2.setAttribute('data-sequence-number', seqNum++);
 
- // Append the highlight to the span and replace the text node with the span
- firstSpan2.appendChild(highlight2);
- //console.debug(firstSpan2);
- //console.debug(secondSpan2);
- const remainder2 = textContent2.substring(end_offset);
- console.debug("unhighlighted remainder", remainder2);
- end_range_node.textContent = remainder2;
- //end_range_node.parentNode.replaceChild(secondSpan2, end_range_node);
- end_range_node.parentNode.insertBefore(firstSpan2, end_range_node);
-      
-        
+        // Append the highlight to the span and replace the text node with the span
+        firstSpan2.appendChild(highlight2);
+        //console.debug(firstSpan2);
+        //console.debug(secondSpan2);
+        const remainder2 = textContent2.substring(end_offset);
+        console.debug("unhighlighted remainder", remainder2);
+        end_range_node.textContent = remainder2;
+        //end_range_node.parentNode.replaceChild(secondSpan2, end_range_node);
+        end_range_node.parentNode.insertBefore(firstSpan2, end_range_node);
 
     } else {
 
@@ -1206,9 +1460,9 @@ n--;
 
 
         // first node
-        var n=0;
+        var n = 0;
         //console.debug(start_range_node);
-        const secondSpan  = document.createElement('span');
+        const secondSpan = document.createElement('span');
         const textContent = start_range_node.nodeValue;
         //console.debug(textContent);
         // Split the text node
@@ -1227,7 +1481,6 @@ n--;
         highlight.setAttribute('data-highlight-id', uniqueId);
         highlight.setAttribute('data-sequence-number', seqNum++);
 
-
         // Append the highlight to the span and replace the text node with the span
         secondSpan.appendChild(highlight);
         start_range_node.textContent = unhighligt_remainder;
@@ -1238,38 +1491,36 @@ n--;
             start_range_node.parentNode.appendChild(secondSpan);
         }
 
-
-       
         // "middle" nodes
-   
-        for (var i=1; i < (nodecount - 1); i++) {
+
+        for (var i = 1; i < (nodecount - 1); i++) {
             n++;
             console.debug("middle node: ", n);
             console.debug(textnodelist);
             console.debug(textnodelist[i]);
             console.debug(textnodelist[i].parentNode);
             // check if this textnode has the same parent and the previous text node
-            console.debug(nodesAreIdentical(textnodelist[i-1], textnodelist[i]));
-            if (nodesAreIdentical(textnodelist[i-1], textnodelist[i])) {
-               // textnodelist[i].remove();
-               // delete textnodelist[i];
-                 textnodelist.splice(i, 1);
+            console.debug(nodesAreIdentical(textnodelist[i - 1], textnodelist[i]));
+            if (nodesAreIdentical(textnodelist[i - 1], textnodelist[i])) {
+                // textnodelist[i].remove();
+                // delete textnodelist[i];
+                textnodelist.splice(i, 1);
                 i--;
                 n--;
-            }else{
-            addHighlighting(textnodelist[i], seqNum++);
+            } else {
+                addHighlighting(textnodelist[i], seqNum++);
             }
         }
 
         // last node
         //console.debug(textnodelist);
-//console.debug("last node: ", n);
-n--;
-       // console.debug(textnodelist[n]);
-       // console.debug(textnodelist[n].parentNode);
-//console.debug("end_offset: ", end_offset);
-//console.debug(end_range_node);
-//console.debug(end_range_node.parentNode);
+        //console.debug("last node: ", n);
+        n--;
+        // console.debug(textnodelist[n]);
+        // console.debug(textnodelist[n].parentNode);
+        //console.debug("end_offset: ", end_offset);
+        //console.debug(end_range_node);
+        //console.debug(end_range_node.parentNode);
         //const secondSpan2  = document.createElement('span');
         const firstSpan2 = document.createElement('span');
         const textContent2 = end_range_node.nodeValue;
@@ -2723,39 +2974,6 @@ function getAllNotes() {
     });
 }
 
-// scan all the text on the page, with a view to later making a pattern match with the selected text contained in the note
-function scan_page() {
-    console.debug("#scan_page");
-    var doc = window.document,
-    body = doc.body,
-    selection,
-    range,
-    bodyText;
-    //  console.debug(doc);
-    //   console.debug(doc.nodeName);
-    // root
-    var root_node = doc.documentElement;
-
-    // reset the global variables that contain the document structure (for use in other functions)
-    whole_page_text = "";
-    textnode_map = [];
-    //console.debug("1.2.0");
-
-    // exec traversal
-    var rc = traverse(doc.documentElement);
-    //  The data describing the text structure of the document is now populated into textnode_map
-    //console.debug("browsersolutions "+rc);
-
-    console.debug("whole_page_text length: ", whole_page_text.length);
-    //
-    //console.debug(whole_page_text);
-
-    // contain node object and the position within overall text (white space removed)
-
-    //console.debug(textnode_map);
-    console.debug("textnode_map size: " + textnode_map.length);
-
-}
 
 function DELETEgetSelectionTextDOMPosition(selection_text) {
     console.debug("#getSelectionTextDOMPosition.start");
@@ -3397,6 +3615,32 @@ function processBoxParameterInput(input, fallback, lowerLimit, upperLimit) {
     }
 }
 
+function collectVisibleText(element) {
+    let text = '';
+
+    // Function to determine if an element is visible
+    function isVisible(elem) {
+        const style = window.getComputedStyle(elem);
+        return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    }
+
+    // Recursive function to visit each node and collect text
+    function visitNode(node) {
+        // Check if the node is a text node and its parent is visible
+        if (node.nodeType === Node.TEXT_NODE && isVisible(node.parentNode)) {
+            text += node.textContent.trim() + ' ';
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            // Recursively visit each child node
+            Array.from(node.childNodes).forEach(visitNode);
+        }
+    }
+
+    // Start recursion on the specified element
+    visitNode(element);
+
+    return text;
+}
+
 /*
 function to look through the text of the document to locate where the selection string fits in
 
@@ -3422,162 +3666,168 @@ function getDOMposition(selection_text) {
             // compact the section text to enable white space-agnostic matching
             var selection_text_compact = selection_text.replace(/\s/g, "");
             console.debug("look for selection_text_compact: " + selection_text_compact);
-            //console.debug("in whole_page_text: " + whole_page_text);
+            console.debug("in whole_page_text: " + whole_page_text);
             var start_pos = whole_page_text.replace(/\s/g, "").indexOf(selection_text_compact);
+
             console.debug("text match start pos: " + start_pos);
             // textnode_map contains the text nodes of the document, and the position (start and stop) of the text node in the document
             // step through the array of all text nodes to find the one that contains the start position
 
-            var i = 0,
-            j = 0;
-            try {
-                // put a cap on max nodes / array entries to examine
-                while (i < textnode_map.length && i < 5000) {
-                    // console.debug(i + " " + textnode_map[i][0] + " " + textnode_map[i][1]);
-                    //console.debug(textnode_map[i]);
+            // if start_pos is "-! it means the selection text was not found in the page text at all, and we can just skip this next step
+            if (start_pos !== -1) {
+                var i = 0,
+                j = 0;
+                try {
+                    // put a cap on max nodes / array entries to examine
+                    while (i < textnode_map.length && i < 5000) {
+                        // console.debug(i + " " + textnode_map[i][0] + " " + textnode_map[i][1]);
+                        //console.debug(textnode_map[i]);
 
-                    j = i;
-                    // first occurrence the start pos, capture the node and exit the iteration
-                    if ((textnode_map[i][0] <= start_pos) && (start_pos <= textnode_map[i][1])) {
-                        // textnode_map[i][0];
-                        console.debug("browsersolutions hit!");
-                        // Now the DOM node where the selection begins to match, has been found
-                        start_range_node = textnode_map[i][2];
-                        // How far out in the textnode does the selection actually begin (on compacted text, so only approx.)
-                        //start_offset = start_pos - textnode_map[i][0];
-                        console.debug(i + " " + textnode_map[i][0]);
-                        // break out of iteration
-                        i = 10000000;
+                        j = i;
+                        // first occurrence the start pos, capture the node and exit the iteration
+                        if ((textnode_map[i][0] <= start_pos) && (start_pos <= textnode_map[i][1])) {
+                            // textnode_map[i][0];
+                            console.debug("browsersolutions hit!");
+                            // Now the DOM node where the selection begins to match, has been found
+                            start_range_node = textnode_map[i][2];
+                            // How far out in the textnode does the selection actually begin (on compacted text, so only approx.)
+                            //start_offset = start_pos - textnode_map[i][0];
+                            console.debug(i + " " + textnode_map[i][0]);
+                            // break out of iteration
+                            i = 10000000;
 
-                        // if the selection is fully contained inside the start node..
-                        var indexofSelection = start_range_node.textContent.indexOf(selection_text);
-                        console.debug("browsersolutions indexOfSelection (a '-1' means the match spans multiple nodes): " + indexofSelection);
+                            // if the selection is fully contained inside the start node..
+                            var indexofSelection = start_range_node.textContent.indexOf(selection_text);
+                            console.debug("browsersolutions indexOfSelection (a '-1' means the match spans multiple nodes): " + indexofSelection);
 
-                        if (indexofSelection > 0) {
-                            // selection is fully contained inside start node
-                            // start offset  is where the match begins
-                            start_offset = indexofSelection;
-                        } else {
-                            // selection spans outside the start node
-                            // The selection text will have some whitespace characters removed (line breaks, and tabs)
-                            // to be able to make a match, the text must also have these replace with a single space (ascii 20)
-                            // also multiple repeated shapce characters must be collapsed into just one.
+                            if (indexofSelection > 0) {
+                                // selection is fully contained inside start node
+                                // start offset  is where the match begins
+                                start_offset = indexofSelection;
+                            } else {
+                                // selection spans outside the start node
+                                // The selection text will have some whitespace characters removed (line breaks, and tabs)
+                                // to be able to make a match, the text must also have these replace with a single space (ascii 20)
+                                // also multiple repeated shapce characters must be collapsed into just one.
 
-                            console.debug("browsersolutions #determine overlap between")
-                            //console.debug(selection_text.replace(/\W/g, ""));
-                            //console.debug(selection_text.replace(/\w/g, ""));
-                            console.debug(align_characterspace(selection_text));
-                            console.debug("browsersolutions #and")
-                            //console.debug(start_range_node.textContent.replace(/\W/g, ""))
-                            //console.debug(start_range_node.textContent.replace(/\w/g, ""))
-                            console.debug(start_range_node.textContent)
-                            console.debug(align_characterspace(start_range_node.textContent))
+                                console.debug("browsersolutions #determine overlap between")
+                                //console.debug(selection_text.replace(/\W/g, ""));
+                                //console.debug(selection_text.replace(/\w/g, ""));
+                                console.debug(align_characterspace(selection_text));
+                                console.debug("browsersolutions #and")
+                                //console.debug(start_range_node.textContent.replace(/\W/g, ""))
+                                //console.debug(start_range_node.textContent.replace(/\w/g, ""))
+                                console.debug(start_range_node.textContent)
+                                console.debug(align_characterspace(start_range_node.textContent))
 
-                            var lcs = longest_common_substring(align_characterspace(selection_text), align_characterspace(start_range_node.textContent));
-                            //console.debug(lcs);
-                            console.debug("browsersolutions #found common section: " + lcs);
-                            // look for the startOffset by frying the find where the overlaping piece fit.
-                            start_offset = align_characterspace(start_range_node.textContent).indexOf(lcs);
-                            console.debug("browsersolutions start_offset" + start_offset);
+                                var lcs = longest_common_substring(align_characterspace(selection_text), align_characterspace(start_range_node.textContent));
+                                //console.debug(lcs);
+                                console.debug("browsersolutions #found common section: " + lcs);
+                                // look for the startOffset by frying the find where the overlaping piece fit.
+                                start_offset = align_characterspace(start_range_node.textContent).indexOf(lcs);
+                                console.debug("browsersolutions start_offset" + start_offset);
+                            }
                         }
+                        i++;
                     }
-                    i++;
+                } catch (e) {
+                    console.error(e);
                 }
-            } catch (e) {
-                console.error(e);
-            }
 
-            console.debug(start_range_node);
-            console.debug(start_offset);
-            // start_range_node now contains the DOM node where the selection range begins
-            // add start node to output list
-            //textnodelist.push(start_range_node);
-            //console.debug(textnodelist);
-            // find end node
-            var end_pos = start_pos + selection_text.replace(/\s/g, "").length;
-            console.debug("end pos: " + end_pos);
-            // Step through the array of all text nodes to find the one that contains the end pos
+                console.debug(start_range_node);
+                console.debug(start_offset);
+                // start_range_node now contains the DOM node where the selection range begins
+                // add start node to output list
+                //textnodelist.push(start_range_node);
+                //console.debug(textnodelist);
+                // find end node
+                var end_pos = start_pos + selection_text.replace(/\s/g, "").length;
+                console.debug("end pos: " + end_pos);
+                // Step through the array of all text nodes to find the one that contains the end pos
 
-            // When iterating though all textnodes, Start where left off when looking for start node
-            try {
-                // put a cap on max nodes / array entries to examine
-                while (j < textnode_map.length && j < 5000) {
-                    console.debug(j + " " + textnode_map[j][0] + " " + textnode_map[j][1]);
-                    console.debug(textnode_map[j][2]);
-                    console.debug((textnode_map[j][2]).parentNode);
-                    textnodelist.push(textnode_map[j][2]);
-                    console.debug(textnodelist);
-                    // first occurrence the start pos, capture the node and exit the iteration
-                    if ((textnode_map[j][0] <= end_pos) && (end_pos <= textnode_map[j][1])) {
-                        //                	textnode_map[i][0];
-                        end_range_node = textnode_map[j][2];
-                        // who far from the begining of the textnode does the selection actually end (compacted text, so only approx.)
+                // When iterating though all textnodes, Start where left off when looking for start node
+                try {
+                    // put a cap on max nodes / array entries to examine
+                    while (j < textnode_map.length && j < 5000) {
+                        console.debug(j + " " + textnode_map[j][0] + " " + textnode_map[j][1]);
+                        console.debug(textnode_map[j][2]);
+                        console.debug((textnode_map[j][2]).parentNode);
+                        textnodelist.push(textnode_map[j][2]);
+                        console.debug(textnodelist);
+                        // first occurrence the start pos, capture the node and exit the iteration
+                        if ((textnode_map[j][0] <= end_pos) && (end_pos <= textnode_map[j][1])) {
+                            //                	textnode_map[i][0];
+                            end_range_node = textnode_map[j][2];
+                            // who far from the begining of the textnode does the selection actually end (compacted text, so only approx.)
 
-                        // match selection text on the text node and find the end of the overlap
-                        // the selection text will in general begin prior to the text node and the textnode may match only a piece at the end of the selection
+                            // match selection text on the text node and find the end of the overlap
+                            // the selection text will in general begin prior to the text node and the textnode may match only a piece at the end of the selection
 
-                        // find overlap of selection_text and endnode text
-                        console.debug("determine overlap between");
-                        const normalized_selection_text = align_characterspace(selection_text);
-                        console.debug(normalized_selection_text);
-                        console.debug("and");
-                        const normalized_end_node_text = align_characterspace(end_range_node.textContent);
-                        console.debug(normalized_end_node_text);
-                        var lcs = longest_common_substring(normalized_selection_text, normalized_end_node_text);
+                            // find overlap of selection_text and endnode text
+                            console.debug("determine overlap between");
+                            const normalized_selection_text = align_characterspace(selection_text);
+                            console.debug(normalized_selection_text);
+                            console.debug("and");
+                            const normalized_end_node_text = align_characterspace(end_range_node.textContent);
+                            console.debug(normalized_end_node_text);
+                            var lcs = longest_common_substring(normalized_selection_text, normalized_end_node_text);
 
-                        console.debug("overlap is: " + lcs);
-                        // compute where in the end node the match actually ends
-                        // this will be the end of the section where the endnode and the selection text overlaps
-                        //var indexofSelection = normalized_end_node_text.indexOf(normalized_selection_text);
-                        var indexInSelection = normalized_end_node_text.indexOf(lcs);
-                        console.debug(indexInSelection);
+                            console.debug("overlap is: " + lcs);
+                            // compute where in the end node the match actually ends
+                            // this will be the end of the section where the endnode and the selection text overlaps
+                            //var indexofSelection = normalized_end_node_text.indexOf(normalized_selection_text);
+                            var indexInSelection = normalized_end_node_text.indexOf(lcs);
+                            console.debug(indexInSelection);
 
-                        if (indexInSelection > 0) {
-                            // if the selection text IS contained inside the
-                            // the end offset is the start of the overlap match plus the length of it.
-                            end_offset = indexInSelection + lcs.length;
-                            console.debug(lcs.length);
-                            console.debug(selection_text.length);
-                        } else {
+                            if (indexInSelection > 0) {
+                                // if the selection text IS contained inside the
+                                // the end offset is the start of the overlap match plus the length of it.
+                                end_offset = indexInSelection + lcs.length;
+                                console.debug(lcs.length);
+                                console.debug(selection_text.length);
+                            } else {
 
-                            // If the selection text is NOT contained inside the end node
-                            // the length of the common match is the end offset point in the endnode
-                            end_offset = lcs.length;
+                                // If the selection text is NOT contained inside the end node
+                                // the length of the common match is the end offset point in the endnode
+                                end_offset = lcs.length;
+                            }
+
+                            //end_offset = textnode_map[j][1] - end_pos;
+                            //console.debug(i + " " + textnode_map[i][0]);
+                            // break out of iteration
+                            j = 10000000;
                         }
-
-                        //end_offset = textnode_map[j][1] - end_pos;
-                        //console.debug(i + " " + textnode_map[i][0]);
-                        // break out of iteration
-                        j = 10000000;
+                        j++;
                     }
-                    j++;
+                } catch (e) {
+                    console.error(e);
                 }
-            } catch (e) {
-                console.error(e);
-            }
-            const selection_matched_in_document = true;
-            console.debug("browsersolutions: start_range_node");
-            console.debug(start_range_node);
-            console.debug(start_range_node.parentNode);
-            console.debug("browsersolutions: start_offset");
-            console.debug(start_offset);
-            console.debug("browsersolutions: end_range_node");
-            console.debug(end_range_node);
-            console.debug(end_range_node.parentNode);
-            console.debug("browsersolutions: end_offset");
-            console.debug(end_offset);
-            console.debug("textnodelist");
-            console.debug(textnodelist);
+                const selection_matched_in_document = true;
+                console.debug("browsersolutions: start_range_node");
+                console.debug(start_range_node);
+                console.debug(start_range_node.parentNode);
+                console.debug("browsersolutions: start_offset");
+                console.debug(start_offset);
+                console.debug("browsersolutions: end_range_node");
+                console.debug(end_range_node);
+                console.debug(end_range_node.parentNode);
+                console.debug("browsersolutions: end_offset");
+                console.debug(end_offset);
+                console.debug("textnodelist");
+                console.debug(textnodelist);
 
-            return {
-                selection_matched_in_document,
-                start_range_node,
-                start_offset,
-                end_range_node,
-                end_offset,
-                textnodelist
+                return {
+                    selection_matched_in_document,
+                    start_range_node,
+                    start_offset,
+                    end_range_node,
+                    end_offset,
+                    textnodelist
+                }
+            } else {
+                // selection(text) was not found in the body text
+                return null;
             }
-
         } else {
             return null;
         }
@@ -4036,6 +4286,16 @@ function getDOMplacement(selection_text) {
     console.debug("getDOMplacement.start");
     if (selection_text !== undefined && selection_text.length > 0) {
 
+
+        // scan page if it has not been done already
+// add a time check to avoid scanning the page too often
+
+//        if (whole_page_text === "") {
+            console.debug("call scan page)=");
+            scan_page();
+  //      }
+
+
         //var message_display_text = note_obj.message_display_text;
         var selection_matched_in_document = false;
 
@@ -4156,15 +4416,54 @@ function get_brand_from_sessiontoken(token) {
 
 }
 
+
+
+// scan all the text on the page, with a view to later making a pattern match with the selected text contained in the note
+function scan_page() {
+    console.debug("#scan_page.start");
+    var doc = window.document,
+    body = doc.body,
+    selection,
+    range,
+    bodyText;
+    //  console.debug(doc);
+    //   console.debug(doc.nodeName);
+    // root
+    //var root_node = doc.documentElement;
+
+    // reset the global variables that contain the document structure (for use in other functions)
+    whole_page_text = "";
+    textnode_map = [];
+    //console.debug("1.2.0");
+
+    // exec traversal
+    var rc = traverse(doc.documentElement);
+    //  The data describing the text structure of the document is now populated into textnode_map
+    //console.debug("browsersolutions "+rc);
+
+    console.debug("whole_page_text length: ", whole_page_text.length);
+    //
+    console.debug(whole_page_text);
+
+    // contain node object and the position within overall text (white space removed)
+
+    console.debug(textnode_map);
+    console.debug("textnode_map size: " + textnode_map.length);
+
+}
+
 // create a node array of all text nodes present in the document, in document order
 function traverse(elm) {
     // produce a string of all test concatenated
     //var text_str = "";
     // Produce an array of all nodes
     //console.debug("#traverse");
+   // console.debug(elm);
+  //  console.debug(elm.nodeType);
+//console.debug(elm.childNodes);
 
-    if (elm.nodeType == Node.ELEMENT_NODE || elm.nodeType == Node.DOCUMENT_NODE) {
-        // console.debug("1.0.1");
+if (elm.nodeType == Node.ELEMENT_NODE || elm.nodeType == Node.DOCUMENT_NODE) {
+        //console.debug("1.0.1");
 
         // exclude elements with invisible text nodes
         if (isExcluded(elm)) {
@@ -4174,29 +4473,52 @@ function traverse(elm) {
         for (var i = 0; i < elm.childNodes.length; i++) {
             // recursively call to traverse
             traverse(elm.childNodes[i]);
+
         }
 
-    }
-
-    if (elm.nodeType == Node.TEXT_NODE) {
+    }else  if (elm.nodeType == Node.TEXT_NODE) {
         //  console.debug("1.0.2");
         // exclude text node consisting of only spaces
         if (elm.nodeValue.trim() == "") {
             return
         }
 
-        // elm.nodeValue here is visible text we need.
-        //  console.log("##");
-        //   console.log(elm.nodeValue);
+        // elm.nodeValue , here is visible text we need.
+         // console.log(elm.parentNode.tagName);
+         //  console.log(elm.nodeValue);
         var start_position = whole_page_text.length;
         whole_page_text = whole_page_text + elm.nodeValue.replace(/\s/g, "");
         var end_position = whole_page_text.length;
-        textnode_map.push([start_position, end_position, elm]);
+        textnode_map.push([start_position, end_position, elm, elm.parentNode.tagName]);
 
     }
 
     return [whole_page_text, textnode_map];
 
+}
+
+
+function isExcluded(elm) {
+    //	console.debug("isExcluded")
+    //	console.debug(elm );
+    //	console.debug("elm.tagName: " + elm.tagName );
+    //	console.debug("elm.tagName: " + elm.tagName.toUpperCase() );
+    //    if (elm.tagName.toUpperCase() == "STYLE") {
+    //        return true;
+    //    }
+    const one = elm.tagName.toUpperCase();
+    if (one == "STYLE") {
+        return true;
+    }else     if (one == "SCRIPT") {
+        return true;
+    }else     if (one == "NOSCRIPT") {
+        return true;
+    }else     if (one == "IFRAME") {
+        return true;
+    }else     if (one == "OBJECT") {
+        return true;
+    }
+    return false
 }
 
 function create_stickynote_node(note_object_data, note_template, creatorDetails, isOwner, newNote) {
@@ -5157,13 +5479,13 @@ function update_note_internal_size(box_width, box_height, note) {
         note.querySelector('[name="contentFrame"]').style.height = usable_height + 'px';
 
     } catch (e) {
-        console.error(e);
+        //console.error(e);
     }
     try {
         note.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
         note.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
     } catch (e) {
-        console.error(e);
+        //console.error(e);
     }
 
     try {
@@ -5186,7 +5508,7 @@ function update_note_internal_size(box_width, box_height, note) {
         console.debug("setting new url intput field width " + new_field_width);
         note.querySelector('[id="urlInput"]').style.width = new_field_width + 'px';
     } catch (e) {
-        console.error(e);
+        //console.error(e);
     }
 
 }
@@ -5479,28 +5801,6 @@ function ignore(elm) {
     return false
 }
 
-function isExcluded(elm) {
-    //	console.debug("isExcluded")
-    //	console.debug(elm );
-    //	console.debug("elm.tagName: " + elm.tagName );
-    //	console.debug("elm.tagName: " + elm.tagName.toUpperCase() );
-    //    if (elm.tagName.toUpperCase() == "STYLE") {
-    //        return true;
-    //    }
-    if (elm.tagName.toUpperCase() == "SCRIPT") {
-        return true;
-    }
-    if (elm.tagName.toUpperCase() == "NOSCRIPT") {
-        return true;
-    }
-    if (elm.tagName.toUpperCase() == "IFRAME") {
-        return true;
-    }
-    if (elm.tagName.toUpperCase() == "OBJECT") {
-        return true;
-    }
-    return false
-}
 
 function delete_note(event) {
     console.debug("browsersolutions delete note");
@@ -5581,7 +5881,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     console.debug("" + "size_and_place_note_based_on_texthighlight.start");
     console.debug(newGloveboxNode);
     // the text the note is connected to has been located in the text of the page
-// the unique id of the highlight, highlightuniqueid, has been added to the porperties of the root object of the note
+    // the unique id of the highlight, highlightuniqueid, has been added to the porperties of the root object of the note
 
 
     //console.debug("highlightuniqueid: " + newGloveboxNode.getAttribute("highlightuniqueid"));
@@ -5604,7 +5904,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
 
     console.debug(insertedNode);
 
-    const highlightuniqueid = newGloveboxNode.getAttribute("highlightuniqueid" );
+    const highlightuniqueid = newGloveboxNode.getAttribute("highlightuniqueid");
     console.debug(highlightuniqueid);
     const firstNode = document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]');
     const secondNode = insertedNode;
@@ -5707,7 +6007,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
         insertedNode.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
         insertedNode.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
     } catch (e) {
-       // console.error(e);
+        // console.error(e);
     }
 
     try {
@@ -5756,25 +6056,23 @@ function placeNodeRelativeTo(firstNode, secondNode, x, y) {
     secondNode.style.top = `${newTop}px`;
     //console.debug("r_x: ",newLeft );
     //console.debug("r_y: ",newTop );
-    try{
-    
+    try {
+
         if (!document.body.contains(firstNode)) {
             console.debug("first node missing from body");
-        }else{
-            console.debug( "first node present in the DOM" )
+        } else {
+            console.debug("first node present in the DOM")
         }
         // Append the second node to the body if it's not already in the DOM
         if (!document.body.contains(secondNode)) {
             console.debug("second node missing from body");
             //document.body.appendChild(secondNode);
-        }else{
-            console.debug( "second node present in the DOM" )
-    
+        } else {
+            console.debug("second node present in the DOM")
+
         }
 
-    }catch(e){
-
-    }
+    } catch (e) {}
     // compte the new position of the second node with respect to the first node
     //const r_x = Math.round(newLeft - firstRect.left);
     //const r_y = Math.round(newTop - firstRect.top);

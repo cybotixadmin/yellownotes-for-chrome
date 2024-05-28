@@ -239,6 +239,14 @@ chrome.contextMenus.create({
     contexts: ["all"]
 });
 
+chrome.contextMenus.create({
+    id: "captureSelection",
+    parentId: "yellownotes",
+    title: "Select and Capture",
+    contexts: ["all"]
+  });
+
+
 // listener for context menu clicks
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -263,6 +271,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     } else if (info.menuItemId === "pin-faktisk-note") {
         pinYellowNote(info, tab, 'webframe', 'faktisk.no');
 
+    } else if (info.menuItemId === "captureSelection") {
+        chrome.tabs.sendMessage(tab.id, { action: "initiateSelection", sharedsecret: "secret1234" });
+
+
     } else if (info.menuItemId === "lookup-yellow-stickynotes") {
         lookup_yellownotes(info, tab);
 
@@ -276,6 +288,24 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         pinYellowNote(info, tab, 'webframe', 'default');
     }
 });
+
+/**
+ * the receiving end of the selctive screen capture functionality
+ * 
+ */
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "capture" && request.coords) {
+      chrome.tabs.captureVisibleTab(null, { format: 'png' }, function (dataUrl) {
+        console.log('Data URL of screenshot:', dataUrl);
+        chrome.storage.local.set({ screenshot: dataUrl }, () => {
+          console.log('Screenshot saved.');
+        });
+        sendResponse({ status: 'success', dataUrl: dataUrl });
+      });
+      return true;  // Indicates asynchronous response
+    }
+  });
+
 
 function pinYellowNote(info, tab, note_type, brand) {
 
@@ -689,6 +719,67 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     url: pluginURL
                 });
             }
+
+        } else if (action == 'create_capture_note') {
+            console.debug("request: create_capture_note");
+
+            console.debug( message.message.coords);
+// determined the identity of the user, then lookup the template toue and the note properties, and return it all to the onctent script 
+
+
+
+var result_msg ={note_properties: "", note_template: "", coords: {} , dataUrl: "", sessiontoken: ""};
+var session_uuid="";
+var sessiontoken="";
+var captureddata;
+
+
+result_msg.coords = message.message.coords;
+
+captureTab()
+        .then(function(dataUrl){
+console.debug("dataUrl: " + dataUrl);
+result_msg.dataUrl = dataUrl;
+           // captureddata = dataUrl;
+return  chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]);
+        }).then(function (result) {
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
+                xYellownotesSession = result[plugin_session_header_name];
+                installationUniqueId = result[plugin_uuid_header_name];
+                sessiontoken = result[plugin_session_header_name];
+                result_msg.sessiontoken = sessiontoken;
+                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
+                console.debug("installationUniqueId: " + installationUniqueId);
+                console.debug("sessiontoken: " + sessiontoken);
+                session_uuid = getUuid(sessiontoken);
+        console.log("session_uuid: " + session_uuid);
+        if (session_uuid == null) {
+            session_uuid = "UNAUTHENTICATED";
+        }else{
+
+        }
+        console.log("session_uuid: " + session_uuid);
+
+        return fetchDataFromApi2(session_uuid);
+    }).then(creatorData => {
+        console.log(creatorData);
+            result_msg.note_properties = creatorData;
+const brand = "default";
+            return getTemplate(brand, "yellownote");
+    }).then(template => {
+
+        console.log(template);
+        result_msg.note_template = template;
+console.log(result_msg);
+            sendResponse(result_msg);
+
+        });
+
+
+
+    
+
 
         } else if (action == 'single_create') {
             console.debug("request: save a new yellow note");
@@ -1379,6 +1470,32 @@ try{
     }
     return true;
 });
+
+
+function captureTab() {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.captureVisibleTab(null, {format: 'png'}, dataUrl => {
+            if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+            } else {
+                resolve(dataUrl);
+            }
+        });
+    });
+}
+
+function saveScreenshot(dataUrl) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.set({screenshot: dataUrl}, () => {
+            if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+            } else {
+                console.log('Screenshot saved.');
+                resolve(dataUrl);
+            }
+        });
+    });
+}
 
 
 // Helper to cache data with a timestamp
