@@ -565,7 +565,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     Default values are specified in the template itself
      */
 
-    var box_width = "250px"; // set default value, override with more specific values if available
+    var box_width = default_box_width + "px"; // set default value, override with more specific values if available
     // attempt to read size parameters from the note object
     if (note_table.hasAttribute("box_width")) {
         console.debug("note_table has box_width, use it ");
@@ -578,7 +578,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     }
     node_root.setAttribute("box_width", box_width);
 
-    var box_height = "250px"; // set default value, override with more specific values if available
+    var box_height = default_box_height + "px"; // set default value, override with more specific values if available
     // attempt to read size parameters from the note object
     if (note_table.hasAttribute("box_height")) {
         console.debug("note_table has box_height, use it");
@@ -1052,6 +1052,7 @@ function save_new_note(event) {
 
         }
 
+
         // new notes do not have a noteid and it one does it is not a new note
         var noteid = null;
         console.debug("noteid: " + noteid);
@@ -1098,10 +1099,24 @@ function save_new_note(event) {
 
             // read out position parameters
             console.debug(note_root);
-            const posx = note_root.getAttribute("posx");
-            const posy = note_root.getAttribute("posy");
-            const box_height = note_root.getAttribute("box_height");
-            const box_width = note_root.getAttribute("box_width");
+            var posx = note_root.getAttribute("posx");
+            if (posx == null || posx == undefined) {
+                posx = 0;
+            }
+            var posy = note_root.getAttribute("posy");
+            if (posy == null || posy == undefined) {
+                posy = 0;
+            }
+            var box_height = note_root.getAttribute("box_height");
+            if (box_height == null || box_height == undefined) {
+                box_height = default_box_height;
+            }
+            var box_width = note_root.getAttribute("box_width");
+if (box_width == null || box_width == undefined) {
+                box_width = default_box_width;
+            }
+
+
 
             const note_type = note_root.getAttribute("note_type");
 
@@ -1115,7 +1130,7 @@ function save_new_note(event) {
             let base64data = utf8_to_b64(selection_text);
             console.log(utf8_to_b64(selection_text));
 
-            const json_create = {
+var  json_create = {
                 message_display_text: utf8_to_b64(message_display_text),
                 selection_text: utf8_to_b64(selection_text),
                 url: url,
@@ -1124,9 +1139,27 @@ function save_new_note(event) {
                 note_type: note_type,
                 posx: posx,
                 posy: posy,
+               
                 box_width: box_width,
                 box_height: box_height
             };
+ 
+            if (note_type == "webframe") {
+                // capture the scroll position of the iframe
+                var framenote_scroll_x = note_root.querySelector('[name="fakeiframe"]').scrollLeft.toString();
+                if (framenote_scroll_x == null || framenote_scroll_x == undefined) {
+                    framenote_scroll_x = 0;
+                }
+                json_create.framenote_scroll_x = framenote_scroll_x  ;
+                var framenote_scroll_y =  note_root.querySelector('[name="fakeiframe"]').scrollTop.toString();
+                if (framenote_scroll_y == null || framenote_scroll_y == undefined) {
+                    framenote_scroll_y = 0;
+                }
+                json_create.framenote_scroll_y =  framenote_scroll_y ;
+            }
+    
+    
+
             console.debug(JSON.stringify(json_create));
 
             // Send save request back to background
@@ -1199,8 +1232,8 @@ function dropdownlist_add_option(node_root, dropdownlist, option_text, option_va
     } catch (e) {
         console.error(e);
     }
-
 }
+
 
 function createDistributionlistDropdown(node_root, dropdownlist, option_text, option_value) {
     // create DOM object of the distribution list dropdown
@@ -1222,6 +1255,7 @@ function createDistributionlistDropdown(node_root, dropdownlist, option_text, op
 
 }
 
+
 // return a drop down html list of all available distribution lists
 function get_distributionlist() {
     console.debug("# get_distributionlist");
@@ -1242,10 +1276,9 @@ function get_distributionlist() {
             console.log(e);
             reject();
         }
-
     });
-
 }
+
 
 function haveValidXYPositons(node_root) {
     return true
@@ -1299,7 +1332,7 @@ function getXYPositionOfDOMElement(element) {
 function highlightTextOccurrences_old(selection_text, rgbcolor) {
     console.debug("highlightTextOccurrences_old with ", rgbcolor);
     // Generate a unique ID for this operation
-    const uniqueId = 'highlight-' + Date.now();
+    var uniqueId = 'highlight-' + Date.now();
 
     let startNode = null;
     let endNode = null;
@@ -1319,7 +1352,7 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
     } = getDOMplacement(selection_text);
 
     console.log("selection_matched_in_document: " + selection_matched_in_document);
-    console.debug("browsersolutions: start_range_node");
+    console.debug("browsersolutions: start_range_node: ");
     console.log(start_range_node);
     console.log("start_offset: " + start_offset);
     console.log(end_range_node);
@@ -1328,12 +1361,17 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
     //console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
 
 
+    if (start_range_node == null) {
+  // No match. return nothing
+  uniqueId = "";
+    }else{
+
     let seqNum = 1;
     var nodecount = textnodelist.length;
     console.log("nodecount: " + nodecount);
 
     if (nodecount == 0) {
-        // No match. return nothing
+        // also no match. return nothing
         uniqueId = "";
         // one one node
     } else if (nodecount == 1) {
@@ -1586,6 +1624,7 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
         span.appendChild(highlight);
         node.parentNode.replaceChild(span, node);
     }
+}
 }
 
 function DELETEhighlightTextOccurrences(text, rgbcolor) {
@@ -2222,7 +2261,8 @@ function getOwnNotes() {
     }
     console.log("browsersolutions " + JSON.stringify(msg));
     chrome.runtime.sendMessage(msg).then(function (response) {
-        console.debug("browsersolutions" + "message sent to backgroup.js with response: " + JSON.stringify(response));
+        console.debug("browsersolutions" + "message sent to backgroup.js with response: " );
+        console.debug(response);
         notes_found = response.notes_found;
         console.log("notes_found");
         console.log(notes_found);
@@ -2481,16 +2521,28 @@ function update_note(event) {
         // capture new positon and size of note
 
         //const posx = processBoxParameterInput(note_root.getAttribute("posx"), 0, 0, 1200);
-        const posx = note_root.getAttribute("posx");
+        var posx = note_root.getAttribute("posx");
+        if (posx == null || posx == undefined) {
+            posx = 0 +"px";
+        }
 
         //const posy = processBoxParameterInput(note_root.getAttribute("posy"), 0, 0, 5000);
-        const posy = note_root.getAttribute("posy");
+        var posy = note_root.getAttribute("posy");
+        if (posy == null || posy == undefined) {
+            posy = 0 +"px";
+        }
 
         //const box_width = processBoxParameterInput(note_root.getAttribute("box_width"), 250, 50, 500);
-        const box_width = note_root.getAttribute("box_width");
+        var box_width = note_root.getAttribute("box_width");
+        if (box_width == null || box_width == undefined) {
+            box_width = default_box_width + "px";
+        }
 
         //const box_height = processBoxParameterInput(note_root.getAttribute("box_height"), 250, 50, 500);
-        const box_height = note_root.getAttribute("box_height");
+        var box_height = note_root.getAttribute("box_height");
+        if (box_height == null || box_height == undefined) {
+            box_height = default_box_height + "px";
+        }
 
         console.debug("message_display_text: " + message_display_text);
         console.debug("url: " + url);
@@ -2498,7 +2550,7 @@ function update_note(event) {
 
         console.debug("selection_text (encoded): " + encoded_selection_text);
 
-        const json_update = {
+        var json_update = {
             message_display_text: utf8_to_b64(message_display_text),
             selection_text: encoded_selection_text,
             url: url,
@@ -2512,7 +2564,26 @@ function update_note(event) {
             box_width: box_width,
             box_height: box_height
         };
-        console.debug(JSON.stringify(json_update));
+
+        if (note_type == "webframe") {
+            // capture the scroll position of the iframe
+            if (note_type == "webframe") {
+                // capture the scroll position of the iframe
+                var framenote_scroll_x = note_root.querySelector('[name="fakeiframe"]').scrollLeft.toString();
+                if (framenote_scroll_x == null || framenote_scroll_x == undefined) {
+                    framenote_scroll_x = "0";
+                }
+                json_update.framenote_scroll_x =  framenote_scroll_x  ;
+                var framenote_scroll_y =  note_root.querySelector('[name="fakeiframe"]').scrollTop.toString();
+                if (framenote_scroll_y == null || framenote_scroll_y == undefined) {
+                    framenote_scroll_y = "0";
+                }
+                json_update.framenote_scroll_y =  framenote_scroll_y ;
+            }
+
+        }
+
+        console.debug(json_update);
 
         // Send save request back to background
         // Stickynotes are always enabled when created.
@@ -3012,7 +3083,7 @@ function DELETEgetSelectionTextDOMPosition(selection_text) {
     //console.debug("browsersolutions: selection_text: " + note_obj.selection_text);
     //var selection_text = "";
     try {
-        if (selection_text != "" && selection_text != null) {
+        if (selection_text != "" && selection_text != null && selection_text != undefined) {
 
             console.debug("browsersolutions: selection_text: " + selection_text);
 
@@ -3154,6 +3225,8 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                             newGloveboxNode.setAttribute("button_arrangment", "ro");
                         }
 
+                        // internal scrolling for webframes
+
                         // Make the stickynote draggable:
                         console.debug("browsersolutions: makeDragAndResize");
                         makeDragAndResize(newGloveboxNode);
@@ -3277,7 +3350,7 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                             //}
                         }
                         // if the text was found in the document, the highlightuniqueid will be set to a value other than "0"
-                        if (highlightuniqueid !== "0") {
+                        if (highlightuniqueid !== "0" && highlightuniqueid !== "" && highlightuniqueid !== null  && highlightuniqueid !== undefined) {
 
                             console.debug("browsersolutions: selection_matched_in_document: true");
 
@@ -3331,7 +3404,6 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                 if (moveFocus) {
                                     moveFocusToNote(noteid);
                                 }
-
                                 //return;
                             });
 
@@ -4147,10 +4219,10 @@ function load_url(event) {
             //cont1.querySelector('input[id="urlInput"]').value = note_object_data.content_url;
 
             // start the process of looking up the content
-            var content_iframe = note_root.querySelector('#contentFrame');
-            console.log("content_iframe: " + content_iframe);
-            // console.log(content_iframe);
-
+            var content_iframe = note_root.querySelector('[name="contentFrame"]');
+            console.log("content_iframe: ");
+            console.log(content_iframe);
+var resp;
             // send message to background serviceworker and it will lookup the URL. This is to bypass any CORS issues
             // Send save request back to background
             // Stickynotes are always enabled when created.
@@ -4161,10 +4233,26 @@ function load_url(event) {
                     "url": url
                 }
             }).then(function (response) {
-                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                resp = response;
+                console.debug("message sent to backgroup.js with response: " + response);
                 // render content of ifram based on this
                 //console.log(getYellowStickyNoteRoot(event.target));
                 setContentInIframe(content_iframe, response);
+
+                 //set scroll position
+                 var framenote_scroll_y = 0;
+                 if (note_object_data.framenote_scroll_x !== undefined) {
+                     framenote_scroll_x =  note_object_data.framenote_scroll_x;
+                     cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
+                 }
+                 var framenote_scroll_y = 0;
+                 if (note_object_data.framenote_scroll_y !== undefined) {
+                     framenote_scroll_y =  note_object_data.framenote_scroll_y;
+                     cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
+                 }
+console.log("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
+
+
                 resolve(response);
             });
 
@@ -4173,6 +4261,9 @@ function load_url(event) {
         }
     });
 }
+
+
+
 
 function increaseVerticalDistanceUsingTop(element1, element2) {
     // Ensure that both elements are valid DOM elements
@@ -4284,6 +4375,15 @@ function nodesAreIdentical(node1, node2) {
 
 function getDOMplacement(selection_text) {
     console.debug("getDOMplacement.start");
+    var selection_matched_in_document = false;
+
+ // start
+ var start_range_node = null;
+ var start_offset = 0;
+ var textnodelist = [];
+ // end
+ var end_range_node = null;
+ var end_offset = 0;
     if (selection_text !== undefined && selection_text.length > 0) {
 
 
@@ -4297,39 +4397,35 @@ function getDOMplacement(selection_text) {
 
 
         //var message_display_text = note_obj.message_display_text;
-        var selection_matched_in_document = false;
+       
+        var msg ={};
 
-        // start
-        var start_range_node;
-        var start_offset = 0;
-        var textnodelist = [];
-        // end
-        var end_range_node;
-        var end_offset = 0;
+       
         // using the position of the start of the selection text within the whole text, determine the start node where the selection begins
         // try to match the selection text to the text in the document
         console.debug("getDOMposition: " + "selection_text: " + selection_text);
         var one = getDOMposition(selection_text);
-        console.debug("getDOMposition output " + JSON.stringify(one));
+        console.debug("getDOMposition output: " );
+        console.debug(one);
         // Now the starting node for the selection is found, as well as the end node (and character offset within the nodes)
-        if (one === undefined) {
+        if (one === undefined || one === null) {
             console.log("browsersolutions: " + "This is undefined");
             // not place to in the page to attach the note to. place it on top of the page
-            start_range_node = document.querySelector(':root');
-            start_offset = 0;
+            //start_range_node = document.querySelector(':root');
+            //start_offset = 0;
             // end
-            end_range_node = start_range_node;
-            end_offset = 0;
+            //end_range_node = start_range_node;
+            //end_offset = 0;
         } else {
             console.debug("browsersolutions: " + JSON.stringify(one));
             if (one.start_range_node === undefined) {
                 console.debug("browsersolutions: unable to locate the selection text");
                 // if the selection text in the note is not matchable on the page, something that will be a common occurence on dynamic sites, place the note on top of the page
-                start_range_node = document.querySelector(':root');
-                start_offset = 0;
+                //start_range_node = null;
+                //start_offset = 0;
                 // end
-                end_range_node = start_range_node;
-                end_offset = 0;
+                //end_range_node = start_range_node;
+                //end_offset = 0;
             } else {
                 selection_matched_in_document = true;
                 start_range_node = one.start_range_node;
@@ -4341,11 +4437,11 @@ function getDOMplacement(selection_text) {
         }
     } else {
         // No text selected in the note that can anchor the palcement of the note to the page. Place the note on top of the page
-        start_range_node = document.querySelector(':root');
-        start_offset = 0;
+        //start_range_node = document.querySelector(':root');
+        //start_offset = 0;
         // end
-        end_range_node = start_range_node;
-        end_offset = 0;
+        //end_range_node = start_range_node;
+       // end_offset = 0;
     }
     console.debug("start_range_node");
     console.debug(start_range_node);
@@ -4569,9 +4665,9 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                 }
 
                 // start the process of looking up the content
-                var content_iframe = cont1.querySelector('#contentFrame');
-                console.log("content_iframe: " + content_iframe);
-                // console.log(content_iframe);
+                var content_iframe = cont1.querySelector('[name="contentFrame"]');
+                //console.log("content_iframe: " );
+                //console.log(content_iframe);
 
                 // send message to background serviceworker and it will lookup the URL. This is to bypass any CORS issues
                 // Send save request back to background
@@ -4587,6 +4683,21 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                     // render content of ifram based on this
                     //console.log(getYellowStickyNoteRoot(event.target));
                     setContentInIframe(content_iframe, response);
+
+                    //set scroll position
+                    var framenote_scroll_y = "0";
+                    if (note_object_data.framenote_scroll_x !== undefined) {
+                        framenote_scroll_x =  note_object_data.framenote_scroll_x;
+                        cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
+                    }
+                    var framenote_scroll_y = "0";
+                    if (note_object_data.framenote_scroll_y !== undefined) {
+                        framenote_scroll_y =  note_object_data.framenote_scroll_y;
+                        cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
+                    }
+console.log("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
+                    content_iframe.contentWindow.scrollTo(scrollPosition.x, framenote_scroll_y);
+
                     resolve(cont1);
                 });
 
@@ -4796,8 +4907,8 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
         // then replace those values with more specific ones if they are available
 
         // set defaults
-        var box_width = "250px";
-        var box_height = "250px";
+        var box_width = default_box_width+ "px";
+        var box_height = default_box_height + "px";
 
         // check for template-specific values - not implemented yet
 
@@ -4838,10 +4949,16 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
 }
 
 function setContentInIframe(iframe, content) {
-    console.debug("# setContentInIframe");
+    console.debug("# setContentInIframe.start");
+    //console.debug(iframe);
+    //console.debug(content);
     //const iframe = document.getElementById(iframeId);
     if (iframe) {
         iframe.srcdoc = content; // Using srcdoc to set the content
+
+
+
+
     } else {
         console.error('Iframe not found');
     }
@@ -5467,19 +5584,24 @@ function update_note_internal_size(box_width, box_height, note) {
     console.debug("box_width: " + box_width);
     console.debug("box_height: " + box_height);
     console.debug(note);
-
+const note_type = note.getAttribute("note_type");
     // update some internal objects in the note object to reflect the new overall size of the note
     const usable_width = (parseInt(box_width) - note_internal_width_padding);
     const usable_height = (parseInt(box_height) - note_internal_height_padding);
     console.debug("setting new content frame usable width " + usable_width);
     console.debug("setting new content frame usable height " + usable_height);
 
+    if (note_type === "webframe") {
     try {
-        note.querySelector('[name="contentFrame"]').style.width = usable_width + 'px';
-        note.querySelector('[name="contentFrame"]').style.height = usable_height + 'px';
+        console.debug("setting new (fake)iframe width " + usable_width);
+        note.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
+        note.querySelector('[name="fakeiframe"]').style.height = ( usable_height - note_owners_control_bar_height) + 'px';
+
+
 
     } catch (e) {
         //console.error(e);
+    }
     }
     try {
         note.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
@@ -5488,13 +5610,14 @@ function update_note_internal_size(box_width, box_height, note) {
         //console.error(e);
     }
 
+    if (note_type === "yellownote") {
     try {
         note.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
         note.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
     } catch (e) {
         console.error(e);
     }
-
+    }
     try {
 
         note.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';
@@ -5694,7 +5817,7 @@ function updateClipboard(newClip) {
  * make different parts of the graphical elements visible or not.
  */
 function setComponentVisibility(note, visibility) {
-    console.debug("# setComponentVisibility " + visibility);
+    console.debug("# setComponentVisibility.start " + visibility);
     console.debug(note);
     const regex = new RegExp(visibility, 'i');
     const allElements = note.querySelectorAll('[ subcomponentvisibility ]');
@@ -5995,15 +6118,23 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     console.debug("setting new content frame usable width " + usable_width);
     console.debug("setting new content frame usable height " + usable_height);
 
+    const note_type = insertedNode.getAttribute("note_type");
+
     // one of the following two will fail, depeding on the type of note this is
     try {
-        insertedNode.querySelector('[name="contentFrame"]').style.width = usable_width + 'px';
-        insertedNode.querySelector('[name="contentFrame"]').style.height = usable_height + 'px';
-
+        if (note_type === "webframe") {
+            insertedNode.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
+            insertedNode.querySelector('[name="fakeiframe"]').style.height = usable_height + 'px';
+        }
+        
     } catch (e) {
         //console.error(e);
     }
     try {
+        if (note_type === "yellownote") {
+            insertedNode.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
+            insertedNode.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
+        }
         insertedNode.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
         insertedNode.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
     } catch (e) {
@@ -6022,6 +6153,9 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     console.debug(insertedNode);
 
     console.debug("size_and_place_note_based_on_texthighlight.end");
+
+    
+
 }
 
 function placeNodeRelativeTo(firstNode, secondNode, x, y) {
@@ -6131,6 +6265,25 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
 
     //newGloveboxNode.style.position = 'relative';
 
+// for webframes, set any aplicable internal scrolling
+const node_type = insertedNode.getAttribute("note_type");
+
+if (node_type === "webframe") {
+
+    try {
+        const scroll_x = note_obj.framenote_scroll_x;
+        const scroll_y = note_obj.framenote_scroll_y;
+        console.debug("webframe scroll_x: " + scroll_x);
+        console.debug("webframe scroll_y: " + scroll_y);
+        if (scroll_x !== undefined && scroll_y !== undefined) {
+        insertedNode.querySelector('[name="fakeiframe"]').scrollLeft = scroll_x;
+        insertedNode.querySelector('[name="fakeiframe"]').scrollTop = scroll_y;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
     // set default values first
     // then replace those values with more specific ones if they are available
     var box_width = "250px";
@@ -6174,7 +6327,6 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
         insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height + 'px';
     }
     insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height;
-
     insertedNode.querySelector('[name="whole_note_table"]').style.position = "absolute";
 
     // update the size of some other fields in the note object
@@ -6196,20 +6348,31 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
     console.debug("setting new content frame usable width " + usable_width);
     console.debug("setting new content frame usable height " + usable_height);
 
-    try {
-        insertedNode.querySelector('[name="contentFrame"]').style.width = usable_width + 'px';
-        insertedNode.querySelector('[name="contentFrame"]').style.height = usable_height + 'px';
+    const note_type = insertedNode.getAttribute("note_type");
 
-    } catch (e) {
-        console.error(e);
-    }
-    try {
-        insertedNode.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
-        insertedNode.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
-    } catch (e) {
-        console.error(e);
-    }
+    if (note_type === "webframe") {
+        try {
+            insertedNode.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
+            insertedNode.querySelector('[name="fakeiframe"]').style.height = usable_height + 'px';
+        } catch (e) {
+            console.error(e);
+        }
+    }else if (note_type === "yellownote") {
+        try {
+            insertedNode.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
+            insertedNode.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
+        } catch (e) {
+            console.error(e);
+        }
+    
 
+        try {
+            insertedNode.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
+            insertedNode.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
+        } catch (e) {
+            console.error(e);
+        }
+    }
     try {
 
         insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';

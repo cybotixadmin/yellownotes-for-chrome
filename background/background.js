@@ -255,29 +255,22 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
     if (info.menuItemId === "create-yellownote") {
         console.debug("# create-yellownote");
-
         // use embeded as the content type. It captures more data some of which will not be used, but it more likely to be uniquely anchored.
         //create_yellownote(info, tab, 'anchor');
         pinYellowNote(info, tab, 'yellownote', 'default');
-
     } else if (info.menuItemId === "pin-content-note") {
         // pinContentNote(info, tab, 'webframe', 'default');
         pinYellowNote(info, tab, 'webframe', 'default');
     } else if (info.menuItemId === "pin-dagensneringsliv-note") {
         pinYellowNote(info, tab, 'webframe', 'dagensneringsliv');
-
     } else if (info.menuItemId === "pin-klassekampen-note") {
         pinYellowNote(info, tab, 'webframe', 'klassekampen.no');
     } else if (info.menuItemId === "pin-faktisk-note") {
         pinYellowNote(info, tab, 'webframe', 'faktisk.no');
-
     } else if (info.menuItemId === "captureSelection") {
         chrome.tabs.sendMessage(tab.id, { action: "initiateSelection", sharedsecret: "secret1234" });
-
-
     } else if (info.menuItemId === "lookup-yellow-stickynotes") {
         lookup_yellownotes(info, tab);
-
     } else if (info.menuItemId === "create-free-yellownote") {
         console.debug("# create-free-yellownote");
         //create_free_yellownote(info, tab);
@@ -439,8 +432,9 @@ note_properties = {
     }catch(e){
         console.log(e);
     }
-
 }
+
+
 
 // for access to admin page there is a separate listener
 //chrome.browserAction.onClicked.addListener(() => {
@@ -530,6 +524,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             } catch (e) {
                 console.log(e);
             }
+        } else if (action === "DELETEinjectIframeScript") {
+            console.log("action: injectIframeScript")
+            chrome.scripting.executeScript({
+                target: {tabId: sender.tab.id, frameIds: [sender.frameId]},
+                files: ['./content_scripts/contentScriptForIframe.js']
+            });
+
         } else if (action === "setSliderDefaultPosition") {
             // set slider default position
             // for new pages, or pages where no setting has been made, this is the default
@@ -633,13 +634,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.log("simple_url_lookup " + JSON.stringify(message));
             // upen a tab and get a URL, then close the tab
 
-            console.log("simple_url_lookup");
+            
             const url = message.message.url;
             console.log(url);
             if (url == "") {
                 sendResponse(null);
             } else {
-                // call to the "cookie jar" to collect any cookies pertaining to this URL.
+                // the tab opening above is required to be able to invoke the "cookie jar"
+                // Call to the cookie jar to collect any cookies pertaining to this URL.
                 // this is essetial for authentication purposes. The cookies are needed to authenticate the user with the server.
                 // session cookie are generallt set to SameSite = lax,
                 // which means that they are not sent to the server when the url is being opened from inside an iframe
@@ -649,8 +651,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     // make a fetch to get the page content, using the cookies retieved above
 
                     return fetchContentWithCookies(url, cookies);
+                    //return capturePageForEmbedingInIframe(url, cookies);
+
+                    // run with capturing embeddings - suitable for sandboxing
+                    //return capturePageAndProcess(url, cookies);
+               
+
                 }).then(content => {
-                    console.log('Fetched content:', content);
+                    //console.log('Fetched web page content:', content);
                     sendResponse(content);
                 })
                 .catch(error => {
@@ -1929,7 +1937,11 @@ function findTabsAndSendMessage(url, message) {
 function createCookieHeader(cookies) {
     return cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
 }
+/*
+call to collect a webpage
+include relevant cookies that have been set for this URL earlier. This is essential for sites requiring authentication, as this information is stored in the cookies.
 
+*/
 function fetchContentWithCookies(url, cookies) {
     const cookieHeader = createCookieHeader(cookies);
 
@@ -1950,6 +1962,184 @@ function fetchContentWithCookies(url, cookies) {
         .catch(error => reject(error));
     });
 }
+
+
+function capturePageForEmbedingInIframe(url, cookieString) {
+    const cookieHeader = createCookieHeader(cookieString);
+    return new Promise((resolve, reject) => {
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Cookie': cookieString,
+                'Content-Type': 'text/html'
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.text();
+        })
+        .then(html => inlineResources(html, url, cookieString))
+        .then(inlineHtml => {
+            console.log('Captured and inlined resources for', url);
+            console.log(inlineHtml);
+            const blob = new Blob([inlineHtml], { type: 'text/html' });
+           // const blobUrl = URL.createObjectURL(blob);
+            const blobUrl = blobToDataURI(blob);
+            
+
+            resolve(inlineHtml);
+        })
+        .catch(error => {
+            console.error('Failed to capture and inline resources:', error);
+            reject(error);
+        });
+    });
+}
+
+
+function fetchResourceAsDataURI(url, cookieString) {
+    console.debug("fetchResourceAsDataURI.start");
+    console.log('Fetching resource as data URI:', url);
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error(`Network response was not ok for ${url}`);
+            return response.blob();
+        })
+        .then(blob => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        });
+}
+
+function inlineResources(html, baseUrl, cookieString) {
+    console.debug("inlineResources.start");
+    console.log('Inlining resources for', baseUrl);
+    console.log('Cookie string:', cookieString);
+    console.log('HTML:', html);
+    // Regex to find image and link tags
+    const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+    const cssRegex = /<link[^>]+href=["']([^"']+)["'][^>]*rel=["']stylesheet["'][^>]*>/gi;
+
+    // Function to replace URL with data URI
+    function replaceWithDataURL(original, url, cookieString) {
+        console.debug("replaceWithDataURL.start");
+        console.debug("original: " + original);
+        console.log('Replacing URL with data URI:', url);
+        const fullUrl = new URL(url, baseUrl).href;
+        return fetchResourceAsDataURI(fullUrl, cookieString)
+            .then(dataUri => {
+                console.log('Incomming data URI:', dataUri);
+                console.debug("replace ", original);
+                console.debug("with ", original.replace(url, dataUri));
+                console.debug("in ", html);
+                const result = html.replace(original, original.replace(url, dataUri));
+                console.debug("result: ", result);
+                return result;
+            })
+            .catch(error => {
+                console.error(`Failed to load resource ${fullUrl}:`, error);
+                return html; // Return the original html if the fetch fails
+            });
+    }
+
+    // Collect all promises from replacements
+    const replacements = [];
+
+    // Handle images
+    let match;
+    while ((match = imgRegex.exec(html)) !== null) {
+        replacements.push(replaceWithDataURL(match[0], match[1], cookieString));
+    }
+
+    // Handle CSS
+    while ((match = cssRegex.exec(html)) !== null) {
+        replacements.push(replaceWithDataURL(match[0], match[1], cookieString));
+    }
+
+    // Resolve all replacements
+    return Promise.all(replacements).then(() => html);
+}
+
+function blobToDataURI(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function() {
+            resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+function fetchResourceAsDataURI(url, cookieString) {
+    console.debug("fetchResourceAsDataURI.start");
+    return fetch(url, {
+        headers: {
+            'Cookie': cookieString
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`Network response was not ok for ${url}`);
+        return response.blob();
+    })
+    .then(blob => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    });
+}
+
+function capturePageAndProcess(url, cookieString) {
+    console.debug("capturePageAndProcess.start");
+    console.log(url);
+    return fetch(url, {
+        headers: {
+            'Cookie': cookieString
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.text();
+    })
+    .then(html => {
+        const urlPattern = /<img src="([^"]+)"|<link rel="stylesheet" href="([^"]+)"/g;
+        const replacements = [];
+        let match;
+
+        // Gather all resource URLs and their intended replacements
+        while ((match = urlPattern.exec(html)) !== null) {
+            const resourceUrl = match[1] || match[2]; // Depending on whether it's an img or link tag
+            const absoluteUrl = new URL(resourceUrl, url).href; // Resolve relative URLs
+
+            // Create a replacement promise
+            const replacementPromise = fetchResourceAsDataURI(absoluteUrl, cookieString)
+                .then(dataUri => {
+                    return { old: resourceUrl, new: dataUri };
+                });
+            
+            replacements.push(replacementPromise);
+        }
+
+        return Promise.all(replacements).then(replacementsInfo => {
+            // Replace all resource URLs with their corresponding data URIs
+            replacementsInfo.forEach(replace => {
+                html = html.replace(new RegExp(replace.old, 'g'), replace.new);
+            });
+            return html;
+        });
+    });
+}
+
+
+
 
 let cookiesInMemory = {};
 
