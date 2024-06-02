@@ -306,7 +306,7 @@ async function fetchData() {
             });
         
         if (!response.ok) {
-            reject(new Error('Network response was not ok'));
+            new Error('Network response was not ok');
         }
       
         const data = await response.json();

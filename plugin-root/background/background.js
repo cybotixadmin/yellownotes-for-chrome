@@ -66,6 +66,14 @@ Key is tab id
  */
 var in_memory_tab_settings = {};
 
+// to make this code compatible with firefox, we need to check if the browser object is defined. If not, we define it as chrome.
+if (typeof browser === "undefined") {
+    var browser = chrome;
+  }
+
+  const extension = (typeof browser !== "undefined") ? browser : chrome;
+
+
 /** Check if a unique ID has been set for this extenstion. It not, set one.
  * This ID is used to identify the user with the server without the user having to provide any information.
  * The level of security is weak, but it is sufficient for the purpose of this tool when used in the unauthenticated-mode.
@@ -2143,6 +2151,52 @@ function capturePageAndProcess(url, cookieString) {
 
 let cookiesInMemory = {};
 
+
+/* ############## 
+redirection to Yellow Notes on-plugin hosted GUI pages happens here
+*/
+
+
+
+const pattern = /^https:\/\/www+.yellownotes+.cloud\/pages(\/.*)?$/;
+
+browser.webRequest.onBeforeRequest.addListener(
+  function(details) {
+    console.log(details);
+    const match = pattern.exec(details.url);
+    if (match) {
+      const newPath = match[1] || "";
+      return {
+        redirectUrl: browser.runtime.getURL("pages" + newPath)
+      };
+    }
+  },
+  {  urls: ["*://www.yellownotes.cloud/pages/*"] },
+  ["blocking"]
+);
+
+
+chrome.webRequest.onBeforeRequest.addListener(
+    (details) => {
+    console.log(details);
+    console.log(details.responseHeaders);
+    console.log("looking for " + plugin_session_header_name);
+    const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === plugin_session_header_name);
+    console.log('Possible Yellownotes session authentication header detected * * * * * *');
+    if (xSessionHeader) {
+        console.log('Yellownotes session value:' + xSessionHeader.value);
+        chrome.storage.local.set({
+            [plugin_session_header_name]: xSessionHeader.value
+        }, () => {
+            console.log('Yellownotes Value saved in local storage (on ', plugin_session_header_name, '): ', xSessionHeader.value);
+        });
+    }
+}, {
+    urls: ["*://www.yellownotes.cloud/pages/*"]
+},
+    ["responseHeaders"]);
+
+
 /* #############################
 
 Authentication to Yellow Notes Cloud infrastructure takes place here
@@ -2186,6 +2240,8 @@ chrome.webRequest.onHeadersReceived.addListener(
     urls: ["*://www.yellownotes.cloud/logout_silent*"]
 },
     ["responseHeaders"]);
+
+
 
 function logHeaders(tabId, url) {
     console.log('Listening for headers on tab:', tabId);
