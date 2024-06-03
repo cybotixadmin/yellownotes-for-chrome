@@ -2152,50 +2152,6 @@ function capturePageAndProcess(url, cookieString) {
 let cookiesInMemory = {};
 
 
-/* ############## 
-redirection to Yellow Notes on-plugin hosted GUI pages happens here
-*/
-
-
-
-const pattern = /^https:\/\/www+.yellownotes+.cloud\/pages(\/.*)?$/;
-
-browser.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    console.log(details);
-    const match = pattern.exec(details.url);
-    if (match) {
-      const newPath = match[1] || "";
-      return {
-        redirectUrl: browser.runtime.getURL("pages" + newPath)
-      };
-    }
-  },
-  {  urls: ["*://www.yellownotes.cloud/pages/*"] },
-  ["blocking"]
-);
-
-
-chrome.webRequest.onBeforeRequest.addListener(
-    (details) => {
-    console.log(details);
-    console.log(details.responseHeaders);
-    console.log("looking for " + plugin_session_header_name);
-    const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === plugin_session_header_name);
-    console.log('Possible Yellownotes session authentication header detected * * * * * *');
-    if (xSessionHeader) {
-        console.log('Yellownotes session value:' + xSessionHeader.value);
-        chrome.storage.local.set({
-            [plugin_session_header_name]: xSessionHeader.value
-        }, () => {
-            console.log('Yellownotes Value saved in local storage (on ', plugin_session_header_name, '): ', xSessionHeader.value);
-        });
-    }
-}, {
-    urls: ["*://www.yellownotes.cloud/pages/*"]
-},
-    ["responseHeaders"]);
-
 
 /* #############################
 

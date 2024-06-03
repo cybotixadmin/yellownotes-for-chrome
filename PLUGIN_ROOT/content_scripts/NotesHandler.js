@@ -1005,7 +1005,10 @@ function setBackground(newBackgroundRGB, note_root) {
     });
 }
 
+
 function hexToRGB(hex) {
+    console.debug("browsersolutions ### hexToRGB (" + hex + ")");
+    try{
     // Remove the leading '#' if it exists
     if (hex.charAt(0) === '#') {
         hex = hex.slice(1);
@@ -1018,6 +1021,11 @@ function hexToRGB(hex) {
 
     // Return the RGB string
     return `${r},${g},${b}`;
+} catch (e) {
+    console.error(e);
+    // return the default color
+    return "255,255,0";
+}
 }
 
 function save_new_note(event) {
