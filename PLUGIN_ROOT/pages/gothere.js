@@ -18,6 +18,11 @@ chrome.runtime.sendMessage({
 }).then(function (ret) {
     console.debug("ret: ");
     console.debug(ret);
+    // check if any data was returned
+    if (ret == null) {
+        console.debug("no data returned");
+        throw new Error('Initial Fetch Error: no data returned' );
+    }
     console.debug(ret.session_uuid);
     const uuid  = ret.session_uuid
     console.log("uuid: ", uuid);
@@ -61,7 +66,7 @@ chrome.runtime.sendMessage({
     //  }catch(g){console.debug(g);}
 
 }).catch(function (error) {
-    console.error("error: " + error);
+    console.log("error: " + error);
 });
 
 // Function to get the value of the 'dist' query string parameter

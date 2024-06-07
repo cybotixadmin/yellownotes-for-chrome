@@ -4,7 +4,7 @@
     "author": "The BrowserSolutions Team",
     "description": "__MSG_appDesc__",
     "homepage_url": "https://www.yellownotes.cloud/",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "icons": {
         "32": "icons/yellownotecloud-32x32.png",
         "48": "icons/yellownotecloud-48x48.png",
@@ -18,7 +18,7 @@
         "default_popup": "./popup/popup.html",
         "default_icon": "icons/yellownotecloud-200x200.png",
         "theme_icons": [{
-                "light": "iconsyellownotecloud-48x48.png",
+                "light": "icons/yellownotecloud-48x48.png",
                 "dark": "icons/yellownotecloud-48x48.png",
                 "size": 32
             }

@@ -1292,14 +1292,26 @@ try{
             }).then(function (response) {
                 console.log(response);
                 if (!response.ok) {
+                    console.debug("error: ", response.statusText);
                     throw new Error('Initial Fetch Error: ' + response.statusText);
-                }
+                    //return null;
+                    sendResponse(null);
+                }else{
                 // examine each note and for each note creator lookup the note formating infomation for the creator of the note
                 // this is needed to display the note in the correct format
 
 
                 return response.json();
+                }
             }).then(initialData => {
+                // check if the returned data is defined 
+
+                if (initialData == undefined) {
+                    console.debug("error: initialData is undefined"); 
+                    sendResponse(null);
+                }else{
+                console.log(initialData);
+                }
                 console.log(JSON.stringify(initialData));
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
@@ -1325,6 +1337,9 @@ try{
 
                 sendResponse(msg);
 
+            }).catch(function (error) {
+                console.log(error);
+                sendResponse(null);
             });
             return true;
 
@@ -1709,7 +1724,7 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab, ses
 
                 if (tabs.length == 0 || openNewTab) {
                     // If no tabs with the URL are found, or openNewTab=true, create a new tab
-                    chrome.tabs.update({
+                    chrome.tabs.create({
                         url: url
                     }, function (tab) {
                         console.log('Updated tab:', tab.id);

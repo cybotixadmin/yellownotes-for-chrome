@@ -200,12 +200,11 @@ function createNoteShareLink(datarow) {
     }
 
     // place the url value in the clipboard
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        console.log('Invitation URL copied to clipboard: ' + textToCopy);
-
-    }).catch(err => {
-        console.error('Error in copying text: ', err);
-    });
+   // navigator.clipboard.writeText(textToCopy).then(() => {
+   //     console.log('Invitation URL copied to clipboard: ' + textToCopy);
+    //}).catch(err => {
+   //     console.error('Error in copying text: ', err);
+   // });
     return textToCopy;
 }
 
@@ -510,27 +509,25 @@ function render() {
             });
         }).then(response => {
             if (!response.ok) {
-                // if an invalid session token was sent, it should be removed from the local storage
                 console.log(response);
 
+                // if an invalid session token was sent, it should be removed from the local storage
                 if (response.status == 401) {
                     // compare the response body with the string "Invalid session token" to determine if the session token is invalid
-
-                    response.text().then(body => {
-                        if (body.includes("Session token invalid")) {
-                            console.log("Session token is invalid, remove it from local storage.");
+if(response.headers.get("session") == "DELETE_COOKIE"){
+    console.log("Session token is invalid, remove it from local storage.");
                             chrome.storage.local.remove([plugin_session_header_name]);
                             // redirect to the front page returning the user to unauthenticated status.
                             // unauthenticated functionality will be in effect until the user authenticates
                             window.location.href = "/pages/my_account.html";
                             reject('logout');
                         } else {
-                            reject(new Error('Network response was not ok'));
+                            reject('Network response was not ok');
                         }
-                    });
+                   
                 } else {
 
-                    reject(new Error('Network response was not ok'));
+                    reject('Network response was not ok');
                 }
             } else {
                 return response.json();

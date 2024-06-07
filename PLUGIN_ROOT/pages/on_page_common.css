@@ -9,6 +9,7 @@ body {
 
 }
 
+
 /* body text */
 .text-body {
   font-size: 20px;
@@ -36,6 +37,15 @@ margin-top: 20px;
 margin-bottom: 20px;
 }
 
+.on_page_title {
+  font-size: 2em;
+  color: black;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  }
+  
 
 
 h1 {

@@ -7,6 +7,7 @@ checkSessionJWTValidity()
 if (isValid){
     console.debug("JWT is valid - show menu accordingly");
     fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/edit_note_creator_default_template_top_text.html", "edit_note_creator_default_template_top_text").then(() => {});
     fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
         //page_display_login_status();
        // login_logout_action();
@@ -15,12 +16,7 @@ if (isValid){
       page_display_login_status();
 }else{
     console.debug("JWT is not valid - show menu accordingly");
-    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
-    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
-        //page_display_login_status();
-        //login_logout_action();
-      
-      });
+   
       
       page_display_login_status();
     }
