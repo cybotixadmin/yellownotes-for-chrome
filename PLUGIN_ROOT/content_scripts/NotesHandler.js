@@ -145,7 +145,9 @@ function listener(request, sender, sendResponse) {
                 return true;
 
             } else if (request.action == "initiateSelection") {
-
+/*
+ * selecting an area of the screen to capture
+ */
                 console.log("initiateSelection");
                 showMessage("Click and drag to select the area for capture.");
 
@@ -211,6 +213,9 @@ function listener(request, sender, sendResponse) {
                 }
 
                 function captureAndProcessSelection(x1, y1, x2, y2) {
+                    console.log('Capturing and processing selection');
+                    var datauri ;
+                    console.log(x1, y1, x2, y2);
                     // Placeholder for capturing and processing logic
                     const captureData = {
                         x1,
@@ -218,8 +223,71 @@ function listener(request, sender, sendResponse) {
                         x2,
                         y2
                     }; // Simulated capture data
+                    var linkedContentUniqueid = "";
                     processData(captureData)
-                    .then(processedData => displayTable(processedData, x1, y1))
+                    .then(function(processedData){
+                       console.log(processedData);
+                       datauri = processedData;
+                       return displayTable(processedData, x1, y1)
+                })
+                    .then( function(id){
+                        linkedContentUniqueid = id;
+                        console.log("linkedContentUniqueid: " + linkedContentUniqueid); 
+// call out to get information about the note over
+const request_msg = {
+    message: {
+        "action": "get_note_creator_info"
+    }
+}
+console.log("request to background: ");
+
+console.log(request_msg);
+
+return chrome.runtime.sendMessage(request_msg);
+
+}).then(function (response) {
+console.debug("message sent to backgroup.js with response: ");
+console.debug(response);
+// call out to create the note
+//create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (response) {
+const note_obj={}
+var note_template = safeParseInnerHTML(response.note_template, 'div');
+    create_stickynote_node(note_obj, note_template, response.note_properties, true, true).then(function (res) {
+    console.debug("message sent to backgroup.js with response: ");
+    
+    // link in the captured image
+    res.linkedContentUniqueid = linkedContentUniqueid;
+    console.debug(res);
+    // 
+
+    const newGloveboxNode = size_and_place_note_based_on_coordinates(res, note_obj, true, true);
+
+    newGloveboxNode.linkedContentUniqueid = linkedContentUniqueid;
+    // newGloveboxNode.setAttribute("linkedContentUniqueid", linkedContentUniqueid);
+    newGloveboxNode.querySelector('input[type="hidden"][name="captured_image_datauri"]').replaceChildren(document.createTextNode(datauri));
+
+
+    newGloveboxNode.setAttribute("note_type", "capture_note");
+    console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
+    attachEventlistenersToYellowStickynote(newGloveboxNode);
+    // make some parts visible and other not visible
+        console.debug("browsersolutions: makeEditButtonsVisible");
+        console.debug("calling setComponentVisibility");
+        setComponentVisibility(newGloveboxNode, ",new,.*normalsized");
+        newGloveboxNode.setAttribute("button_arrangment", "rw");
+ 
+
+    // internal scrolling for webframes
+
+    // Make the stickynote draggable:
+    console.debug("browsersolutions: makeDragAndResize");
+    makeDragAndResize(newGloveboxNode);
+
+    });
+
+
+
+                    })
                     .catch(error => console.error("Error processing data:", error));
                 }
 
@@ -230,6 +298,7 @@ function listener(request, sender, sendResponse) {
                     // Send save request back to background to get the required information for creting a blank sticky note
                     // Stickynotes are always enabled when created.
                     var resp;
+                    return new Promise((resolve, reject) => {
                     chrome.runtime.sendMessage({
                         message: {
                             "action": "create_capture_note",
@@ -244,13 +313,10 @@ function listener(request, sender, sendResponse) {
                         return cropImage(resp.dataUrl, data);
                     }).then(function (croppedImage) {
                         console.log(croppedImage);
+                        resolve(croppedImage);
                         // update the with the just cropped image
-                        resp.dataUrl = croppedImage;
-                        console.debug(resp);
-
-                        // call the function that will create the note
-
-                        create_newstickynote_node(resp, "capture_note", resp.note_template, resp.note_properties, resp.sessiontoken);
+                     //   resp.dataUrl = croppedImage;
+                    //    console.debug(resp);
 
                         // call the function that will set which part of the note will be displayed
                         // setComponentVisibility(note_root, ",rw,.*normalsized,");
@@ -259,21 +325,43 @@ function listener(request, sender, sendResponse) {
 
                     });
 
-                    return new Promise((resolve, reject) => {
-                        setTimeout(() => resolve({
-                                result: "Processed Data"
-                            }), 1000); // Simulate async operation
+                   
+                       
                     });
                 }
 
                 function displayTable(data, x, y) {
-                    const table = document.createElement('table');
-                    table.style.position = 'fixed';
-                    table.style.left = `${x}px`;
-                    table.style.top = `${y}px`;
-                    table.style.zIndex = '10001';
-                    table.innerHTML = `<tr><td>${data.result}</td></tr>`; // Simplified table content
-                    document.body.appendChild(table);
+                    console.log("Displaying table...");
+                    // Diplay the captured image data on page overlaying the original 
+                    const capturedImageFrameTable = document.createElement('table');
+                    capturedImageFrameTable.style.position = 'fixed';
+                    capturedImageFrameTable.style.left = `${x}px`;
+                    capturedImageFrameTable.style.top = `${y}px`;
+                    capturedImageFrameTable.style.zIndex = '10001';
+                    capturedImageFrameTable.innerHTML = `<tr><td>${data.result}</td></tr>`; // Simplified table content
+                    // give the captured image a visible frame
+
+                    // asign the frame a uniqu value to be able to remove it later
+                    let guid = () => {
+                        let s4 = () => {
+                            return Math.floor((1 + Math.random()) * 0x10000)
+                            .toString(16)
+                            .substring(1);
+                        }
+                        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+                    }
+                    const linkedContentUniqueid = guid();
+
+                    return  linkedContentUniqueid;
+                    capturedImageFrameTable.linkedContentUniqueid =linkedContentUniqueid;
+
+                    resp.linkedContentUniqueid = linkedContentUniqueid;
+                        // call the function that will create the note
+
+                        create_newstickynote_node(resp, "capture_note", resp.note_template, resp.note_properties, resp.sessiontoken);
+
+
+                    document.body.appendChild(capturedImageFrameTable);
                 }
                 return true;
             } else if (request.action == "update_notes_on_page") {
@@ -631,7 +719,11 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.debug((!isUndefined(selection_text)));
     console.debug(selection_text != null);
     console.debug(selection_text != '');
+    // uuid to connect to image inserted (for capture_note)
+    var linkedContentUniqueid = "";
+    // uuid to connect to the part fo the document that has been highlighted
     var highlightuniqueid = "";
+
 
     // is selection_text set ?
     if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
@@ -652,7 +744,6 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
         note_object_data.selection_text = selection_text;
         note_object_data.message_display_text = selection_text;
-
     } else {
         // no selection_text
         console.debug("selection_text is not set or is blank: ");
@@ -672,7 +763,6 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
             node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(utf8_to_b64(note_object_data.selection_text)));
         } else {
             node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(""));
-
         }
 
         // capture local url
@@ -856,7 +946,6 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
         //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
 
-
     }
 
     // call the function that will set which part of the note will be displayed
@@ -1039,6 +1128,9 @@ function save_new_note(event) {
         var note_root = getYellowStickyNoteRoot(event.target);
         console.log(note_root);
 
+
+        const note_type = note_root.getAttribute("note_type");
+console.log("note_type: " + note_type);
         // var note_table = event.target.parentNode.parentNode.parentNode;
         // console.debug(note_table);
         var selection_text = "";
@@ -1069,7 +1161,7 @@ function save_new_note(event) {
         } catch (e) {}
         console.debug("noteid: " + noteid);
         // only proceed if there is no noteid set - this note should not be created in this function
-        if (noteid == null || noteid == "") {
+        if (noteid == null || noteid == "" || noteid == undefined || noteid == "undefined") {
 
             var distributionlistid;
             try {
@@ -1109,11 +1201,11 @@ function save_new_note(event) {
             console.debug(note_root);
             var posx = note_root.getAttribute("posx");
             if (posx == null || posx == undefined) {
-                posx = 0;
+                posx = "0px";
             }
             var posy = note_root.getAttribute("posy");
             if (posy == null || posy == undefined) {
-                posy = 0;
+                posy = "0px";
             }
             var box_height = note_root.getAttribute("box_height");
             if (box_height == null || box_height == undefined) {
@@ -1125,8 +1217,6 @@ if (box_width == null || box_width == undefined) {
             }
 
 
-
-            const note_type = note_root.getAttribute("note_type");
 
             console.debug("posy: " + posy);
 
@@ -1147,11 +1237,11 @@ var  json_create = {
                 note_type: note_type,
                 posx: posx,
                 posy: posy,
-               
                 box_width: box_width,
                 box_height: box_height
             };
- 
+
+            var captured_image_datauri = "";
             if (note_type == "webframe") {
                 // capture the scroll position of the iframe
                 var framenote_scroll_x = note_root.querySelector('[name="fakeiframe"]').scrollLeft.toString();
@@ -1164,21 +1254,34 @@ var  json_create = {
                     framenote_scroll_y = 0;
                 }
                 json_create.framenote_scroll_y =  framenote_scroll_y ;
-            }
-    
-    
+            }else if (note_type == "capture_note") {
+                // get the image data
 
+                try {
+                    captured_image_datauri = note_root.querySelectorAll('[name="captured_image_datauri"]')[0].textContent.trim();
+                    //console.debug("captured_image_datauri: " + captured_image_datauri);
+                    json_create.captured_image_datauri = captured_image_datauri ;
+                } catch (e) {
+                    console.error(e);
+                }
+            }
             console.debug(JSON.stringify(json_create));
 
             // Send save request back to background
             // Stickynotes are always enabled when created.
-            chrome.runtime.sendMessage({
-                message: {
-                    "action": "single_create",
-                    "create_details": json_create
-                }
-            }, function (response) {
-                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+
+const save_new_msg = {
+    message: {
+        "action": "single_create",
+        "create_details": json_create
+    }
+}
+console.log("save_new_msg:");
+console.log(save_new_msg);
+
+            chrome.runtime.sendMessage(save_new_msg, function (response) {
+                console.debug("message sent to backgroup.js with response: " );
+                console.debug(response);
 
                 // read the noteid assigned to this note that returned from the API service
                 var noteid = response.noteid;
@@ -1198,7 +1301,7 @@ var  json_create = {
 
             });
         } else {
-            console.log("browsersolutions noteid already set - not creating new note");
+            console.log("browsersolutions noteid has already been set - not creating new note, and potentially a conflict");
         }
     } catch (e) {
         console.error(e);
@@ -4649,7 +4752,14 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
         cont1.setAttribute("class", "yellownotecontainer");
         // use this attribute to mark this as a stickynote object
         cont1.setAttribute("note_type", note_object_data.note_type);
-        cont1.setAttribute("noteid", note_object_data.noteid);
+
+        // if the not is new, there is no noteid yet
+        if (newNote) {
+            console.debug("new note, not yet a noteid");
+            //cont1.setAttribute("newNote", "true");
+            cont1.setAttribute("noteid", note_object_data.noteid);
+        }
+
         cont1.setAttribute("isOwner", isOwner);
 
         if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
@@ -6393,6 +6503,7 @@ if (node_type === "webframe") {
     console.debug(insertedNode);
 
     console.debug("browsersolutions: " + "#size_and_place_note_based_on_coordinates.end");
+    return insertedNode;
 }
 
 const note_internal_height_padding = 25;

@@ -299,6 +299,273 @@ document.querySelectorAll('[name="login_status"]').forEach(element => {
 }
 
 
+
+
+function getElementPosition(element) {
+  if (!element || !element.parentNode) {
+      throw new Error("Invalid element or element has no parent");
+  }
+
+  let position = 0;
+  let currentElement = element;
+
+  while (currentElement.previousElementSibling) {
+      position++;
+      currentElement = currentElement.previousElementSibling;
+  }
+
+  return position;
+}
+
+
+function timestampstring2timestamp(str) {
+  console.log("timestampstring2timestamp: " + str);
+  try {
+      const year = str.substring(0, 4);
+      const month = str.substring(5, 7);
+      const day = str.substring(8, 10);
+      const hour = str.substring(11, 13);
+      const minute = str.substring(14, 16);
+      const second = str.substring(17, 19);
+      //    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second + "";
+      var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute;
+      console.log("timestamp: " + timestamp);
+
+      return timestamp;
+  } catch (e) {
+      console.log(e);
+      return null;
+  }
+}
+
+function integerstring2timestamp(int) {
+  console.log("integerstring2timestamp: " + int);
+  try {
+      const year = int.substring(0, 4);
+      const month = int.substring(5, 6);
+      const day = int.substring(8, 9);
+      const hour = int.substring(8, 9);
+      const minute = int.substring(10, 11);
+      const second = int.substring(12, 13);
+
+      var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+      console.log("timestamp: " + timestamp);
+
+      return timestamp;
+  } catch (e) {
+      console.log(e);
+      return null;
+  }
+}
+
+
+function sortTa(event) {
+  console.log("sortTa()");
+  console.log(event);
+  console.log(event.target);
+  console.log(event.target.parentNode);
+  console.log( getElementPosition(event.target.parentNode));
+  sortTable("dataTable", getElementPosition(event.target.parentNode));
+}
+
+
+
+// Function to sort the table
+function sortTable(table_id, columnIndex) {
+  console.log("sortTable.start");
+  console.log("columnIndex: " + columnIndex)
+  console.log("sortTabl: " + table_id)
+  const table = document.querySelector('[id="' + table_id + '"]');
+  console.log(table);
+  let rows = Array.from(table.rows).slice(2); // Ignore the header rows
+  let sortedRows;
+  const row_count = table.rows.length - 2;
+  console.log("row count: " + row_count);
+
+  // Toggle sort state for the column (asceding or decending sort)
+  try{
+      console.log(table.rows[0].cells[columnIndex]);
+      console.log(table.rows[0].cells[columnIndex].querySelector("span").textContent);
+console.log(table.rows[1].cells[columnIndex]);
+  }catch(e){
+      console.log(e);
+  }
+  if (sortStates[columnIndex] === 'none' || sortStates[columnIndex] === 'desc') {
+      sortStates[columnIndex] = 'asc';
+      table.rows[0].cells[columnIndex].querySelector("span").textContent = "▲";
+  } else {
+      sortStates[columnIndex] = 'desc';
+      table.rows[0].cells[columnIndex].querySelector("span").textContent = "▼";
+  }
+  var sortOrder = sortStates[columnIndex];
+  console.log("sortOrder: " + sortOrder);
+
+  // type of sort - default is case-sensitive alphabetical
+var sort_type="stringCaseExact";
+try{
+if (table.rows[0].cells[columnIndex].hasAttribute("sort_type")) {
+  sort_type = table.rows[0].cells[columnIndex].getAttribute("sort_type");
+}
+}catch(e){
+  console.log(e);
+}
+  // Sort based on the selected column and sort state
+  // Consider options for different types of sorting here.
+
+if (sort_type == "stringCaseExact") {
+
+      sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
+} else if (sort_type == "stringCaseIgnore") {
+
+      sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.toLowerCase().localeCompare(b.cells[columnIndex].innerText.toLowerCase()));
+
+} else if (sort_type == "selectCaseExact") {
+ // console.log("selectCaseExact");
+   
+
+    sortedRows = rows.sort((rowA, rowB) => {
+      const cellA = rowA.cells[columnIndex].querySelector('select').value;
+      const cellB = rowB.cells[columnIndex].querySelector('select').value;
+
+      return cellA.localeCompare(cellB);
+  });
+
+
+}else {
+  console.log("default sort");
+  sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
+}
+  
+  
+  if (sortOrder === 'desc') {
+      sortedRows.reverse();
+  }
+
+  // Remove existing rows (excluding the two header rows)
+  while (table.rows.length > 3) {
+      table.deleteRow(3);
+  }
+
+  // Append sorted rows
+  const tbody = table.getElementsByTagName('tbody')[0];
+  sortedRows.forEach(row => tbody.appendChild(row));
+}
+
+
+
+
+
+/*
+apply all filters simmultaneously
+
+TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
+and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
+ */
+function filterTableAllCols() {
+  console.log("filterTableAllCols");
+  var table = document.getElementById("dataTable");
+  var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
+  var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+  //console.debug(filtersCols);
+
+  // Loop through each row of the table
+  for (var i = 0; i < rows.length; i++) {
+      ///  for (var i = 0; i < 1; i++) {
+      var showRow = true;
+      // console.debug(rows[i]);
+      // check each cell against the corresponding filter for the column, if any
+      for (var j = 0; j < filtersCols.length; j++) {
+          //console.log(j + " ##########");
+          //            console.log(j);
+          //console.log(filtersCols[j]);
+          //console.log(filtersCols[j].value);
+          //console.debug(filtersCols[j].tagName);
+          //console.debug(filtersCols[j].tagName == "SELECT");
+          //console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+          //console.debug(filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
+          //console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
+
+          if (filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch") {
+              // filter on whether or not a checkbox has been checked
+              var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+              //console.log("filter on col: " + comparingCol)
+              var cell = rows[i].getElementsByTagName("td")[comparingCol];
+              //console.log(cell);
+              if (cell) {
+                  //console.log(cell.querySelector('input[type="checkbox"]'));
+                  var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                  //console.log("isChecked: " + isChecked);
+                  var filterValue = filtersCols[j].value;
+                  //console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
+                  if (filterValue === "active" && !isChecked ||
+                      filterValue === "inactive" && isChecked) {
+                      showRow = false;
+                      break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                  }
+              }
+          } else if (filtersCols[j].value && filtersCols[j].getAttribute("filtertype") == "selectmatch") {
+              console.log("selectmatch");
+              // filter on whether or not a checkbox has been checked
+              var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+              console.log("filter on col: " + comparingCol)
+              var cell = rows[i].getElementsByTagName("td")[comparingCol];
+              console.log(cell);
+              if (cell) {
+                  console.log(cell.getElementsByTagName("select"));
+
+                  var selectElement = cell.getElementsByTagName("select")[0];
+                  var selectedText = selectElement.options[selectElement.selectedIndex].text;
+
+                  // Log the selected text to the console or return it from the function
+                  console.log('Currently selected text:', selectedText);
+
+                  console.log(cell.getElementsByTagName("select")[0].value);
+                  //var isChecked = cell.querySelector('input[type="checkbox"]').checked;
+                  //console.log("isChecked: " + isChecked);
+                  var filterValue = filtersCols[j].value;
+                  console.log("filterValue: " + filterValue + " selectedText: " + selectedText);
+
+                  var regex = new RegExp(escapeRegex(filterValue), "i");
+                  //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                  // Test the regex against the cell content
+                  if (!regex.test(selectedText.trim())) {
+                      showRow = false;
+                      break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                  }
+              }
+
+          } else {
+
+              try {
+                  if (filtersCols[j].value) { // Only process filters with a value
+                      var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
+                      //console.log("filter on col: " + comparingCol)
+                      var cell = rows[i].getElementsByTagName("td")[comparingCol];
+                      if (cell) {
+                          var filterValue = filtersCols[j].value;
+                          var regex = new RegExp(escapeRegex(filterValue), "i");
+                          //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
+                          // Test the regex against the cell content
+                          if (!regex.test(cell.textContent.trim())) {
+                              showRow = false;
+                              break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
+                          }
+                      }
+
+                  }
+              } catch (e) {
+                  console.log(e);
+              }
+
+          }
+      }
+      // Show or hide the row based on the filter results
+      rows[i].style.display = showRow ? "" : "none";
+  }
+}
+
+
 // call to the API to determine authentication status
 function getStatusValue(url, header1, value1, header2, value2) {
   return new Promise((resolve, reject) => {

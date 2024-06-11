@@ -157,6 +157,37 @@ padding: .35em;
   }
 
 
+/* Add styles specific for a most compact drop-down list*/
+
+  select.compact {
+    padding: 0px; /* Reduce padding */
+    font-size: 9px; /* Smaller font size */
+    margin: 0px; /* Remove margins */
+    border: 1px;
+    border-radius: 0px;
+    line-height: 1; /* Reduce line height */
+    height: 21px; /* Ensure the height adjusts to the content */
+    width: 30px; /* Adjust the width to fit the content */
+            box-sizing: border-box;
+}
+
+option.compact {
+  padding: 0; /* Reduce padding */
+  font-size: 1em; /* Smaller font size */
+  margin: 1px; /* Remove margins */
+  line-height: 0.8; /* Reduce line height */
+  height: auto; /* Ensure the height adjusts to the content */
+          width: 10px; /* Adjust the width to fit the content */
+          box-sizing: border-box;
+}
+
+
+
+.filterableCol {
+  font-size: .8em;
+  height: 21px;
+  }
+  
 
 /* Add styles specific for scrollable table containing notes*/
 
@@ -183,6 +214,26 @@ table.notesTable th {
   background-color: yellow;
 }
 
+
+.explanation-container {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+.explanation-label-container {
+  margin-bottom: 15px;
+}
+.explanation-label-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+.explanation-label-description {
+  margin: 5px 0 10px 0;
+}
+.explanation-label-instructions {
+  color: #555;
+  font-style: italic;
+}
+
   table.notesTable th th {
     font-size: .5em;
     letter-spacing: .1em;
@@ -192,13 +243,13 @@ table.notesTable th {
   }
   
   table.notesTable tr th:nth-child(2){
-    display: none;
+    max-width: 100px;
 
  }
 
 
  table.notesTable tr th:nth-child(3) {
-  max-width: 200px;
+  max-width: 100px;
 }
 
 table.notesTable tr th:nth-child(4) {
@@ -207,7 +258,9 @@ table.notesTable tr th:nth-child(4) {
 
 
 table.notesTable tr th:nth-child(5) {
-  width: 20px;
+  width: 10px;
+  border-spacing: 0px;
+ 
 }
 
 table.notesTable tr th:nth-child(6) {
@@ -252,14 +305,14 @@ table.notesTable td {
   padding-left: 2px;
   border: 1px solid black;
   text-align: center;
-  display: table-cell;
+ 
   vertical-align: inherit;
   word-break: break-all;
 
 }
 
 table.notesTable tr td:nth-child(2){
-  display: none;
+  max-width: 200px;
 
 }
 
@@ -273,7 +326,8 @@ table.notesTable tr td:nth-child(4) {
 }
 
 table.notesTable tr td:nth-child(5) {
-  width: 20px;
+  width: 10px;
+  border-spacing: 0px;
 }
 
 table.notesTable tr td:nth-child(6) {
@@ -333,3 +387,26 @@ display: none;
 
 
 
+
+.toggle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100px;
+}
+
+.toggle-button {
+  display: flex;
+  justify-content: flex-end;
+          align-items: center;
+  width: 60px;
+  margin-bottom: 3px;
+}
+.toggle-button input {
+  margin-right: 10px;
+}
+
+
+.hidden {
+  display: none;
+}

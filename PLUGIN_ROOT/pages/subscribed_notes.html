@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="sidebar.css"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>yellow sticky notes - all</title>
+    <title>all subscribed yellownotes</title>
 </head>
 <body>
 
@@ -31,20 +31,20 @@
   <thead>
     <tr class="fixed-header">
       <th>ID</th>
-      <th class="sortableCol" >last modified</th>
-      <th class="sortableCol" >created</th>
-      <th class="sortableCol" >type<span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" >feed </th>
-      <th class="sortableCol" >location(URL)</th>
-      <th class="sortableCol" >text</th>
-      <th>action</th>
+      <th class="sortableCol" name="created">created<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="modified">modified<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="type">type<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="feed">feed <span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="location">location(URL)<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="message">message<span class="sort-icon" ">&#9650;</span></th>
+      <th name="action">action</th>
       
     </tr>
     
     <!-- Add a filter row -->
     <tr class="fixed-header">
       <th class="filterableCol"></th>
-      <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
       <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
       <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
 
@@ -60,8 +60,44 @@
   </tbody>
 </table>
 <hr/>
+<style>
+ 
+</style>
+</div>
+which columns to show
+<div class="toggle-container">
+  <div class="toggle-button">
+      <label for="toggle-created">Created</label>
+      <input type="checkbox" id="toggle-created" checked>
+  </div><br/>
+  <div class="toggle-button">
+      <label for="toggle-modified">Modified</label>
+      <input type="checkbox" id="toggle-modified" checked>
+  </div><br/>
+  <div class="toggle-button">
+      <label for="toggle-type">Type</label>
+      <input type="checkbox" id="toggle-type" checked>
+  </div>
+  <div class="toggle-button">
+    <label for="toggle-feed">Feed</label>
+    <input type="checkbox" id="toggle-feed" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-message">Message</label>
+  <input type="checkbox" id="toggle-message" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-action">Note actions</label>
+  <input type="checkbox" id="toggle-action" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-location">Location</label>
+  <input type="checkbox" id="toggle-location" checked>
+</div>
 </div>
 
+
+<div id="subscribed_notes_page_footer_text"></div>
 </div>
     <script  src="on_page_common.js"></script>
     <script src="./subscribed_notes_script.js"></script>

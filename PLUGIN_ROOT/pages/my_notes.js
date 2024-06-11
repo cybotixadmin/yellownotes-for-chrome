@@ -7,6 +7,10 @@ checkSessionJWTValidity()
     if (isValid) {
         console.debug("JWT is valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+
+        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_explanation.html", "my_notes_page_footer_text").then(() => {});
+
+
         fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
             //page_display_login_status();
             // login_logout_action();
@@ -16,6 +20,8 @@ checkSessionJWTValidity()
     } else {
         console.debug("JWT is not valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_explanation.html", "my_notes_page_footer_text").then(() => {});
+
         fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
             //page_display_login_status();
             //login_logout_action();
@@ -41,10 +47,115 @@ console.error('Error:', error.message);
 });
  */
 
+
+
+
+// which columns to display
+// The users can decide which columns to display
+
+document.getElementById('toggle-created').addEventListener('change', function () {
+    toggleColumn('created', this.checked);
+});
+
+document.getElementById('toggle-modified').addEventListener('change', function () {
+    toggleColumn('modified', this.checked);
+});
+
+document.getElementById('toggle-type').addEventListener('change', function () {
+    toggleColumn('type', this.checked);
+});
+
+document.getElementById('toggle-feed').addEventListener('change', function () {
+    toggleColumn('feed', this.checked);
+});
+document.getElementById('toggle-message').addEventListener('change', function () {
+    toggleColumn('message', this.checked);
+});
+
+document.getElementById('toggle-selected').addEventListener('change', function () {
+    toggleColumn('selected', this.checked);
+});
+
+document.getElementById('toggle-active').addEventListener('change', function () {
+    toggleColumn('active', this.checked);
+});
+
+document.getElementById('toggle-action').addEventListener('change', function () {
+    toggleColumn('action', this.checked);
+});
+
+document.getElementById('toggle-location').addEventListener('change', function () {
+    toggleColumn('location', this.checked);
+});
+
+
+
+
+function toggleColumn(columnName, isChecked) {
+    console.log("toggleColumn: " + columnName + " isChecked: " + isChecked);
+    var table = document.getElementById("dataTable");
+    // find out which column has the name columnName
+    console.log(table);
+    // thead tr:nth-child(2)
+    var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
+    console.log(col);
+    const columnIndex = getElementPosition(col);
+    console.log(getElementPosition(col));
+  
+    if (!isChecked) {
+        table.querySelectorAll('tr').forEach(row => {
+            // console.log(row);
+            // console.log(row.cells[columnIndex].classList);
+  
+            row.cells[columnIndex].classList.add("hidden");
+        });
+  
+    } else {
+        table.querySelectorAll('tr').forEach(row => {
+  
+            //console.log(row);
+            //console.log(row.cells[columnIndex].classList);
+            row.cells[columnIndex].classList.remove("hidden");
+        });
+  
+    }
+  
+   
+  }
+
+// set table visibility defaults
+// make this sensitive to the size screen the user is using
+
+var not_show_by_default_columns = [];
+
+const pagewidth = window.innerWidth;
+console.log("window.innerWidth: " + pagewidth);
+
+if (pagewidth < 300) { 
+    not_show_by_default_columns = ["created", "modified", "type", "feed", "selected", "active", "action" ];
+}else if (pagewidth < 600) {
+    not_show_by_default_columns = ["created", "type", "selected", "active", "action"];
+
+}else if (pagewidth < 1000) {
+    not_show_by_default_columns = ["created",  "type", "selected", "active", "action"];
+} else if (pagewidth < 1200) {
+    not_show_by_default_columns = [];
+}
+
+
 // call to database to get noets and place them in a table
-render().then(function (d) {
+fetchData(not_show_by_default_columns).then(function (d) {
     console.debug("render notes");
     console.debug(d);
+
+    
+
+
+not_show_by_default_columns.forEach(column => {
+    toggleColumn(column, false);
+    document.getElementById(`toggle-${column}`).checked = false;
+});
+
     // kick of the process of rendering the yellow sticky notes in the graphic form
 
     var doc = window.document;
@@ -243,7 +354,7 @@ async function editNote(noteid) {
 
 // setup table items for sorting and filtering
 
-// Locate all elements with the class "my-button"
+// Locate all elements with the class "sortableCol"
 const buttons = document.querySelectorAll('.sortableCol');
 len = buttons.length;
 for (var i = 0; i < buttons.length; i++) {
@@ -276,211 +387,15 @@ const sortStates = {
     1: 'none'
 };
 
-function sortTa(event) {
-    console.log("sortTa()");
-    console.log(event);
-    console.log(event.target);
-    console.log(event.target.parentNode);
-    sortTable("dataTable", parseInt(event.target.parentNode.getAttribute("colindex"), 10));
-}
 
-function timestampstring2timestamp(str) {
-    console.log("timestampstring2timestamp: " + str);
-    try {
-        const year = str.substring(0, 4);
-        const month = str.substring(5, 7);
-        const day = str.substring(8, 10);
-        const hour = str.substring(11, 13);
-        const minute = str.substring(14, 16);
-        const second = str.substring(17, 19);
-        //    var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second + "";
-        var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute;
-        console.log("timestamp: " + timestamp);
 
-        return timestamp;
-    } catch (e) {
-        console.log(e);
-        return null;
-    }
-}
 
-function integerstring2timestamp(int) {
-    console.log("integerstring2timestamp: " + int);
-    try {
-        const year = int.substring(0, 4);
-        const month = int.substring(5, 6);
-        const day = int.substring(8, 9);
-        const hour = int.substring(8, 9);
-        const minute = int.substring(10, 11);
-        const second = int.substring(12, 13);
-
-        var timestamp = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
-        console.log("timestamp: " + timestamp);
-
-        return timestamp;
-    } catch (e) {
-        console.log(e);
-        return null;
-    }
-}
-
-// Function to sort the table
-function sortTable(table_id, columnIndex) {
-    console.log("sortTabl: " + columnIndex)
-    console.log("sortTabl: " + table_id)
-    const table = document.querySelector('[id="' + table_id + '"]');
-    console.log(table);
-    let rows = Array.from(table.rows).slice(2); // Ignore the header rows
-    let sortedRows;
-
-    // Toggle sort state for the column
-    if (sortStates[columnIndex] === 'none' || sortStates[columnIndex] === 'desc') {
-        sortStates[columnIndex] = 'asc';
-    } else {
-        sortStates[columnIndex] = 'desc';
-    }
-    console.log(sortStates[columnIndex]);
-
-    // Sort based on the selected column and sort state
-    // Consider options for different types of sorting here.
-    if (columnIndex === 0) {
-        sortedRows = rows.sort((a, b) => {
-                return Number(a.cells[columnIndex].innerText) - Number(b.cells[columnIndex].innerText);
-            });
-    } else {
-        sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
-    }
-    console.log(sortStates[columnIndex]);
-    if (sortStates[columnIndex] === 'desc') {
-        sortedRows.reverse();
-    }
-
-    console.log(sortedRows);
-    // Remove existing rows
-    while (table.rows.length > 1) {
-        table.deleteRow(1);
-    }
-
-    // Append sorted rows
-    const tbody = table.getElementsByTagName('tbody')[0];
-    sortedRows.forEach(row => tbody.appendChild(row));
-}
-
-/*
-apply all filters simmultaneously
-
-TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
-and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
- */
-function filterTableAllCols() {
-    console.log("filterTableAllCols");
-    var table = document.getElementById("dataTable");
-    var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
-    var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-
-    //console.debug(filtersCols);
-
-    // Loop through each row of the table
-    for (var i = 0; i < rows.length; i++) {
-        ///  for (var i = 0; i < 1; i++) {
-        var showRow = true;
-        // console.debug(rows[i]);
-        // check each cell against the corresponding filter for the column, if any
-        for (var j = 0; j < filtersCols.length; j++) {
-            //console.log(j + " ##########");
-            //            console.log(j);
-            //console.log(filtersCols[j]);
-            //console.log(filtersCols[j].value);
-            //console.debug(filtersCols[j].tagName);
-            //console.debug(filtersCols[j].tagName == "SELECT");
-            //console.debug(filtersCols[j].getAttribute("filtertype") == "checkedmatch");
-            //console.debug(filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch");
-            //console.log(j + ": " + filtersCols[j].parentNode.getAttribute("colindex"));
-
-            if (filtersCols[j].tagName == "SELECT" && filtersCols[j].getAttribute("filtertype") == "checkedmatch") {
-                // filter on whether or not a checkbox has been checked
-                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
-                //console.log("filter on col: " + comparingCol)
-                var cell = rows[i].getElementsByTagName("td")[comparingCol];
-                //console.log(cell);
-                if (cell) {
-                    //console.log(cell.querySelector('input[type="checkbox"]'));
-                    var isChecked = cell.querySelector('input[type="checkbox"]').checked;
-                    //console.log("isChecked: " + isChecked);
-                    var filterValue = filtersCols[j].value;
-                    //console.log("filterValue: " + filterValue + " isChecked: " + isChecked);
-                    if (filterValue === "active" && !isChecked ||
-                        filterValue === "inactive" && isChecked) {
-                        showRow = false;
-                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
-                    }
-                }
-            } else if (filtersCols[j].value && filtersCols[j].getAttribute("filtertype") == "selectmatch") {
-                console.log("selectmatch");
-                // filter on whether or not a checkbox has been checked
-                var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
-                console.log("filter on col: " + comparingCol)
-                var cell = rows[i].getElementsByTagName("td")[comparingCol];
-                console.log(cell);
-                if (cell) {
-                    console.log(cell.getElementsByTagName("select"));
-
-                    var selectElement = cell.getElementsByTagName("select")[0];
-                    var selectedText = selectElement.options[selectElement.selectedIndex].text;
-
-                    // Log the selected text to the console or return it from the function
-                    console.log('Currently selected text:', selectedText);
-
-                    console.log(cell.getElementsByTagName("select")[0].value);
-                    //var isChecked = cell.querySelector('input[type="checkbox"]').checked;
-                    //console.log("isChecked: " + isChecked);
-                    var filterValue = filtersCols[j].value;
-                    console.log("filterValue: " + filterValue + " selectedText: " + selectedText);
-
-                    var regex = new RegExp(escapeRegex(filterValue), "i");
-                    //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
-                    // Test the regex against the cell content
-                    if (!regex.test(selectedText.trim())) {
-                        showRow = false;
-                        break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
-                    }
-                }
-
-            } else {
-
-                try {
-                    if (filtersCols[j].value) { // Only process filters with a value
-                        var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
-                        //console.log("filter on col: " + comparingCol)
-                        var cell = rows[i].getElementsByTagName("td")[comparingCol];
-                        if (cell) {
-                            var filterValue = filtersCols[j].value;
-                            var regex = new RegExp(escapeRegex(filterValue), "i");
-                            //console.log("is cell content " + cell.textContent.trim() + ' matching regex: ' + regex);
-                            // Test the regex against the cell content
-                            if (!regex.test(cell.textContent.trim())) {
-                                showRow = false;
-                                break; // Exit the loop if any filter condition fails, there is no need to check the remaining filters for this row
-                            }
-                        }
-
-                    }
-                } catch (e) {
-                    console.log(e);
-                }
-
-            }
-        }
-        // Show or hide the row based on the filter results
-        rows[i].style.display = showRow ? "" : "none";
-    }
-}
 
 // Fetch data on page load
 
 
-function render() {
-    console.log("render");
+function fetchData(not_show_by_default_columns) {
+    console.log("fetchData");
 
     return new Promise(
         function (resolve, reject) {
@@ -514,19 +429,17 @@ function render() {
                 // if an invalid session token was sent, it should be removed from the local storage
                 if (response.status == 401) {
                     // compare the response body with the string "Invalid session token" to determine if the session token is invalid
-if(response.headers.get("session") == "DELETE_COOKIE"){
-    console.log("Session token is invalid, remove it from local storage.");
+                    if(response.headers.get("session") == "DELETE_COOKIE"){
+                            console.log("Session token is invalid, remove it from local storage.");
                             chrome.storage.local.remove([plugin_session_header_name]);
                             // redirect to the front page returning the user to unauthenticated status.
                             // unauthenticated functionality will be in effect until the user authenticates
                             window.location.href = "/pages/my_account.html";
                             reject('logout');
-                        } else {
-                            reject('Network response was not ok');
-                        }
-                   
+                    } else {
+                        reject('Network response was not ok');
+                    }
                 } else {
-
                     reject('Network response was not ok');
                 }
             } else {
@@ -584,9 +497,10 @@ if(response.headers.get("session") == "DELETE_COOKIE"){
                 const type_cell = newRow.insertCell(3);
                 const cell_status = newRow.insertCell(4);
                 const cell_url = newRow.insertCell(5);
-                const cell_payload = newRow.insertCell(6);
-                const cell_actions = newRow.insertCell(7);
-                const cell_distributionlist = newRow.insertCell(8);
+                const cell_selection = newRow.insertCell(6);
+                const cell_message = newRow.insertCell(7);
+                const cell_actions = newRow.insertCell(8);
+                const cell_distributionlist = newRow.insertCell(9);
                 const obj = JSON.parse(row.json);
                 // key column - not to be displayed
                 cell_noteid.textContent = row.noteid;
@@ -674,22 +588,40 @@ if(response.headers.get("session") == "DELETE_COOKIE"){
                 cell_url.setAttribute('data-label', 'url');
                 cell_url.setAttribute('name', 'url');
 
-                // payload
+                // selection
                 // contenteditable="true"
                 if (obj.note_type == "yellownote") {
-                    cell_payload.textContent = b64_to_utf8(obj.message_display_text);
-                    cell_payload.setAttribute('name', 'message_display_text');
+                    cell_selection.textContent = b64_to_utf8(obj.selection_text);
+                    cell_selection.setAttribute('name', 'selection_text');
                 } else if (obj.note_type == "webframe") {
-                    cell_payload.textContent = (obj.content_url);
-                    cell_payload.setAttribute('name', 'content_url');
+                    cell_selection.textContent = (obj.content_url);
+                    cell_selection.setAttribute('name', 'content_url');
                 } else {
                     // default - will revisit this later (L.R.)
-                    cell_payload.textContent = b64_to_utf8(obj.message_display_text);
-                    cell_payload.setAttribute('name', 'message_display_text');
+                    cell_selection.textContent = b64_to_utf8(obj.selection_text);
+                    cell_selection.setAttribute('name', 'selection_text');
                 }
-                cell_payload.setAttribute('contenteditable', 'true');
-                cell_payload.setAttribute('data-label', 'text');
-                cell_payload.setAttribute('name', 'payload');
+                cell_selection.setAttribute('contenteditable', 'true');
+                cell_selection.setAttribute('data-label', 'text');
+                cell_selection.setAttribute('name', 'selection_text');
+
+
+                // message payload
+                // contenteditable="true"
+                if (obj.note_type == "yellownote") {
+                    cell_message.textContent = b64_to_utf8(obj.message_display_text);
+                    cell_message.setAttribute('name', 'message_display_text');
+                } else if (obj.note_type == "webframe") {
+                    cell_message.textContent = (obj.content_url);
+                    cell_message.setAttribute('name', 'content_url');
+                } else {
+                    // default - will revisit this later (L.R.)
+                    cell_message.textContent = b64_to_utf8(obj.message_display_text);
+                    cell_message.setAttribute('name', 'message_display_text');
+                }
+                cell_message.setAttribute('contenteditable', 'true');
+                cell_message.setAttribute('data-label', 'text');
+                cell_message.setAttribute('name', 'message_display_text');
 
                 // Create the dropdown list for the distribution list
                 const dropdown = createDropdown(distributionListData, row.distributionlistid);
@@ -962,7 +894,7 @@ async function saveChanges(noteid, event) {
 
             console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
 
-            message_display_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="payload"]').textContent.trim());
+            message_display_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="message_display_text"]').textContent.trim());
         } catch (e) {
             console.debug(e);
         }
@@ -975,7 +907,7 @@ async function saveChanges(noteid, event) {
             console.debug("webframe");
             try {
                 //content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
-                content_url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="payload"]').textContent.trim();
+                content_url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="message_display_text"]').textContent.trim();
 
             } catch (e) {
                 console.debug(e);
@@ -986,6 +918,8 @@ async function saveChanges(noteid, event) {
                     url: url,
                     content_url: content_url,
                 });
+        }else if (note_type == "capture_note") {
+                
         } else {
             message_body = JSON.stringify({
                     noteid: noteid,
@@ -1115,3 +1049,5 @@ if (is_authenticated()) {
     page_display_login_status();
 
 }
+
+

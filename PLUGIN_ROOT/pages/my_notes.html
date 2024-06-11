@@ -8,7 +8,7 @@
     
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yellow notes - my own</title>
+    <title>my yellow notes</title>
 </head>
 <body>
 
@@ -33,29 +33,35 @@
   <thead>
     <tr class="fixed-header">
       <th>ID</th>
-      <th class="sortableCol" >created <span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol" >last modified <span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol" >type<span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol" >active</th>
-      <th class="sortableCol" >location</th>
-      <th class="sortableCol" >content</th>
-      <th>action</th>
-      <th class="serialized_note">feed</th>
-      <th class="serialized_note">note</th>
+      <th class="sortableCol" name="created" sort_type="stringDatetime">created<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol" name="modified" sort_type="stringCaseExact">changed<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol" name="type" sort_type="stringCaseExact">type<span class="sort-icon">&#9650;</span></th>
+      <th name="active" >act</th>
+      <th class="sortableCol" name="location" sort_type="stringCaseIgnore">location<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol"  name="selected" >selected<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol"  name="message" >message<span class="sort-icon">&#9650;</span></th>
+      <th name="action">actions</th>
+      <th class="sortableCol" name="feed" sort_type="selectCaseExact">feed<span class="sort-icon">&#9650;</span></th>
+      <!--
+      <th class="sortableCol" sort_type="stringCaseExact">note<span class="sort-icon">&#9650;</span></th>
+      -->
     </tr>
 
     <!-- Add a filter row -->
     <tr class="fixed-header">
       <th class="filterableCol"></th> <!-- Empty cell -->
-      <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-      <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
-      <th class="filterableCol"><select filtertype="checkedmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">inactive</option><option class="filterableCol">active</option></select></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+      <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"></option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
+      <th class="filterableCol"><select filtertype="checkedmatch" class="filterableCol compact"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
       <th class="filterableCol"></th>
-      <th class="filterableCol"><input filtertype="selectmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol"><input filtertype="selectmatch" type="text" class="filterContent" placeholder="Filter "></th>
+      <!--
+      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+      -->
     </tr>
   </thead>
   <tbody>
@@ -64,6 +70,51 @@
 </table>
 <hr/>
 </div>
+
+which columns to show
+<div class="toggle-container">
+  <div class="toggle-button">
+      <label for="toggle-created">Created</label>
+      <input type="checkbox" id="toggle-created" checked>
+  </div><br/>
+  <div class="toggle-button">
+      <label for="toggle-modified">Modified</label>
+      <input type="checkbox" id="toggle-modified" checked>
+  </div><br/>
+  <div class="toggle-button">
+      <label for="toggle-type">Type</label>
+      <input type="checkbox" id="toggle-type" checked>
+  </div>
+  <div class="toggle-button">
+    <label for="toggle-feed">Feed</label>
+    <input type="checkbox" id="toggle-feed" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-selected">Selected text</label>
+  <input type="checkbox" id="toggle-selected" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-active">active</label>
+  <input type="checkbox" id="toggle-active" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-message">Message</label>
+  <input type="checkbox" id="toggle-message" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-action">Action</label>
+  <input type="checkbox" id="toggle-action" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-location">Location</label>
+  <input type="checkbox" id="toggle-location" checked>
+</div>
+</div>
+
+<div id="my_notes_page_footer_text"></div>
 </div>
 <!-- main page end -->
     <script src="./on_page_common.js"></script>

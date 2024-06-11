@@ -30,12 +30,6 @@
 }
 
 
-.filterableCol {
-font-size: .8em;
-
-}
-
-
 
 .go_to_location_button {
   height: 20px;
@@ -163,3 +157,5 @@ position: relative;
 .button-container > div:first-child {
   margin-left: 5px; /* Removes margin from the last button to avoid extra spacing */
 }
+
+

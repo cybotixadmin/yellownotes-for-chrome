@@ -128,15 +128,6 @@ function DELETEcacheData(key, data) {
     });
 }
 
-// Function to retrieve cached data
-function DELgetCachedData(url) {
-    console.log("getCachedData (" + url + ")");
-    return new Promise(resolve => {
-        chrome.storage.local.get(url, result => {
-            resolve(result[url]);
-        });
-    });
-}
 
 // Intercepting fetch requests for caching purposes
 /*
@@ -366,8 +357,8 @@ function pinYellowNote(info, tab, note_type, brand) {
 
         // get personal template related informaton
         console.log("uuid" + uuid);
-        console.debug("calling fetchDataFromApi2");
-        return fetchDataFromApi2(uuid);
+        console.debug("calling fetchCreatorDataThroughAPI");
+        return fetchCreatorDataThroughAPI(uuid);
 
     }).then(function (result) {
         console.log(result);
@@ -736,6 +727,55 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 });
             }
 
+        } else if (action == 'get_note_creator_info') {
+            console.debug("request: get_note_creator_info");
+            console.debug( message.message.coords);
+            // determined the identity of the user, then lookup the template toue and the note properties, and return it all to the onctent script 
+            
+            
+            
+            var result_msg ={note_properties: "", note_template: "", coords: {} , dataUrl: "", sessiontoken: ""};
+            var session_uuid="";
+            var sessiontoken="";
+            
+            
+            
+             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                            ynInstallationUniqueId = result[plugin_uuid_header_name];
+                            xYellownotesSession = result[plugin_session_header_name];
+                            installationUniqueId = result[plugin_uuid_header_name];
+                            sessiontoken = result[plugin_session_header_name];
+                            result_msg.sessiontoken = sessiontoken;
+                            console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                            console.debug("xYellownotesSession: " + xYellownotesSession);
+                            console.debug("installationUniqueId: " + installationUniqueId);
+                            console.debug("sessiontoken: " + sessiontoken);
+                            session_uuid = getUuid(sessiontoken);
+                    console.log("session_uuid: " + session_uuid);
+                    if (session_uuid == null) {
+                        session_uuid = "UNAUTHENTICATED";
+                    }else{
+            
+                    }
+                    console.log("session_uuid: " + session_uuid);
+            
+                    return fetchCreatorDataThroughAPI(session_uuid);
+                }).then(creatorData => {
+                    console.log(creatorData);
+                        result_msg.note_properties = creatorData;
+            const brand = "default";
+                        return getTemplate(brand, "yellownote");
+                }).then(template => {
+            
+                    console.log(template);
+                    result_msg.note_template = template;
+            console.log(result_msg);
+                        sendResponse(result_msg);
+            
+                    });
+            
+            
+
         } else if (action == 'create_capture_note') {
             console.debug("request: create_capture_note");
 
@@ -754,7 +794,8 @@ result_msg.coords = message.message.coords;
 
 captureTab()
         .then(function(dataUrl){
-console.debug("dataUrl: " + dataUrl);
+console.debug("dataUrl: ");
+console.debug(dataUrl);
 result_msg.dataUrl = dataUrl;
            // captureddata = dataUrl;
 return  chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]);
@@ -777,7 +818,7 @@ return  chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header
         }
         console.log("session_uuid: " + session_uuid);
 
-        return fetchDataFromApi2(session_uuid);
+        return fetchCreatorDataThroughAPI(session_uuid);
     }).then(creatorData => {
         console.log(creatorData);
             result_msg.note_properties = creatorData;
@@ -1236,15 +1277,17 @@ try{
             console.debug(JSON.stringify(message));
             
             const datarow = message.message.scroll_to_note_details.datarow;
+            console.debug(datarow);
+
             try{
-                openUrlAndScrollToElement(tab_id, message.message.scroll_to_note_details.url, datarow.noteid, datarow, false, null).then(function (res) {
+                openUrlAndScrollToElement(tab_id, datarows.url, datarow.noteid, datarow, false, null).then(function (res) {
                 console.debug("response: " + JSON.stringify(res));
                 sendResponse(res);
             });
             }catch(e){
               console.log(e);
                 // try again, but with opening a fresh tab this time
-                openUrlAndScrollToElement(null, message.message.scroll_to_note_details.url, datarow.noteid, datarow, true, null).then(function (res) {
+                openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true, null).then(function (res) {
                 console.debug("response: " + JSON.stringify(res));
                 sendResponse(res);
             });
@@ -1315,8 +1358,8 @@ try{
                 console.log(JSON.stringify(initialData));
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
-                            console.debug("calling fetchDataFromApi2");
-                            return fetchDataFromApi2(item.creatorid).then(creatorData => {
+                            console.debug("calling fetchCreatorDataThroughAPI");
+                            return fetchCreatorDataThroughAPI(item.creatorid).then(creatorData => {
                                 item.creatorDetails = creatorData;
                                 item.creatorDetails2 = "creatorData2";
                             });
@@ -1388,8 +1431,8 @@ try{
                 console.log(initialData);
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
-                            console.debug("calling fetchDataFromApi2");
-                            return fetchDataFromApi2(item.creatorid).then(creatorData => {
+                            console.debug("calling fetchCreatorDataThroughAPI");
+                            return fetchCreatorDataThroughAPI(item.creatorid).then(creatorData => {
                                 item.creatorDetails = creatorData;
                                 item.creatorDetails2 = "creatorData2";
                             });
@@ -1482,7 +1525,7 @@ try{
             }).then(function (initialData) {
                 notes = initialData;
                 console.log(notes);
-                return fetchDataFromApi2(notes[0].creatorid);
+                return fetchCreatorDataThroughAPI(notes[0].creatorid);
             }).then(function (creatordata) {
                 console.log(creatordata);
                 console.log(JSON.stringify(creatordata));
@@ -1549,7 +1592,7 @@ function cacheData(key, data) {
 
 // Helper to get cached data , timeout in seconds
 function getCachedData(key, cachetimeout) {
-    console.log('getCachedData: Getting cached data for key:', key, ", timeout:", cachetimeout);
+    console.log('getCachedData: Getting cached data for key:', key, ", with timeout:", cachetimeout);
     return new Promise((resolve, reject) => {
         try {
             chrome.storage.local.get([key], function (result) {
@@ -1574,14 +1617,14 @@ function getCachedData(key, cachetimeout) {
             });
         } catch (e) {
             console.debug(e);
-            reject();
+            reject(null);
         }
     });
 }
 
 // Helper to fetch data from API_URL_2
-function fetchDataFromApi2(creatorId) {
-    console.log('fetchDataFromApi2: Fetching data for creatorId:', creatorId);
+function fetchCreatorDataThroughAPI(creatorId) {
+    console.log('fetchCreatorDataThroughAPI: Fetching data for creatorId:', creatorId);
 
     if (!creatorId) {
         // If no creator ID is supplied, resolve immediately with null
@@ -1590,9 +1633,9 @@ function fetchDataFromApi2(creatorId) {
 
     const cacheKey = creatorId + "_creator_data";
     
-    return getCachedData(cacheKey, 10)
+    return getCachedData(cacheKey, CACHE_DURATION)
         .then(cachedData => {
-            console.log('fetchDataFromApi2: Cached data:', cachedData);
+            console.log('fetchCreatorDataThroughAPI: data returned from cache:', cachedData);
 
             if (cachedData) {
                 console.log('Returning cached data for creatorId:', creatorId, "cacheKey:", cacheKey);
@@ -1602,10 +1645,11 @@ function fetchDataFromApi2(creatorId) {
             }
         })
         .catch(error => {
-            console.error("Error during fetchDataFromApi2:", error);
+            console.error("Error during fetchCreatorDataThroughAPI:", error);
             throw error;  // Propagate the error to be handled in the next link of the promise chain
         });
 }
+
 
 function fetchNewData(creatorId, cacheKey) {
     console.debug('fetchNewData: Fetching new data for creatorId:', creatorId);
@@ -1617,7 +1661,7 @@ function fetchNewData(creatorId, cacheKey) {
             const controller = new AbortController();
             setTimeout(() => controller.abort(), 8000);
 
-            console.log('fetchDataFromApi2: Fetching new data from API');
+            console.log('fetchCreatorDataThroughAPI: Fetching new data from API');
             return fetch(server_url + '/api/v1.0/get_note_properties', {
                 method: 'POST',
                 headers: {
@@ -1646,53 +1690,6 @@ function fetchNewData(creatorId, cacheKey) {
         });
 }
 
-
-function DELETEfetchDataFromApi(creatorId) {
-    console.log('fetchDataFromApi: Fetching data for creatorId:', creatorId);
-
-    // Start by fetching the cached data
-    return getCachedData(creatorId, 10).then(cachedData => {
-        console.log('fetchDataFromApi: Cached data:', cachedData);
-        if (cachedData) {
-            console.log('fetchDataFromApi: Returning cached data for creatorId:', creatorId);
-            return cachedData;
-        }
-
-        // If no cached data, fetch new data from the API
-        return chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(result => {
-            const installationUniqueId = result[plugin_uuid_header_name];
-            const sessiontoken = result[plugin_session_header_name];
-            console.debug("ynInstallationUniqueId: " + installationUniqueId);
-            console.debug("xYellownotesSession: " + sessiontoken);
-
-            const url = server_url + '/api/v1.0/get_note_properties';
-            console.log('fetchDataFromApi2: Fetching data from API:', url);
-            return fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: installationUniqueId,
-                    [plugin_session_header_name]: sessiontoken
-                },
-                body: JSON.stringify({
-                    creatorid: creatorId
-                })
-            });
-        })
-        .then(response => {
-            console.log(response);
-            if (!response.ok) {
-                throw new Error('API Fetch Error: ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            cacheData(creatorId, data); // Assuming cacheData is an async but does not need to be awaited here
-            return data;
-        });
-    });
-}
-
 // rewrite this to return a promise
 
 
@@ -1703,7 +1700,7 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab, ses
     var notes = [datarow];
     // lookup creator information needed to render the note
     return new Promise((resolve, reject) => {
-        fetchDataFromApi2(creatorid)
+        fetchCreatorDataThroughAPI(creatorid)
         .then((creatordata) => {
             console.log(creatordata);
             console.log(JSON.stringify(creatordata));
