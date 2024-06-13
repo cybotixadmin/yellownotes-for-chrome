@@ -64,6 +64,10 @@ chrome.runtime.sendMessage({
     //  try{
     //  	close_note(event);
     //  }catch(g){console.debug(g);}
+    // close this tab
+    //window.close();
+    //window.open(url, '_blank').focus();
+
 
 }).catch(function (error) {
     console.log("error: " + error);

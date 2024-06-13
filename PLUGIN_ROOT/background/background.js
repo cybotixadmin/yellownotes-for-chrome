@@ -69,10 +69,9 @@ var in_memory_tab_settings = {};
 // to make this code compatible with firefox, we need to check if the browser object is defined. If not, we define it as chrome.
 if (typeof browser === "undefined") {
     var browser = chrome;
-  }
+}
 
-  const extension = (typeof browser !== "undefined") ? browser : chrome;
-
+const extension = (typeof browser !== "undefined") ? browser : chrome;
 
 /** Check if a unique ID has been set for this extenstion. It not, set one.
  * This ID is used to identify the user with the server without the user having to provide any information.
@@ -127,7 +126,6 @@ function DELETEcacheData(key, data) {
         console.log(`Data cached for ${key}`);
     });
 }
-
 
 // Intercepting fetch requests for caching purposes
 /*
@@ -243,8 +241,7 @@ chrome.contextMenus.create({
     parentId: "yellownotes",
     title: "Select and Capture",
     contexts: ["all"]
-  });
-
+});
 
 // listener for context menu clicks
 
@@ -267,7 +264,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     } else if (info.menuItemId === "pin-faktisk-note") {
         pinYellowNote(info, tab, 'webframe', 'faktisk.no');
     } else if (info.menuItemId === "captureSelection") {
-        chrome.tabs.sendMessage(tab.id, { action: "initiateSelection", sharedsecret: "secret1234" });
+        chrome.tabs.sendMessage(tab.id, {
+            action: "initiateSelection",
+            sharedsecret: "secret1234"
+        });
     } else if (info.menuItemId === "lookup-yellow-stickynotes") {
         lookup_yellownotes(info, tab);
     } else if (info.menuItemId === "create-free-yellownote") {
@@ -283,157 +283,161 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 /**
  * the receiving end of the selctive screen capture functionality
- * 
+ *
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "capture" && request.coords) {
-      chrome.tabs.captureVisibleTab(null, { format: 'png' }, function (dataUrl) {
-        console.log('Data URL of screenshot:', dataUrl);
-        chrome.storage.local.set({ screenshot: dataUrl }, () => {
-          console.log('Screenshot saved.');
+        chrome.tabs.captureVisibleTab(null, {
+            format: 'png'
+        }, function (dataUrl) {
+            console.log('Data URL of screenshot:', dataUrl);
+            chrome.storage.local.set({
+                screenshot: dataUrl
+            }, () => {
+                console.log('Screenshot saved.');
+            });
+            sendResponse({
+                status: 'success',
+                dataUrl: dataUrl
+            });
         });
-        sendResponse({ status: 'success', dataUrl: dataUrl });
-      });
-      return true;  // Indicates asynchronous response
+        return true; // Indicates asynchronous response
     }
-  });
-
+});
 
 function pinYellowNote(info, tab, note_type, brand) {
 
-    try{
-    // contenttype
-    // permitted values: text, html, embeded, http_get_url
+    try {
+        // contenttype
+        // permitted values: text, html, embeded, http_get_url
 
-    // call back out to the content script to get the selected html - and other parts of the page -and create the not object
+        // call back out to the content script to get the selected html - and other parts of the page -and create the not object
 
-    // Should the user later click "save" The event handler for the save-event in the content script will then call back to the background script to save the note to the database.
+        // Should the user later click "save" The event handler for the save-event in the content script will then call back to the background script to save the note to the database.
 
-    console.debug("pinYellowNote (info," + note_type + ") and " + brand);
-    console.debug(JSON.stringify(info));
-    console.debug(JSON.stringify(tab));
-    var pageUrl = info.pageUrl;
-    // this is the selection the user flagged.
-    var selectionText = info.selectionText;
-    console.log("selectionText: " + selectionText);
-    console.log(selectionText);
+        console.debug("pinYellowNote (info," + note_type + ") and " + brand);
+        console.debug(JSON.stringify(info));
+        console.debug(JSON.stringify(tab));
+        var pageUrl = info.pageUrl;
+        // this is the selection the user flagged.
+        var selectionText = info.selectionText;
+        console.log("selectionText: " + selectionText);
+        console.log(selectionText);
 
-    // call out to the tab to collect the complete html selected
-    var replacement_text = new String("");
+        // call out to the tab to collect the complete html selected
+        var replacement_text = new String("");
 
-    var selection_html;
-    var usekey;
-    var usekey_uuid;
-    // ID of tab in use
-    var tab_id = tab.id;
-    console.debug("tab_id: " + tab_id);
+        var selection_html;
+        var usekey;
+        var usekey_uuid;
+        // ID of tab in use
+        var tab_id = tab.id;
+        console.debug("tab_id: " + tab_id);
 
-    // get the template file from the server
-    console.debug("###calling for contenttype=" + note_type);
+        // get the template file from the server
+        console.debug("###calling for contenttype=" + note_type);
 
-    var shared_secret_to_identify_background_js_to_content_script_NoteSelectedHTML = "Glbx_marker6";
-    var PinToSelectedHTML_sharedsecret = "Glbx_maraskesfser6";
-    if (brand == '') {
-        brand = 'default';
-    }
+        var shared_secret_to_identify_background_js_to_content_script_NoteSelectedHTML = "Glbx_marker6";
+        var PinToSelectedHTML_sharedsecret = "Glbx_maraskesfser6";
+        if (brand == '') {
+            brand = 'default';
+        }
 
-    // lookup the template file
-    var note_template;
-    var note_properties;
-    var sessionToken;
-    chrome.storage.local.get([plugin_session_header_name]).then(function (result) {
-        console.log(JSON.stringify(result));
-        sessionToken = result[plugin_session_header_name];
-        console.log(sessionToken);
-        uuid = getUuid(sessionToken);
-        console.log("uuid: " + uuid);
-        // get a template, even if it is the default one
-        return getTemplate(brand, note_type);
-    }).then(function (result) {
-        console.log(result);
-        note_template = result;
-        console.log("note_template");
-        console.log(note_template);
+        // lookup the template file
+        var note_template;
+        var note_properties;
+        var sessionToken;
+        chrome.storage.local.get([plugin_session_header_name]).then(function (result) {
+            console.log(JSON.stringify(result));
+            sessionToken = result[plugin_session_header_name];
+            console.log(sessionToken);
+            uuid = getUuid(sessionToken);
+            console.log("uuid: " + uuid);
+            // get a template, even if it is the default one
+            return getTemplate(brand, note_type);
+        }).then(function (result) {
+            console.log(result);
+            note_template = result;
+            console.log("note_template");
+            console.log(note_template);
 
-        // get personal template related informaton
-        console.log("uuid" + uuid);
-        console.debug("calling fetchCreatorDataThroughAPI");
-        return fetchCreatorDataThroughAPI(uuid);
+            // get personal template related informaton
+            console.log("uuid" + uuid);
+            console.debug("calling fetchCreatorDataThroughAPI");
+            return fetchCreatorDataThroughAPI(uuid);
 
-    }).then(function (result) {
-        console.log(result);
+        }).then(function (result) {
+            console.log(result);
 
-        note_properties = result;
-        console.log("note_properties");
-        console.log(note_properties);
-// if not was returned, use default
+            note_properties = result;
+            console.log("note_properties");
+            console.log(note_properties);
+            // if not was returned, use default
 
-if (note_properties == null) {
-// use default for note properties
-note_properties = {
-"box_height" :"250px",
-"box_width": "250px",
-"note_color": "#ffff00" 
-};
-}
+            if (note_properties == null) {
+                // use default for note properties
+                note_properties = {
+                    "box_height": "250px",
+                    "box_width": "250px",
+                    "note_color": "#ffff00"
+                };
+            }
 
-        //      return fetch(server_url + '/api/v1.0/get_note_properties', {
-        //          method: 'POST',
-        //          headers: {
-        //              'Content-Type': 'application/json',
-        //              [plugin_uuid_header_name]: installationUniqueId,
-        //              [plugin_session_header_name]: sessiontoken
-        //          },
-        //          body: JSON.stringify({
-        //              creatorid: uuid
-        //           })
-        //       });
-        //   }).then(function (response) {
-        //       console.log(response);
-        //       if (!response.ok) {
-        //           console.log('API_URL_2 Fetch Error: ' + response.statusText);
-        //           // return blank (lower-priority values, or defaults, will be used later.)
-        //           return {};
-        //      } else {
-        //          //note_properties = response.json();
-        //          return response.json();
-        //      }
-        //  }).then(function (data) {
-        //      note_properties = data;
-        // execute script in active tab
-        //    return chrome.scripting.executeScript({
-        //        target: {
-        //            tabId: tab.id
-        //        },
-        //        files: ["./content_scripts/PinToSelectedHTML.js"]
-        //    });
-        //})
-        // .then(function (result) {
-        // send message to the active tab
-        const msg = {
-            action: "createnode",
-            sharedsecret: PinToSelectedHTML_sharedsecret,
-            note_type: note_type,
-            brand: brand,
-            note_template: note_template,
-            note_properties: note_properties,
-            session: sessionToken,
-            info: info,
-            tab: tab
-        };
-        console.debug("sending message back to tab: " + JSON.stringify(msg) );
-        return chrome.tabs.sendMessage(tab_id, msg);
-    }).then(function (res) {
-        console.debug("###### pinYellowNote response " + JSON.stringify(res));
+            //      return fetch(server_url + '/api/v1.0/get_note_properties', {
+            //          method: 'POST',
+            //          headers: {
+            //              'Content-Type': 'application/json',
+            //              [plugin_uuid_header_name]: installationUniqueId,
+            //              [plugin_session_header_name]: sessiontoken
+            //          },
+            //          body: JSON.stringify({
+            //              creatorid: uuid
+            //           })
+            //       });
+            //   }).then(function (response) {
+            //       console.log(response);
+            //       if (!response.ok) {
+            //           console.log('API_URL_2 Fetch Error: ' + response.statusText);
+            //           // return blank (lower-priority values, or defaults, will be used later.)
+            //           return {};
+            //      } else {
+            //          //note_properties = response.json();
+            //          return response.json();
+            //      }
+            //  }).then(function (data) {
+            //      note_properties = data;
+            // execute script in active tab
+            //    return chrome.scripting.executeScript({
+            //        target: {
+            //            tabId: tab.id
+            //        },
+            //        files: ["./content_scripts/PinToSelectedHTML.js"]
+            //    });
+            //})
+            // .then(function (result) {
+            // send message to the active tab
+            const msg = {
+                action: "createnode",
+                sharedsecret: PinToSelectedHTML_sharedsecret,
+                note_type: note_type,
+                brand: brand,
+                note_template: note_template,
+                note_properties: note_properties,
+                session: sessionToken,
+                info: info,
+                tab: tab
+            };
+            console.debug("sending message back to tab: " + JSON.stringify(msg));
+            return chrome.tabs.sendMessage(tab_id, msg);
+        }).then(function (res) {
+            console.debug("###### pinYellowNote response " + JSON.stringify(res));
 
-    });
+        });
 
-    }catch(e){
+    } catch (e) {
         console.log(e);
     }
 }
-
-
 
 // for access to admin page there is a separate listener
 //chrome.browserAction.onClicked.addListener(() => {
@@ -526,7 +530,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         } else if (action === "DELETEinjectIframeScript") {
             console.log("action: injectIframeScript")
             chrome.scripting.executeScript({
-                target: {tabId: sender.tab.id, frameIds: [sender.frameId]},
+                target: {
+                    tabId: sender.tab.id,
+                    frameIds: [sender.frameId]
+                },
                 files: ['./content_scripts/contentScriptForIframe.js']
             });
 
@@ -592,7 +599,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         } else if (action === "whoami") {
             // return minimal current user information sufficient to check it a note is owned by the current user or not
-            console.log("whoami: " )
+            console.log("whoami: ")
             // Relay the state to all open tabs
 
             sendResponse({
@@ -633,7 +640,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.log("simple_url_lookup " + JSON.stringify(message));
             // upen a tab and get a URL, then close the tab
 
-            
+
             const url = message.message.url;
             console.log(url);
             if (url == "") {
@@ -654,7 +661,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
                     // run with capturing embeddings - suitable for sandboxing
                     //return capturePageAndProcess(url, cookies);
-               
+
 
                 }).then(content => {
                     //console.log('Fetched web page content:', content);
@@ -729,77 +736,21 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         } else if (action == 'get_note_creator_info') {
             console.debug("request: get_note_creator_info");
-            console.debug( message.message.coords);
-            // determined the identity of the user, then lookup the template toue and the note properties, and return it all to the onctent script 
-            
-            
-            
-            var result_msg ={note_properties: "", note_template: "", coords: {} , dataUrl: "", sessiontoken: ""};
-            var session_uuid="";
-            var sessiontoken="";
-            
-            
-            
-             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
-                            ynInstallationUniqueId = result[plugin_uuid_header_name];
-                            xYellownotesSession = result[plugin_session_header_name];
-                            installationUniqueId = result[plugin_uuid_header_name];
-                            sessiontoken = result[plugin_session_header_name];
-                            result_msg.sessiontoken = sessiontoken;
-                            console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                            console.debug("xYellownotesSession: " + xYellownotesSession);
-                            console.debug("installationUniqueId: " + installationUniqueId);
-                            console.debug("sessiontoken: " + sessiontoken);
-                            session_uuid = getUuid(sessiontoken);
-                    console.log("session_uuid: " + session_uuid);
-                    if (session_uuid == null) {
-                        session_uuid = "UNAUTHENTICATED";
-                    }else{
-            
-                    }
-                    console.log("session_uuid: " + session_uuid);
-            
-                    return fetchCreatorDataThroughAPI(session_uuid);
-                }).then(creatorData => {
-                    console.log(creatorData);
-                        result_msg.note_properties = creatorData;
-            const brand = "default";
-                        return getTemplate(brand, "yellownote");
-                }).then(template => {
-            
-                    console.log(template);
-                    result_msg.note_template = template;
-            console.log(result_msg);
-                        sendResponse(result_msg);
-            
-                    });
-            
-            
-
-        } else if (action == 'create_capture_note') {
-            console.debug("request: create_capture_note");
-
-            console.debug( message.message.coords);
-// determined the identity of the user, then lookup the template toue and the note properties, and return it all to the onctent script 
+            console.debug(message.message.coords);
+            // determined the identity of the user, then lookup the template toue and the note properties, and return it all to the onctent script
 
 
+            var result_msg = {
+                note_properties: "",
+                note_template: "",
+                coords: {},
+                dataUrl: "",
+                sessiontoken: ""
+            };
+            var session_uuid = "";
+            var sessiontoken = "";
 
-var result_msg ={note_properties: "", note_template: "", coords: {} , dataUrl: "", sessiontoken: ""};
-var session_uuid="";
-var sessiontoken="";
-var captureddata;
-
-
-result_msg.coords = message.message.coords;
-
-captureTab()
-        .then(function(dataUrl){
-console.debug("dataUrl: ");
-console.debug(dataUrl);
-result_msg.dataUrl = dataUrl;
-           // captureddata = dataUrl;
-return  chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]);
-        }).then(function (result) {
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
                 installationUniqueId = result[plugin_uuid_header_name];
@@ -810,33 +761,85 @@ return  chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header
                 console.debug("installationUniqueId: " + installationUniqueId);
                 console.debug("sessiontoken: " + sessiontoken);
                 session_uuid = getUuid(sessiontoken);
-        console.log("session_uuid: " + session_uuid);
-        if (session_uuid == null) {
-            session_uuid = "UNAUTHENTICATED";
-        }else{
+                console.log("session_uuid: " + session_uuid);
+                if (session_uuid == null) {
+                    session_uuid = "UNAUTHENTICATED";
+                } else {}
+                console.log("session_uuid: " + session_uuid);
 
-        }
-        console.log("session_uuid: " + session_uuid);
+                return fetchCreatorDataThroughAPI(session_uuid);
+            }).then(creatorData => {
+                console.log(creatorData);
+                result_msg.note_properties = creatorData;
+                const brand = "default";
+                return getTemplate(brand, "yellownote");
+            }).then(template => {
 
-        return fetchCreatorDataThroughAPI(session_uuid);
-    }).then(creatorData => {
-        console.log(creatorData);
-            result_msg.note_properties = creatorData;
-const brand = "default";
-            return getTemplate(brand, "yellownote");
-    }).then(template => {
+                console.log(template);
+                result_msg.note_template = template;
+                console.log(result_msg);
+                sendResponse(result_msg);
 
-        console.log(template);
-        result_msg.note_template = template;
-console.log(result_msg);
-            sendResponse(result_msg);
+            });
 
-        });
+        } else if (action == 'create_capture_note') {
+            console.debug("request: create_capture_note");
+
+            console.debug(message.message.coords);
+            // determined the identity of the user, then lookup the template toue and the note properties, and return it all to the onctent script
 
 
+            var result_msg = {
+                note_properties: "",
+                note_template: "",
+                coords: {},
+                dataUrl: "",
+                sessiontoken: ""
+            };
+            var session_uuid = "";
+            var sessiontoken = "";
+            var captureddata;
 
-    
+            result_msg.coords = message.message.coords;
 
+            captureTab()
+            .then(function (dataUrl) {
+                console.debug("dataUrl: ");
+                console.debug(dataUrl);
+                result_msg.dataUrl = dataUrl;
+                // captureddata = dataUrl;
+                return chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]);
+            }).then(function (result) {
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
+                xYellownotesSession = result[plugin_session_header_name];
+                installationUniqueId = result[plugin_uuid_header_name];
+                sessiontoken = result[plugin_session_header_name];
+                result_msg.sessiontoken = sessiontoken;
+                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
+                console.debug("installationUniqueId: " + installationUniqueId);
+                console.debug("sessiontoken: " + sessiontoken);
+                session_uuid = getUuid(sessiontoken);
+                console.log("session_uuid: " + session_uuid);
+                if (session_uuid == null) {
+                    session_uuid = "UNAUTHENTICATED";
+                } else {}
+                console.log("session_uuid: " + session_uuid);
+
+                return fetchCreatorDataThroughAPI(session_uuid);
+            }).then(creatorData => {
+                console.log(creatorData);
+                result_msg.note_properties = creatorData;
+                const brand = "default";
+                return getTemplate(brand, "yellownote");
+            }).then(template => {
+
+                console.log(template);
+                result_msg.note_template = template;
+                console.log(result_msg);
+                sendResponse(result_msg);
+
+            });
 
         } else if (action == 'single_create') {
             console.debug("request: save a new yellow note");
@@ -1215,11 +1218,33 @@ console.log(result_msg);
             console.debug("action: gothere");
             console.debug(message);
             // lookup the details of the not in the database
-            
-            //console.debug(message.go_to_note_details);
 
-            const noteid = message.go_to_note_details.noteid;
+
+            // open the url the note belongs to
+
+            // place the note on the page
+
+            // move focus to the note
+var use_this_tab;
+            //console.debug(message.go_to_note_details);
+            var datarow;
+            const noteid = message.go_to_note_details.datarow.noteid;
+            var note_type = message.go_to_note_details.datarow.note_type;
+            if (note_type == null || note_type == "" || note_type == "undefined" || note_type == undefined) {
+                note_type = "yellownote";
+            }
+            // brand has not yet been implemented
+            const brand = message.go_to_note_details.datarow.brand;
             const session_uuid = message.go_to_note_details.session_uuid;
+            var creatorDetails;
+            const note_data = message.go_to_note_details.datarow;
+            var note_template = null;
+
+            // Is this note owned by the current user?
+            // Assume so, buth check against the sessiontoken further down
+            var isOwner = true;
+
+            const creatorid = message.go_to_note_details.datarow.creatorid;
             console.debug("noteid: " + noteid);
             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
@@ -1246,51 +1271,89 @@ console.log(result_msg);
                 return response.json();
             }).then(function (data) {
                 console.debug(data);
-                const datarow = data[0];
- // the API returns notes that the user may not own, so we need to mark them all accordingly
-// datarow.
-// console.debug(datarow);
-// datarow.isowner = false;
-try{
-                openUrlAndScrollToElement(tab_id, datarow.url, datarow.noteid, datarow, false, session_uuid).then(function (res) {
-                    console.debug("response: " + JSON.stringify(res));
-                    sendResponse(res);
-                });
-            }catch(e){
-                console.log(e);
-                datarow.isowner = false; 
-                // try again, but with opening a fresh tab this time
-                openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true, session_uuid).then(function (res) {
-                    console.debug("response: " + JSON.stringify(res));
-                    sendResponse(res);
-                });
-                //return true;
-            }
+                datarow = data[0];
+                // the API returns notes that the user may not own, so we need to mark them all accordingly
+                // datarow.
+                // console.debug(datarow);
+                // datarow.isowner = false;
+                // open the url the note belongs to
+                return openURLinTab(sender.tab, datarow.url);
+            }).then(function (res) {
+                use_this_tab = res;
+                console.debug(use_this_tab);
+                return fetchCreatorDataThroughAPI(creatorid);
+            }).then(function (response) {
+                console.debug(response);
+                creatorDetails = response;
+
+                return getTemplate(brand, note_type);
+            }).then(function (response) {
+note_template = response;
+                // place the note on the page
+                //  return placeNoteOnTab(sender.tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
+                // function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid)
+                //  return placeNoteOnTab(use_this_tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
+                // calling this function in the note_handler script
+                //  placeStickyNote(request.note_data, request.note_template, request.creatorDetails, request.isOwner, false, true);
+                const msg = {
+                    action: "placeYellowNoteOnPage",
+                    sharedsecret: "secret1234",
+                    datarow: datarow,
+                    noteid: noteid,
+                    session_uuid: session_uuid,
+                    note_data:datarow,
+                    note_template:note_template,
+                    creatorDetails:creatorDetails,
+                    isOwner:isOwner
+                }
+                console.debug(msg);
+                return chrome.tabs.sendMessage(use_this_tab, msg);
+            }).then(function (response) {
+                console.debug(response);
+                return focusOnNote(sender.tab, datarow.noteid);
+            }).then(function (response) {
+
+                try {
+                    openUrlAndScrollToElement(sender.tab, datarow.url, datarow.noteid, datarow, false, session_uuid).then(function (res) {
+                        console.debug("response: " + JSON.stringify(res));
+                        sendResponse(res);
+                    });
+
+                } catch (e) {
+                    console.log(e);
+                    datarow.isowner = false;
+                    // try again, but with opening a fresh tab this time
+                    openUrlAndScrollToElement(sender.tab, datarow.url, datarow.noteid, datarow, true, session_uuid).then(function (res) {
+                        console.debug("response: " + JSON.stringify(res));
+                        sendResponse(res);
+                    });
+                    //return true;
+                }
             });
             return true;
         } else if (action == 'scroll_to_note') {
             /*
-             * scroll to a note on a page - 
+             * scroll to a note on a page -
              */
             console.debug("request: scroll_to_note");
             console.debug(message);
             console.debug(JSON.stringify(message));
-            
+
             const datarow = message.message.scroll_to_note_details.datarow;
             console.debug(datarow);
 
-            try{
-                openUrlAndScrollToElement(tab_id, datarows.url, datarow.noteid, datarow, false, null).then(function (res) {
-                console.debug("response: " + JSON.stringify(res));
-                sendResponse(res);
-            });
-            }catch(e){
-              console.log(e);
+            try {
+                openUrlAndScrollToElement(sender.tab, datarows.url, datarow.noteid, datarow, false, null).then(function (res) {
+                    console.debug("response: " + JSON.stringify(res));
+                    sendResponse(res);
+                });
+            } catch (e) {
+                console.log(e);
                 // try again, but with opening a fresh tab this time
-                openUrlAndScrollToElement(null, datarow.url, datarow.noteid, datarow, true, null).then(function (res) {
-                console.debug("response: " + JSON.stringify(res));
-                sendResponse(res);
-            });
+                openUrlAndScrollToElement(sender.tab, datarow.url, datarow.noteid, datarow, true, null).then(function (res) {
+                    console.debug("response: " + JSON.stringify(res));
+                    sendResponse(res);
+                });
 
             }
             //return true;
@@ -1312,13 +1375,11 @@ try{
                 console.debug("installationUniqueId: " + installationUniqueId);
                 console.debug("sessiontoken: " + sessiontoken);
                 session_uuid = getUuid(sessiontoken);
-        console.log("session_uuid: " + session_uuid);
-        if (session_uuid == null) {
-            session_uuid = "UNAUTHENTICATED";
-        }else{
-
-        }
-        console.log("session_uuid: " + session_uuid);
+                console.log("session_uuid: " + session_uuid);
+                if (session_uuid == null) {
+                    session_uuid = "UNAUTHENTICATED";
+                } else {}
+                console.log("session_uuid: " + session_uuid);
                 const opts = {
                     method: 'POST',
                     headers: {
@@ -1339,21 +1400,21 @@ try{
                     throw new Error('Initial Fetch Error: ' + response.statusText);
                     //return null;
                     sendResponse(null);
-                }else{
-                // examine each note and for each note creator lookup the note formating infomation for the creator of the note
-                // this is needed to display the note in the correct format
+                } else {
+                    // examine each note and for each note creator lookup the note formating infomation for the creator of the note
+                    // this is needed to display the note in the correct format
 
 
-                return response.json();
+                    return response.json();
                 }
             }).then(initialData => {
-                // check if the returned data is defined 
+                // check if the returned data is defined
 
                 if (initialData == undefined) {
-                    console.debug("error: initialData is undefined"); 
+                    console.debug("error: initialData is undefined");
                     sendResponse(null);
-                }else{
-                console.log(initialData);
+                } else {
+                    console.log(initialData);
                 }
                 console.log(JSON.stringify(initialData));
                 const promises = initialData.map(item => {
@@ -1375,7 +1436,7 @@ try{
                 const msg = {
                     session_uuid: session_uuid,
                     data: data
-                } 
+                }
                 console.log(JSON.stringify(msg));
 
                 sendResponse(msg);
@@ -1501,7 +1562,7 @@ try{
                 console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
                 console.debug("xYellownotesSession: " + xYellownotesSession);
 
-                const opts = {  
+                const opts = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1545,10 +1606,11 @@ try{
     return true;
 });
 
-
 function captureTab() {
     return new Promise((resolve, reject) => {
-        chrome.tabs.captureVisibleTab(null, {format: 'png'}, dataUrl => {
+        chrome.tabs.captureVisibleTab(null, {
+            format: 'png'
+        }, dataUrl => {
             if (chrome.runtime.lastError) {
                 reject(new Error(chrome.runtime.lastError.message));
             } else {
@@ -1560,7 +1622,9 @@ function captureTab() {
 
 function saveScreenshot(dataUrl) {
     return new Promise((resolve, reject) => {
-        chrome.storage.local.set({screenshot: dataUrl}, () => {
+        chrome.storage.local.set({
+            screenshot: dataUrl
+        }, () => {
             if (chrome.runtime.lastError) {
                 reject(new Error(chrome.runtime.lastError.message));
             } else {
@@ -1570,7 +1634,6 @@ function saveScreenshot(dataUrl) {
         });
     });
 }
-
 
 // Helper to cache data with a timestamp
 function cacheData(key, data) {
@@ -1588,7 +1651,6 @@ function cacheData(key, data) {
         });
     });
 }
-
 
 // Helper to get cached data , timeout in seconds
 function getCachedData(key, cachetimeout) {
@@ -1632,70 +1694,150 @@ function fetchCreatorDataThroughAPI(creatorId) {
     }
 
     const cacheKey = creatorId + "_creator_data";
-    
+
     return getCachedData(cacheKey, CACHE_DURATION)
-        .then(cachedData => {
-            console.log('fetchCreatorDataThroughAPI: data returned from cache:', cachedData);
+    .then(cachedData => {
+        console.log('fetchCreatorDataThroughAPI: data returned from cache:', cachedData);
 
-            if (cachedData) {
-                console.log('Returning cached data for creatorId:', creatorId, "cacheKey:", cacheKey);
-                return cachedData;
-            } else {
-                return fetchNewData(creatorId, cacheKey);
-            }
-        })
-        .catch(error => {
-            console.error("Error during fetchCreatorDataThroughAPI:", error);
-            throw error;  // Propagate the error to be handled in the next link of the promise chain
-        });
+        if (cachedData) {
+            console.log('Returning cached data for creatorId:', creatorId, "cacheKey:", cacheKey);
+            return cachedData;
+        } else {
+            return fetchNewData(creatorId, cacheKey);
+        }
+    })
+    .catch(error => {
+        console.error("Error during fetchCreatorDataThroughAPI:", error);
+        throw error; // Propagate the error to be handled in the next link of the promise chain
+    });
 }
-
 
 function fetchNewData(creatorId, cacheKey) {
     console.debug('fetchNewData: Fetching new data for creatorId:', creatorId);
     return chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
-        .then(result => {
-            const installationUniqueId = result[plugin_uuid_header_name];
-            const sessionToken = result[plugin_session_header_name];
+    .then(result => {
+        const installationUniqueId = result[plugin_uuid_header_name];
+        const sessionToken = result[plugin_session_header_name];
 
-            const controller = new AbortController();
-            setTimeout(() => controller.abort(), 8000);
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 8000);
 
-            console.log('fetchCreatorDataThroughAPI: Fetching new data from API');
-            return fetch(server_url + '/api/v1.0/get_note_properties', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: installationUniqueId,
-                    [plugin_session_header_name]: sessionToken
-                },
-                signal: controller.signal,
-                body: JSON.stringify({ creatorid: creatorId })
-            });
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Caching data for', creatorId);
-            return cacheData(cacheKey, data)
-                .then(() => data);
-        })
-        .catch(error => {
-            console.error("Error in fetchNewData:", error);
-            throw error;  // Propagate the error to maintain the integrity of the promise chain
+        console.log('fetchCreatorDataThroughAPI: Fetching new data from API');
+        return fetch(server_url + '/api/v1.0/get_note_properties', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [plugin_uuid_header_name]: installationUniqueId,
+                [plugin_session_header_name]: sessionToken
+            },
+            signal: controller.signal,
+            body: JSON.stringify({
+                creatorid: creatorId
+            })
         });
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Caching data for', creatorId);
+        return cacheData(cacheKey, data)
+        .then(() => data);
+    })
+    .catch(error => {
+        console.error("Error in fetchNewData:", error);
+        throw error; // Propagate the error to maintain the integrity of the promise chain
+    });
 }
 
-// rewrite this to return a promise
+function focusOnNote(tab_id, noteid) {
+console.debug("focusOnNote: ");
+console.debug(tab_id);
+console.debug(noteid);
+return new Promise((resolve, reject) => {
+const msg = {
+    action: "moveFocusToNote",
+    sharedsecret: "secret1234",
+ 
+    noteid: noteid
 
+}
+//chrome.tabs.sendMessage(tabs[i].id, msg);
+resolve(chrome.tabs.sendMessage(tab_id, msg));
+});
 
-function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab, session_uuid) {
-    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab_id + ' and scrolling to element with noteid ' + noteid + " openNewTab: " + openNewTab + " session_uuid: " + session_uuid);
+}
+
+//  return placeNoteOnTab(sender.tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
+function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid) {
+    console.debug("placeNoteOnTab: ");
     console.debug(datarow);
+    console.debug(tab);
+    console.debug(openNewTab);
+    console.debug(session_uuid);
+
+    const tab_id = tab.id;
+
+    //chrome.tabs.sendMessage(tab.id, { action: "placeYellowNoteOnPage", sharedsecret: "secret1234", });
+
+    const msg = {
+        action: "placeYellowNoteOnPage",
+        sharedsecret: "secret1234",
+        datarow: datarow,
+        noteid: noteid,
+        session_uuid: session_uuid
+    }
+
+    return new Promise((resolve, reject) => {
+        // Send the message and handle the promise
+        chrome.tabs.query({}, function (tabs) {
+            for (let i = 0; i < tabs.length; i++) {
+                console.log("Sending message to tab: " + tabs[i].id);
+                chrome.tabs.sendMessage(tabs[i].id, msg);
+            }
+        });
+        resolve(chrome.tabs.sendMessage(tab_id, msg));
+    });
+}
+
+function openURLinTab(tab, url) {
+    console.debug('openURLinTab: Opening url ' + url + ' in tab ' + tab + ' and scrolling to element with noteid ');
+    console.debug(tab);
+    const tab_id = tab.id;
+    return new Promise((resolve, reject) => {
+        try {
+            chrome.tabs.update(tab_id, {
+                url: url
+            }, function (tab) {
+                console.log('Updated tab:', tab_id);
+                // Ensure the tab is completely loaded before sending the message
+                chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+                    if (tabId === tab_id && changeInfo.status === 'complete') {
+                        chrome.tabs.onUpdated.removeListener(listener); // Remove listener once the tab is loaded
+                        resolve(tab_id);
+
+                    } else {
+                        console.log("tabId: " + tabId + " tab_id: " + tab_id + " changeInfo.status: " + changeInfo.status);
+                        resolve(tab_id);
+                    }
+                });
+            });
+        } catch (e) {
+            console.log(e);
+            reject(e);
+        }
+    });
+
+}
+
+function openUrlAndScrollToElement(tab, url, noteid, datarow, openNewTab, session_uuid) {
+    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab + ' and scrolling to element with noteid ' + noteid + " openNewTab: " + openNewTab + " session_uuid: " + session_uuid);
+    console.debug(datarow);
+    console.debug(tab);
+    const tab_id = tab.id;
     const creatorid = datarow.creatorid;
     var notes = [datarow];
     // lookup creator information needed to render the note
@@ -1718,10 +1860,17 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab, ses
                 console.debug(tabs.length);
                 console.debug(tabs);
                 var rc;
-
+                console.debug("currenturl: " + tab.url);
                 if (tabs.length == 0 || openNewTab) {
                     // If no tabs with the URL are found, or openNewTab=true, create a new tab
-                    chrome.tabs.create({
+                    console.debug("Nload in the the same tab");
+                    // modify to open in the same place the at the gothere.html
+
+                    //chrome.tabs.create({
+                    //    url: url
+                    //}, function (tab) {
+
+                    chrome.tabs.update(tab_id, {
                         url: url
                     }, function (tab) {
                         console.log('Updated tab:', tab.id);
@@ -1740,54 +1889,59 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab, ses
                             }
                         });
                     });
+
                 } else {
                     // an existing tab with this url was found - try to use it.
-                    try{
-                    console.debug("An existing tab was found with this URL.");
-                    //let tabId = tabs[0].id;
-                    console.log('Using existing tab:', tab_id);
-                    //rc = sendMessageToContentScript(tab_id, resp, noteid, session_uuid);
-                    sendMessageToContentScript(tab_id, resp, noteid, session_uuid)
-                    .then(result => {
-                        console.log('Result:', result); // This will log '0' for success or '1' for error
-// sending failed try opening in the current tab
- // Query to get the current active tab
- chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    if (tabs.length > 0) {
-        let activeTab = tabs[0];
-        // Update the URL of the current active tab
-        chrome.tabs.update(activeTab.id, {url: url}, tab => {
-            console.log("Tab updated with URL:", url);
+                    try {
+                        console.debug("An existing tab was found with this URL.");
+                        //let tabId = tabs[0].id;
+                        console.log('Using existing tab:', tab_id);
+                        //rc = sendMessageToContentScript(tab_id, resp, noteid, session_uuid);
+                        sendMessageToContentScript(tab_id, resp, noteid, session_uuid)
+                        .then(result => {
+                            console.log('Result:', result); // This will log '0' for success or '1' for error
+                            // sending failed try opening in the current tab
+                            // Query to get the current active tab
+                            chrome.tabs.query({
+                                active: true,
+                                currentWindow: true
+                            }, function (tabs) {
+                                if (tabs.length > 0) {
+                                    let activeTab = tabs[0];
+                                    // Update the URL of the current active tab
+                                    chrome.tabs.update(activeTab.id, {
+                                        url: url
+                                    }, tab => {
+                                        console.log("Tab updated with URL:", url);
 
-            // Wait for the tab to finish loading the new URL
-            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-                if (tabId === tab.id && changeInfo.status === 'complete') {
-                    // Remove the listener once the URL is loaded
-                    chrome.tabs.onUpdated.removeListener(listener);
+                                        // Wait for the tab to finish loading the new URL
+                                        chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+                                            if (tabId === tab.id && changeInfo.status === 'complete') {
+                                                // Remove the listener once the URL is loaded
+                                                chrome.tabs.onUpdated.removeListener(listener);
 
-                    sendMessageToContentScript(tabId, resp, noteid, session_uuid)
-                    .then(result => {
-                        console.log('Result:', result); // This will log '0' for success or '1' for error
-                        resolve(`Message sent to new tab ${tab.id}`);
-                    })
-                    .catch(error => {
-                        console.error('Unexpected error:', error);
-                    });
-                }
-            });
-        });
-    } else {
-        console.error("No active tab found.");
-    }
-});
+                                                sendMessageToContentScript(tabId, resp, noteid, session_uuid)
+                                                .then(result => {
+                                                    console.log('Result:', result); // This will log '0' for success or '1' for error
+                                                    resolve(`Message sent to new tab ${tab.id}`);
+                                                })
+                                                .catch(error => {
+                                                    console.error('Unexpected error:', error);
+                                                });
+                                            }
+                                        });
+                                    });
+                                } else {
+                                    console.error("No active tab found.");
+                                }
+                            });
 
-
-                        resolve(`Message sent to new tab ${tab_id}`);
-                    })
-                    .catch(error => {
-                        console.error('Unexpected error:', error);
-                    });
-                    }catch(e){
+                            resolve(`Message sent to new tab ${tab_id}`);
+                        })
+                        .catch(error => {
+                            console.error('Unexpected error:', error);
+                        });
+                    } catch (e) {
                         console.log(e);
                         reject(e);
                     }
@@ -1800,8 +1954,6 @@ function openUrlAndScrollToElement(tab_id, url, noteid, datarow, openNewTab, ses
         });
     });
 }
-
-
 
 function sendMessageToContentScript(tabId, resp, noteid, session_uuid) {
     console.debug('sendMessageToContentScript: Sending message to tab ' + tabId);
@@ -1827,18 +1979,17 @@ function sendMessageToContentScript(tabId, resp, noteid, session_uuid) {
 
     // Send the message and handle the promise
     return chrome.tabs.sendMessage(tabId, msg)
-        .then(res => {
-            console.debug("# response " + JSON.stringify(res));
-            return 0; // success
-        })
-        .catch(error => {
-            console.debug("# error " + JSON.stringify(error));
-            // This error typically occurs when the tab is open but the plugin has been restarted.
-            // The tab should be refreshed in this case, but as it is not the desired behavior, return 1
-            return 1; // error or other undesirable situation
-        });
+    .then(res => {
+        console.debug("# response " + JSON.stringify(res));
+        return 0; // success
+    })
+    .catch(error => {
+        console.debug("# error " + JSON.stringify(error));
+        // This error typically occurs when the tab is open but the plugin has been restarted.
+        // The tab should be refreshed in this case, but as it is not the desired behavior, return 1
+        return 1; // error or other undesirable situation
+    });
 }
-
 
 function DELETEsendMessageToContentScript(tabId, data, noteId) {
     chrome.tabs.sendMessage(tabId, {
@@ -1881,28 +2032,26 @@ function DELETE2sendMessageToContentScript(tabId, resp, noteid) {
     console.debug(creatorid);
     // if no creatorid is present - use default values
 
-try{
-     chrome.tabs.sendMessage(tabId, msg).then(function (res) {
-        // read response
-        console.debug("# response " + JSON.stringify(res));
-        return 0;
-    }).catch(function (error) {
-        console.debug("# error " + JSON.stringify(error));
-/* this error usually occure when the tab is open byt the plugin has been restarted. The tab should in that case also be refreshed but this is not desired behavior. 
-In this scenario the desired url is open fresh  in the current tab instead. 
-*/
-return 1;
-console.debug("# error " + JSON.stringify(error));
+    try {
+        chrome.tabs.sendMessage(tabId, msg).then(function (res) {
+            // read response
+            console.debug("# response " + JSON.stringify(res));
+            return 0;
+        }).catch(function (error) {
+            console.debug("# error " + JSON.stringify(error));
+            /* this error usually occure when the tab is open byt the plugin has been restarted. The tab should in that case also be refreshed but this is not desired behavior.
+            In this scenario the desired url is open fresh  in the current tab instead.
+             */
+            return 1;
+            console.debug("# error " + JSON.stringify(error));
 
-    });
-}catch(e){
-    console.log(e);
-    return 1;
+        });
+    } catch (e) {
+        console.log(e);
+        return 1;
+    }
+
 }
-
-}
-
-
 
 function scrollToElement(selector, uuid) {
     // This part of the function will be injected and executed in the context of the webpage
@@ -1961,7 +2110,7 @@ function createCookieHeader(cookies) {
 call to collect a webpage
 include relevant cookies that have been set for this URL earlier. This is essential for sites requiring authentication, as this information is stored in the cookies.
 
-*/
+ */
 function fetchContentWithCookies(url, cookies) {
     const cookieHeader = createCookieHeader(cookies);
 
@@ -1983,7 +2132,6 @@ function fetchContentWithCookies(url, cookies) {
     });
 }
 
-
 function capturePageForEmbedingInIframe(url, cookieString) {
     const cookieHeader = createCookieHeader(cookieString);
     return new Promise((resolve, reject) => {
@@ -1996,17 +2144,19 @@ function capturePageForEmbedingInIframe(url, cookieString) {
             credentials: 'include'
         })
         .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
             return response.text();
         })
         .then(html => inlineResources(html, url, cookieString))
         .then(inlineHtml => {
             console.log('Captured and inlined resources for', url);
             console.log(inlineHtml);
-            const blob = new Blob([inlineHtml], { type: 'text/html' });
-           // const blobUrl = URL.createObjectURL(blob);
+            const blob = new Blob([inlineHtml], {
+                    type: 'text/html'
+                });
+            // const blobUrl = URL.createObjectURL(blob);
             const blobUrl = blobToDataURI(blob);
-            
 
             resolve(inlineHtml);
         })
@@ -2017,23 +2167,23 @@ function capturePageForEmbedingInIframe(url, cookieString) {
     });
 }
 
-
 function fetchResourceAsDataURI(url, cookieString) {
     console.debug("fetchResourceAsDataURI.start");
     console.log('Fetching resource as data URI:', url);
     return fetch(url)
-        .then(response => {
-            if (!response.ok) throw new Error(`Network response was not ok for ${url}`);
-            return response.blob();
-        })
-        .then(blob => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
+    .then(response => {
+        if (!response.ok)
+            throw new Error(`Network response was not ok for ${url}`);
+        return response.blob();
+    })
+    .then(blob => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
         });
+    });
 }
 
 function inlineResources(html, baseUrl, cookieString) {
@@ -2052,19 +2202,19 @@ function inlineResources(html, baseUrl, cookieString) {
         console.log('Replacing URL with data URI:', url);
         const fullUrl = new URL(url, baseUrl).href;
         return fetchResourceAsDataURI(fullUrl, cookieString)
-            .then(dataUri => {
-                console.log('Incomming data URI:', dataUri);
-                console.debug("replace ", original);
-                console.debug("with ", original.replace(url, dataUri));
-                console.debug("in ", html);
-                const result = html.replace(original, original.replace(url, dataUri));
-                console.debug("result: ", result);
-                return result;
-            })
-            .catch(error => {
-                console.error(`Failed to load resource ${fullUrl}:`, error);
-                return html; // Return the original html if the fetch fails
-            });
+        .then(dataUri => {
+            console.log('Incomming data URI:', dataUri);
+            console.debug("replace ", original);
+            console.debug("with ", original.replace(url, dataUri));
+            console.debug("in ", html);
+            const result = html.replace(original, original.replace(url, dataUri));
+            console.debug("result: ", result);
+            return result;
+        })
+        .catch(error => {
+            console.error(`Failed to load resource ${fullUrl}:`, error);
+            return html; // Return the original html if the fetch fails
+        });
     }
 
     // Collect all promises from replacements
@@ -2088,7 +2238,7 @@ function inlineResources(html, baseUrl, cookieString) {
 function blobToDataURI(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function () {
             resolve(reader.result);
         };
         reader.onerror = reject;
@@ -2104,7 +2254,8 @@ function fetchResourceAsDataURI(url, cookieString) {
         }
     })
     .then(response => {
-        if (!response.ok) throw new Error(`Network response was not ok for ${url}`);
+        if (!response.ok)
+            throw new Error(`Network response was not ok for ${url}`);
         return response.blob();
     })
     .then(blob => {
@@ -2126,7 +2277,8 @@ function capturePageAndProcess(url, cookieString) {
         }
     })
     .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+            throw new Error(`HTTP error! status: ${response.status}`);
         return response.text();
     })
     .then(html => {
@@ -2142,9 +2294,12 @@ function capturePageAndProcess(url, cookieString) {
             // Create a replacement promise
             const replacementPromise = fetchResourceAsDataURI(absoluteUrl, cookieString)
                 .then(dataUri => {
-                    return { old: resourceUrl, new: dataUri };
+                    return {
+                        old: resourceUrl,
+                        new: dataUri
+                    };
                 });
-            
+
             replacements.push(replacementPromise);
         }
 
@@ -2158,12 +2313,7 @@ function capturePageAndProcess(url, cookieString) {
     });
 }
 
-
-
-
 let cookiesInMemory = {};
-
-
 
 /* #############################
 
@@ -2199,17 +2349,14 @@ chrome.webRequest.onHeadersReceived.addListener(
     // console.log(details);
     // execute logout
     console.log('Logout detected');
-        chrome.storage.local.remove(
-            [plugin_session_header_name]
-        , () => {
-            console.log('Yellownotes session token removed local storage:');
-        });
+    chrome.storage.local.remove(
+        [plugin_session_header_name], () => {
+        console.log('Yellownotes session token removed local storage:');
+    });
 }, {
     urls: ["*://www.yellownotes.cloud/logout_silent*"]
 },
     ["responseHeaders"]);
-
-
 
 function logHeaders(tabId, url) {
     console.log('Listening for headers on tab:', tabId);

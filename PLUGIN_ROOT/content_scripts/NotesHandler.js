@@ -143,7 +143,26 @@ function listener(request, sender, sendResponse) {
                     data: "value"
                 });
                 return true;
+            } else if (request.action == "placeYellowNoteOnPage") {
+                console.debug("placeYellowNoteOnPage");
+                console.debug(request.datarow);
+                console.debug(request.datarow.noteid);
+                console.debug(request.noteid);
+if (isNoteOnPage(request.noteid)) {
+                    console.debug("yellownote is already on page");
+                    // move focus to note
+                    moveFocusToNote(request.noteid);
+                }else{
+                    console.debug("yellownote is NOT already on page");
+                    // call the function that will place the note on the page
+                    console.debug("calling placeStickyNote");
+                   
+                   placeStickyNote(request.note_data, request.note_template, request.creatorDetails, request.isOwner, false, true);
+                     }
+                    } else if (request.action == "moveFocusToNote") {
 
+                        moveFocusToNote(request.noteid);
+                        
             } else if (request.action == "initiateSelection") {
 /*
  * selecting an area of the screen to capture
@@ -933,7 +952,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         try {
             insertedNode.querySelector('[focus="true"]').focus();
         } catch (e) {
-            console.error(e);
+            console.log(e);
         }
 
     } else {
@@ -956,6 +975,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.debug("browsersolutions: makeDragAndResize");
     makeDragAndResize(insertedNode);
 
+    console.debug(insertedNode);
     // attach eventlisteners to the note
     attachEventlistenersToYellowStickynote(insertedNode);
 
@@ -965,7 +985,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.debug("browsersolutions: calling dropdownlist_add_option");
     dropdownlist_add_option(insertedNode, "", "", "");
 
-    // place focus
+    // place focus on the new yellownote
     try {
         insertedNode.querySelector('[focus="true"]').focus();
     } catch (e) {
@@ -2249,7 +2269,7 @@ function moveFocusToNote(noteid) {
             console.log('Element not found: ' + elementId);
         }
     } catch (e) {
-        //console.error(e);
+        console.error(e);
     }
 }
 
@@ -3193,10 +3213,11 @@ function DELETEgetSelectionTextDOMPosition(selection_text) {
     // Decode the String containing the selection text
     //console.debug("browsersolutions: selection_text: " + note_obj.selection_text);
     //var selection_text = "";
+    // do not attempt this with strings shorter than 3 characters (revise this later to something longer)
     try {
-        if (selection_text != "" && selection_text != null && selection_text != undefined) {
+        if (selection_text != null && selection_text != undefined && selection_text.length > 3 ) {
 
-            console.debug("browsersolutions: selection_text: " + selection_text);
+            console.debug("browsersolutions: selection_text: \"" + selection_text + "\"");
 
             // find where in the DOM the selection text is found (if at all)
             console.debug("calling getDOMplacement");
@@ -3282,6 +3303,20 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
     console.debug(creatorDetails);
     console.debug(isOwner);
     console.debug(newNote);
+    console.debug(moveFocus);
+
+// first , check if the note is already on the page
+    if (isNoteOnPage(note_obj.noteid)) {
+        console.debug("browsersolutions: note IS already on page");
+        // move focus ?
+        if (moveFocus) {
+            // move focus to this note
+            console.debug("call moveFocusToNote");
+            moveFocusToNote(note_obj.noteid);
+        }
+    }else{
+
+    
 
     // set a default background color for the note selection highlighting
     var highlight_background = "rgb(255, 255, 0, 0.25)";
@@ -3311,42 +3346,11 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
             console.debug("browsersolutions: newnote=" + newNote);
         } else {
             console.debug(note_obj);
-            if (note_obj.selection_text == "") {
-                // if no selection_text, only position co-ordinates can place the note
+            
+            // use the selection text to place the note, but ignore selections shorter than 3 characters
+            if (note_obj.selection_text != undefined && note_obj.selection_text != null && note_obj.selection_text.length > 3) {
 
-                try {
-                    console.debug("browsersolutions: calling: create_stickynote_node");
-                    create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (response) {
-                        var newGloveboxNode = response;
-
-                        console.debug(newGloveboxNode);
-                        console.debug("browsersolutions: calling: size_and_place_note_based_on_coordinates");
-                        size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
-                        console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
-                        attachEventlistenersToYellowStickynote(newGloveboxNode);
-                        // make some parts visible and other not visible
-                        if (isOwner) { // if the note is the user's own note, then make the edit buttons visible
-                            console.debug("browsersolutions: makeEditButtonsVisible");
-                            console.debug("calling setComponentVisibility");
-                            setComponentVisibility(newGloveboxNode, ",rw,.*normalsized");
-                            newGloveboxNode.setAttribute("button_arrangment", "rw");
-                        } else {
-                            console.debug("browsersolutions: makeEditButtonsInvisible");
-                            setComponentVisibility(newGloveboxNode, ",ro,.*normalsized");
-                            newGloveboxNode.setAttribute("button_arrangment", "ro");
-                        }
-
-                        // internal scrolling for webframes
-
-                        // Make the stickynote draggable:
-                        console.debug("browsersolutions: makeDragAndResize");
-                        makeDragAndResize(newGloveboxNode);
-                    });
-                } catch (e) {
-                    console.debug("browsersolutions " + e);
-                }
-
-            } else {
+              
                 console.debug("browsersolutions: attempt selection text macthing");
                 // check if note contains position coordinates/parameters. If so, try to use them to place the note.
 
@@ -3596,14 +3600,56 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                     console.debug(e);
                 }
 
-            }
+
+
+
+
+            }else{
+  // if no selection_text, only position co-ordinates can place the note
+
+  try {
+    console.debug("browsersolutions: calling: create_stickynote_node");
+    create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (response) {
+        var newGloveboxNode = response;
+
+        console.debug(newGloveboxNode);
+        console.debug("browsersolutions: calling: size_and_place_note_based_on_coordinates");
+        size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
+        console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
+        attachEventlistenersToYellowStickynote(newGloveboxNode);
+        // make some parts visible and other not visible
+        if (isOwner) { // if the note is the user's own note, then make the edit buttons visible
+            console.debug("browsersolutions: makeEditButtonsVisible");
+            console.debug("calling setComponentVisibility");
+            setComponentVisibility(newGloveboxNode, ",rw,.*normalsized");
+            newGloveboxNode.setAttribute("button_arrangment", "rw");
+        } else {
+            console.debug("browsersolutions: makeEditButtonsInvisible");
+            setComponentVisibility(newGloveboxNode, ",ro,.*normalsized");
+            newGloveboxNode.setAttribute("button_arrangment", "ro");
+        }
+
+        // internal scrolling for webframes
+
+        // Make the stickynote draggable:
+        console.debug("browsersolutions: makeDragAndResize");
+        makeDragAndResize(newGloveboxNode);
+    });
+} catch (e) {
+    console.debug("browsersolutions " + e);
+}
+
+
+        }
+
             return true;
         }
     }
 }
+}
 
 function moveFocusToNote(noteid) {
-    console.log("moveFocusToNote(" + noteid + ")");
+    console.log("moveFocusToNote (" + noteid + ")");
 
     console.log("The current URL is:", window.location.href);
 
@@ -4625,6 +4671,7 @@ function get_brand_from_sessiontoken(token) {
 
 
 
+
 // scan all the text on the page, with a view to later making a pattern match with the selected text contained in the note
 function scan_page() {
     console.debug("#scan_page.start");
@@ -4659,6 +4706,124 @@ function scan_page() {
 
 }
 
+// scan all the text on the page, with a view to later making a pattern match with the selected text contained in the note
+function scan_page_new() {
+    console.debug("#scan_page.start");
+    var doc = window.document,
+    body = doc.body,
+    selection,
+    range,
+    bodyText;
+    //  console.debug(doc);
+    //   console.debug(doc.nodeName);
+    // root
+    //var root_node = doc.documentElement;
+
+
+// Usage example
+//const rootElement = document.body; // Replace with the desired root element
+const result = extractTextAndNodes(doc.documentElement);
+console.log(result);
+
+console.log('PAGE_TEXT:', result.PAGE_TEXT);
+console.log('DOC_ARR:', result.DOC_ARR);
+//console.log(DOC_ARR);
+
+
+    // reset the global variables that contain the document structure (for use in other functions)
+    whole_page_text = result.PAGE_TEXT;
+    textnode_map = [];
+    //console.debug("1.2.0");
+
+    // exec traversal
+   // var rc = traverse(doc.documentElement);
+    //  The data describing the text structure of the document is now populated into textnode_map
+    //console.debug("browsersolutions "+rc);
+
+    console.debug("whole_page_text length: ", whole_page_text.length);
+    //
+    console.debug(whole_page_text);
+
+    // contain node object and the position within overall text (white space removed)
+
+    console.debug(textnode_map);
+    console.debug("textnode_map size: " + textnode_map.length);
+
+}
+
+
+
+
+function extractTextAndNodes(inputNode) {
+    let PAGE_TEXT = '';
+    let DOC_ARR = [];
+
+    function traverse(node) {
+        // Only process element and text nodes
+        console.log('Node tag:', node.tagName);
+        console.log('Node type:', node.nodeType);
+        console.log('node.childNodes:', node.childNodes);
+
+
+        
+
+        if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) {
+            // Get the text content of the node
+            const nodeText = node.textContent.trim(); // Use trim to remove any leading/trailing whitespace
+
+            if (nodeText) {
+                // Get the length of PAGE_TEXT before concatenation
+                const startIndex = PAGE_TEXT.length;
+                
+                // Concatenate the text content to PAGE_TEXT
+                PAGE_TEXT += nodeText;
+
+                // Calculate the end index after concatenation
+                const endIndex = PAGE_TEXT.length;
+
+                // Get the tag name of the parent node
+                const parentTagName = node.parentNode ? node.parentNode.tagName : null;
+
+                // Create NODE_ARR array and push it to DOC_ARR
+                const NODE_ARR = [startIndex, endIndex, node, parentTagName, nodeText];
+                DOC_ARR.push(NODE_ARR);
+            }
+
+            // Recursively traverse child nodes
+            node.childNodes.forEach(child => traverse(child));
+
+            // Traverse the shadow DOM if it exists
+            if (node.shadowRoot) {
+                console.log('Shadow DOM detected:', node);
+                traverse(node.shadowRoot);
+            }
+
+            // Traverse the content of iframes if they exist and are accessible
+           
+            if (node.tagName === 'IFRAME') {
+                console.log('IFRAME detected:', node);
+                try {
+                    const iframeDoc = node.contentDocument || node.contentWindow.document;
+                    if (iframeDoc) {
+                        traverse(iframeDoc.body);
+                    }
+                } catch (e) {
+                    console.error('Could not access iframe content:', e);
+                }
+            }
+        }
+    }
+
+    // Start the traversal from the input node
+    traverse(inputNode);
+
+    // Return the results
+    return {
+        PAGE_TEXT: PAGE_TEXT,
+        DOC_ARR: DOC_ARR
+    };
+}//
+
 // create a node array of all text nodes present in the document, in document order
 function traverse(elm) {
     // produce a string of all test concatenated
@@ -4669,7 +4834,7 @@ function traverse(elm) {
   //  console.debug(elm.nodeType);
 //console.debug(elm.childNodes);
 
-if (elm.nodeType == Node.ELEMENT_NODE || elm.nodeType == Node.DOCUMENT_NODE) {
+    if (elm.nodeType == Node.ELEMENT_NODE || elm.nodeType == Node.DOCUMENT_NODE) {
         //console.debug("1.0.1");
 
         // exclude elements with invisible text nodes
@@ -4697,9 +4862,7 @@ if (elm.nodeType == Node.ELEMENT_NODE || elm.nodeType == Node.DOCUMENT_NODE) {
         whole_page_text = whole_page_text + elm.nodeValue.replace(/\s/g, "");
         var end_position = whole_page_text.length;
         textnode_map.push([start_position, end_position, elm, elm.parentNode.tagName]);
-
     }
-
     return [whole_page_text, textnode_map];
 
 }
@@ -4720,10 +4883,10 @@ function isExcluded(elm) {
         return true;
     }else     if (one == "NOSCRIPT") {
         return true;
-    }else     if (one == "IFRAME") {
-        return true;
-    }else     if (one == "OBJECT") {
-        return true;
+   // }else     if (one == "IFRAME") {
+   //     return true;
+   // }else     if (one == "OBJECT") {
+   //     return true;
     }
     return false
 }
@@ -5378,7 +5541,7 @@ function rightsize_note(event) {
 }
 
 function close_note(event) {
-    console.debug("# close yellow note");
+    console.debug("# close yellownote (event)");
     // stop clicking anything behind the button
     event.stopPropagation();
     event.preventDefault();
@@ -5391,6 +5554,24 @@ function close_note(event) {
 
     try {
         remove_note(stickynote_rootnode);
+
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+
+function close_note(noteid) {
+    console.debug("# close yellownote: " + noteid);
+  
+
+    // loop upwards from the target nodes to locate the root node for the sticky note
+    var note_root = document.querySelectorAll('[class][note_type][noteid="' + noteid + '"]')[0];
+
+   
+
+    try {
+        remove_note(note_root);
 
     } catch (e) {
         console.error(e);
@@ -6140,6 +6321,12 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
 
     const rootElement = document.documentElement;
     //console.debug(rootElement);
+    // check one more time that the note is not already on the page
+    if (!isNoteOnPage(noteid)) {
+        console.debug("note is not already on the page");
+        // cleanup by removing it
+        close_noteid(noteid);
+    }
     let insertedNode = rootElement.insertBefore(newGloveboxNode, rootElement.firstChild.nextSibling);
     //let insertedNode = rootElement.appendChild(newGloveboxNode);
 
@@ -6271,7 +6458,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     console.debug(insertedNode);
 
     console.debug("size_and_place_note_based_on_texthighlight.end");
-
+   
     
 
 }
@@ -6366,7 +6553,10 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
 
     const rootElement = document.documentElement;
     //console.debug(rootElement);
+    // check on more time if the note is already on the page
+    if (!isNoteOnPage(note_obj.noteid)) {
     let insertedNode = rootElement.insertBefore(newGloveboxNode, rootElement.firstChild.nextSibling);
+    
     //let insertedNode = rootElement.appendChild(newGloveboxNode);
 
     console.debug(insertedNode);
@@ -6503,7 +6693,12 @@ if (node_type === "webframe") {
     console.debug(insertedNode);
 
     console.debug("browsersolutions: " + "#size_and_place_note_based_on_coordinates.end");
+
     return insertedNode;
+}else{
+    console.debug("note already on page");
+    return null;    }
+
 }
 
 const note_internal_height_padding = 25;
