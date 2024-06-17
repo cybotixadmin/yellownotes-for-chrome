@@ -34,6 +34,10 @@ const URI_plugin_user_get_subscribed_url_yellownotes = "/api/v1.0/plugin_user_ge
 
 const URI_plugin_user_get_own_url_yellownotes = "/api/v1.0/plugin_user_get_own_url_yellownotes";
 
+const URI_plugin_user_get_own_url_yellownotes_with_selection_text = "/api/v1.0/plugin_user_get_own_url_yellownotes_with_selection_text";
+
+
+
 const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_distribution_lists";
 
 const URI_plugin_user_get_an_authorized_note = "/api/v1.0/plugin_user_get_an_authorized_note";
@@ -150,6 +154,8 @@ return response;
 });
 
  */
+
+
 
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
@@ -465,26 +471,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     console.debug("received from page: " + JSON.stringify(message));
 
     const tab_id = sender.tab.id;
-
     try {
         var action = "";
         action = message.action;
         console.debug("action: " + action);
-
         if (isUndefined(message.action)) {
-
             if (!isUndefined(message.message.action)) {
                 action = message.message.action;
-
             }
-
         }
-
         try {
             if (isUndefined(message.stickynote)) {
                 if (isUndefined(message.stickynote.request)) {
                     if (message.stickynote.request) {
-
                         action = message.stickynote.request;
                     }
                 }
@@ -1277,14 +1276,17 @@ var use_this_tab;
                 // console.debug(datarow);
                 // datarow.isowner = false;
                 // open the url the note belongs to
+                console.debug("######## ####### 1 ######### ######## #######");
                 return openURLinTab(sender.tab, datarow.url);
             }).then(function (res) {
                 use_this_tab = res;
                 console.debug(use_this_tab);
+                console.debug("######## ####### 2 ######### ######## #######");
                 return fetchCreatorDataThroughAPI(creatorid);
             }).then(function (response) {
                 console.debug(response);
                 creatorDetails = response;
+                console.debug("######## ####### 3 ######### ######## #######");
 
                 return getTemplate(brand, note_type);
             }).then(function (response) {
@@ -1307,28 +1309,28 @@ note_template = response;
                     isOwner:isOwner
                 }
                 console.debug(msg);
+                console.debug("######## ####### 4 ######### ######## #######");
+
                 return chrome.tabs.sendMessage(use_this_tab, msg);
             }).then(function (response) {
                 console.debug(response);
-                return focusOnNote(sender.tab, datarow.noteid);
-            }).then(function (response) {
+                console.debug("######## ####### 5 ######### ######## #######");
 
-                try {
-                    openUrlAndScrollToElement(sender.tab, datarow.url, datarow.noteid, datarow, false, session_uuid).then(function (res) {
-                        console.debug("response: " + JSON.stringify(res));
-                        sendResponse(res);
-                    });
-
-                } catch (e) {
-                    console.log(e);
-                    datarow.isowner = false;
-                    // try again, but with opening a fresh tab this time
-                    openUrlAndScrollToElement(sender.tab, datarow.url, datarow.noteid, datarow, true, session_uuid).then(function (res) {
-                        console.debug("response: " + JSON.stringify(res));
-                        sendResponse(res);
-                    });
-                    //return true;
+                const msg = {
+                    action: "moveFocusToNote",
+                    sharedsecret: "secret1234",
+                 
+                    noteid: noteid
+                
                 }
+                //chrome.tabs.sendMessage(tabs[i].id, msg);
+                return chrome.tabs.sendMessage(tab_id, msg);
+
+                
+            }).then(function (response) {
+console.debug(response);
+                console.debug("######## ####### 6 ######### ######## #######");
+                sendResponse(response);
             });
             return true;
         } else if (action == 'scroll_to_note') {
@@ -1552,6 +1554,14 @@ note_template = response;
             //            console.debug("get all notes for " + message.message);
             console.debug("get all notes for " + message.message.url);
             const url = message.message.url;
+            const note_type = message.message.note_type;
+
+            var APIendpoint = server_url + URI_plugin_user_get_own_url_yellownotes;
+            if (note_type == "selection_text") {
+                APIendpoint = server_url + URI_plugin_user_get_own_url_yellownotes_with_selection_text;
+           
+            }
+
             // call out to database
             //  chrome.storage.local.set({xYellownotesSession: xSessionHeader.value}, () => {
             //console.log('Yellownotes Value saved in local storage:', xSessionHeader.value);
@@ -1574,7 +1584,7 @@ note_template = response;
                     }),
                 };
                 console.log(opts);
-                return fetch(server_url + URI_plugin_user_get_own_url_yellownotes, opts);
+                return fetch(APIendpoint, opts);
             }).then(function (response) {
                 console.log(response);
                 if (!response.ok) {

@@ -51,8 +51,8 @@ background: rgba(255, 255, 0, 0.7);">
 											z-index: 13000;
 										}
 					</style>
-				<tr name="note_ribbon" style="max-height: 22px; min-height: 22px; height: 22px; width: 100%; overflow: visible; display: flex; padding: 0px; border: 0px; margin: 0px;  ">
-					<td name="topbar_filler"  style="top: 0px; left: 0px; text-align: left; flex-grow:1;  padding: 0px; border: 1px; margin: 0px;  overflow: hidden ;z-index: 10103; font-size: 14px">
+				<tr name="note_ribbon" style="max-height: 22px; min-height: 22px; height: 22px; overflow: visible; display: flex; padding: 0px; border: 0px; margin: 0px;  ">
+					<td name="topbar_filler" style="top: 0px; left: 0px; text-align: left; flex-grow:1;  padding: 0px; border: 1px; margin: 0px;  overflow: hidden ;z-index: 10103; font-size: 14px">
 					</td>
 					<td name="topbar_icons" style="position: absolute; top: 0px; right: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 98px; max-width: 98px; top: 0px; z-index: 10103; overflow: visible;">
 						<table style="padding: 0px; border: 0px; margin: 0px; table-layout: fixed; height: 100%; width: 100%; z-index: 10103; border-collapse: collapse;">
@@ -125,7 +125,8 @@ iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAACAklEQVRYR+2Yva4BQRTHzyqEIKIREi+w
 	</tr>
 	<tr name="whole_note_middlebar" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 180px; width: 100%; position: absolute; top: 25px; padding: 0px; border: 0px; margin: 0px; overflow: hidden; background: rgba(255, 255, 0, 0.7); z-index: 10103;">
 		<td name="whole_note_middlecell" style="height: 180px; width: 250px; position: absolute; top: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 140px; min-height: 40px; text-align: left; text-wrap: wrap; overflow: visible; background: rgba(255, 255, 0, 0.7); z-index: 10103;" >
-			<textarea  name="message_display_text"  style="height: 100%; width: 100%; position: absolute; left: 0px; top: 0px; color: rgba(0, 0, 0, 0.7); background: rgba(255, 255, 0, 0.7); border: 0px solid #ffff00; border-radius: 0px; overflow: hidden; padding: 0px; margin: 0px; position: relative; bottom: 0; z-index: 10104;" contenteditable="true"></textarea>
+			<div name="message_display_text" contenteditable="true" style=" position: absolute; left: 0px; top: 0px; color: rgba(0, 0, 0, 0.7); background: rgba(255, 255, 0, 0.7); border: 0px solid #ffff00; border-radius: 0px; overflow-x: hidden; overflow-y: auto; line-height: 0.9; padding: 2px; margin: 0px; position: relative; bottom: 0; z-index: 10104;" contenteditable="true">
+			</div>
 		</td>
 			<!--
 			<form name="note_form" style="border: 0px solid #ffff00;
@@ -140,9 +141,6 @@ iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAACAklEQVRYR+2Yva4BQRTHzyqEIKIREi+w
 			<input type="hidden" name="lastmodifiedtime"></input>
 			<input type="hidden" name="enabled"></input>
 			<input type="hidden" name="captured_image_datauri"></input>
-
-			
-						
 	</tr>
 	<tr name="whole_note_bottombar" subcomponentvisibility=",new,rw,normalsized,fullscreen," style="height: 25px; width: 100%; position: absolute; bottom: 0px; z-index: 10103; padding: 0px; border: 0px; margin: 0px;  overflow: visible;">
 		<td  subcomponentvisibility=",new,normalsized,fullscreen," style="position: static; width: 50px; min-width: 40px; padding: 0px; border: 0px; margin: 0px; height: 22px;  text-align: left; overflow: hidden;">

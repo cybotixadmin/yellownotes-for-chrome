@@ -887,8 +887,9 @@ async function saveChanges(noteid, event) {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
+        var content_url;
         var message_display_text;
-        var content_url
+       
         try {
             //message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent);
 
@@ -899,6 +900,14 @@ async function saveChanges(noteid, event) {
             console.debug(e);
         }
 
+        var selection_text;
+       
+        try {
+           
+            selection_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="selection_text"]').textContent.trim());
+        } catch (e) {
+            console.debug(e);
+        }
         const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent;
         const note_type = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="note_type"]').textContent;
 
@@ -926,6 +935,7 @@ async function saveChanges(noteid, event) {
                     note_type: note_type,
                     url: url,
                     message_display_text: message_display_text,
+                    selection_text: selection_text
                 });
         }
 

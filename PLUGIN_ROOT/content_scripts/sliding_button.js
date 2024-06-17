@@ -196,17 +196,17 @@ function create_frame(position) {
         frame.appendChild(button);
 
         console.log(`Button created at position ${position} and appended inside the frame.`);
-// trigger page update event based on the slider position
-        chrome.runtime.sendMessage({
-            "message": {
-                "action": "execute_notesupdate_on_page",
-                "parameters": {
-                    "position": position
-                }
-            }
-        }, function (response) {
-            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-        });
+      //  trigger page update event based on the slider position
+      //  chrome.runtime.sendMessage({
+      //      "message": {
+      //          "action": "execute_notesupdate_on_page",
+      //          "parameters": {
+      //              "position": position
+      //          }
+      //      }
+      //  }, function (response) {
+      //      console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+      //  });
 
 
         // a local "function" where the position of the button is set in the visual frame
@@ -244,7 +244,6 @@ function create_frame(position) {
                     console.log("setButtonPosition: " + res);
                     // Kick off the looking up of if there are any notes for this page
                     // This function is held in another content script
-
                     chrome.runtime.sendMessage({
                         "message": {
                             "action": "execute_notesupdate_on_page",
@@ -256,7 +255,6 @@ function create_frame(position) {
                         console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                         // finally, call "close" on the note
                     });
-
                     //case_handling(1);
                 });
             } else if (clickedX < 60) {
@@ -266,7 +264,6 @@ function create_frame(position) {
 
                     // Kick off the looking up of if there are any notes for this page
                     // This function is held in another content script
-
                     chrome.runtime.sendMessage({
                         message: {
                             "action": "execute_notesupdate_on_page",
@@ -287,7 +284,6 @@ function create_frame(position) {
 
                     // Kick off the looking up of if there are any notes for this page
                     // This function is held in another content script
-
                     chrome.runtime.sendMessage({
                         message: {
                             "action": "execute_notesupdate_on_page",
@@ -299,6 +295,7 @@ function create_frame(position) {
                         console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                         // finally, call "close" on the note
                     });
+                   
 
                 });
 
