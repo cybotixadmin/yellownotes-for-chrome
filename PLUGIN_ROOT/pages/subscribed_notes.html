@@ -37,6 +37,7 @@
       <th class="sortableCol" name="feed">feed <span class="sort-icon" ">&#9650;</span></th>
       <th class="sortableCol" name="location">location(URL)<span class="sort-icon" ">&#9650;</span></th>
       <th class="sortableCol" name="message">message<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="status">status<span class="sort-icon" ">&#9650;</span></th>
       <th name="action">action</th>
       
     </tr>
@@ -51,6 +52,7 @@
       <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
       <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
       <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+      <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"</option><option class="filterableCol">dismissed</option><option class="filterableCol">unread</option></select></th>
       <th ></th>
     </tr>
 
@@ -93,6 +95,10 @@ which columns to show
 <div class="toggle-button">
   <label for="toggle-location">Location</label>
   <input type="checkbox" id="toggle-location" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-status">Status</label>
+  <input type="checkbox" id="toggle-status" checked>
 </div>
 </div>
 

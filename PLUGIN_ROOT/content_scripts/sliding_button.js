@@ -153,7 +153,7 @@ function create_frame(position) {
             //console.log(e);
         }
             frame.style.position = "fixed";
-        frame.style.zIndex = "11000"; // Make sure the button is always on top  of other elements, but below button
+        frame.style.zIndex = "110000"; // Make sure the button is always on top  of other elements, but below button
 
         frame.style.top = "10px";
         frame.style.left = "10px";
@@ -180,7 +180,7 @@ function create_frame(position) {
         //console.log(e);
     }
         button.style.position = "absolute";
-        button.style.zIndex = "11001"; // Make sure the button is always on top  of other elements, but below button
+        button.style.zIndex = "110010"; // Make sure the button is always on top  of other elements, but below button
 
         button.style.left = `${position * 30 - 30}px`;
         button.style.top = "0px";

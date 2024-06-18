@@ -150,7 +150,7 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/
 /*
 
 */
-} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/subscribed_notes.html/)).test(window.location.href)) {
+} else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/subscribed_notes.html/)).test(window.location.href)) {
     console.log("redirect this link to plugin")
     // Notify the background script to redirect
     chrome.runtime.sendMessage({

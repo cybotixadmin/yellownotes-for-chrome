@@ -333,7 +333,19 @@ function listener(request, sender, sendResponse) {
                 console.debug("textnode_map size: " + textnode_map.length);
             }
 
-            if (request.action == "createnode") {
+            if (request.action === "getPageContent") {
+                console.debug("getPageContent");
+                capturePageContent(request.url)
+                    .then(content => {
+                        sendResponse({ content });
+                    })
+                    .catch(error => {
+                        console.error("Error capturing page content:", error);
+                        sendResponse({ error: error.message });
+                    });
+                // Indicate that we want to send a response asynchronously
+                return true;
+            } else if (request.action == "createnode") {
                 // call to create a yellow note
                 console.debug("browsersolutions calling: create_newstickynote_node");
                 create_newstickynote_node(request.info, request.note_type, request.note_template, request.note_properties, request.session);
@@ -764,6 +776,58 @@ function listener(request, sender, sendResponse) {
 }
 
 chrome.runtime.onMessage.addListener(listener);
+
+
+function capturePageContent() {
+    console.debug("capturePageContent.start");
+    return new Promise((resolve, reject) => {
+        try {
+            // Serialize the entire document's HTML
+            const htmlContent = document.documentElement.outerHTML;
+            resolve(htmlContent);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+function capturePageForIframe(url) {
+    console.debug("capturePageForIframe.start");
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch the URL. Status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(htmlContent => {
+            // Create a Blob from the HTML content
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+
+            // Create a URL for the Blob
+            const blobUrl = URL.createObjectURL(blob);
+
+            // Create an iframe
+            const iframe = document.createElement('iframe');
+
+            // Set the sandbox attribute for security
+            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+            // Set the src attribute to the Blob URL
+            iframe.src = blobUrl;
+
+            // Append the iframe to the body (or any other element)
+            document.body.appendChild(iframe);
+
+            // Return the Blob URL
+            return blobUrl;
+        })
+        .catch(error => {
+            console.error('Error capturing page:', error);
+            throw error;
+        });
+}
+
 
 function cropImage(base64Image, coords, scale = window.devicePixelRatio) {
     return new Promise((resolve, reject) => {
@@ -2481,6 +2545,8 @@ function remove_noteid(noteid) {
     console.debug(note_root);
     //if (note_root != null || note_root != undefined) {
     remove_note(note_root);
+    
+
     //}
 }
 
@@ -2519,6 +2585,26 @@ if(noteroot.getAttribute("note_type") == "webframe"){
         console.debug("closing...");
         console.debug(noteroot);
         noteroot.parentNode.removeChild(noteroot);
+
+        var noteid = noteroot.getAttribute("noteid");
+//console.debug();
+
+        // call to background.js to record the note as read/dismissed - only for notes that are not new
+        chrome.runtime.sendMessage({
+            message: {
+                "action": "dismiss_note",
+                          "noteid": noteid,
+                    "enabled": false
+                
+            }
+        }, function (response) {
+            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+            // finally, call "close" on the note
+            //  try{
+            //  	close_note(event);
+            //  }catch(g){console.debug(g);}
+            //remove_noteid(noteid);
+        });
         //}
 
     } catch (e) {
@@ -2779,7 +2865,7 @@ function update_note(event) {
         var content_url = "";
         // check for content_url for notes that collect content from elsewhere
         try {
-            content_url = note_root.querySelector('input[id="urlInput"]').value.trim();
+            content_url = note_root.querySelector('input[name="urlInput"]').value.trim();
         } catch (e) {}
 
         var message_display_text = "";
@@ -4443,6 +4529,23 @@ function attachEventlistenersToYellowStickynote(note) {
 
 
 
+    try {
+
+        const mydismiss_note = (event) => {
+            dismiss_note(event);
+            event.stopPropagation();
+        };
+        var allGoTo18 = note.querySelectorAll('[js_action="dismiss_note"]');
+        for (var i = 0; i < allGoTo18.length; i++) {
+            allGoTo18[i].removeEventListener("click", mydismiss_note);
+            allGoTo18[i].addEventListener("click", mydismiss_note);
+
+        }
+
+    } catch (e) {
+        console.log(e);
+    }
+
 
     try {
 
@@ -4458,17 +4561,20 @@ function attachEventlistenersToYellowStickynote(note) {
         }
 
     } catch (e) {
-        console.error(e);
+        console.log(e);
     }
 
 
-
+    try {
 // Attach an event listener to the message text inside yellownotes
 // that prevent drag when clicking on the text
 note.querySelector('[name="message_display_text"]').addEventListener('mousedown', function(e) {
 console.log("prevent drag on text");
     e.stopPropagation();
 });
+} catch (e) {
+    console.log(e);
+}
 
 
     // goto
@@ -4516,6 +4622,7 @@ console.log("prevent drag on text");
         // load_url
 
         var allGoTo1_14 = note.querySelectorAll('[js_action="load_url"]');
+        console.debug(allGoTo1_14);
         for (var i = 0; i < allGoTo1_14.length; i++) {
             allGoTo1_14[i].removeEventListener("click", myload_url);
             allGoTo1_14[i].addEventListener("click", myload_url);
@@ -4553,18 +4660,18 @@ function load_url(event) {
     var note_root = getYellowStickyNoteRoot(event.target.parentNode);
     console.debug(note_root);
     return new Promise(function (resolve, reject) {
-        console.debug(note_root.querySelector('input[id="urlInput"]'));
-        const url = note_root.querySelector('input[id="urlInput"]').value;
+        console.debug(note_root.querySelector('input[name="urlInput"]'));
+        const url = note_root.querySelector('input[name="urlInput"]').value;
 
         console.debug("#### perform url lookup on " + url);
         //console.debug(cont1);
 
         // check for content_url for notes that collect content from elsewhere
         try {
-            //cont1.querySelector('input[id="urlInput"]').value = note_object_data.content_url;
+            //cont1.querySelector('input[name="urlInput"]').value = note_object_data.content_url;
 
             // start the process of looking up the content
-            var content_iframe = note_root.querySelector('[name="contentFrame"]');
+            var content_iframe = note_root.querySelector('[name="contentframe"]');
             console.log("content_iframe: ");
             console.log(content_iframe);
             var resp;
@@ -4572,12 +4679,23 @@ function load_url(event) {
             // Send save request back to background
             // Stickynotes are always enabled when created.
             console.log("remote url: " + url);
-            chrome.runtime.sendMessage({
+
+            var msg = {
                 message: {
                     "action": "simple_url_lookup",
                     "url": url
                 }
-            }).then(function (response) {
+            };
+            msg = {
+                message: {
+                    "action": "capturePage",
+                    "url": url
+                }
+            };
+            msg = { action: 'capturePage', url: url, timeout: 2 };
+
+            console.debug(msg);
+            chrome.runtime.sendMessage(msg).then(function (response) {
                 resp = response;
                 console.debug("message sent to backgroup.js with response: " + response);
                 // render content of ifram based on this
@@ -4586,15 +4704,23 @@ function load_url(event) {
 
                 //set scroll position
                 var framenote_scroll_y = 0;
+                try{
                 if (note_object_data.framenote_scroll_x !== undefined) {
                     framenote_scroll_x = note_object_data.framenote_scroll_x;
                     cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
                 }
+            } catch (e) {
+                console.log(e);
+            }
                 var framenote_scroll_y = 0;
+                try{
                 if (note_object_data.framenote_scroll_y !== undefined) {
                     framenote_scroll_y = note_object_data.framenote_scroll_y;
                     cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
                 }
+            } catch (e) {
+                console.log(e);
+            }
                 console.log("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
 
                 resolve(response);
@@ -5119,11 +5245,11 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
             // check for content_url for notes that collect content from elsewhere
             try {
                 if (note_object_data.content_url != undefined) {
-                    cont1.querySelector('input[id="urlInput"]').value = note_object_data.content_url;
+                    cont1.querySelector('input[name="urlInput"]').value = note_object_data.content_url;
                 }
 
                 // start the process of looking up the content
-                var content_iframe = cont1.querySelector('[name="contentFrame"]');
+                var content_iframe = cont1.querySelector('[name="contentframe"]');
                 //console.log("content_iframe: " );
                 //console.log(content_iframe);
 
@@ -5778,10 +5904,71 @@ if (note_root == undefined){
     try {
         remove_note(note_root);
 
+// Send mesage to backend to report the note closed/dismissed and record this in the database
+// The note will then note be automcatically reopened when the page is reloaded
+
+chrome.runtime.sendMessage({
+    message: {
+        "action": "dismiss_note",
+                  "noteid": noteid,
+            "enabled": false
+        
+    }
+}, function (response) {
+    console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+    // finally, call "close" on the note
+    //  try{
+    //  	close_note(event);
+    //  }catch(g){console.debug(g);}
+    //remove_noteid(noteid);
+});
+
     } catch (e) {
         console.error(e);
     }
 }
+}
+
+
+
+// for subscribers: make the note no longer appear in context (only in the own subscriptions page)
+function dismiss_note(event) {
+    console.debug("# dismiss yellownote (event)");
+    // stop clicking anything behind the button
+    event.stopPropagation();
+    event.preventDefault();
+
+    // call to kill the yellow note window
+
+    // loop upwards from the target nodes to locate the root node for the sticky note
+
+    const stickynote_rootnode = getYellowStickyNoteRoot(event.target);
+
+
+    try {
+        var noteid = stickynote_rootnode.getAttribute("noteid");
+        //console.debug();
+        
+                // call to background.js to record the note as read/dismissed - only for notes that are not new
+                chrome.runtime.sendMessage({
+                    message: {
+                        "action": "dismiss_note",
+                                  "noteid": noteid,
+                            "enabled": false
+                        
+                    }
+                }, function (response) {
+                    console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                    // finally, call "close" on the note
+                    //  try{
+                    //  	close_note(event);
+                    //  }catch(g){console.debug(g);}
+                    remove_noteid(noteid);
+                });
+
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 /*
@@ -6100,7 +6287,8 @@ function update_note_internal_size(box_width, box_height, note) {
         try {
             console.debug("setting new (fake)iframe width " + usable_width);
             note.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-            note.querySelector('[name="fakeiframe"]').style.height = (usable_height - note_owners_control_bar_height) + 'px';
+     //       note.querySelector('[name="fakeiframe"]').style.height = (usable_height - note_owners_control_bar_height) + 'px';
+            note.querySelector('[name="fakeiframe"]').style.height = (usable_height - 55) + 'px';
 
         } catch (e) {
             //console.error(e);
@@ -6132,7 +6320,7 @@ function update_note_internal_size(box_width, box_height, note) {
     try {
         const new_field_width = (parseInt(box_width) - 40);
         console.debug("setting new url intput field width " + new_field_width);
-        note.querySelector('[id="urlInput"]').style.width = new_field_width + 'px';
+        note.querySelector('[name="urlInput"]').style.width = new_field_width + 'px';
     } catch (e) {
         //console.error(e);
     }
@@ -6615,7 +6803,6 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
 
     } else {
         // if the note is not owned by the current user, the note will be smaller as the bottom bar is removed
-
         usable_height = (parseInt(box_height) - (note_internal_height_padding - note_owners_control_bar_height));
     }
 
@@ -6631,7 +6818,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     try {
         if (note_type === "webframe") {
             insertedNode.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-            insertedNode.querySelector('[name="fakeiframe"]').style.height = usable_height + 'px';
+            insertedNode.querySelector('[name="fakeiframe"]').style.height = (usable_height - frame_note_url_bar_height)  + 'px';
         }
 
     } catch (e) {
@@ -6639,7 +6826,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     }
     try {
         if (note_type === "yellownote") {
-             insertedNode.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
+            insertedNode.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
             insertedNode.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
         }
         insertedNode.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
@@ -6662,6 +6849,8 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     console.debug("size_and_place_note_based_on_texthighlight.end");
 
 }
+
+const frame_note_url_bar_height = 30;
 
 function placeNodeRelativeTo(firstNode, secondNode, x, y) {
     console.debug("placeNodeRelativeTo.start");
@@ -6861,7 +7050,7 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
         if (note_type === "webframe") {
             try {
                 insertedNode.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-                insertedNode.querySelector('[name="fakeiframe"]').style.height = usable_height + 'px';
+                insertedNode.querySelector('[name="fakeiframe"]').style.height = (usable_height - frame_note_url_bar_height)  + 'px';
             } catch (e) {
                 console.error(e);
             }

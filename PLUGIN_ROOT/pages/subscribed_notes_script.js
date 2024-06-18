@@ -63,6 +63,9 @@ document.getElementById('toggle-location').addEventListener('change', function (
 });
 
 
+document.getElementById('toggle-status').addEventListener('change', function () {
+    toggleColumn('status', this.checked);
+});
 
 function toggleColumn(columnName, isChecked) {
     console.log("toggleColumn: " + columnName + " isChecked: " + isChecked);
@@ -130,12 +133,90 @@ async function deleteDataRow(uuid) {
     }
 }
 
+
+
+async function unPause(datarow) {
+    try {
+        const userid = "";
+        console.log("unPause: " + datarow.url);
+        console.log("go lookup creatorid: " + datarow.creatorid);
+        const noteid = datarow.noteid;
+       
+        // invoke the background script to unblock the note in question
+        chrome.runtime.sendMessage({
+            message: {
+                action: "undismiss_note",
+                noteid: noteid
+            }
+        }, function (response) {
+            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+            // update the status of the note in the table directly
+            document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="note_status"]').textContent = "unread";
+        });
+    } catch (error) {
+       document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="note_status"]').textContent = "unread";
+        console.error(error);
+    }
+}
+
+
+
+
 /**
  * Navigate to the page where the note is attached
  * @param {*} url
  */
 
+
 async function goThere(datarow) {
+    try {
+
+        const userid = "";
+        console.log("go to url: " + datarow.url);
+
+        console.log("go lookup creatorid: " + datarow.creatorid);
+        const noteid = datarow.noteid;
+
+        console.log("go lookup noteid: " + noteid);
+
+        console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
+
+        const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
+        console.log(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim());
+
+        // lookup the target url in the table (the user may have changed it !)
+
+
+        // issue a http redirect to open the URL in another browser tab
+        //window.open(url, '_blank').focus();
+        // add functionality to scroll to the note in question
+        // invoke the background script to scroll to the note in question
+        chrome.runtime.sendMessage({
+            message: {
+                action: "scroll_to_note",
+                scroll_to_note_details: {
+                    datarow: datarow,
+                    url: url
+
+                }
+            }
+        }, function (response) {
+            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+            // finally, call "close" on the note
+            //  try{
+            //  	close_note(event);
+            //  }catch(g){console.debug(g);}
+
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+async function DISABLEgoThere(datarow) {
     try {
 
         const userid = "";
@@ -302,7 +383,7 @@ function fetchData(not_show_by_default_columns) {
                     
                     // Create new row
                     const newRow = tableBody.insertRow();
-
+                    newRow.setAttribute("noteid", row.noteid);
                     // Create cells and populate them with data
                     const cell1 = newRow.insertCell(0);
                     const cell_createtime = newRow.insertCell(1);
@@ -311,7 +392,8 @@ function fetchData(not_show_by_default_columns) {
                     const cell_name = newRow.insertCell(4);
                     const cell_url = newRow.insertCell(5);
                     const cell_message_text = newRow.insertCell(6);
-                    const cell_buttons = newRow.insertCell(7);
+                    const cell_status = newRow.insertCell(7);
+                    const cell_buttons = newRow.insertCell(8);
 
                     // parse the JSON of the note
                     const obj = JSON.parse(row.json);
@@ -322,6 +404,7 @@ function fetchData(not_show_by_default_columns) {
                     // last create timestamp
                     try {
                         cell_createtime.textContent = timestampstring2timestamp(row.createtime);
+                        cell_createtime.setAttribute('name', 'createtime');
                         if (not_show_by_default_columns.indexOf("created") !== -1) {
                             cell_createtime.className = "hidden";
                         }else{
@@ -334,6 +417,7 @@ function fetchData(not_show_by_default_columns) {
                     // last modified timestamp
                     try {
                         cell_lastmodifiedtime.textContent = timestampstring2timestamp(row.lastmodifiedtime);
+                        cell_lastmodifiedtime.setAttribute('name', 'lastmodifiedtime');
                         if (not_show_by_default_columns.indexOf("modified") !== -1) {
                             cell_lastmodifiedtime.className = "hidden";
                        
@@ -345,6 +429,7 @@ function fetchData(not_show_by_default_columns) {
                     // type
                     try {
                         type_cell.textContent = obj.note_type;
+                        type_cell.setAttribute('name', 'note_type');
                         if (not_show_by_default_columns.indexOf("type") !== -1) {
                             type_cell.className = "hidden";
                         }
@@ -355,6 +440,7 @@ function fetchData(not_show_by_default_columns) {
                     // name
                     try {
                         cell_name.textContent = row.distributionlistname;
+                        cell_name.setAttribute('name', 'distributionlistname');
                         if (not_show_by_default_columns.indexOf("feed") !== -1) {
                             cell_name.className = "hidden";
                         }
@@ -364,6 +450,7 @@ function fetchData(not_show_by_default_columns) {
 
                     // url where note is attached
                     cell_url.textContent = obj.url;
+                    cell_url.setAttribute('name', 'url');
                     if (not_show_by_default_columns.indexOf("location") !== -1) {
                         cell_url.className = "hidden";
                     }
@@ -390,21 +477,57 @@ function fetchData(not_show_by_default_columns) {
                         cell_message_text.className = "hidden";
                     }
 
+  // type
+  try {
+    cell_status.textContent = row.note_status;
+    cell_status.setAttribute('name', 'note_status');
+    if (not_show_by_default_columns.indexOf("type") !== -1) {
+        cell_status.className = "hidden";
+    }
+} catch (e) {
+    console.log(e);
+}
+
                     // buttons
+                     // Add button container
+                const actionButtonContainer = document.createElement('div');
+                actionButtonContainer.setAttribute('class', 'button-container');
+
                     const goThereButtonContainer = document.createElement('div');
                     goThereButtonContainer.className = 'go_to_location_button';
-
                     const goThereButton = document.createElement('img');
                     goThereButton.src = "../icons/goto.icon.transparent.40x40.png";
                     goThereButton.alt = 'go there';
+                    goThereButton.height = "25";
                     goThereButton.className = 'go_to_location_button';
-
                     goThereButton.onclick = function () {
                         goThere(row);
                     };
-
                     goThereButtonContainer.appendChild(goThereButton);
-                    cell_buttons.appendChild(goThereButtonContainer);
+
+                    actionButtonContainer.appendChild(goThereButtonContainer);
+
+                    const unPauseButtonContainer = document.createElement('div');
+                    unPauseButtonContainer.className = 'unpause_button';
+                    const unPauseButton = document.createElement('img');
+                    unPauseButton.src = "../icons/unpause.40.png";
+                   unPauseButton.height = "25";
+                    unPauseButton.alt = 'go there';
+                    unPauseButton.className = 'unpause_button';
+                    unPauseButton.onclick = function () {
+                        unPause(row);
+                    };
+                    unPauseButtonContainer.appendChild(unPauseButton);
+                    actionButtonContainer.appendChild(unPauseButtonContainer);
+
+
+
+                    cell_buttons.appendChild(actionButtonContainer);
+
+
+
+
+
                 });
 
                 resolve(data);
@@ -639,13 +762,13 @@ const pagewidth = window.innerWidth;
 console.log("window.innerWidth: " + pagewidth);
 
 if (pagewidth < 300) {
-    not_show_by_default_columns = ["created", "modified", "type", "feed",  "action" ];
+    not_show_by_default_columns = ["created", "modified", "type", "feed", "status", "action" ];
 }else if (pagewidth < 600) {
-    not_show_by_default_columns = ["created", "type",  "action"];
+    not_show_by_default_columns = ["modified", "type", "status", "action"];
 }else if (pagewidth < 800) {
-    not_show_by_default_columns = ["action"];
+    not_show_by_default_columns = ["modified","action"];
 }else  {
-    not_show_by_default_columns = ["action"];
+    not_show_by_default_columns = [];
 }
 
 fetchData(not_show_by_default_columns).then(() => {

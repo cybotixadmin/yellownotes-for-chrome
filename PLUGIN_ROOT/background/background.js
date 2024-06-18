@@ -34,6 +34,8 @@ const URI_plugin_user_get_subscribed_url_yellownotes = "/api/v1.0/plugin_user_ge
 
 const URI_plugin_user_get_own_url_yellownotes = "/api/v1.0/plugin_user_get_own_url_yellownotes";
 
+const URI_plugin_user_update_subscribednote_status = "/api/v1.0/plugin_user_update_subscribednote_status";
+
 const URI_plugin_user_get_own_url_yellownotes_with_selection_text = "/api/v1.0/plugin_user_get_own_url_yellownotes_with_selection_text";
 
 
@@ -224,7 +226,7 @@ chrome.contextMenus.create({
 chrome.contextMenus.create({
     id: "pin-content-note",
     parentId: "yellownotes",
-    title: "attach other web content to selection",
+    title: "attach other web content to selection (in testing)",
     contexts: ["selection"]
 });
 
@@ -238,14 +240,14 @@ chrome.contextMenus.create({
 chrome.contextMenus.create({
     id: "create-free-webframenote",
     parentId: "yellownotes",
-    title: "attach other web content on page",
+    title: "attach other web content on page (in testing)",
     contexts: ["all"]
 });
 
 chrome.contextMenus.create({
     id: "captureSelection",
     parentId: "yellownotes",
-    title: "Select and Capture",
+    title: "Select and Capture (in development)",
     contexts: ["all"]
 });
 
@@ -362,10 +364,10 @@ function pinYellowNote(info, tab, note_type, brand) {
             // get a template, even if it is the default one
             return getTemplate(brand, note_type);
         }).then(function (result) {
-            console.log(result);
+            //console.log(result);
             note_template = result;
             console.log("note_template");
-            console.log(note_template);
+            //console.log(note_template);
 
             // get personal template related informaton
             console.log("uuid" + uuid);
@@ -635,6 +637,21 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             return true;
 
+        } else if (action === "capturePage") {
+
+            console.debug("browsersolutions calling: capturePage");
+          
+            console.debug(message);
+                const url = message.url;
+                const timeout  = message.timeout;
+                
+                capturePageAsPng(url, timeout)
+                    .then(dataUrl => sendResponse({ dataUrl }))
+                    .catch(error => sendResponse({ error }));
+                return true; // Keep the message channel open for async response
+          
+            
+
         } else if (action === "simple_url_lookup") {
             console.log("simple_url_lookup " + JSON.stringify(message));
             // upen a tab and get a URL, then close the tab
@@ -661,7 +678,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     // run with capturing embeddings - suitable for sandboxing
                     //return capturePageAndProcess(url, cookies);
 
-
                 }).then(content => {
                     //console.log('Fetched web page content:', content);
                     sendResponse(content);
@@ -669,6 +685,116 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 .catch(error => {
                     console.error('Error fetching content:', error);
                 });
+
+            }
+            return true;
+        } else if (action === "dismiss_note") {
+            console.log("dismiss_note " + JSON.stringify(message));
+            // close a note and do not automatically reopen it (when the page is reloaded)
+            // it can still be accessed from the notes panel
+            // get all distribution list belonging to the user
+
+            try {
+                chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                    ynInstallationUniqueId = result[plugin_uuid_header_name];
+                    xYellownotesSession = result[plugin_session_header_name];
+                    console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    console.debug("xYellownotesSession: " + xYellownotesSession);
+
+                    // Create an AbortController instance
+                    const controller = new AbortController();
+                    const signal = controller.signal;
+
+                    const close_details = {
+                        noteid: message.message.noteid,
+                        note_status: "dismissed"
+                    };
+                    console.debug(close_details);
+                    // Set a timeout of 5 seconds (in milliseconds)
+                    const timeout = setTimeout(() => {
+                            controller.abort();
+                        }, 5000);
+
+                    const opts = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [plugin_uuid_header_name]: ynInstallationUniqueId,
+                            [plugin_session_header_name]: xYellownotesSession
+                        },
+                        body: JSON.stringify(close_details),
+                        signal: signal
+
+                    };
+                    console.debug(opts);
+
+                    return fetch(server_url + URI_plugin_user_update_subscribednote_status, opts);
+                }).then(function (response) {
+                    //                console.log(response);
+                    return response.json();
+                }).then(function (data) {
+                    // return the uuid assigned to this note
+                    sendResponse(data);
+
+                });
+            } catch (e) {
+                console.log(e);
+                sendResponse(null);
+
+            }
+            return true;
+        } else if (action === "undismiss_note") {
+            console.log("undismiss_note " + JSON.stringify(message));
+            // close a note and do not automatically reopen it (when the page is reloaded)
+            // it can still be accessed from the notes panel
+            // get all distribution list belonging to the user
+
+            try {
+                chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                    ynInstallationUniqueId = result[plugin_uuid_header_name];
+                    xYellownotesSession = result[plugin_session_header_name];
+                    console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    console.debug("xYellownotesSession: " + xYellownotesSession);
+
+                    // Create an AbortController instance
+                    const controller = new AbortController();
+                    const signal = controller.signal;
+
+                    const close_details = {
+                        noteid: message.message.noteid,
+                        note_status: "unread"
+                    };
+                    console.debug(close_details);
+                    // Set a timeout of 5 seconds (in milliseconds)
+                    const timeout = setTimeout(() => {
+                            controller.abort();
+                        }, 5000);
+
+                    const opts = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [plugin_uuid_header_name]: ynInstallationUniqueId,
+                            [plugin_session_header_name]: xYellownotesSession
+                        },
+                        body: JSON.stringify(close_details),
+                        signal: signal
+
+                    };
+                    console.debug(opts);
+
+                    return fetch(server_url + URI_plugin_user_update_subscribednote_status, opts);
+                }).then(function (response) {
+                    //                console.log(response);
+                    return response.json();
+                }).then(function (data) {
+                    // return the uuid assigned to this note
+                    sendResponse(data);
+
+                });
+            } catch (e) {
+                console.log(e);
+                sendResponse(null);
 
             }
             return true;
@@ -1497,7 +1623,7 @@ console.debug(response);
                             console.debug("calling fetchCreatorDataThroughAPI");
                             return fetchCreatorDataThroughAPI(item.creatorid).then(creatorData => {
                                 item.creatorDetails = creatorData;
-                                item.creatorDetails2 = "creatorData2";
+                                
                             });
                         }
                         return Promise.resolve();
@@ -1615,6 +1741,40 @@ console.debug(response);
     }
     return true;
 });
+
+
+// Function to capture a page as a PNG image, convert it to Base64, and return the data URL
+function capturePageAsPng(url, timeout) {
+    console.log('capturePageAsPng: Capturing page as PNG image:', url);
+    return new Promise((resolve, reject) => {
+        // Open a new tab with the specified URL
+        chrome.tabs.create({ url, active: false }, (tab) => {
+            const tabId = tab.id;
+            console.log("tabId: " + tabId);
+
+            // Wait for the specified timeout
+            setTimeout(() => {
+                // Capture the tab as a PNG image
+                chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' }, (dataUrl) => {
+                    console.log('capturePageAsPng: Captured page as PNG image:', dataUrl);
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError.message);
+                        // Close the tab
+
+                        chrome.tabs.remove(tabId);
+                        return;
+                    }
+console.log("resolve dataUrl");
+                    // Resolve with the Base64 data URL
+                    resolve(dataUrl);
+
+                    // Close the tab
+                    chrome.tabs.remove(tabId);
+                });
+            }, timeout);
+        });
+    });
+}
 
 function captureTab() {
     return new Promise((resolve, reject) => {
@@ -2418,6 +2578,7 @@ function fetchPageContent(url) {
 }
 
 function logCookiesForUrl(url) {
+    console.debug(`logCookiesForUrl.start Fetching cookies for ${url}`);
     return new Promise(function (resolve, reject) {
         // Retrieve cookies for the given URL
         chrome.cookies.getAll({

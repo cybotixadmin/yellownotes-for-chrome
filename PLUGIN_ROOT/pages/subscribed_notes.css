@@ -104,3 +104,52 @@
     z-index: 12000;
   }
 
+
+  
+.unpause_button {
+  height: 20px;
+position: relative;
+  z-index: 12000;
+}
+
+.unpause_button::after {
+  content: "reactivate";
+  position: absolute;
+  bottom: 50%;
+  left: 0px;
+  transform: translateY(-15%);
+  white-space: wrap;
+  background-color: black;
+  
+  color: white;
+  text-align: center;
+  padding: 4px;
+  border-radius: 2px;
+  font-size: 15px;
+  z-index: 12000;
+
+  /* Initially hidden */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s;
+  overflow: visible;
+}
+  
+.button-container {
+  display: flex; /* Makes the container flex */
+  justify-content: space-between; /* Distributes space between the buttons */
+}
+
+.button-container > div {
+  margin-right: 1px; /* Adds spacing between buttons */
+}
+
+.button-container > div:last-child {
+  margin-right: 5px; /* Removes margin from the last button to avoid extra spacing */
+}
+
+
+.button-container > div:first-child {
+  margin-left: 5px; /* Removes margin from the last button to avoid extra spacing */
+}
+

@@ -37,7 +37,7 @@ background: rgba(255, 255, 0, 0.7);">
 										padding: 4px;
 										border-radius: 2px;
 										font-size: 15px;
-										z-index: 12000;
+										z-index: 120000;
 							
 										/* Initially hidden */
 										opacity: 0;
@@ -48,7 +48,7 @@ background: rgba(255, 255, 0, 0.7);">
 											/* Show the tooltip */
 											opacity: 1;
 											visibility: visible;
-											z-index: 13000;
+											z-index: 130000;
 										}
 					</style>
 				<tr name="note_ribbon" style="max-height: 22px; min-height: 22px; height: 22px; overflow: visible; display: flex; padding: 0px; border: 0px; margin: 0px;  ">
@@ -72,18 +72,25 @@ background: rgba(255, 255, 0, 0.7);">
 										</a>
 									</div>
 								</td>
-
-
-<!--
-trash can 
-iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAACAklEQVRYR+2Yva4BQRTHzyqEIKIREi+whcIb0GrQSSRaiY5eFB5AJ9FKJEKBRq1UUXgFiUQnKAjOnd3clf0wzI4Vbu5sJZnz8dv/zFnnjAScTzgcxs1mw+Qdj8dhuVxKTMYmIy4nEgPtJnO73XA6nWznszjU63U1uSRZY3k8Huj3+zCfz+3yqfaFQgFkWYbz+Wzxv1wuEAqFoFqtGhKbKWwrw0X6wMnn88HhcLhx3X7k83ns9XpO5+OK1263oVQqqWx/B/D3Vb93i7W9UIrkeDyCy+Xi2h5eJ6VIIpEIVCqVh0XCG/9tfra/S28joQSmAX7qLFp4vgYwEAjAbrcTgNxH9H8o2Gq1oFwuS5lMBsfjsUEtkwKWIms0GlCr1aRisYidTseitFMK6g+xASKXy8FwOFTXY7EYrlYrMwTVVzF0FLDb7aLSOumfdDoNk8lEhYhGo7herwXgvYpUFRIK6qSx+08iFHxUWfo1WrMgFBQKig/1k+lOFIkoElEkLEVyzyabzcJoNPpsw6q1/AQGCYzhPAeDQdhut1rzQW35SaOLpF17W8vPPbU9c/T7/bDf79nmYnKJiOQS8VlMR9cTiQQsFgs2QDKBIZnAHAVgCHa3N6VeHiWTSZxOpwxxXzfRRlLqjEFLMRgMsNlswmw2g+v1+jqJLoLX64VUKnWbBGnBfwC8tbU4CiR7YwAAAABJRU5ErkJggg==
-
--->
-
+								<!-- icon to delete the note, for non-owner this simply means to dismiss it and no longer make it visible on the page where it is attached -->
+								<td name="dismiss" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="dismiss" style="position: absolute; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+	<style>
+		.copy_tooltip_content::after {
+			content: "dismiss the note";
+		}
+	</style>
+	<div class="yellownote_icon_tooltip dismiss_tooltip_content">
+		<img style="padding: 0px; border: 0px; margin: 0px; width: 20px" height="18" width="18" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAA20lEQVRYR+2Y0Q3DIAwFExiBOZiCuZmCORgBaFM1aqtKYOUUiUTmm2c/DgPC6zL5WCf3t6hBukP3IOi9bymlHxjOuSXnPFwg0W4Jhwmec9pgm3oxiPaVtmswhNBijJIy+otDtN8Juwatta2Ucsgg0YoNGmNarfWQQaIVGyQUiFYNbgSUIKWgBJXg5y7pPhbXfklIoROtXtT0gClBJbjXADmJRKs1qDV4mRokHx+ivc8hIZ9vohUTfE8k7QuiHbc+9pWQBhDRDnszkpbC2XMk3a2zPXTjq0GKf3qCD7TR8CnTyaaxAAAAAElFTkSuQmCC" alt="dismiss" js_action="dismiss_note" />
+	</div>
+	</td>
+								<!-- icon to copy the note to clipboard -->
 								<td name="copy" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen,"  js_action="copy_note_to_clipboard" style="position: absolute; right: 40px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
 									<style>
 										.copy_tooltip_content::after {
 											content: "copy note to clipboard";
+											z-index: 99999;
+											position: absolute;
+
 										}
 									</style>
 									<div class="yellownote_icon_tooltip copy_tooltip_content">
@@ -124,10 +131,11 @@ iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAACAklEQVRYR+2Yva4BQRTHzyqEIKIREi+w
 		</td>
 	</tr>
 	<tr name="whole_note_middlebar" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 180px; width: 100%; position: absolute; top: 25px; padding: 0px; border: 0px; margin: 0px; overflow: hidden; background: rgba(255, 255, 0, 0.7); z-index: 10103;">
-		<td name="whole_note_middlecell" style="height: 180px; width: 250px; position: absolute; top: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 140px; min-height: 40px; text-align: left; text-wrap: wrap; overflow: visible; background: rgba(255, 255, 0, 0.7); z-index: 10103;" >
+		<td name="whole_note_middlecell" contenteditable="true" style="height: 180px; width: 250px; position: absolute; top: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 140px; min-height: 40px; text-align: left; text-wrap: wrap; overflow: visible; background: rgba(255, 255, 0, 0.7); z-index: 10103;" >
 			<div name="message_display_text" contenteditable="true" style=" position: absolute; left: 0px; top: 0px; color: rgba(0, 0, 0, 0.7); background: rgba(255, 255, 0, 0.7); border: 0px solid #ffff00; border-radius: 0px; overflow-x: hidden; overflow-y: auto; line-height: 0.9; padding: 2px; margin: 0px; position: relative; bottom: 0; z-index: 10104;" contenteditable="true">
 			</div>
-		</td>
+		</div>
+	</td>
 			<!--
 			<form name="note_form" style="border: 0px solid #ffff00;
  border-radius: 0px; width: 100%; overflow: hidden; padding: 0px; margin: 0px; position: relative; bottom: 0; z-index: 10104;">
@@ -161,7 +169,7 @@ iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAACAklEQVRYR+2Yva4BQRTHzyqEIKIREi+w
 											position: absolute;
 											bottom: 0px;
 											display: inline-block;
-											z-index: 12000;
+											z-index: 120000;
 										}
 								
 										.yellownote_distributionlist_icon_tooltip::after {
@@ -177,7 +185,7 @@ iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAACAklEQVRYR+2Yva4BQRTHzyqEIKIREi+w
 											padding: 4px;
 											border-radius: 2px;
 											font-size: 15px;
-											z-index: 12000;
+											z-index: 120000;
 								
 											/* Initially hidden */
 											opacity: 0;
