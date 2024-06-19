@@ -22,6 +22,18 @@ ul {
     margin-right: 10px;
   }
   
+/* CSS to make plaintext look like a clickable link */
+.clickable-text {
+  color: blue; /* Common link color */
+  text-decoration: underline; /* Underline to mimic links */
+  cursor: pointer; /* Pointer cursor to indicate clickability */
+}
+
+/* Optional: Change color on hover */
+.clickable-text:hover {
+  color: darkblue; /* Darker color on hover */
+  text-decoration: none; /* Remove underline on hover */
+}
 
   .tooltip .tooltiptext {
     visibility: hidden;

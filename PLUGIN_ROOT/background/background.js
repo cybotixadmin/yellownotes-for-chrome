@@ -472,7 +472,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     console.debug(message.action);
     console.debug("received from page: " + JSON.stringify(message));
 
-    const tab_id = sender.tab.id;
+    var tab_id = "";
+    try{
+         tab_id = sender.tab.id;
+
+    }catch(e){
+        console.log(e);
+    }
     try {
         var action = "";
         action = message.action;
@@ -743,6 +749,30 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             }
             return true;
+
+        } else if (action === "attach_to_current_tab") {
+/**some website replace the default browser context meny with one of their own creation (Spotify is an example)
+ * This interferes with how Yellownotes operates. The context menu is replaced with a custom one, and the Yellownotes options are not available.
+ * To address this limitation, there option to create a note from the context menu is also available from the browser action icon.
+ * 
+ */
+            console.debug("attach_to_current_tab");
+            console.debug(message);
+            console.debug(message.url);
+const url = message.url;
+const note_type = message.note_type;
+const psuedo_info= {
+    pageUrl: url
+};
+
+const tab = {
+    id: message.tab_id
+};
+
+pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
+
+            return true;
+
         } else if (action === "undismiss_note") {
             console.log("undismiss_note " + JSON.stringify(message));
             // close a note and do not automatically reopen it (when the page is reloaded)

@@ -82,6 +82,25 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloudDISABLED\/subscribe/)).test(win
         uri: "/pages/subscribe.html?" + queryString
     });
 }
+
+
+/*
+part of the workaround implemented for pages blocking the default browser context menu
+*/
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/attach_to_current_tab.html|attach_to_current_tab.html)/)).test(window.location.href)) {
+    console.log("redirect to attach note page")
+    // Extract query string (everything after the '?' character)
+    const queryString = (window.location.href).split('?')[1] || '';
+
+    // Notify the background script to redirect
+    chrome.runtime.sendMessage({
+        action: "local_pages_intercept",
+        redirect: true,
+        uri: "/pages/attach_to_current_tab.html?" + queryString
+    });
+}
+
+
 // intercept links to individual notes
 else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/(pages\/gothere.html|gothere.html)/)).test(window.location.href)) {
     console.log("/gothere.html")

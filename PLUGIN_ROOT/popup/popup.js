@@ -141,6 +141,27 @@ document.querySelector('#option_all_notes').addEventListener('click', () => {
 
 });
 
+document.querySelector('#attach_note_to_current_tab').addEventListener('click', () => {
+    console.log("attach_note_to_currenttab selected");
+    var url = window.location.href;
+    console.debug("to url: " , url);
+    getCurrentTabUrl().then((url) => {
+        console.debug("to url: " , url);
+        return chrome.runtime.sendMessage({
+        action: "attach_to_current_tab",
+        note_type: "yellownote",
+        url: url
+        });
+        
+    }).then((response) => {
+        console.log(response);
+
+        // send message to background that this is the new default for all new pages, and all pages where there is no value specifically set.
+  
+    
+        });
+    });
+
 } else {}
 });
 
@@ -152,3 +173,19 @@ document.querySelectorAll('#defaultSliderPosition li').forEach(item => {
         // Additional JavaScript actions on mouseout, if needed
     });
 });
+
+
+
+function getCurrentTabUrl() {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                var activeTab = tabs[0];
+                var activeTabUrl = activeTab.url;
+                resolve(activeTabUrl);
+            }
+        });
+    });
+}
