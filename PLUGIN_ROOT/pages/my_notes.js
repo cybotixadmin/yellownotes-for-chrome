@@ -54,80 +54,48 @@ console.error('Error:', error.message);
 // The users can decide which columns to display
 
 document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked);
+    toggleColumn('created', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked);
+    toggleColumn('modified', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked);
+    toggleColumn('type', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked);
+    toggleColumn('feed', this.checked,"dataTable");
 });
 document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked);
+    toggleColumn('message', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-selected').addEventListener('change', function () {
-    toggleColumn('selected', this.checked);
+    toggleColumn('selected', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked);
+    toggleColumn('active', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked);
+    toggleColumn('action', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked);
+    toggleColumn('location', this.checked,"dataTable");
 });
 
 
-
-
-function toggleColumn(columnName, isChecked) {
-    console.log("toggleColumn: " + columnName + " isChecked: " + isChecked);
-    var table = document.getElementById("dataTable");
-    // find out which column has the name columnName
-    console.log(table);
-    // thead tr:nth-child(2)
-    var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
-    console.log(col);
-    const columnIndex = getElementPosition(col);
-    console.log(getElementPosition(col));
-  
-    if (!isChecked) {
-        table.querySelectorAll('tr').forEach(row => {
-            // console.log(row);
-            // console.log(row.cells[columnIndex].classList);
-  
-            row.cells[columnIndex].classList.add("hidden");
-        });
-  
-    } else {
-        table.querySelectorAll('tr').forEach(row => {
-  
-            //console.log(row);
-            //console.log(row.cells[columnIndex].classList);
-            row.cells[columnIndex].classList.remove("hidden");
-        });
-  
-    }
-  
-   
-  }
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
 
 var not_show_by_default_columns = [];
 
+// check if not_show_by_default_columns has been set 
 const pagewidth = window.innerWidth;
 console.log("window.innerWidth: " + pagewidth);
 
@@ -143,6 +111,21 @@ if (pagewidth < 300) {
 }
 
 
+
+
+
+const table_columns_to_not_display_keyname = "mynotes_hide_columns";
+
+
+
+// 
+getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+    not_show_by_default_columns = columns;
+    console.log(not_show_by_default_columns);
+}).catch(error => {
+    console.error('Error:', error);
+});
+
 // call to database to get noets and place them in a table
 fetchData(not_show_by_default_columns).then(function (d) {
     console.debug("render notes");
@@ -152,7 +135,7 @@ fetchData(not_show_by_default_columns).then(function (d) {
 
 
 not_show_by_default_columns.forEach(column => {
-    toggleColumn(column, false);
+    toggleColumn(column, false,"dataTable");
     document.getElementById(`toggle-${column}`).checked = false;
 });
 
@@ -304,7 +287,7 @@ function createNoteShareLink(datarow) {
         distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
         console.log(distributionlistid);
         const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
-        textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
+        textToCopy = "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
     } catch (e) {
         console.log(e);
         textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
@@ -353,33 +336,8 @@ async function editNote(noteid) {
 }
 
 // setup table items for sorting and filtering
+setupTableFilteringAndSorting("dataTable");
 
-// Locate all elements with the class "sortableCol"
-const buttons = document.querySelectorAll('.sortableCol');
-len = buttons.length;
-for (var i = 0; i < buttons.length; i++) {
-    //work with checkboxes[i]
-    console.log(buttons[i]);
-    // set column index number for each column
-    buttons[i].setAttribute("colindex", i);
-    buttons[i].addEventListener('click', function (event) {
-        sortTa(event);
-    }, false);
-}
-
-// Locate all cells that are used for filtering of search results
-const f_cells = document.getElementById("dataTable").querySelectorAll("thead tr:nth-child(2) th");
-console.log(f_cells);
-len = f_cells.length;
-for (var i = 0; i < f_cells.length; i++) {
-    //work with regexp in cell
-    console.log(f_cells[i]);
-    // set column index number for each column
-    f_cells[i].setAttribute("colindex", i);
-    f_cells[i].addEventListener('input', function (event) {
-        filterTableAllCols();
-    }, false);
-}
 
 // Sort states for each column
 const sortStates = {
@@ -478,13 +436,14 @@ function fetchData(not_show_by_default_columns) {
             console.log(new Date().toISOString());
 
             // Get table body element
-            const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-
+            //const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const tableBody = document.querySelector('table[name="dataTable"]').getElementsByTagName('tbody')[0];
             // Loop through data and populate the table
             data.forEach(row => {
                 console.log(row);
                 console.log(JSON.stringify(row));
                 console.log(row.noteid);
+
 
                 // Create new row
                 const newRow = tableBody.insertRow();
@@ -513,10 +472,12 @@ function fetchData(not_show_by_default_columns) {
                         //console.log("createtime: " + integerstring2timestamp(row.createtime));
 
                         cell_createtime.textContent = timestampstring2timestamp(row.createtime);
+                        cell_createtime.setAttribute('class', 'datetime');
                     } else {
 
                         console.log("createtime is integer: " + row.createtime)
                         cell_createtime.textContent = integerstring2timestamp(row.createtime);
+                        cell_createtime.setAttribute('class', 'datetime');
 
                     }
 
@@ -529,9 +490,11 @@ function fetchData(not_show_by_default_columns) {
                     if (/2024/.test(row.lastmodifiedtime)) {
                         console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
                         cell_lastmodified.textContent = timestampstring2timestamp(row.lastmodifiedtime);
+                        cell_lastmodified.setAttribute('class', 'datetime');
                     } else {
                         console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)
                         cell_lastmodified.textContent = integerstring2timestamp(row.lastmodifiedtime);
+                        cell_lastmodified.setAttribute('class', 'datetime');
                     }
                 } catch (e) {
                     console.log(e);
@@ -549,11 +512,11 @@ function fetchData(not_show_by_default_columns) {
                 if (row.status == 1) {
                     // active
                     suspendActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
+                        '<label><input type="checkbox" class="checkbox" placeholder="Enter text" checked/><span></span></label>';
                 } else {
                     // deactivated
                     suspendActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
+                        '<label><input type="checkbox" class="checkbox" placeholder="Enter text" /><span></span></label>';
                 }
 
                 // Add classes using classList with error handling
@@ -580,6 +543,7 @@ function fetchData(not_show_by_default_columns) {
                     }
                 });
                 cell_status.appendChild(suspendActButton);
+                cell_status.setAttribute('class', 'checkbox');
 
                 // where note is attached
                 //contenteditable="true"
@@ -587,7 +551,7 @@ function fetchData(not_show_by_default_columns) {
                 cell_url.setAttribute('contenteditable', 'true');
                 cell_url.setAttribute('data-label', 'url');
                 cell_url.setAttribute('name', 'url');
-
+                cell_url.setAttribute('class', 'url');
                 // selection
                 // contenteditable="true"
                 if (obj.note_type == "yellownote") {
@@ -604,7 +568,7 @@ function fetchData(not_show_by_default_columns) {
                 cell_selection.setAttribute('contenteditable', 'true');
                 cell_selection.setAttribute('data-label', 'text');
                 cell_selection.setAttribute('name', 'selection_text');
-
+                cell_selection.setAttribute('class', 'text');
 
                 // message payload
                 // contenteditable="true"
@@ -622,7 +586,7 @@ function fetchData(not_show_by_default_columns) {
                 cell_message.setAttribute('contenteditable', 'true');
                 cell_message.setAttribute('data-label', 'text');
                 cell_message.setAttribute('name', 'message_display_text');
-
+                cell_message.setAttribute('class', 'text');
                 // Create the dropdown list for the distribution list
                 const dropdown = createDropdown(distributionListData, row.distributionlistid);
                 console.log(dropdown);
@@ -753,9 +717,9 @@ function fetchData(not_show_by_default_columns) {
 
                 // Adding data-label for mobile responsive
                 cell_createtime.setAttribute('data-label', 'createtime');
-                cell_createtime.setAttribute('class', 'timestamp');
+                //cell_createtime.setAttribute('class', 'timestamp');
                 cell_lastmodified.setAttribute('data-label', 'lastmodfiedtime');
-                cell_lastmodified.setAttribute('class', 'timestamp');
+                //cell_lastmodified.setAttribute('class', 'timestamp');
 
             });
             resolve('Data saved OK');

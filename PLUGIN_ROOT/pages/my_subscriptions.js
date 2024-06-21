@@ -771,12 +771,12 @@ function addSubscriptionTableRow(tableBody, row) {
     cell8.appendChild(deleteButton);
 }
 
-function sortTa() {
+function DELETEsortTa() {
     sortTable(event.target);
 }
 
 // Function to sort the table
-function sortTable(colheader) {
+function DELETEsortTable(colheader) {
     const columnIndex = colheader.parentNode.getAttribute("colindex");
     console.log("sortable: " + columnIndex, colheader);
 

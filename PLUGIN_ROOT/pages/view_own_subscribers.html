@@ -19,31 +19,30 @@
 <!-- 
 -->
      <!-- Empty table structure -->
+     <div id="view_own_subscribers_page_main_text"></div>
 
-
-    <div class="header">
-      <hr>subscribers</hr>
+  
     <div class="scrollable-table">
-      <table id="subscribersTable" class="ownSubscribersTable">
+      <table id="subscribersTable" class="notesTable">
         <thead>
           <tr class="fixed-header">
             
-            <th class="sortableCol">subscrptionid</th>
-            <th class="sortableCol">name<span class="sort-icon" ">&#9650;</span></th>
-            <th class="sortableCol">subscriber since<span class="sort-icon" ">&#9650;</span></th>
-            <th class="sortableCol">active</th>
-            <th class="sortableCol">status</th>
+            <th class="sortableCol displayname">name<span class="sort-icon" ">&#9650;</span></th>
+            <th class="sortableCol email">email<span class="sort-icon email" ">&#9650;</span></th>
+            <th class="sortableCol datetime" >subscriber since<span class="sort-icon" ">&#9650;</span></th>
+            <th class="sortableCol checkbox">active</th>
+            <th class="sortableCol status">status</th>
             <th>action</th>
           </tr>
           
           <!-- Add a filter row -->
           <tr class="fixed-header">
-            <th class="filterableCol"></th>
-            <th class="filterableCol">filter:<input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"></option><option class="filterableCol">active</option><option class="filterableCol">inactive</option><option class="filterableCol">applied</option></select></th>
-            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th ></th>
+            <th class="filterableCol displayname"><input filtertype="wildcardmatch" type="text"  placeholder="Filter "></th>
+            <th class="filterableCol email"><input filtertype="wildcardmatch" type="text"  placeholder="Filter "></th>
+            <th class="filterableCol datetime"><input filtertype="wildcardmatch" type="text" class="filterableCol datetime" placeholder="Filter "></th>
+            <th class="filterableCol checkbox"><select filtertype="wildcardmatch" class="filterableCol checkbox"><option class="filterableCol"></option><option class="filterableCol">active</option><option class="filterableCol">inactive</option><option class="filterableCol">applied</option></select></th>
+            <th class="filterableCol status"><input filtertype="wildcardmatch" type="text" class="filterableCol status" placeholder="Filter "></th>
+            <th class="status"></th>
           </tr>
       
         </thead>
@@ -53,10 +52,57 @@
       </table>
       </div>
 
-    </div>
+    
 
     <hr>automatic rules and restrictions</hr>
 
+    
+    which columns to show
+    <div class="toggle-container">
+      <div class="toggle-button">
+          <label for="toggle-created">Created</label>
+          <input type="checkbox" id="toggle-created" checked>
+      </div><br/>
+      <div class="toggle-button">
+          <label for="toggle-modified">Modified</label>
+          <input type="checkbox" id="toggle-modified" checked>
+      </div><br/>
+      <div class="toggle-button">
+          <label for="toggle-type">Type</label>
+          <input type="checkbox" id="toggle-type" checked>
+      </div>
+      <div class="toggle-button">
+        <label for="toggle-feed">Feed</label>
+        <input type="checkbox" id="toggle-feed" checked>
+    </div>
+    
+    <div class="toggle-button">
+      <label for="toggle-selected">Selected text</label>
+      <input type="checkbox" id="toggle-selected" checked>
+    </div>
+    
+    <div class="toggle-button">
+      <label for="toggle-active">active</label>
+      <input type="checkbox" id="toggle-active" checked>
+    </div>
+    
+    <div class="toggle-button">
+      <label for="toggle-message">Message</label>
+      <input type="checkbox" id="toggle-message" checked>
+    </div>
+    <div class="toggle-button">
+      <label for="toggle-action">Actions</label>
+      <input type="checkbox" id="toggle-action" checked>
+    </div>
+    <div class="toggle-button">
+      <label for="toggle-location">Location</label>
+      <input type="checkbox" id="toggle-location" checked>
+    </div>
+    </div>
+    
+    <div id="view_own_subscribers_page_explanation"></div>
+    </div>
+   
 <!-- main page end -->
 
 <script src="./on_page_common.js"></script>

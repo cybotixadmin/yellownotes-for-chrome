@@ -462,7 +462,7 @@ async function fetchData() {
         console.log(data);
         // Get table body element
         const tableBody = document
-            .getElementById("dataTable")
+            .querySelector('table[name="distributionsTable"]')
             .getElementsByTagName("tbody")[0];
 
         console.log(tableBody);
@@ -495,20 +495,26 @@ function newTableRow2(tableBody, rowData) {
     const newRow = tableBody.insertRow();
     newRow.setAttribute("distributionlistid", rowData.distributionlistid);
     // Create cells and populate them with data
-    const cell1 = newRow.insertCell(0);
-    cell1.textContent = rowData.distributionlistid;
+    const cell_name = newRow.insertCell(0);
+    const cell_desc = newRow.insertCell(1);
+    const cell_visibility = newRow.insertCell(2);
+    const cell_restrictions = newRow.insertCell(3);
+    const cell_postcount = newRow.insertCell(4);
+    const cell_subscribercount = newRow.insertCell(5);
+    const cell_createtime = newRow.insertCell(6);
+    const cell_status = newRow.insertCell(7);
+    const cell_actions = newRow.insertCell(8);
 
-    const cell2 = newRow.insertCell(1);
-    cell2.textContent = rowData.name;
-    cell2.setAttribute("name", "name");
-    cell2.setAttribute("contenteditable", "true");
 
-    const cell3 = newRow.insertCell(2);
-    cell3.textContent = rowData.description;
-    cell3.setAttribute("name", "description");
-    cell3.setAttribute("contenteditable", "true");
+    cell_name.textContent = rowData.name;
+    cell_name.setAttribute("name", "name");
+    cell_name.setAttribute("class", "displayname");
+    cell_name.setAttribute("contenteditable", "true");
 
-    const cell4 = newRow.insertCell(3);
+    cell_desc.textContent = rowData.description;
+    cell_desc.setAttribute("name", "description");
+    cell_desc.setAttribute("contenteditable", "true");
+
 
     // Create a dropdown for the visibility
     const visibilityDropdown = document.createElement('select');
@@ -526,23 +532,22 @@ function newTableRow2(tableBody, rowData) {
 
     // Add dropdown to the table cell
     //const visibilityCell = newRow.insertCell(5);
-    cell4.appendChild(visibilityDropdown);
-    cell4.setAttribute("name", "visibility");
+    cell_visibility.appendChild(visibilityDropdown);
+    cell_visibility.setAttribute("name", "visibility");
 
-    const cell5 = newRow.insertCell(4);
-    cell5.textContent = rowData.restrictions;
+    cell_restrictions.textContent = rowData.restrictions;
 
-    const cell9 = newRow.insertCell(5);
-    cell9.textContent = rowData.postcount;
+    cell_postcount.textContent = rowData.postcount;
+    cell_postcount.setAttribute("class", "count");
 
-    const cell11 = newRow.insertCell(6);
-    cell11.textContent = rowData.subscriberscount;
 
-    const cell10 = newRow.insertCell(7);
+    cell_subscribercount.textContent = rowData.subscriberscount;
+    cell_subscribercount.setAttribute("class", "count");
     // set the genuine value of the field in an attribute
-    cell10.setAttribute("value", "createdtime");
+    cell_createtime.setAttribute("value", "createdtime");
+    cell_createtime.setAttribute("class", "datetime");
 console.log(rowData.createdtime);    
-    cell10.textContent = reformatTimestamp(rowData.createdtime);
+    cell_createtime.textContent = reformatTimestamp(rowData.createdtime);
 
 
     //Suspend/Active check switch
@@ -577,9 +582,8 @@ console.log(rowData.createdtime);
             await deactivateByUUID(rowData.distributionlistid);
         }
     });
-    const cell8 = newRow.insertCell(8);
-    cell8.appendChild(suspendActButton);
-
+    cell_status.appendChild(suspendActButton);
+    cell_status.setAttribute("class", "checkbox");
     //
     // action buttons
     //
@@ -637,7 +641,7 @@ console.log(rowData.createdtime);
     const createInviteButton = document.createElement("button");
 
    // title="Click to copy the invitation URL to your clipboard"
-    createInviteButton.title = "Click to create an invition to subscribe link, and copy it the clipboard";
+    createInviteButton.title = "Click to create an invition to subscribe link, and copy it to the clipboard";
     createInviteButton.textContent = "Invite";
     createInviteButton.classList.add("deleteBtn");
     createInviteButton.onclick = function () {
@@ -647,51 +651,19 @@ console.log(rowData.createdtime);
 
 
 
-    const cell7 = newRow.insertCell(9);
-    cell7.appendChild(viewNotesButton);
-    cell7.appendChild(viewSubscribersButton);
-    cell7.appendChild(deleteButton);
-    cell7.appendChild(saveButton);
-    cell7.appendChild(createInviteButton);
+    cell_actions.appendChild(viewNotesButton);
+    cell_actions.appendChild(viewSubscribersButton);
+    cell_actions.appendChild(deleteButton);
+    cell_actions.appendChild(saveButton);
+    cell_actions.appendChild(createInviteButton);
     
 }
 
 
+// setup table items for sorting and filtering
+setupTableFilteringAndSorting("distributionsTable");
 
 
-
-// Locate all elements with the class "my-button"
-const buttons = document.querySelectorAll(".sortableCol");
-//len = buttons.length;
-for (var i = 0; i < buttons.length; i++) {
-    //work with checkboxes[i]
-    console.log(buttons[i]);
-    // set column index number for each column
-    buttons[i].setAttribute("colindex", i);
-    buttons[i].addEventListener(
-        "click",
-        function (event) {
-        sortTa();
-    },
-        false);
-}
-
-// Locate all cells that are used for filtering of search results
-const f_cells = document.querySelectorAll(".filterableCol");
-console.log(f_cells);
-//len = f_cells.length;
-for (var i = 0; i < f_cells.length; i++) {
-    //work with regexp in cell
-    console.log(f_cells[i]);
-    // set column index number for each column
-    f_cells[i].setAttribute("colindex", i);
-    f_cells[i].addEventListener(
-        "input",
-        function (event) {
-        filterTable_a();
-    },
-        false);
-}
 
 // Sort states for each column
 const sortStates = {
@@ -710,9 +682,6 @@ function createOpenInvitation(distributionlistid) {
 
 }
 
-function sortTa() {
-    sortTable(event.target);
-}
 
 function prettyFormatTimestamp(timestamp) {
     const date = new Date(timestamp);
@@ -729,53 +698,6 @@ function prettyFormatTimestamp(timestamp) {
     return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
-// Function to sort the table
-function sortTable(colheader) {
-    const columnIndex = colheader.parentNode.getAttribute("colindex");
-    console.log("sortable: " + columnIndex, colheader);
-
-    const table = document.getElementById("dataTable");
-
-    let rows = Array.from(table.rows).slice(1); // Ignore the header
-    let sortedRows;
-
-    // Toggle sort state for the column
-    if (
-        sortStates[columnIndex] === "none" ||
-        sortStates[columnIndex] === "desc") {
-        sortStates[columnIndex] = "asc";
-    } else {
-        sortStates[columnIndex] = "desc";
-    }
-
-    // Sort based on the selected column and sort state
-    // Consider options for different types of sorting here.
-    if (columnIndex === 0) {
-        sortedRows = rows.sort((a, b) => {
-                return (
-                    Number(a.cells[columnIndex].innerText) -
-                    Number(b.cells[columnIndex].innerText));
-            });
-    } else {
-        sortedRows = rows.sort((a, b) =>
-                a.cells[columnIndex].innerText.localeCompare(
-                    b.cells[columnIndex].innerText));
-    }
-
-    if (sortStates[columnIndex] === "desc") {
-        sortedRows.reverse();
-    }
-
-    console.log(sortedRows);
-    // Remove existing rows
-    while (table.rows.length > 1) {
-        table.deleteRow(1);
-    }
-
-    // Append sorted rows
-    const tbody = table.getElementsByTagName("tbody")[0];
-    sortedRows.forEach((row) => tbody.appendChild(row));
-}
 
 function filterTable_a() {
     //  console.log("filterTable_a " );

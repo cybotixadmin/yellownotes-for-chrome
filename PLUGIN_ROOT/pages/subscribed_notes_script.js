@@ -37,39 +37,41 @@ checkSessionJWTValidity()
 // The users can decide which columns to display
 
 document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked);
+    toggleColumn('created', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked);
+    toggleColumn('modified', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked);
+    toggleColumn('type', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked);
+    toggleColumn('feed', this.checked,"dataTable");
 });
 document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked);
+    toggleColumn('message', this.checked,"dataTable");
 });
 document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked);
+    toggleColumn('action', this.checked,"dataTable");
 });
 
 document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked);
+    toggleColumn('location', this.checked,"dataTable");
 });
 
 
 document.getElementById('toggle-status').addEventListener('change', function () {
-    toggleColumn('status', this.checked);
+    toggleColumn('status', this.checked,"dataTable");
 });
 
-function toggleColumn(columnName, isChecked) {
+
+function DELETEtoggleColumn(columnName, isChecked) {
     console.log("toggleColumn: " + columnName + " isChecked: " + isChecked);
-    var table = document.getElementById("dataTable");
+   // var table = document.getElementById("dataTable");
+    var table = document.querySelector('table[name="dataTable"]');
     // find out which column has the name columnName
     //console.log(table);
     var col = table.querySelector('[name = "' + columnName + '"]');
@@ -284,34 +286,12 @@ async function editNote(uuid) {
     }
 }
 
+//
+// setup table event listeners for sorting and filtering
+
 // setup table items for sorting and filtering
+setupTableFilteringAndSorting("dataTable");
 
-// Locate all elements with the class "sortableCol"
-const buttons = document.getElementById("dataTable").querySelectorAll('.sortableCol');
-len = buttons.length;
-for (var i = 0; i < buttons.length; i++) {
-    //work with checkboxes[i]
-    //console.log(buttons[i]);
-    // set column index number for each column
-    buttons[i].setAttribute("colindex", i);
-    buttons[i].addEventListener('click', function (event) {
-        sortTa(event);
-    }, false);
-}
-
-// Locate all cells that are used for filtering of search results
-const f_cells = document.getElementById("dataTable").querySelectorAll("thead tr:nth-child(2) th");
-console.log(f_cells);
-len = f_cells.length;
-for (var i = 0; i < f_cells.length; i++) {
-    //work with regexp in cell
-    //console.log(f_cells[i]);
-    // set column index number for each column
-    f_cells[i].setAttribute("colindex", i);
-    f_cells[i].addEventListener('input', function (event) {
-        filterTableAllCols();
-    }, false);
-}
 
 // Sort states for each column
 const sortStates = {
@@ -374,7 +354,7 @@ function fetchData(not_show_by_default_columns) {
                 console.log(new Date().toISOString());
 
                 // Get table body element
-                const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                const tableBody = document.querySelector('table[name="dataTable"]').getElementsByTagName('tbody')[0];
 
                 // Loop through data and populate the table
                 data.forEach(row => {
@@ -385,22 +365,21 @@ function fetchData(not_show_by_default_columns) {
                     const newRow = tableBody.insertRow();
                     newRow.setAttribute("noteid", row.noteid);
                     // Create cells and populate them with data
-                    const cell1 = newRow.insertCell(0);
-                    const cell_createtime = newRow.insertCell(1);
-                    const cell_lastmodifiedtime = newRow.insertCell(2);
-                    const type_cell = newRow.insertCell(3);
-                    const cell_name = newRow.insertCell(4);
-                    const cell_url = newRow.insertCell(5);
-                    const cell_message_text = newRow.insertCell(6);
-                    const cell_status = newRow.insertCell(7);
-                    const cell_buttons = newRow.insertCell(8);
+                   
+                    const cell_createtime = newRow.insertCell(0);
+                    const cell_lastmodifiedtime = newRow.insertCell(1);
+                    const type_cell = newRow.insertCell(2);
+                    const cell_name = newRow.insertCell(3);
+                    const cell_url = newRow.insertCell(4);
+                    const cell_message_text = newRow.insertCell(5);
+                    const cell_status = newRow.insertCell(6);
+                    const cell_buttons = newRow.insertCell(7);
 
                     // parse the JSON of the note
                     const obj = JSON.parse(row.json);
                     console.log(obj);
 
-                    cell1.textContent = row.uuid;
-
+                   
                     // last create timestamp
                     try {
                         cell_createtime.textContent = timestampstring2timestamp(row.createtime);
@@ -511,7 +490,7 @@ function fetchData(not_show_by_default_columns) {
                     unPauseButtonContainer.className = 'unpause_button';
                     const unPauseButton = document.createElement('img');
                     unPauseButton.src = "../icons/unpause.40.png";
-                   unPauseButton.height = "25";
+                    unPauseButton.height = "25";
                     unPauseButton.alt = 'go there';
                     unPauseButton.className = 'unpause_button';
                     unPauseButton.onclick = function () {
@@ -545,9 +524,9 @@ apply all filters simmultaneously
 TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
 and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
  */
-function filterTableAllCols() {
+function DELETEfilterTableAllCols() {
     console.log("filterTableAllCols");
-    var table = document.getElementById("dataTable");
+    var table = document.querySelector('table[name="' + tableName + '"]');
     var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
     var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
 
@@ -677,80 +656,6 @@ function enable_note_with_noteid(noteid) {
     }
 }
 
-/*
- * recursively go down the DOM tree below the specified node
- *
- */
-function DELreplaceLink(node, note_template) {
-    try {
-        console.debug("# replaceLink");
-        //console.debug(node);
-
-        if (node) {
-
-            // recursively call to analyse child nodes
-
-            for (var i = 0; i < node.childNodes.length; i++) {
-                //console.debug("call childnodes");
-                try {
-                    replaceLink(node.childNodes[i], note_template);
-                } catch (f) {}
-            }
-
-            /*
-             * Node.ELEMENT_NODE 	1 	An Element node like <p> or <div>.
-            Node.ATTRIBUTE_NODE 	2 	An Attribute of an Element.
-            Node.TEXT_NODE 	3 	The actual Text inside an Element or Attr.
-            Node.CDATA_SECTION_NODE 	4 	A CDATASection, such as <!CDATA[[ … ]]>.
-            Node.PROCESSING_INSTRUCTION_NODE 	7 	A ProcessingInstruction of an XML document, such as <?xml-stylesheet … ?>.
-            Node.COMMENT_NODE 	8 	A Comment node, such as <!-- … -->.
-            Node.DOCUMENT_NODE 	9 	A Document node.
-            Node.DOCUMENT_TYPE_NODE 	10 	A DocumentType node, such as <!DOCTYPE html>.
-            Node.DOCUMENT_FRAGMENT_NODE 	11 	A DocumentFragment node.
-             *
-             */
-
-            if (node.nodeType == Node.ELEMENT_NODE || node.nodeType == Node.DOCUMENT_NODE) {
-                // console.debug("1.0.1");
-
-                // exclude elements with invisible text nodes
-                //  if (ignore(node)) {
-                //      return
-                //  }
-            }
-
-            // if this node is a textnode, look for the
-            if (node.nodeType === Node.TEXT_NODE) {
-                // check for visibility
-
-
-                // apply regexp identifying yellownote
-
-                // exclude elements with invisible text nodes
-
-                // ignore any textnode that is not at least xx characters long
-                if (node.textContent.length >= 150) {
-
-                    //console.debug("look for sticky note in (" + node.nodeType + "): " + node.textContent);
-                    // regexp to match begining and end of a stickynote serialization. The regex pattern is such that multiple note objects may be matched.
-                    var yellownote_regexp = new RegExp(/yellownote=.*=yellownote/);
-
-                    if (yellownote_regexp.test(node.textContent)) {
-                        console.debug("HIT");
-                        // carry out yellow sticky note presentation on this textnode
-
-                        showStickyNote(node, note_template);
-
-                    }
-
-                }
-            }
-        }
-    } catch (e) {
-        console.debug(e);
-    }
-
-}
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
@@ -771,11 +676,25 @@ if (pagewidth < 300) {
     not_show_by_default_columns = [];
 }
 
+const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns";
+
+
+// 
+getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+    not_show_by_default_columns = columns;
+    console.log(not_show_by_default_columns);
+}).catch(error => {
+    console.error('Error:', error);
+});
+
+
+
+
 fetchData(not_show_by_default_columns).then(() => {
     console.log("toggle columns off by default");
     console.log(not_show_by_default_columns);
     not_show_by_default_columns.forEach(column => {
-        toggleColumn(column, false);
+        toggleColumn(column, false, "dataTable");
         document.getElementById(`toggle-${column}`).checked = false;
     });
     });

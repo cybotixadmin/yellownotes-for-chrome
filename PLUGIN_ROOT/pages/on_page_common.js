@@ -211,8 +211,8 @@ async function get_displayname_from_sessiontoken(token) {
 function fetchAndDisplayStaticContent(url, dom_id) {
     return new Promise((resolve, reject) => {
       console.log("fetchAndDisplayStaticContent()");
-      console.log(url);
-      console.log(dom_id);
+      console.log("place ",url);
+      console.log("on ", dom_id);
   
       try{
       // Security measure 1
@@ -240,7 +240,7 @@ function fetchAndDisplayStaticContent(url, dom_id) {
               formElement.appendChild(doc.body.querySelector('div'));
               resolve(); // Resolve the promise here
             } else {
-              console.error('Element with ID "form" not found.');
+              console.error('Element with ID "'+dom_id+'" not found.');
               reject('Element with ID "form" not found.'); // Reject the promise here
             }
           })
@@ -359,23 +359,23 @@ function integerstring2timestamp(int) {
 }
 
 
-function sortTa(event) {
-  console.log("sortTa()");
-  console.log(event);
-  console.log(event.target);
-  console.log(event.target.parentNode);
-  console.log( getElementPosition(event.target.parentNode));
-  sortTable("dataTable", getElementPosition(event.target.parentNode));
+function sortTa(table_name, event) {
+  console.debug("sortTa().start");
+ // console.log(event);
+ // console.log(event.target);
+ // console.log(event.target.parentNode);
+ // console.log( getElementPosition(event.target.parentNode));
+  sortTable(table_name, getElementPosition(event.target.parentNode));
 }
 
 
 
 // Function to sort the table
-function sortTable(table_id, columnIndex) {
+function sortTable(table_name, columnIndex) {
   console.log("sortTable.start");
   console.log("columnIndex: " + columnIndex)
-  console.log("sortTabl: " + table_id)
-  const table = document.querySelector('[id="' + table_id + '"]');
+  console.log("sortTabl: " + table_name)
+  const table = document.querySelector('table[name="' + table_name + '"]');
   console.log(table);
   let rows = Array.from(table.rows).slice(2); // Ignore the header rows
   let sortedRows;
@@ -461,9 +461,9 @@ apply all filters simmultaneously
 TO DO. add a swith where the user can chose between whilecard and regexp filters (wildcard default)
 and chose to have the filters to be caseinsensitive or not (caseinsensitive default) or not (casesensitive default)
  */
-function filterTableAllCols() {
+function filterTableAllCols(table_name) {
   console.log("filterTableAllCols");
-  var table = document.getElementById("dataTable");
+  var table = document.querySelector('table[name="'+table_name+'"]');
   var filtersCols = table.querySelectorAll("thead > tr:nth-child(2) > th > input, select");
   var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
 
@@ -742,3 +742,238 @@ function getClaimsFromJwt(token, claimNames) {
 }
 
 
+
+
+
+function getNotShowByDefaultColumns(key, defaultValue) {
+  return new Promise((resolve, reject) => {
+      try {
+          //const key = 'name_not_show_by_default_columns';
+          let value = localStorage.getItem(key);
+          console.debug("reading: " + value);
+          console.debug(value);
+          if (value === null) {
+              console.debug("setting the default value of which columns should be hidden.");
+              // Apply the default value if nothing have been set
+              localStorage.setItem(key, JSON.stringify(defaultValue));
+              
+              value = JSON.stringify(defaultValue);
+              console.debug("setting: " + value);
+          }
+          console.debug("returning: " + value);
+          // Parse the value to return as an array
+          resolve(JSON.parse(value));
+      } catch (error) {
+          reject(error);
+      }
+  });
+}
+
+
+
+/*
+ * use by the procedure that persis which columns are to be display in tables
+ *
+ */
+function modifyNotShowByDefaultColumns(value, action, key) {
+  return new Promise((resolve, reject) => {
+      try {
+          //const key = 'name_not_show_by_default_columns';
+          let storedValue = localStorage.getItem(key);
+
+          if (storedValue === null) {
+              // Initialize with an empty array if not set
+              storedValue = [];
+          } else {
+              storedValue = JSON.parse(storedValue);
+          }
+
+          if (action === "set") {
+              // Add the value if it's not already present
+              if (!storedValue.includes(value)) {
+                  storedValue.push(value);
+                  localStorage.setItem(key, JSON.stringify(storedValue));
+              }
+          } else if (action === "unset") {
+              // Remove the value if it is present
+              const index = storedValue.indexOf(value);
+              if (index !== -1) {
+                  storedValue.splice(index, 1);
+                  console.debug("setting new: " + storedValue);
+                  localStorage.setItem(key, JSON.stringify(storedValue));
+              }
+          }
+
+          resolve(storedValue);
+      } catch (error) {
+          reject(error);
+      }
+  });
+}
+
+
+
+
+function toggleColumn(columnName, isChecked, tableName) {
+  console.log("toggleColumn: " + columnName + " isChecked: " + isChecked);
+  //var table = document.getElementById("dataTable");
+  var table = document.querySelector('table[name="' + tableName + '"]');
+  // find out which column has the name columnName
+  console.log(table);
+  // thead tr:nth-child(2)
+  var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
+  console.log(col);
+  const columnIndex = getElementPosition(col);
+  console.log(getElementPosition(col));
+
+  if (!isChecked) {
+      table.querySelectorAll('tr').forEach(row => {
+          // console.log(row);
+          // console.log(row.cells[columnIndex].classList);
+
+          row.cells[columnIndex].classList.add("hidden");
+
+// add column to supression list
+console.debug("hidden column: " + columnName);
+
+modifyNotShowByDefaultColumns(columnName, 'set', table_columns_to_not_display_keyname).then(updatedArray => {
+  //console.log(updatedArray);
+}).catch(error => {
+  console.error('Error:', error);
+});
+
+
+      });
+
+  } else {
+      table.querySelectorAll('tr').forEach(row => {
+
+          //console.log(row);
+          //console.log(row.cells[columnIndex].classList);
+          row.cells[columnIndex].classList.remove("hidden");
+
+// To remove a value
+modifyNotShowByDefaultColumns(columnName, 'unset', table_columns_to_not_display_keyname).then(updatedArray => {
+  console.log(updatedArray);
+}).catch(error => {
+  console.error('Error:', error);
+});
+
+      });
+
+  }
+
+ 
+}
+
+
+function setupTableFilteringAndSorting(table_name) {
+
+
+// Locate all elements with the class "sortableCol"
+const buttons = document.querySelector('table[name="'+table_name+'"]').querySelectorAll('.sortableCol');
+len = buttons.length;
+for (var i = 0; i < buttons.length; i++) {
+    //work with checkboxes[i]
+    console.log(buttons[i]);
+    // set column index number for each column
+    //buttons[i].setAttribute("colindex", i);
+    buttons[i].addEventListener('click', function (event) {
+        sortTa(table_name, event);
+    }, false);
+}
+
+// Locate all cells that are used for filtering of search results
+const f_cells = document.querySelector('table[name="'+table_name+'"]').querySelectorAll("thead tr:nth-child(2) th");
+console.log(f_cells);
+len = f_cells.length;
+for (var i = 0; i < f_cells.length; i++) {
+    //work with regexp in cell
+    console.log(f_cells[i]);
+    // set column index number for each column
+   // f_cells[i].setAttribute("colindex", i);
+    f_cells[i].addEventListener('input', function (event) {
+        filterTableAllCols(table_name);
+    }, false);
+}
+
+}
+
+
+
+
+
+/*
+ * recursively go down the DOM tree below the specified node
+ *
+ */
+function replaceLink(node, note_template) {
+  try {
+     // console.debug("# replaceLink");
+      //console.debug(node);
+
+      if (node) {
+
+          // recursively call to analyse child nodes
+
+          for (var i = 0; i < node.childNodes.length; i++) {
+              //console.debug("call childnodes");
+              try {
+                  replaceLink(node.childNodes[i], note_template);
+              } catch (f) {}
+          }
+
+          /*
+           * Node.ELEMENT_NODE 	1 	An Element node like <p> or <div>.
+          Node.ATTRIBUTE_NODE 	2 	An Attribute of an Element.
+          Node.TEXT_NODE 	3 	The actual Text inside an Element or Attr.
+          Node.CDATA_SECTION_NODE 	4 	A CDATASection, such as <!CDATA[[ … ]]>.
+          Node.PROCESSING_INSTRUCTION_NODE 	7 	A ProcessingInstruction of an XML document, such as <?xml-stylesheet … ?>.
+          Node.COMMENT_NODE 	8 	A Comment node, such as <!-- … -->.
+          Node.DOCUMENT_NODE 	9 	A Document node.
+          Node.DOCUMENT_TYPE_NODE 	10 	A DocumentType node, such as <!DOCTYPE html>.
+          Node.DOCUMENT_FRAGMENT_NODE 	11 	A DocumentFragment node.
+           *
+           */
+
+          if (node.nodeType == Node.ELEMENT_NODE || node.nodeType == Node.DOCUMENT_NODE) {
+              // console.debug("1.0.1");
+
+              // exclude elements with invisible text nodes
+              //  if (ignore(node)) {
+              //      return
+              //  }
+          }
+
+          // if this node is a textnode, look for the
+          if (node.nodeType === Node.TEXT_NODE) {
+              // check for visibility
+
+
+              // apply regexp identifying yellownote
+
+              // exclude elements with invisible text nodes
+
+              // ignore any textnode that is not at least xx characters long
+              if (node.textContent.length >= 150) {
+
+                  //console.debug("look for sticky note in (" + node.nodeType + "): " + node.textContent);
+                  // regexp to match begining and end of a stickynote serialization. The regex pattern is such that multiple note objects may be matched.
+                  var yellownote_regexp = new RegExp(/yellownote=.*=yellownote/);
+
+                  if (yellownote_regexp.test(node.textContent)) {
+                      console.debug("HIT");
+                      // carry out yellow sticky note presentation on this textnode
+
+                      showStickyNote(node, note_template);
+
+                  }
+
+              }
+          }
+      }
+  } catch (e) {
+      console.debug(e);
+  }
+
+}

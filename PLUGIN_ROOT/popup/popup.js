@@ -145,14 +145,19 @@ document.querySelector('#attach_note_to_current_tab').addEventListener('click', 
     console.log("attach_note_to_currenttab selected");
     var url = window.location.href;
     console.debug("to url: " , url);
-    getCurrentTabUrl().then((url) => {
+    getCurrentTabUrl().then((tabInfo) => {
+
+        url = tabInfo.url;
+        tab_id = tabInfo.id;
+
         console.debug("to url: " , url);
         return chrome.runtime.sendMessage({
         action: "attach_to_current_tab",
         note_type: "yellownote",
-        url: url
+        url: url,
+        tab_id: tab_id
         });
-        
+
     }).then((response) => {
         console.log(response);
 
@@ -183,8 +188,11 @@ function getCurrentTabUrl() {
                 reject(chrome.runtime.lastError);
             } else {
                 var activeTab = tabs[0];
-                var activeTabUrl = activeTab.url;
-                resolve(activeTabUrl);
+                var tabInfo = {
+                    id: activeTab.id,
+                    url: activeTab.url
+                };
+                resolve(tabInfo);
             }
         });
     });

@@ -425,7 +425,7 @@ function pinYellowNote(info, tab, note_type, brand) {
             // .then(function (result) {
             // send message to the active tab
             const msg = {
-                action: "createnode",
+                action: "createnote",
                 sharedsecret: PinToSelectedHTML_sharedsecret,
                 note_type: note_type,
                 brand: brand,
@@ -762,7 +762,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 const url = message.url;
 const note_type = message.note_type;
 const psuedo_info= {
-    pageUrl: url
+    pageUrl: url,
+    selectionText: ""
 };
 
 const tab = {
@@ -1937,10 +1938,34 @@ function fetchNewData(creatorId, cacheKey) {
         });
     })
     .then(response => {
+       
+
+
+
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            console.log(response);
+
+            // if an invalid session token was sent, it should be removed from the local storage
+            if (response.status == 401) {
+                // compare the response body with the string "Invalid session token" to determine if the session token is invalid
+                if(response.headers.get("session") == "DELETE_COOKIE"){
+                        console.log("Session token is invalid, remove it from local storage.");
+                        chrome.storage.local.remove([plugin_session_header_name]);
+                        // redirect to the front page returning the user to unauthenticated status.
+                        // unauthenticated functionality will be in effect until the user authenticates
+                        //window.location.href = "/pages/my_account.html";
+                        throw new Error('logout');
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            } else {
+                throw new Error('Network response was not ok');
+            }
+        } else {
+            return response.json();
         }
-        return response.json();
+
+
     })
     .then(data => {
         console.log('Caching data for', creatorId);

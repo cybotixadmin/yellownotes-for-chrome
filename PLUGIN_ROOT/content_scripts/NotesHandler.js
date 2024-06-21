@@ -345,7 +345,7 @@ function listener(request, sender, sendResponse) {
                     });
                 // Indicate that we want to send a response asynchronously
                 return true;
-            } else if (request.action == "createnode") {
+            } else if (request.action == "createnote") {
                 // call to create a yellow note
                 console.debug("browsersolutions calling: create_newstickynote_node");
                 create_newstickynote_node(request.info, request.note_type, request.note_template, request.note_properties, request.session);
@@ -590,7 +590,7 @@ function listener(request, sender, sendResponse) {
 
                     resp.linkedContentUniqueid = linkedContentUniqueid;
                     // call the function that will create the note
-
+console.debug("calling create_newstickynote_node");
                     create_newstickynote_node(resp, "capture_note", resp.note_template, resp.note_properties, resp.sessiontoken);
 
                     document.body.appendChild(capturedImageFrameTable);
@@ -875,16 +875,18 @@ function cropImage(base64Image, coords, scale = window.devicePixelRatio) {
 function create_newstickynote_node(info, note_type, html, note_properties, session) {
 
     console.debug("# create_newstickynote_node start");
-    console.log(info);
+    console.debug("info:");
+    console.debug(info);
 
     const isOwner = true;
     const isNewNote = true;
     // create the note object data with suitable initial values for some fields
     var note_object_data = {}
-    console.log("note_object_data: " + JSON.stringify(note_object_data));
-    console.log("note_properties: " + JSON.stringify(note_properties));
+    console.debug("note_properties: " );
+    console.debug(note_properties);
     var userid = "";
-    console.debug("session: " + JSON.stringify(session));
+    console.debug("session: " );
+    console.debug(session);
     // console.debug("selection text: " + info.selectionText);
 
     try {

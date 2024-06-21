@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="my_notes.css">
     <link rel="stylesheet" href="on_page_common.css">
     <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="scrolltable.css">
     
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,19 +30,19 @@
   
     <!-- Empty table structure -->
 <div class="scrollable-table">
-<table id="dataTable" class="notesTable">
+<table name="dataTable" class="notesTable">
   <thead>
     <tr class="fixed-header">
       <th>ID</th>
-      <th class="sortableCol" name="created" sort_type="stringDatetime">created<span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol" name="modified" sort_type="stringCaseExact">changed<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol datetime" name="created" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol datetime" name="modified" sort_type="stringCaseExact">changed<span class="sort-icon url">&#9650;</span></th>
       <th class="sortableCol" name="type" sort_type="stringCaseExact">type<span class="sort-icon">&#9650;</span></th>
-      <th name="active" >act</th>
-      <th class="sortableCol" name="location" sort_type="stringCaseIgnore">location<span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol"  name="selected" >selected<span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol"  name="message" >message<span class="sort-icon">&#9650;</span></th>
+      <th name="active" class="checkbox">sta</th>
+      <th class="sortableCol url" name="location" sort_type="stringCaseIgnore">location<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol text"  name="selected" >selected<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol text"  name="message" >message<span class="sort-icon">&#9650;</span></th>
       <th name="action">actions</th>
-      <th class="sortableCol" name="feed" sort_type="selectCaseExact">feed<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol" name="feed" sort_type="selectCaseExact">feed<span class="sort-icon url">&#9650;</span></th>
       <!--
       <th class="sortableCol" sort_type="stringCaseExact">note<span class="sort-icon">&#9650;</span></th>
       -->
@@ -50,14 +51,14 @@
     <!-- Add a filter row -->
     <tr class="fixed-header">
       <th class="filterableCol"></th> <!-- Empty cell -->
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-      <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"></option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
-      <th class="filterableCol"><select filtertype="checkedmatch" class="filterableCol compact"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-      <th class="filterableCol"></th>
+      <th class="filterableCol datetime"><input filtertype="wildcardmatch" type="text" class="filterContent datetime" placeholder="Filter "></th>
+      <th class="filterableCol datetime"><input filtertype="wildcardmatch" type="text" class="filterContent datetime" placeholder="Filter "></th>
+      <th class="filterableCol"><select filtertype="wildcardmatch" class="filterContent"><option class="filterContent"></option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
+      <th class="filterableCol checkbox"><select filtertype="checkedmatch" class="filterContent class compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+      <th class="filterableCol url"><input filtertype="wildcardmatch" type="text" class="filterContent url" placeholder="Filter "></th>
+      <th class="filterableCol text"><input filtertype="wildcardmatch" type="text" class="filterContent text" placeholder="Filter "></th>
+      <th class="filterableCol text"><input filtertype="wildcardmatch" type="text" class="filterContent text" placeholder="Filter "></th>
+      <th ></th>
       <th class="filterableCol"><input filtertype="selectmatch" type="text" class="filterContent" placeholder="Filter "></th>
       <!--
       <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
@@ -105,7 +106,7 @@ which columns to show
   <input type="checkbox" id="toggle-message" checked>
 </div>
 <div class="toggle-button">
-  <label for="toggle-action">Action</label>
+  <label for="toggle-action">Actions</label>
   <input type="checkbox" id="toggle-action" checked>
 </div>
 <div class="toggle-button">

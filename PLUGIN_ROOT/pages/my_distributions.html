@@ -38,19 +38,19 @@
 
   <div class="tabContent scrollable-table">
     <div class="tableResponsive">
-      <table class="distributionlistsTable" id="dataTable">
+      <table class="distributionlistsTable" name="distributionsTable">
         <thead>
           <tr class="fixed-header">
-            <th>ID</th>
+          
             <!-- <th class="sortableCol">universaltime</th> -->
-            <th class="sortableCol">name</th>
-            <th>description</th>
-            <th>visibility</th>
-            <th>restrictions</th>
-            <th>posts</th>
-            <th>subscribers</th>
-            <th>created</th>
-            <th>active</th>
+            <th class="sortableCol displayname" sort_type="selectCaseExact">name<span class="sort-icon url">&#9650;</span></th>
+            <th class="sortableCol displayname" sort_type="selectCaseExact">description<span class="sort-icon url">&#9650;</span></th>
+            <th class="sortableCol">visibility</th>
+            <th class="sortableCol displayname" sort_type="selectCaseExact">restrictions<span class="sort-icon url">&#9650;</span></th>
+            <th class="sortableCol count">posts</th>
+            <th class="sortableCol count">subscribers</th>
+            <th class="sortableCol datetime" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
+            <th class="sortableCol checkbox">active</th>
             <th></th>
           </tr>
 <!-- populate the table with the distribution list owned by this user  
@@ -61,14 +61,18 @@ The lists are returned by calling to the background script.
 
 
           <!-- Add a filter row -->
-          <!-- <tr class="fixed-header">
-      <th class="filterableCol"></th> <!//-- Empty cell --//>
-      <th class="filterableCol">filter:<input type="text" id="filterContent" placeholder="Filter Content" "></th>
-      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" "></th>
-      <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" "></th>
-      <th class="filterableCol"></th>
-      <th class="filterableCol"></th>
-    </tr> -->
+          <tr class="fixed-header">
+     
+            <th class="filterableCol displayname"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th class="filterableCol displayname"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th> 
+            <th class="filterableCol"><select filtertype="wildcardmatch" class="filterContent"><option class="filterContent"></option><option class="filterableCol">public</option><option class="filterableCol">private</option></select></th>
+            <th class="filterableCol displayname"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th class="filterableCol count"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th class="filterableCol count"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th class="filterableCol datetime"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
+            <th class="filterableCol checkbox"><select filtertype="checkedmatch" class="filterContent class compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+            <th></th>
+    </tr> 
           </thead>
           <tbody>
             <!-- Rows will be added here -->

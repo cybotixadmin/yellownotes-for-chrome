@@ -186,6 +186,8 @@ option.compact {
 .filterableCol {
   font-size: .8em;
   height: 21px;
+  padding: 0px;
+  border: 0px;
   }
   
 
@@ -242,7 +244,38 @@ table.notesTable th {
     color: white;
   }
   
-  table.notesTable tr th:nth-child(2){
+.datetime {
+  max-width: 100px;
+}
+
+
+.count {
+  max-width: 30px;
+}
+.displayname {
+  max-width: 150px;
+}
+.checkbox {
+  max-width: 10px;
+  margin: 1px;
+  padding: unset;
+
+}
+.url {
+  max-width: 100px;
+}
+
+.text {
+  max-width: 100px;
+}
+
+
+.status {
+  max-width: 50px;
+}
+
+
+  table.notesTable tr th:nth-child(102){
     max-width: 100px;
 
  }
@@ -258,7 +291,7 @@ table.notesTable tr th:nth-child(4) {
 
 
 table.notesTable tr th:nth-child(5) {
-  width: 10px;
+ 
   border-spacing: 0px;
  
 }
@@ -311,10 +344,8 @@ table.notesTable td {
 
 }
 
-table.notesTable tr td:nth-child(2){
-  max-width: 200px;
 
-}
+
 
 
 table.notesTable tr td:nth-child(3) {
@@ -326,21 +357,12 @@ table.notesTable tr td:nth-child(4) {
 }
 
 table.notesTable tr td:nth-child(5) {
-  width: 10px;
+ 
   border-spacing: 0px;
 }
 
-table.notesTable tr td:nth-child(6) {
-  width: 80px;
-}
 
-table.notesTable tr td:nth-child(7) {
-  width: 35px;
-}
 
-table.notesTable tr td:nth-child(8) {
-  width: 80px;
-}
 
 table.notesTable tr td:nth-child(9) {
   width: 120px;

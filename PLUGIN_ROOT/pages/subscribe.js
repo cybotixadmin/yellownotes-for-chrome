@@ -111,7 +111,7 @@ function addSubscriptionByUUIDinBackground(distributionlistid) {
 
 // Function to use "fetch" to suspend a data agreement
 async function addSubscriptionByUUID(distributionlistid, feed_data) {
-    console.debug("addSubscriptionByUUID");
+    console.debug("addSubscriptionByUUID.start");
     console.debug(distributionlistid);
     console.debug(feed_data);
     try {

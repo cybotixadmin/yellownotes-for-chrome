@@ -89,7 +89,7 @@ for (var i = 0; i < f_cells.length; i++) {
     // set column index number for each column
     f_cells[i].setAttribute("colindex", i);
     f_cells[i].addEventListener('input', function (event) {
-        filterTableAllCols();
+        filterTableAllCols("dataTable");
     }, false);
 }
 
@@ -101,7 +101,7 @@ const sortStates = {
 
 
 
-function timestampstring2timestamp(str) {
+function DELETEtimestampstring2timestamp(str) {
     console.log("timestampstring2timestamp: " + str);
     try {
         const year = str.substring(0, 4);
@@ -121,7 +121,7 @@ function timestampstring2timestamp(str) {
     }
 }
 
-function integerstring2timestamp(int) {
+function DELETEintegerstring2timestamp(int) {
     console.log("integerstring2timestamp: " + int);
     try {
         const year = int.substring(0, 4);
@@ -142,7 +142,7 @@ function integerstring2timestamp(int) {
 }
 
 
-function sortTa(event) {
+function DELETEsortTa(event) {
     console.log("sortTa()");
     console.log(event);
     console.log(event.target);
@@ -152,7 +152,7 @@ function sortTa(event) {
 
 
 // Function to sort the table
-function sortTable(table_id, columnIndex) {
+function DELETEsortTable(table_id, columnIndex) {
     console.log("sortTabl: " + columnIndex)
     console.log("sortTabl: " + table_id)
     const table = document.querySelector('[id="' + table_id + '"]');
@@ -581,6 +581,7 @@ async function fetchNote(distributionlistid, noteid) {
         // last create timestamp
         try {
             cell_createtime.textContent = integerstring2timestamp(row.createtime);
+            cell_createtime.setAttribute('class', 'datetime');
         } catch (e) {
             console.debug(e);
         }
@@ -588,6 +589,7 @@ async function fetchNote(distributionlistid, noteid) {
         // last modified timestamp
         try {
             cell_lastmodifiedtime.textContent = integerstring2timestamp(row.lastmodifiedtime);
+            cell_lastmodifiedtime.setAttribute('class', 'datetime');
         } catch (e) {
             console.debug(e);
         }
@@ -609,8 +611,10 @@ async function fetchNote(distributionlistid, noteid) {
         // url where note is attached
         cell_url.textContent = obj.url;
         cell_url.setAttribute('name', 'url');
+        cell_url.setAttribute('class', 'url');
         // display/message text
         cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
+        cell_message_text.setAttribute('class', 'text');
 
         // buttons
         // Add delete button
