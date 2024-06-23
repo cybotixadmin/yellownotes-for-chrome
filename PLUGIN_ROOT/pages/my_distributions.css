@@ -28,6 +28,14 @@ table.distributionlistsTable tr td {
 }
 
 
+    
+
+p {
+    font-size: clamp(12px, 2vw, 18px);
+    color: black;
+}
+
+
 table.distributionlistsTable tr td:nth-child(2) {
  
   width: auto;

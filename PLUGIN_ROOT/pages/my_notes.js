@@ -450,19 +450,18 @@ function fetchData(not_show_by_default_columns) {
                 newRow.setAttribute('noteid', row.noteid);
 
                 // Create cells and populate them with data
-                const cell_noteid = newRow.insertCell(0);
-                const cell_createtime = newRow.insertCell(1);
-                const cell_lastmodified = newRow.insertCell(2);
-                const type_cell = newRow.insertCell(3);
-                const cell_status = newRow.insertCell(4);
-                const cell_url = newRow.insertCell(5);
-                const cell_selection = newRow.insertCell(6);
-                const cell_message = newRow.insertCell(7);
-                const cell_actions = newRow.insertCell(8);
-                const cell_distributionlist = newRow.insertCell(9);
+               
+                const cell_createtime = newRow.insertCell(0);
+                const cell_lastmodified = newRow.insertCell(1);
+                const type_cell = newRow.insertCell(2);
+                const cell_status = newRow.insertCell(3);
+                const cell_url = newRow.insertCell(4);
+                const cell_selection = newRow.insertCell(5);
+                const cell_message = newRow.insertCell(6);
+                const cell_actions = newRow.insertCell(7);
+                const cell_distributionlist = newRow.insertCell(8);
                 const obj = JSON.parse(row.json);
                 // key column - not to be displayed
-                cell_noteid.textContent = row.noteid;
                 // create timestamp - not to be dsiplayed either
                 try {
                     console.log(row.createtime);
@@ -755,7 +754,7 @@ function createDropdown(optionsArray, selectedDistributionListId) {
         console.debug(event.target.parentNode);
         console.debug(event.target.parentNode.parentNode);
         console.debug(event.target.parentNode.parentNode.firstChild.textContent);
-        noteid = event.target.parentNode.parentNode.firstChild.textContent;
+        noteid = event.target.parentNode.parentNode.getAttribute('noteid');
 
         // Only trigger fetch call if the selected value is not empty
         if (selectedId) {
@@ -930,7 +929,7 @@ async function saveChanges(noteid, event) {
 }
 
 async function setNoteDistributionlistId(noteid, distributionlistid) {
-    console.debug("setNoteDistributionlistId: " + noteid + " distributionlistid: " + distributionlistid);
+    console.debug("setNoteDistributionlistId: noteid: " + noteid + ", distributionlistid: " + distributionlistid);
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);

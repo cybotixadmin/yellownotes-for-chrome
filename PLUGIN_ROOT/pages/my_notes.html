@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="my_notes.css">
     <link rel="stylesheet" href="on_page_common.css">
     <link rel="stylesheet" href="sidebar.css">
-    <link rel="stylesheet" href="scrolltable.css">
+    
     
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,14 +33,13 @@
 <table name="dataTable" class="notesTable">
   <thead>
     <tr class="fixed-header">
-      <th>ID</th>
-      <th class="sortableCol datetime" name="created" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol datetime" name="created" sort_type="stringCaseExact">created<span class="sort-icon url">&#9650;</span></th>
       <th class="sortableCol datetime" name="modified" sort_type="stringCaseExact">changed<span class="sort-icon url">&#9650;</span></th>
       <th class="sortableCol" name="type" sort_type="stringCaseExact">type<span class="sort-icon">&#9650;</span></th>
       <th name="active" class="checkbox">sta</th>
       <th class="sortableCol url" name="location" sort_type="stringCaseIgnore">location<span class="sort-icon url">&#9650;</span></th>
-      <th class="sortableCol text"  name="selected" >selected<span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol text"  name="message" >message<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol text"  name="selected"  sort_type="stringCaseExact">selected<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol text"  name="message" sort_type="stringCaseExact" >message<span class="sort-icon">&#9650;</span></th>
       <th name="action">actions</th>
       <th class="sortableCol" name="feed" sort_type="selectCaseExact">feed<span class="sort-icon url">&#9650;</span></th>
       <!--
@@ -50,19 +49,17 @@
 
     <!-- Add a filter row -->
     <tr class="fixed-header">
-      <th class="filterableCol"></th> <!-- Empty cell -->
-      <th class="filterableCol datetime"><input filtertype="wildcardmatch" type="text" class="filterContent datetime" placeholder="Filter "></th>
-      <th class="filterableCol datetime"><input filtertype="wildcardmatch" type="text" class="filterContent datetime" placeholder="Filter "></th>
-      <th class="filterableCol"><select filtertype="wildcardmatch" class="filterContent"><option class="filterContent"></option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
-      <th class="filterableCol checkbox"><select filtertype="checkedmatch" class="filterContent class compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
-      <th class="filterableCol url"><input filtertype="wildcardmatch" type="text" class="filterContent url" placeholder="Filter "></th>
-      <th class="filterableCol text"><input filtertype="wildcardmatch" type="text" class="filterContent text" placeholder="Filter "></th>
-      <th class="filterableCol text"><input filtertype="wildcardmatch" type="text" class="filterContent text" placeholder="Filter "></th>
+     
+      <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="datetime"><select filterContent="1" ><option class="filterContent"></option><option class="">webframe</option><option class="">yellownote</option></select></th>
+      <th filterableCol="checkedmatch" class="checkbox"><select filterContent="1" class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+      <th filterableCol="wildcardmatch" class="url"><input filterContent="1" type="text" class="url" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="text"><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="text"><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
       <th ></th>
-      <th class="filterableCol"><input filtertype="selectmatch" type="text" class="filterContent" placeholder="Filter "></th>
-      <!--
-      <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-      -->
+      <th filterableCol="selectmatch" class="text"><input filterContent="1" type="text" class="filterContent" placeholder="Filter "></th>
+      
     </tr>
   </thead>
   <tbody>

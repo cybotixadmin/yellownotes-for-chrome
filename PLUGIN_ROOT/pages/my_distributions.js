@@ -9,10 +9,11 @@ const browser_id = chrome.runtime.id;
 // check if the user is authenticated
 checkSessionJWTValidity()
   .then(isValid => {
-      console.log('JWT is valid:', isValid);
+      console.debug('JWT is valid:', isValid);
 if (isValid){
     console.debug("JWT is valid - show menu accordingly");
-    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/my_distributions_main.html", "my_distributions_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/my_distributions_top.html", "my_distributions_top_text").then(() => {});
     fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
         //page_display_login_status();
        // login_logout_action();
@@ -21,7 +22,6 @@ if (isValid){
       page_display_login_status();
 }else{
     console.debug("JWT is not valid - show menu accordingly");
-    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
     fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
         //page_display_login_status();
         //login_logout_action();
@@ -41,7 +41,7 @@ if (isValid){
 
 // Function to use "fetch" to delete a data row
 async function deleteDataRowByDistributionlistId(distributionlistid) {
-    console.log("deleteDataRowByDistributionlistId");
+    console.debug("deleteDataRowByDistributionlistId");
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -49,7 +49,7 @@ async function deleteDataRowByDistributionlistId(distributionlistid) {
         const message_body = JSON.stringify({
                 distributionlistid: distributionlistid,
             }, );
-        console.log(message_body);
+        console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_delete_distribution_list, {
@@ -61,7 +61,7 @@ async function deleteDataRowByDistributionlistId(distributionlistid) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -76,7 +76,7 @@ async function deleteDataRowByDistributionlistId(distributionlistid) {
 
 // Function to use "fetch" to delete a data row
 async function updateDataRowByUUID(distributionlistid) {
-    console.log("updateDataRowByUUID (" + distributionlistid + ")");
+    console.debug("updateDataRowByUUID (" + distributionlistid + ")");
     try {
 
         const row = document.querySelector('tr[distributionlistid="' + distributionlistid + '"]');
@@ -93,7 +93,7 @@ async function updateDataRowByUUID(distributionlistid) {
 
         };
 
-        console.log(message_body);
+        console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_update_own_distributionlist, {
@@ -105,7 +105,7 @@ async function updateDataRowByUUID(distributionlistid) {
                 },
                 body: JSON.stringify(message_body), // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -120,7 +120,7 @@ async function updateDataRowByUUID(distributionlistid) {
 
 // Function to use "fetch" to suspend a data agreement
 async function deleteSubscriptionByUUID(subscriptionid) {
-    console.log("deleteSubscriptionByUUID (" + subscriptionid + ")");
+    console.debug("deleteSubscriptionByUUID (" + subscriptionid + ")");
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -128,7 +128,7 @@ async function deleteSubscriptionByUUID(subscriptionid) {
         const message_body = JSON.stringify({
                 subscriptionid: subscriptionid
             });
-        //console.log(message_body);
+        //console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_delete_subscription, {
@@ -140,7 +140,7 @@ async function deleteSubscriptionByUUID(subscriptionid) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -162,7 +162,7 @@ async function viewDistributionlist(distributionlistid) {
         const message_body = JSON.stringify({
                 distributionlistid: distributionlistid
             });
-        //console.log(message_body);
+        //console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_get_distribution_list, {
@@ -174,7 +174,7 @@ async function viewDistributionlist(distributionlistid) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -183,8 +183,8 @@ async function viewDistributionlist(distributionlistid) {
         // Parse JSON data
         const data = await response.json();
 
-        console.log(data);
-        console.log(data[0]);
+        console.debug(data);
+        console.debug(data[0]);
 
         //document.addEventListener('DOMContentLoaded', function() {
         // Find the element where the table will be added
@@ -219,7 +219,7 @@ async function viewDistributionlist(distributionlistid) {
         const message_body2 = JSON.stringify({
                 distributionlistid: distributionlistid
             });
-        //console.log(message_body);
+        //console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const subscribersresponse = await fetch(
                 server_url + "/api/v1.0/plugin_user_get_distribution_list_subscribers", {
@@ -231,7 +231,7 @@ async function viewDistributionlist(distributionlistid) {
                 },
                 body: message_body2, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!subscribersresponse.ok) {
             throw new Error(`HTTP error! status: ${subscribersresponse.status}`);
@@ -240,7 +240,7 @@ async function viewDistributionlist(distributionlistid) {
         // Parse JSON data
         const subscribersdata = await subscribersresponse.json();
 
-        console.log(subscribersdata);
+        console.debug(subscribersdata);
 
         // Append the table to the container
         container.appendChild(table);
@@ -279,7 +279,7 @@ async function viewDistributionlist(distributionlistid) {
 
         });
 
-        console.log(sub_table);
+        console.debug(sub_table);
         // Append the table to the container
         container.appendChild(sub_table);
         // add button to add a new subscriber
@@ -301,7 +301,7 @@ async function viewDistributionlist(distributionlistid) {
 
 // Function to use "fetch" to re-activate a data agreement
 async function activateByUUID(distributionlistid) {
-    console.log("activateByUUID " + distributionlistid);
+    console.debug("activateByUUID " + distributionlistid);
 
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
@@ -311,7 +311,7 @@ async function activateByUUID(distributionlistid) {
                 distributionlistid: distributionlistid,
                 active: 1,
             });
-        //console.log(message_body);
+        //console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_set_distributionlist_active_status, {
@@ -323,7 +323,7 @@ async function activateByUUID(distributionlistid) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -339,7 +339,7 @@ async function activateByUUID(distributionlistid) {
 
 // Function to use "fetch" to re-activate a data agreement
 async function deactivateByUUID(distributionlistid) {
-    console.log("deactivateByUUID" + distributionlistid);
+    console.debug("deactivateByUUID" + distributionlistid);
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -348,7 +348,7 @@ async function deactivateByUUID(distributionlistid) {
                 distributionlistid: distributionlistid,
                 active: 0,
             });
-        //console.log(message_body);
+        //console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_set_distributionlist_active_status, {
@@ -360,7 +360,47 @@ async function deactivateByUUID(distributionlistid) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table
+
+        // Parse JSON data
+        const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+
+// Function to use "fetch" to re-activate a data agreement
+async function setAnonymousByUUID(distributionlistid, anonymous_allowed) {
+    console.debug("setAnonymousByUUID" + distributionlistid, " anonymous_allowed: " + anonymous_allowed);
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+       
+        const message_body = JSON.stringify({
+                distributionlistid: distributionlistid,
+                anonymous_allowed: anonymous_allowed,
+            });
+        //console.debug(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_set_distributionlist_anonymous_allowed_status, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -376,7 +416,7 @@ async function deactivateByUUID(distributionlistid) {
 
 // Function to suspend all data agreements (not already suspended)
 async function suspendAll() {
-    console.log("suspendAll");
+    console.debug("suspendAll");
     try {
         var message = {
             type: "suspendAllDataAgreements",
@@ -398,7 +438,7 @@ async function suspendAll() {
 
 // Function to activate all data agreements (not already active)
 function activateAll() {
-    console.log("activateAll");
+    console.debug("activateAll");
     try {}
     catch (e) {
         console.error(e);
@@ -407,7 +447,7 @@ function activateAll() {
 
 // Function to fetch data and populate the table
 async function fetchData() {
-    console.log("fetchData");
+    console.debug("fetchData");
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -439,12 +479,12 @@ async function fetchData() {
         //chrome.runtime.sendMessage({
         //    request: "getDistributionLists"
         //}).then(function (response) {
-        //    console.log(response);
+        //    console.debug(response);
 
 
         var utc = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
-        console.log(utc);
-        console.log(Date.now());
+        console.debug(utc);
+        console.debug(Date.now());
         var now = new Date();
         var utc_timestamp = Date.UTC(
                 now.getUTCFullYear(),
@@ -454,21 +494,21 @@ async function fetchData() {
                 now.getUTCMinutes(),
                 now.getUTCSeconds(),
                 now.getUTCMilliseconds());
-        console.log(utc_timestamp);
-        console.log(new Date().toISOString());
+        console.debug(utc_timestamp);
+        console.debug(new Date().toISOString());
 
         // Parse JSON data
         const data = await response.json();
-        console.log(data);
+        console.debug(data);
         // Get table body element
         const tableBody = document
             .querySelector('table[name="distributionsTable"]')
             .getElementsByTagName("tbody")[0];
 
-        console.log(tableBody);
+        console.debug(tableBody);
         // loop through the existing table and delete all rowsnewTableRow2
-        console.log(tableBody.rows);
-        console.log(tableBody.rows.length);
+        console.debug(tableBody.rows);
+        console.debug(tableBody.rows.length);
         var list = tableBody.rows;
         try {
             if (tableBody.rows.length) {
@@ -490,8 +530,9 @@ async function fetchData() {
 }
 
 function newTableRow2(tableBody, rowData) {
-    console.log("newTableRow2");
-    console.log(rowData);
+    console.debug("newTableRow2.start");
+    console.debug(tableBody);
+    console.debug(rowData);
     const newRow = tableBody.insertRow();
     newRow.setAttribute("distributionlistid", rowData.distributionlistid);
     // Create cells and populate them with data
@@ -503,7 +544,9 @@ function newTableRow2(tableBody, rowData) {
     const cell_subscribercount = newRow.insertCell(5);
     const cell_createtime = newRow.insertCell(6);
     const cell_status = newRow.insertCell(7);
-    const cell_actions = newRow.insertCell(8);
+    const cell_anonymous = newRow.insertCell(8);
+    const cell_automatic = newRow.insertCell(9);
+    const cell_actions = newRow.insertCell(10);
 
 
     cell_name.textContent = rowData.name;
@@ -546,7 +589,7 @@ function newTableRow2(tableBody, rowData) {
     // set the genuine value of the field in an attribute
     cell_createtime.setAttribute("value", "createdtime");
     cell_createtime.setAttribute("class", "datetime");
-console.log(rowData.createdtime);    
+console.debug(rowData.createdtime);    
     cell_createtime.textContent = reformatTimestamp(rowData.createdtime);
 
 
@@ -584,6 +627,47 @@ console.log(rowData.createdtime);
     });
     cell_status.appendChild(suspendActButton);
     cell_status.setAttribute("class", "checkbox");
+
+
+
+ //anonymous enrolment check switch
+ const anonActButton = document.createElement("span");
+ if (rowData.anonymous_allowed == 1) {
+     // active
+     anonActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+ } else {
+     // deactivated
+     anonActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+ }
+
+ const anonInputElement = anonActButton.querySelector("input");
+ if (anonInputElement) {
+    anonInputElement.classList.add("input-class");
+ }
+
+ const anonLabelElement = anonActButton.querySelector("label");
+ if (anonLabelElement) {
+    anonLabelElement.classList.add("switch");
+ }
+ const anonSpanElement = anonActButton.querySelector("span");
+ if (anonSpanElement) {
+    anonSpanElement.classList.add("slider");
+ }
+ anonActButton.addEventListener("change", async (e) => {
+     if (e.target.checked) {
+         await setAnonymousByUUID(rowData.distributionlistid, 1);
+     } else {
+         await setAnonymousByUUID(rowData.distributionlistid, 0);
+     }
+ });
+ cell_anonymous.appendChild(anonActButton);
+ cell_anonymous.setAttribute("class", "checkbox");
+
+
+
+
     //
     // action buttons
     //
@@ -676,7 +760,7 @@ const sortStates = {
 // append a redirecturi that redicts the the page showing the distribution list
 
 function createOpenInvitation(distributionlistid) {
-    console.log("createOpenInvitation ("+distributionlistid+")");
+    console.debug("createOpenInvitation ("+distributionlistid+")");
     // create a small window/form to add a new distribution list
 
 
@@ -700,31 +784,31 @@ function prettyFormatTimestamp(timestamp) {
 
 
 function filterTable_a() {
-    //  console.log("filterTable_a " );
+    //  console.debug("filterTable_a " );
 
     filterTable(event.target);
 }
 
 function filterTable(colheader) {
     const columnIndex = colheader.parentNode.getAttribute("colindex");
-    //console.log(colheader);
-    console.log("filter on col: " + columnIndex);
+    //console.debug(colheader);
+    console.debug("filter on col: " + columnIndex);
     //const input = colheader;
     const filter = colheader.value.toUpperCase();
     const table = document.getElementById("dataTable");
     const rows = table
         .getElementsByTagName("tbody")[0]
         .getElementsByTagName("tr");
-    //console.log("filter column:" + columnIndex);
-    //console.log("filter value:" + filter);
+    //console.debug("filter column:" + columnIndex);
+    //console.debug("filter value:" + filter);
 
     for (let i = 0; i < rows.length; i++) {
         const cell = rows[i].getElementsByTagName("td")[columnIndex];
-        //console.log(cell);
+        //console.debug(cell);
         if (cell) {
             const content = cell.innerText || cell.textContent;
             if (new RegExp(filter, "i").test(content)) {
-                //        console.log("not sho");
+                //        console.debug("not sho");
                 rows[i].style.display = "";
             } else {
                 rows[i].style.display = "none";
@@ -759,7 +843,7 @@ document
 
 
 async function add_distribution() {
-    console.log("add_distribution");
+    console.debug("add_distribution");
     // create a small window/form to add a new distribution list
 
     var tableHTML = '<table class="formTable" border="1">';
@@ -791,7 +875,7 @@ async function add_distribution() {
     document.getElementById('form').innerHTML = tableHTML;
 
     document.getElementById('createdistributionname').addEventListener('click', function () {
-        console.log("click");
+        console.debug("click");
         if (this.textContent === 'Enter a name') {
             this.textContent = '';
         }
@@ -813,25 +897,25 @@ async function add_distribution() {
     button.setAttribute("style", "align: middle;");
     button.textContent = 'Submit';
     container.appendChild(button);
-    console.log(container);
+    console.debug(container);
 
     // Find the button and add an event listener
     const createDistributionlistButton = document.getElementById('addform_button');
 
     createDistributionlistButton.addEventListener('click', function () {
-        console.log("createDistributionlistButton clicked");
+        console.debug("createDistributionlistButton clicked");
         // Extract data from table
         //const table = document.querySelector('#form table');
-        console.log(document.getElementById('form'));
-        console.log(document.getElementById('form').getElementsByTagName('table')[0]);
+        console.debug(document.getElementById('form'));
+        console.debug(document.getElementById('form').getElementsByTagName('table')[0]);
         const table = document.getElementById('form').getElementsByTagName('table')[0];
-        console.log(table);
-        console.log(table.rows[0]);
+        console.debug(table);
+        console.debug(table.rows[0]);
         // const id = table.rows[1].cells[1].textContent; // Get text from second cell of the first row
         // const name = table.rows[1].cells[1].textContent; // Get text from second cell of the first row
 
         //    const description = table.rows[2].cells[1].textContent; // Get text from second cell of the second row
-        console.log(document.getElementById('createdistributionname'));
+        console.debug(document.getElementById('createdistributionname'));
         const name = document.getElementById('createdistributionname').textContent;
 
         //      const description = table.rows[2].cells[1].textContent; // Get text from second cell of the second row
@@ -839,8 +923,8 @@ async function add_distribution() {
 
         const visibility = document.getElementById('visibilityDropdown').value; // Get text from second cell of the second row
 
-        console.log("name: " + name);
-        console.log("description: " + description);
+        console.debug("name: " + name);
+        console.debug("description: " + description);
 
         var ynInstallationUniqueId = "";
         var xYellownotesSession = "";
@@ -850,11 +934,11 @@ async function add_distribution() {
             chrome.storage.local.get([plugin_uuid_header_name]).then(
                 function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
-                console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
                 return chrome.storage.local.get([plugin_session_header_name]);
             }).then(function (result) {
                 xYellownotesSession = result[plugin_session_header_name];
-                console.log("xYellownotesSession: " + xYellownotesSession);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
 
                 // let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
 
@@ -867,7 +951,7 @@ async function add_distribution() {
                     "description": description,
                     "visibility": visibility
                 }
-                console.log(msg);
+                console.debug(msg);
                 // Send data using fetch
                 return fetch('https://api.yellownotes.cloud/api/v1.0/plugin_user_create_distributionlist', {
                     method: 'POST',
@@ -881,15 +965,18 @@ async function add_distribution() {
             })
             .then(response => response.json())
             .then(function (data) {
-                console.log('Success:', data);
+                console.debug('Success:', data);
 
                 // update the list of distribution lists with the one just created
                 // append the new row to the table of existing distributions lists
-                const dataTable = document.getElementById('dataTable');
+               // const dataTable = document.querySelector('table[name="dataTable"]');
+                const tableBody = document
+                .querySelector('table[name="distributionsTable"]')
+                .getElementsByTagName("tbody")[0];
 data.subscriberscount = 0;
 data.postcount = 0;
 
-                newTableRow2(dataTable, data);
+                newTableRow2(tableBody, data);
  //               const newRow1 = dataTable.insertRow();
 
    //             var rowHTML = '<tr>';
@@ -919,7 +1006,7 @@ data.postcount = 0;
     buttoncancel.setAttribute("style", "align: middle;");
     buttoncancel.textContent = 'Cancel';
     container.appendChild(buttoncancel);
-    console.log(container);
+    console.debug(container);
 
     // Find the button and add an event listener
     const cancelDataButton = document.getElementById('cancelform_button');
@@ -936,8 +1023,8 @@ data.postcount = 0;
 }
 
 function reformatTimestamp(originalTimestamp) {
-    console.log("reformatTimestamp");
-    console.log(originalTimestamp);
+    console.debug("reformatTimestamp");
+    console.debug(originalTimestamp);
 
     let[date, time1, rest] = originalTimestamp.split(/[T\.]/);
     console.debug(date);
@@ -989,7 +1076,7 @@ function reformatTimestamp(originalTimestamp) {
 }
 
 async function add_subscriber(distributionlistid) {
-    console.log("add_subscriber to " + distributionlistid);
+    console.debug("add_subscriber to " + distributionlistid);
     // create a small window/form to add a new distribution list
 
 
@@ -1029,7 +1116,7 @@ async function add_subscriber(distributionlistid) {
     button.setAttribute('style', 'left: 200px;');
     button.textContent = 'add';
     container.appendChild(button);
-    console.log(container);
+    console.debug(container);
 
     // Find the button and add an event listener
     const sendDataButton = document.getElementById('new-subscriber');
@@ -1047,15 +1134,15 @@ async function add_subscriber(distributionlistid) {
             "distributionlistid": distributionlistid
 
         }
-        console.log(msg);
+        console.debug(msg);
         chrome.storage.local.get([plugin_uuid_header_name]).then(
             function (result) {
             ynInstallationUniqueId = result[plugin_uuid_header_name];
-            console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
+            console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
             return chrome.storage.local.get([plugin_session_header_name]);
         }).then(function (result) {
             xYellownotesSession = result[plugin_session_header_name];
-            console.log("xYellownotesSession: " + xYellownotesSession);
+            console.debug("xYellownotesSession: " + xYellownotesSession);
 
             // let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
 
@@ -1076,7 +1163,7 @@ async function add_subscriber(distributionlistid) {
         })
         .then(response => response.json())
         .then(function (data) {
-            console.log('Success:', data);
+            console.debug('Success:', data);
             // Usage: Pass the ID of the parent element to cleanup
             removeAllChildren('form');
 
@@ -1087,7 +1174,7 @@ async function add_subscriber(distributionlistid) {
 
 
 async function remove_subscriber(subscriptionid, distributionlistid) {
-    console.log("remove_subscriber");
+    console.debug("remove_subscriber");
     // create a small window/form to add a new distribution list
 
     //document.addEventListener('DOMContentLoaded', function() {
@@ -1125,7 +1212,7 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
     button.id = 'send-data';
     button.textContent = 'add subscriber';
     container.appendChild(button);
-    console.log(container);
+    console.debug(container);
 
     // Find the button and add an event listener
     const sendDataButton = document.getElementById('send-data');
@@ -1142,11 +1229,11 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
         chrome.storage.local.get([plugin_uuid_header_name]).then(
             function (result) {
             ynInstallationUniqueId = result[plugin_uuid_header_name];
-            console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
+            console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
             return chrome.storage.local.get([plugin_session_header_name]);
         }).then(function (result) {
             xYellownotesSession = result[plugin_session_header_name];
-            console.log("xYellownotesSession: " + xYellownotesSession);
+            console.debug("xYellownotesSession: " + xYellownotesSession);
 
             // let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
 
@@ -1171,7 +1258,7 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
         })
         .then(response => response.json())
         .then(function (data) {
-            console.log('Success:', data);
+            console.debug('Success:', data);
             // Usage: Pass the ID of the parent element to cleanup
             removeAllChildren('form');
 
@@ -1180,7 +1267,7 @@ async function remove_subscriber(subscriptionid, distributionlistid) {
 }
 
 function removeAllChildren(parentElementId) {
-    console.log("removeAllChildren");
+    console.debug("removeAllChildren");
     // Get the parent element by its ID
     const parent = document.getElementById(parentElementId);
 
@@ -1191,13 +1278,13 @@ function removeAllChildren(parentElementId) {
 }
 
 async function activateAllDistributions() {
-    console.log("activateAllDistributions");
+    console.debug("activateAllDistributions");
     try {
 
          // update the form to show the new state of the subscriptions
 
          const checkboxes = document.getElementById('dataTable').querySelectorAll('input[type="checkbox"]');
-         console.log(checkboxes);
+         console.debug(checkboxes);
          // Iterate over the checkboxes and uncheck them
          checkboxes.forEach(checkbox => {
              checkbox.checked = true;
@@ -1225,18 +1312,18 @@ async function activateAllDistributions() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
-        console.log(error);
+        console.debug(error);
     }
 }
 
 async function deactivateAllDistributions() {
-    console.log("deactivateAllDistributions");
+    console.debug("deactivateAllDistributions");
     try {
 
  // update the form to show the new state of the subscriptions
 
  const checkboxes = document.getElementById('dataTable').querySelectorAll('input[type="checkbox"]');
- console.log(checkboxes);
+ console.debug(checkboxes);
  // Iterate over the checkboxes and uncheck them
  checkboxes.forEach(checkbox => {
      checkbox.checked = false;
@@ -1262,7 +1349,7 @@ async function deactivateAllDistributions() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
-        console.log(error);
+        console.debug(error);
     }
 }
 

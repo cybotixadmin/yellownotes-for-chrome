@@ -21,19 +21,22 @@
 <!-- body of document start -->
 <div class="pageBody">
   <b><div name="login_status"></div></b>
-<div style="display: flex; justify-content: center; align-items: middle; height: 7vh;">
-  <p style="font-size: 30px; color: black;">My Yellownotefeeds</p>
-</div>
-<div style="display: flex;  ">
-  <p style="left: 280px;  font-size: 12px; color: black;">
-  These are the feeds you currently operate. </p>
 
-</div> 
-  
-  <!-- Empty table structure -->
-  <style>
+ 
+<div id="my_distributions_top_text"></div>
+
+<div id="my_distributions_main_text"></div>
    
-  </style>
+  <!-- create new /suspend all /activate all -->
+
+<div >
+  <button id="distributionsAddButton" class="addBtn">Create a feed/distribution list</button>
+ 
+  <button id="distributionsSuspendAllButton" class="suspendAllBtn">Suspend All</button>
+  <button id="distributionsActivateAllButton" class="activateAllBtn">Activate All</button>
+</div>
+  <!-- Empty table structure -->
+  
 
 
   <div class="tabContent scrollable-table">
@@ -51,6 +54,8 @@
             <th class="sortableCol count">subscribers</th>
             <th class="sortableCol datetime" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
             <th class="sortableCol checkbox">active</th>
+            <th class="sortableCol checkbox">anonymous allowes</th>
+            <th class="sortableCol checkbox">automatic enrolment</th>
             <th></th>
           </tr>
 <!-- populate the table with the distribution list owned by this user  
@@ -63,14 +68,14 @@ The lists are returned by calling to the background script.
           <!-- Add a filter row -->
           <tr class="fixed-header">
      
-            <th class="filterableCol displayname"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th class="filterableCol displayname"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th> 
-            <th class="filterableCol"><select filtertype="wildcardmatch" class="filterContent"><option class="filterContent"></option><option class="filterableCol">public</option><option class="filterableCol">private</option></select></th>
-            <th class="filterableCol displayname"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th class="filterableCol count"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th class="filterableCol count"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th class="filterableCol datetime"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter "></th>
-            <th class="filterableCol checkbox"><select filtertype="checkedmatch" class="filterContent class compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th> 
+            <th filterableCol="wildcardmatch" class=""><select filterContent="1" class="filterContent"><option class=""></option><option class="">public</option><option class="">private</option></select></th>
+            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="count"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="count"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
             <th></th>
     </tr> 
           </thead>
@@ -81,21 +86,9 @@ The lists are returned by calling to the background script.
       </div>
     </div>
   
-    <style>
+
+
     
-
-      p {
-          font-size: clamp(12px, 2vw, 18px);
-          color: black;
-      }
-  </style>
-
-    <div >
-      <button id="distributionsAddButton" class="addBtn">Create a feed/distribution list</button>
-     
-      <button id="distributionsSuspendAllButton" class="suspendAllBtn">Suspend All</button>
-      <button id="distributionsActivateAllButton" class="activateAllBtn">Activate All</button>
-    </div>
     <div id="form" >
       </div>
       <div class="b" id="addform_button">
@@ -105,26 +98,8 @@ The lists are returned by calling to the background script.
      
     
     
-      <p>
-          Feeds can usefully be thought of as a distribution list to which others may subscribe. By default one is created for you automatically. 
-          It simply bears your username (email address) as its name.
-      </p>
-
-      <p>
-          Feeds have a visibility setting. This controls whether or not the feed will show up in searches. This can be either public or private. A public feed is visible to all users of the Yellownotes platform. 
-          A private feed is only visible to its members.
-      </p>
-
-      <p>
-          Feeds can carry restrictions on who may subscribe, and how. These are set by you as the feed owner. By default, the setting is "NONE" which means that anyone may subscribe and their subscription is approved automatically. The owner of the feed may remove subscribers at any time.
-          <br/>Restrictions have not yet been implemented.
-      </p>
-
-      <p>
-        Feeds can be deleted or deactivated by you at any time. Deletion is permanent. Deactivation is reversible at any time.
-        The visible effect to subscribers is the same to for both deactivation and deletion: The feeds are no longer visible lists of subscribed feeds, and will it appear in searches for feeds.
-        Nor are the notes attached to those feeds accessible to subscribers.    
-    </p>
+ 
+  
 
     </div>
 <!-- body of document end -->
