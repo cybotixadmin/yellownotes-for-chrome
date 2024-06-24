@@ -115,7 +115,7 @@ if (pagewidth < 300) {
 
 
 
-// 
+// check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
 getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
     console.log(not_show_by_default_columns);
@@ -165,7 +165,7 @@ not_show_by_default_columns.forEach(column => {
 });
 
 // Function to use "fetch" to delete a data row
-async function deleteDataRow(noteid) {
+async function deleteSubscription(noteid) {
     try {
 
         const userid = "";
@@ -463,7 +463,7 @@ function fetchData(not_show_by_default_columns) {
                 // create timestamp - not to be dsiplayed either
                 try {
                     console.log(row.createtime);
-                    console.log(/2024/.test(row.createtime));
+                    console.log(/20/.test(row.createtime));
                     if (/2024/.test(row.createtime)) {
                         console.log("createtime is timestamp: " + row.createtime);
                         //console.log("createtime: " + integerstring2timestamp(row.createtime));
@@ -611,7 +611,7 @@ function fetchData(not_show_by_default_columns) {
                     // Remove the row from the table
                     newRow.remove();
                     // call to API to delete row from data base
-                    deleteDataRow(row.noteid);
+                    deleteSubscription(row.noteid);
                 };
                 deleteButtonContainer.appendChild(deleteButton);
                 actionButtonContainer.appendChild(deleteButtonContainer);
@@ -693,23 +693,10 @@ function fetchData(not_show_by_default_columns) {
                         enable_note_with_noteid(obj.noteid);
                     };
                 }
-
                 cell_actions.appendChild(actionButtonContainer);
-                cell_actions.setAttribute('data-label', 'text');
-                // create drop-down of feeds
-                // Add location "go there" button
-                //const selectionList = document.createElement('select');
-                //selectionList.setAttribute('name', 'distributionlistid');
-                //  selectionContainer.setAttribute('class', 'go_to_location_button');
-                //const option0 = document.createElement('option');
-                //option0.value = "";
-                //option0.textContent = "";
-                //selectionList.appendChild(option0);
 
-                //const option = document.createElement('option');
-                //option.value = row.distributionlistid;
-                //option.textContent = row.distributionlistname;
-                //selectionList.appendChild(option);
+                cell_actions.setAttribute('data-label', 'text');
+               
 
 
                 // Adding data-label for mobile responsive

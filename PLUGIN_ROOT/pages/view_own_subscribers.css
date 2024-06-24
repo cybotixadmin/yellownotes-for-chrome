@@ -24,6 +24,27 @@ table.ownSubscribersTable th {
   
 
 
+  .delete_button::after {
+    content: "delete";
+    position: absolute;
+    bottom: 50%;
+    left: 0px;
+    transform: translateY(-15%);
+    white-space: wrap;
+    background-color: black;
+    
+    color: white;
+    text-align: center;
+    padding: 4px;
+    border-radius: 2px;
+    font-size: 15px;
+    z-index: 12000;
+  
+    /* Initially hidden */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s;
+  }
  
 
     table.ownSubscribersTable th th {

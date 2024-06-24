@@ -10,6 +10,8 @@ const silent_logout_url = "https://www.yellownotes.cloud/logout_silent";
 
 const URI_plugin_user_get_own_distributionlists = '/api/v1.0/plugin_user_get_my_distribution_lists';
 
+const URI_plugin_user_get_my_feed_subscribers = '/api/v1.0/plugin_user_get_my_feed_subscribers';
+
 const URI_plugin_user_setdistributionlist_yellownote = '/api/v1.0/plugin_user_setdistributionlist_yellownote';
 
 const URI_plugin_user_savechanges_yellownote = '/api/v1.0/plugin_user_savechanges_yellownote';

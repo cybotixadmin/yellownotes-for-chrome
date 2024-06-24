@@ -36,6 +36,14 @@ checkSessionJWTValidity()
 // which columns to display
 // The users can decide which columns to display
 
+
+
+
+const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns";
+
+
+
+
 document.getElementById('toggle-created').addEventListener('change', function () {
     toggleColumn('created', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
@@ -66,6 +74,50 @@ document.getElementById('toggle-location').addEventListener('change', function (
 document.getElementById('toggle-status').addEventListener('change', function () {
     toggleColumn('status', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
+
+// set table visibility defaults
+// make this sensitive to the size screen the user is using
+
+
+var not_show_by_default_columns = [];
+
+const pagewidth = window.innerWidth;
+console.log("window.innerWidth: " + pagewidth);
+
+if (pagewidth < 300) {
+    not_show_by_default_columns = ["created", "modified", "type", "feed", "status", "action" ];
+}else if (pagewidth < 600) {
+    not_show_by_default_columns = ["modifie                                 d", "type", "status", "action"];
+}else if (pagewidth < 800) {
+    not_show_by_default_columns = ["modified","action"];
+}else  {
+    not_show_by_default_columns = [];
+}
+
+
+// 
+getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+    not_show_by_default_columns = columns;
+    console.log(not_show_by_default_columns);
+}).catch(error => {
+    console.error('Error:', error);
+});
+
+
+
+
+
+
+fetchData(not_show_by_default_columns).then(() => {
+    console.log("toggle columns off by default");
+    console.log(not_show_by_default_columns);
+    not_show_by_default_columns.forEach(column => {
+        toggleColumn(column, false, "dataTable" , table_columns_to_not_display_keyname);
+        document.getElementById(`toggle-${column}`).checked = false;
+    });
+    });
+
+
 
 
 function DELETEtoggleColumn(columnName, isChecked) {
@@ -102,7 +154,7 @@ function DELETEtoggleColumn(columnName, isChecked) {
 //const browser_id = chrome.runtime.id;
 
 // Function to use "fetch" to delete a data row
-async function deleteDataRow(uuid) {
+async function deleteSubscription(uuid) {
     try {
 
         const userid = "";
@@ -302,7 +354,7 @@ const sortStates = {
 // Fetch data on page load
 
 function fetchData(not_show_by_default_columns) {
-    console.log("fetchData");
+    console.log("fetchData.start");
     console.log(not_show_by_default_columns);
     return new Promise(function (resolve, reject) {
         chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
@@ -657,51 +709,3 @@ function enable_note_with_noteid(noteid) {
 
     }
 }
-
-const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns";
-
-
-
-// set table visibility defaults
-// make this sensitive to the size screen the user is using
-
-
-var not_show_by_default_columns = [];
-
-const pagewidth = window.innerWidth;
-console.log("window.innerWidth: " + pagewidth);
-
-if (pagewidth < 300) {
-    not_show_by_default_columns = ["created", "modified", "type", "feed", "status", "action" ];
-}else if (pagewidth < 600) {
-    not_show_by_default_columns = ["modifie                                 d", "type", "status", "action"];
-}else if (pagewidth < 800) {
-    not_show_by_default_columns = ["modified","action"];
-}else  {
-    not_show_by_default_columns = [];
-}
-
-
-// 
-//getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
-//    not_show_by_default_columns = columns;
-//    console.log(not_show_by_default_columns);
-//}).catch(error => {
-//    console.error('Error:', error);
-//});
-
-
-
-
-
-
-fetchData(not_show_by_default_columns).then(() => {
-    console.log("toggle columns off by default");
-    console.log(not_show_by_default_columns);
-    not_show_by_default_columns.forEach(column => {
-        toggleColumn(column, false, "dataTable" , table_columns_to_not_display_keyname);
-        document.getElementById(`toggle-${column}`).checked = false;
-    });
-    });
-
-

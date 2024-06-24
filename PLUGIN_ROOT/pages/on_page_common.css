@@ -285,6 +285,21 @@ table.notesTable th {
 }
 
 
+
+.delete_button {
+  height: 20px;
+position: relative;
+  z-index: 12000;
+}
+
+.delete_button:hover::after {
+  /* Show the tooltip */
+  opacity: 1;
+  visibility: visible;
+  z-index: 12000;
+}
+
+
   table.notesTable tr th:nth-child(102){
     max-width: 100px;
 

@@ -4,7 +4,6 @@
 //const browser_id = chrome.runtime.id;
 
 
-
 // check if the user is authenticated
 checkSessionJWTValidity()
 .then(isValid => {
@@ -14,7 +13,6 @@ checkSessionJWTValidity()
         fetchAndDisplayStaticContent("../fragments/en_US/view_own_subscribers_page_main_text.html", "view_own_subscribers_page_main_text").then(() => {});
 
         fetchAndDisplayStaticContent("../fragments/en_US/view_own_subscribers_page_explanation.html", "view_own_subscribers_page_explanation").then(() => {});
-
 
         fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
             //page_display_login_status();
@@ -42,47 +40,35 @@ checkSessionJWTValidity()
 // name of key to be used in db
 const table_columns_to_not_display_keyname = "view_own_sub_hide_columns";
 
-
-
 // which columns to display
 // The users can decide which columns to display
 
-document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked, "dataTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-name').addEventListener('change', function () {
+    toggleColumn('name', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
 });
 
-document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked, "dataTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-email').addEventListener('change', function () {
+    toggleColumn('email', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
 });
 
-document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked, "dataTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-distributionlistname').addEventListener('change', function () {
+    toggleColumn('distributionlistname', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
 });
 
-document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked, "dataTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-status').addEventListener('change', function () {
+    toggleColumn('status', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
 });
-document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked, "dataTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-selected').addEventListener('change', function () {
-    toggleColumn('selected', this.checked, "dataTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-subscribetime').addEventListener('change', function () {
+    toggleColumn('subscribetime', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked, "dataTable", table_columns_to_not_display_keyname);
+    toggleColumn('active', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
 });
 
-document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked, "dataTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-actions').addEventListener('change', function () {
+    toggleColumn('actions', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
 });
-
-document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked, "dataTable", table_columns_to_not_display_keyname);
-});
-
-
 
 
 // set table visibility defaults
@@ -93,20 +79,268 @@ var not_show_by_default_columns = [];
 const pagewidth = window.innerWidth;
 console.log("window.innerWidth: " + pagewidth);
 
-if (pagewidth < 300) { 
-    not_show_by_default_columns = ["created", "modified", "type", "feed", "selected", "active", "action" ];
-}else if (pagewidth < 600) {
-    not_show_by_default_columns = ["created", "type", "selected", "active", "action"];
+if (pagewidth < 300) {
+    not_show_by_default_columns = [ "status","subscribetime" ,"status","active"];
+} else if (pagewidth < 600) {
+    not_show_by_default_columns = [ "status" , "active"];
 
-}else if (pagewidth < 1000) {
-    not_show_by_default_columns = ["created",  "type", "selected", "active", "action"];
-} else if (pagewidth < 1200) {
+} else if (pagewidth < 1000) {
     not_show_by_default_columns = [];
 }
 
+// call to database to get notes and place them in a table
+fetchData(null, not_show_by_default_columns).then(function (d) {
+    console.debug("read notes complete");
+    console.debug(d);
+
+    // update the list of colmes and check/uncheck according to the list of columns to not display
+    not_show_by_default_columns.forEach(column => {
+        toggleColumn(column, false, "subscribersTable", table_columns_to_not_display_keyname);
+        document.getElementById(`toggle-${column}`).checked = false;
+    });
+
+});
+
+    function fetchData(distributionlistid, not_show_by_default_columns) {
+        console.log("fetchData for distributionlistid: \"" + distributionlistid, "\" not_show_by_default_columns: " + not_show_by_default_columns);
+
+        return new Promise(
+            function (resolve, reject) {
+
+            var ynInstallationUniqueId = "";
+            var xYellownotesSession = "";
+
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                console.log(result);
+                console.log(ynInstallationUniqueId);
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
+                xYellownotesSession = result[plugin_session_header_name];
+                console.log(ynInstallationUniqueId);
+                console.log(xYellownotesSession);
+                return fetch(server_url + URI_plugin_user_get_my_feed_subscribers, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession,
+                    },
+                    body: JSON.stringify({}) // example IDs, replace as necessary, the body is used to retrieve the notes of other users, default is to retrieve the notes of the authenticated user
+                });
+            }).then(response => {
+                if (!response.ok) {
+                    console.log(response);
+
+                    // if an invalid session token was sent, it should be removed from the local storage
+                    if (response.status == 401) {
+                        // compare the response body with the string "Invalid session token" to determine if the session token is invalid
+                        if (response.headers.get("session") == "DELETE_COOKIE") {
+                            console.log("Session token is invalid, remove it from local storage.");
+                            chrome.storage.local.remove([plugin_session_header_name]);
+                            // redirect to the front page returning the user to unauthenticated status.
+                            // unauthenticated functionality will be in effect until the user authenticates
+                            window.location.href = "/pages/my_account.html";
+                            reject('logout');
+                        } else {
+                            reject('Network response was not ok');
+                        }
+                    } else {
+                        reject('Network response was not ok');
+                    }
+                } else {
+                    return response.json();
+                }
+            }).then(function (resp) {
+                data = resp;
+                return fetch(server_url + URI_plugin_user_get_own_distributionlists, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession,
+                    },
+                });
+            }).then(response => {
+                if (!response.ok) {
+                    reject(new Error('Network response was not ok'));
+                }
+                return response.json();
+            }).then(function (dist) {
+                distributionListData = dist;
+
+                console.log(distributionListData);
+
+                console.log(data);
+
+                var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+                console.log(utc);
+                console.log(Date.now());
+                var now = new Date;
+                var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+                        now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+                console.log(utc_timestamp);
+                console.log(new Date().toISOString());
+
+                // Get table body element
+                const tableBody = document.querySelector('table[name="subscribersTable"]').getElementsByTagName('tbody')[0];
+                // Loop through data and populate the table
+                data.forEach(row => {
+                    console.log(row);
+                    console.log(JSON.stringify(row));
+                    console.log(row.subscriptionid);
+
+                    // Create new row
+                    const newRow = tableBody.insertRow();
+                    newRow.setAttribute('subscriptionid', row.subscriptionid);
+                    newRow.setAttribute('subscriberuuid', row.subscriberuuid);
+                    newRow.setAttribute('distributionlistid', row.distributionlistid);
+                    newRow.setAttribute('creatorid', row.creatorid);
+                    // Create cells and populate them with data
+
+                    const cell_displayname = newRow.insertCell(0);
+                    const cell_email = newRow.insertCell(1);
+                    const cell_distributionlistname = newRow.insertCell(2);
+                    const cell_active = newRow.insertCell(3);
+                    const cell_status = newRow.insertCell(4);
+                    const cell_subscribedate = newRow.insertCell(5);
+                    const cell_actions = newRow.insertCell(6);
+                    // do not include a option for notes in this release
+                    try {
+                        cell_email.textContent = row.email;
+                        cell_email.setAttribute('name', 'email');
+                        cell_email.setAttribute('class', 'email');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
+                    // name
+                    try {
+                        cell_subscribedate.textContent = timestampstring2timestamp(row.subscribedate);
+                        cell_subscribedate.setAttribute('name', 'subscribedate');
+                        cell_subscribedate.setAttribute('class', 'datetime');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
+                    try {
+                        cell_displayname.textContent = row.displayname;
+                        cell_displayname.setAttribute('name', 'displayname');
+                        cell_displayname.setAttribute('class', 'displayname');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
+                    try {
+                        cell_distributionlistname.textContent = row.distributionlistname;
+                        cell_distributionlistname.setAttribute('name', 'distributionlistname');
+                        cell_distributionlistname.setAttribute('class', 'displayname');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
+                    // render a check box to enable/disable the note
+                    const suspendActButton = document.createElement("span");
+                    if (row.active == 1) {
+                        // active
+                        suspendActButton.innerHTML =
+                            '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
+                    } else {
+                        // deactivated
+                        suspendActButton.innerHTML =
+                            '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
+                    }
+
+                    // Add classes using classList with error handling
+                    const inputElement = suspendActButton.querySelector("input");
+                    if (inputElement) {
+                        inputElement.classList.add("input-class");
+                    }
+
+                    const labelElement = suspendActButton.querySelector("label");
+                    if (labelElement) {
+                        labelElement.classList.add("switch");
+                    }
+                    const spanElement = suspendActButton.querySelector("span");
+                    if (spanElement) {
+                        spanElement.classList.add("slider");
+                    }
+                    suspendActButton.addEventListener("change", async(e) => {
+                        if (e.target.checked) {
+                            //         await disable_note_with_noteid(row.noteid);
+                            await setSubscriptionActiveStatusByUUID(row.subscriptionid, 1);
+                        } else {
+                            await setSubscriptionActiveStatusByUUID(row.subscriptionid, 0);
+                            //           await enable_note_with_noteid(row.noteid);
+                        }
+                    });
+                    cell_active.appendChild(suspendActButton);
+                    cell_active.setAttribute('class', 'checkbox');
+                    cell_active.setAttribute('name', 'active');
+
+                    try {
+                        cell_status.textContent = row.status;
+                        cell_status.setAttribute('name', 'status');
+                        cell_status.setAttribute('class', 'status');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
+
+                // Add button container
+                const actionButtonContainer = document.createElement('div');
+                actionButtonContainer.setAttribute('class', 'button-container');
+
+                // Add delete button
+                const deleteButtonContainer = document.createElement('div');
+                deleteButtonContainer.setAttribute('class', 'delete_button');
+                const deleteButton = document.createElement('img');
+                deleteButton.src = "../icons/trash-can.transparent.40x40.png";
+                deleteButton.alt = 'delete';
+                deleteButton.setAttribute('class', 'delete_button');
+                deleteButton.onclick = function () {
+                    // Remove the row from the table
+                    newRow.remove();
+                    // call to API to delete row from data base
+                    deleteSubscription(row.subscriptionid);
+                };
+                deleteButtonContainer.appendChild(deleteButton);
+                actionButtonContainer.appendChild(deleteButtonContainer);
+
+                // Add save/edit button
+
+             
+                // add enable/disable button
+                const ableButton = document.createElement('button');
+
+                if (row.status == "1" || row.status == 1) {
+                    ableButton.setAttribute('name', 'disable');
+                    ableButton.textContent = 'disable';
+                    ableButton.onclick = function () {
+                        // call to API to delete row from data base
+                        disable_note_with_noteid(obj.noteid);
+                    };
+                } else {
+                    ableButton.setAttribute('name', 'enable');
+                    ableButton.textContent = 'enable';
+                    ableButton.onclick = function () {
+                        // call to API to delete row from data base
+                        enable_note_with_noteid(obj.noteid);
+                    };
+                }
+                cell_actions.appendChild(actionButtonContainer);
+                cell_actions.setAttribute('name', 'actions');
+                cell_actions.setAttribute('class', 'action-5');
+                
+                cell_actions.setAttribute('data-label', 'text');
+
+                });
+            });
+
+        });
+    }
+
 // Function to use "fetch" to delete a data row
-async function deleteDataRow(subscriptionid) {
-    console.log("deleteDataRow: " + subscriptionid);
+async function deleteSubscription(subscriptionid) {
+    console.log("deleteSubscription: " + subscriptionid);
     try {
 
         const userid = "";
@@ -117,10 +351,7 @@ async function deleteDataRow(subscriptionid) {
 
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
-
-        const sub = document.querySelector(`tr[subscriptionid="${subscriptionid}"]`);
-        console.log(sub);
-        sub.remove();
+        
 
         console.log(installationUniqueId);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -147,6 +378,8 @@ async function deleteDataRow(subscriptionid) {
     }
 }
 
+// seto event handler for sorting and filtering
+setupTableFilteringAndSorting("subscribersTable");
 
 /**
  * Navigate to the page where the note is attached
@@ -187,32 +420,7 @@ async function goThere(noteid, url, distributionlistid, datarow) {
     }
 }
 
-// Locate all elements with the class "my-button"
-const buttons = document.querySelectorAll('.sortableCol');
-len = buttons.length;
-for (var i = 0; i < buttons.length; i++) {
-    //work with checkboxes[i]
-    console.log(buttons[i]);
-    // set column index number for each column
-    buttons[i].setAttribute("colindex", i);
-    buttons[i].addEventListener('click', function (event) {
-        sortTa();
-    }, false);
-}
 
-// Locate all cells that are used for filtering of search results
-const f_cells = document.querySelectorAll('.filterableCol');
-console.log(f_cells);
-len = f_cells.length;
-for (var i = 0; i < f_cells.length; i++) {
-    //work with regexp in cell
-    console.log(f_cells[i]);
-    // set column index number for each column
-    f_cells[i].setAttribute("colindex", i);
-    f_cells[i].addEventListener('input', function (event) {
-        filterTable_a();
-    }, false);
-}
 
 // Sort states for each column
 const sortStates = {
@@ -220,53 +428,6 @@ const sortStates = {
     1: 'none'
 };
 
-function DELETEsortTa() {
-    console.log("sortTa");
-    console.log(event.target);
-    sortTable("dataTable", event.target.getAttribute("colindex"));
-}
-
-
-// Function to sort the table
-function DELETEsortTable(table_id, columnIndex) {
-    console.log("sortable: " + columnIndex)
-    const table = document.getElementById(table_id);
-
-    let rows = Array.from(table.rows).slice(1); // Ignore the header
-    let sortedRows;
-
-    // Toggle sort state for the column
-    if (sortStates[columnIndex] === 'none' || sortStates[columnIndex] === 'desc') {
-        sortStates[columnIndex] = 'asc';
-    } else {
-        sortStates[columnIndex] = 'desc';
-    }
-    console.log(sortStates[columnIndex]);
-
-    // Sort based on the selected column and sort state
-    // Consider options for different types of sorting here.
-    if (columnIndex === 0) {
-        sortedRows = rows.sort((a, b) => {
-                return Number(a.cells[columnIndex].innerText) - Number(b.cells[columnIndex].innerText);
-            });
-    } else {
-        sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
-    }
-    console.log(sortStates[columnIndex]);
-    if (sortStates[columnIndex] === 'desc') {
-        sortedRows.reverse();
-    }
-
-    console.log(sortedRows);
-    // Remove existing rows
-    while (table.rows.length > 1) {
-        table.deleteRow(1);
-    }
-
-    // Append sorted rows
-    const tbody = table.getElementsByTagName('tbody')[0];
-    sortedRows.forEach(row => tbody.appendChild(row));
-}
 
 function filterTable_a() {
     //  console.log("filterTable_a " );
@@ -274,32 +435,6 @@ function filterTable_a() {
     filterTable(event.target);
 }
 
-function filterTable(colheader) {
-    const columnIndex = colheader.parentNode.getAttribute("colindex");
-    //console.log(colheader);
-    console.log("filter on col: " + columnIndex)
-    //const input = colheader;
-    const filter = colheader.value.toUpperCase();
-    var table = document.querySelector('table[name = "dataTable"]');
-
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    //console.log("filter column:" + columnIndex);
-    //console.log("filter value:" + filter);
-
-    for (let i = 0; i < rows.length; i++) {
-        const cell = rows[i].getElementsByTagName('td')[columnIndex];
-        //console.log(cell);
-        if (cell) {
-            const content = cell.innerText || cell.textContent;
-            if (new RegExp(filter, 'i').test(content)) {
-                //        console.log("not sho");
-                rows[i].style.display = '';
-            } else {
-                rows[i].style.display = 'none';
-            }
-        }
-    }
-}
 
 // Fetch data on page load
 
@@ -373,186 +508,154 @@ async function fetchSubscribers(distributionlistid) {
         });
 
     if (!response.ok) {
-        return(new Error('Network response was not ok'));
-    }else{
+        return (new Error('Network response was not ok'));
+    } else {
 
-    const data = await response.json();
-    // Parse JSON data
+        const data = await response.json();
+        // Parse JSON data
 
-    console.log(data);
+        console.log(data);
 
-    var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
-    console.log(utc);
-    console.log(Date.now());
-    var now = new Date;
-    var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-    console.log(utc_timestamp);
-    console.log(new Date().toISOString());
+        var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+        console.log(utc);
+        console.log(Date.now());
+        var now = new Date;
+        var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+                now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+        console.log(utc_timestamp);
+        console.log(new Date().toISOString());
 
-    // Get table body element
-    const tableBody = document.getElementById('subscribersTable').getElementsByTagName('tbody')[0];
+        // Get table body element
+        const tableBody = document.getElementById('subscribersTable').getElementsByTagName('tbody')[0];
 
-    // Loop through data and populate the table
-    data.forEach(row => {
-        console.log(row);
-        console.log(JSON.stringify(row));
-        console.log(row.subscriptionid);
+        // Loop through data and populate the table
+        data.forEach(row => {
+            console.log(row);
+            console.log(JSON.stringify(row));
+            console.log(row.subscriptionid);
 
-        // Create new row
-        const newRow = tableBody.insertRow();
-        newRow.setAttribute('subscriptionid', row.subscriptionid);
-        // Create cells and populate them with data
-       
-        const cell_displayname = newRow.insertCell(0);
-        const cell_email = newRow.insertCell(1);
-        const cell_subscribedate = newRow.insertCell(2);
-        const cell_active = newRow.insertCell(3);
-        const cell_status = newRow.insertCell(4);
-        const cell_distributionlistname = newRow.insertCell(5);
-        const cell_buttons = newRow.insertCell(5);
-        // do not include a option for notes in this release
+            // Create new row
+            const newRow = tableBody.insertRow();
+            newRow.setAttribute('subscriptionid', row.subscriptionid);
+            // Create cells and populate them with data
 
-        try {
-            cell_email.textContent = row.email;
-            cell_email.setAttribute('name', 'email');
-            cell_email.setAttribute('class', 'email');
-        } catch (e) {
-            console.debug(e);
-        }
+            const cell_displayname = newRow.insertCell(0);
+            const cell_email = newRow.insertCell(1);
+            const cell_subscribedate = newRow.insertCell(2);
+            const cell_active = newRow.insertCell(3);
+            const cell_status = newRow.insertCell(4);
+            const cell_distributionlistname = newRow.insertCell(5);
+            const cell_buttons = newRow.insertCell(5);
+            // do not include a option for notes in this release
 
-        // name
-        try {
-            cell_subscribedate.textContent = integerstring2timestamp(row.subscribedate);
-            cell_subscribedate.setAttribute('name', 'subscribedate');
-            cell_subscribedate.setAttribute('class', 'datetime');
-        } catch (e) {
-            console.debug(e);
-        }
-
-        try {
-            cell_displayname.textContent = row.displayname;
-            cell_displayname.setAttribute('name', 'displayname');
-            cell_displayname.setAttribute('class', 'displayname');
-        } catch (e) {
-            console.debug(e);
-        }
-
-        // render a check box to enable/disable the note
-        const suspendActButton = document.createElement("span");
-        if (row.active == 1) {
-            // active
-            suspendActButton.innerHTML =
-                '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
-        } else {
-            // deactivated
-            suspendActButton.innerHTML =
-                '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
-        }
-
-        // Add classes using classList with error handling
-        const inputElement = suspendActButton.querySelector("input");
-        if (inputElement) {
-            inputElement.classList.add("input-class");
-        }
-
-        const labelElement = suspendActButton.querySelector("label");
-        if (labelElement) {
-            labelElement.classList.add("switch");
-        }
-        const spanElement = suspendActButton.querySelector("span");
-        if (spanElement) {
-            spanElement.classList.add("slider");
-        }
-        suspendActButton.addEventListener("change", async(e) => {
-            if (e.target.checked) {
-                //         await disable_note_with_noteid(row.noteid);
-                await setSubscriptionActiveStatusByUUID(row.subscriptionid, 1);
-            } else {
-                await setSubscriptionActiveStatusByUUID(row.subscriptionid, 0);
-                //           await enable_note_with_noteid(row.noteid);
+            try {
+                cell_email.textContent = row.email;
+                cell_email.setAttribute('name', 'email');
+                cell_email.setAttribute('class', 'email');
+            } catch (e) {
+                console.debug(e);
             }
+
+            // name
+            try {
+                cell_subscribedate.textContent = integerstring2timestamp(row.subscribedate);
+                cell_subscribedate.setAttribute('name', 'subscribedate');
+                cell_subscribedate.setAttribute('class', 'datetime');
+            } catch (e) {
+                console.debug(e);
+            }
+
+            try {
+                cell_displayname.textContent = row.displayname;
+                cell_displayname.setAttribute('name', 'displayname');
+                cell_displayname.setAttribute('class', 'displayname');
+            } catch (e) {
+                console.debug(e);
+            }
+
+            // render a check box to enable/disable the note
+            const suspendActButton = document.createElement("span");
+            if (row.active == 1) {
+                // active
+                suspendActButton.innerHTML =
+                    '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
+            } else {
+                // deactivated
+                suspendActButton.innerHTML =
+                    '<label><input type="checkbox" placeholder="Enter text" /><span></span></label>';
+            }
+
+            // Add classes using classList with error handling
+            const inputElement = suspendActButton.querySelector("input");
+            if (inputElement) {
+                inputElement.classList.add("input-class");
+            }
+
+            const labelElement = suspendActButton.querySelector("label");
+            if (labelElement) {
+                labelElement.classList.add("switch");
+            }
+            const spanElement = suspendActButton.querySelector("span");
+            if (spanElement) {
+                spanElement.classList.add("slider");
+            }
+            suspendActButton.addEventListener("change", async(e) => {
+                if (e.target.checked) {
+                    //         await disable_note_with_noteid(row.noteid);
+                    await setSubscriptionActiveStatusByUUID(row.subscriptionid, 1);
+                } else {
+                    await setSubscriptionActiveStatusByUUID(row.subscriptionid, 0);
+                    //           await enable_note_with_noteid(row.noteid);
+                }
+            });
+            cell_active.appendChild(suspendActButton);
+            cell_active.setAttribute('class', 'checkbox');
+
+            try {
+                cell_status.textContent = row.status;
+                cell_status.setAttribute('name', 'status');
+                cell_status.setAttribute('class', 'status');
+            } catch (e) {
+                console.debug(e);
+            }
+
+            // buttons
+            // Add delete button
+            /*
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function () {
+            // Remove the row from the table
+            newRow.remove();
+            // call to API to delete row from data base
+            deleteDataRow(row.uuid);
+            };
+            cell_buttons.appendChild(deleteButton);
+             */
+            // Add location "go there" button
+
+            // Add remove button
+            const removeButton = document.createElement("button");
+            removeButton.textContent = "delete";
+            removeButton.classList.add("deleteBtn");
+            removeButton.onclick = function () {
+                // call to API to save row to data base
+                deleteSubscription(row.subscriptionid);
+            };
+
+            cell_buttons.appendChild(removeButton);
+
         });
-        cell_active.appendChild(suspendActButton);
-        cell_active.setAttribute('class', 'checkbox');
-
-        try {
-            cell_status.textContent = row.status;
-            cell_status.setAttribute('name', 'status');
-            cell_status.setAttribute('class', 'status');
-        } catch (e) {
-            console.debug(e);
-        }
-
-        // buttons
-        // Add delete button
-        /*
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.onclick = function () {
-        // Remove the row from the table
-        newRow.remove();
-        // call to API to delete row from data base
-        deleteDataRow(row.uuid);
-        };
-        cell_buttons.appendChild(deleteButton);
-         */
-        // Add location "go there" button
-
-        // Add remove button
-        const removeButton = document.createElement("button");
-        removeButton.textContent = "delete";
-        removeButton.classList.add("deleteBtn");
-        removeButton.onclick = function () {
-            // call to API to save row to data base
-            deleteDataRow(row.subscriptionid);
-        };
-
-        cell_buttons.appendChild(removeButton);
-
-    });
     }
 }
 
 // start populating data tables
 
 //fetchData(getQueryStringParameter('distributionlistid'));
-fetchSubscribers(getQueryStringParameter('distributionlistid'));
+//fetchSubscribers(getQueryStringParameter('distributionlistid'));
 
 //traverse_text(document.documentElement);
 console.debug("################################################");
 //console.debug(all_page_text);
 //console.debug(textnode_map);
 
-
-// check if the user is authenticated
-checkSessionJWTValidity()
-.then(isValid => {
-    console.log('JWT is valid:', isValid);
-    if (isValid) {
-        console.debug("JWT is valid - show menu accordingly");
-        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
-        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
-            //page_display_login_status();
-            // login_logout_action();
-
-        });
-
-        page_display_login_status();
-
-    } else {
-        console.debug("JWT is not valid - show menu accordingly");
-        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
-        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
-            //page_display_login_status();
-            //login_logout_action();
-
-        });
-
-        page_display_login_status();
-    }
-
-})
-.catch(error => {
-    console.error('Error:', error.message);
-});
