@@ -1,5 +1,4 @@
 
-
 // check if the user is authenticated
 checkSessionJWTValidity()
 .then(isValid => {
@@ -7,10 +6,7 @@ checkSessionJWTValidity()
     if (isValid) {
         console.debug("JWT is valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
-
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_explanation.html", "my_notes_page_footer_text").then(() => {});
-
-
         fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
             //page_display_login_status();
             // login_logout_action();
@@ -21,7 +17,6 @@ checkSessionJWTValidity()
         console.debug("JWT is not valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_explanation.html", "my_notes_page_footer_text").then(() => {});
-
         fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
             //page_display_login_status();
             //login_logout_action();
@@ -46,6 +41,10 @@ console.log('JWT is valid:', isValid);
 console.error('Error:', error.message);
 });
  */
+
+
+
+const table_columns_to_not_display_keyname = "mynotes_hide_columns";
 
 
 
@@ -114,8 +113,6 @@ if (pagewidth < 300) {
 
 
 
-const table_columns_to_not_display_keyname = "mynotes_hide_columns";
-
 
 
 // 
@@ -127,18 +124,19 @@ getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_def
 });
 
 
-// update the list of colmes and check/uncheck according to the list of columns to not display
-not_show_by_default_columns.forEach(column => {
-    toggleColumn(column, false,"dataTable", table_columns_to_not_display_keyname);
-    document.getElementById(`toggle-${column}`).checked = false;
-});
+
 
 
 // call to database to get notes and place them in a table
 fetchData(not_show_by_default_columns).then(function (d) {
-    console.debug("render notes");
+    console.debug("read notes complete");
     console.debug(d);
 
+    // update the list of colmes and check/uncheck according to the list of columns to not display
+not_show_by_default_columns.forEach(column => {
+    toggleColumn(column, false,"dataTable", table_columns_to_not_display_keyname);
+    document.getElementById(`toggle-${column}`).checked = false;
+});
 
     // kick of the process of rendering the yellow sticky notes in the graphic form
 
@@ -406,7 +404,6 @@ function fetchData(not_show_by_default_columns) {
             }
         }).then(function (resp) {
             data = resp;
-
             return fetch(server_url + URI_plugin_user_get_own_distributionlists, {
                 method: 'GET',
                 headers: {

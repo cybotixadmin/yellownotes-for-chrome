@@ -29,6 +29,10 @@
       <table id="dataTable">
         <thead>
           <tr class="fixed-header">
+            <th name="name" class="sortableCol displayname" sort_type="stringCaseExact">name<span class="sort-icon url">&#9650;</span></th>
+            <th name="description" class="sortableCol displayname" sort_type="stringCaseExact">description<span class="sort-icon url">&#9650;</span></th>
+            <th name="visibility" class="compact sortableCol" sort_type="selectCaseExact">visibility<span class="sort-icon url">&#9650;</span></th>
+           
             <th>ID</th>
             <!-- <th class="sortableCol">universaltime</th> -->
             <th class="sortableCol">feed name</th>
@@ -47,14 +51,18 @@ The lists are returned by calling to the background script.
 
 
           <!-- Add a filter row -->
-          <!-- <tr class="fixed-header">
+           <tr class="fixed-header">
+             <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th> 
+            <th filterableCol="wildcardmatch" class="compact"><select filterContent="1" class="filterContent"><option class=""></option><option class="">public</option><option class="">private</option></select></th>
+           
       <th class="filterableCol"></th> <!//-- Empty cell --//>
       <th class="filterableCol">filter:<input type="text" id="filterContent" placeholder="Filter Content" "></th>
       <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" "></th>
       <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" "></th>
       <th class="filterableCol"></th>
       <th class="filterableCol"></th>
-    </tr> -->
+    </tr> 
           </thead>
           <tbody>
             <!-- Rows will be added here -->

@@ -655,7 +655,6 @@ function safeParseInnerHTML(rawHTML, targetElementName) {
 
     // list of acceptable html tags
 
-
     // list of unacceptable html tags
     const unaccep = ["script"];
 
@@ -725,15 +724,13 @@ function parseJwt(token) {
     }
 }
 
-/*
 
+/*
 // Example usage
 const token = 'your_jwt_token'; // Replace with your JWT token
 const claimNames = ['sub', 'email']; // Replace with the claims you want to extract
 const claims = getClaimsFromJwt(token, claimNames);
-
 console.log(claims);
-
  */
 function getClaimsFromJwt(token, claimNames) {
     const decodedToken = parseJwt(token);

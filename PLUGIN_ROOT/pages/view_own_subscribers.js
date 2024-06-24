@@ -39,6 +39,10 @@ checkSessionJWTValidity()
     console.error('Error:', error.message);
 });
 
+// name of key to be used in db
+const table_columns_to_not_display_keyname = "view_own_sub_hide_columns";
+
+
 
 // which columns to display
 // The users can decide which columns to display

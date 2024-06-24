@@ -392,6 +392,8 @@ function fetchData(not_show_by_default_columns) {
                     } catch (e) {
                         console.debug(e);
                     }
+                   
+                    
 
                     // last modified timestamp
                     try {
@@ -656,6 +658,9 @@ function enable_note_with_noteid(noteid) {
     }
 }
 
+const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns";
+
+
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
@@ -669,23 +674,23 @@ console.log("window.innerWidth: " + pagewidth);
 if (pagewidth < 300) {
     not_show_by_default_columns = ["created", "modified", "type", "feed", "status", "action" ];
 }else if (pagewidth < 600) {
-    not_show_by_default_columns = ["modified", "type", "status", "action"];
+    not_show_by_default_columns = ["modifie                                 d", "type", "status", "action"];
 }else if (pagewidth < 800) {
     not_show_by_default_columns = ["modified","action"];
 }else  {
     not_show_by_default_columns = [];
 }
 
-const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns";
-
 
 // 
-getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
-    not_show_by_default_columns = columns;
-    console.log(not_show_by_default_columns);
-}).catch(error => {
-    console.error('Error:', error);
-});
+//getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+//    not_show_by_default_columns = columns;
+//    console.log(not_show_by_default_columns);
+//}).catch(error => {
+//    console.error('Error:', error);
+//});
+
+
 
 
 
