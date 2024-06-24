@@ -14,6 +14,10 @@ if (isValid){
     console.debug("JWT is valid - show menu accordingly");
     fetchAndDisplayStaticContent("../fragments/en_US/my_distributions_main.html", "my_distributions_main_text").then(() => {});
     fetchAndDisplayStaticContent("../fragments/en_US/my_distributions_top.html", "my_distributions_top_text").then(() => {});
+
+    fetchAndDisplayStaticContent("../fragments/en_US/my_distributions_field_explanation.html", "my_distributions_field_explanations").then(() => {});
+
+
     fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
         //page_display_login_status();
        // login_logout_action();
@@ -36,6 +40,117 @@ if (isValid){
       console.error('Error:', error.message);
   });
 
+
+  const table_columns_to_not_display_keyname = "mydistributionlists_hide_columns2";
+
+
+
+// which columns to display
+// The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
+
+document.getElementById('toggle-name').addEventListener('change', function () {
+    toggleColumn('name', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-description').addEventListener('change', function () {
+    toggleColumn('description', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-visibility').addEventListener('change', function () {
+    toggleColumn('visibility', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-restrictions').addEventListener('change', function () {
+    toggleColumn('restrictions', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-postcount').addEventListener('change', function () {
+    toggleColumn('postcount', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-subscriberscount').addEventListener('change', function () {
+    toggleColumn('subscriberscount', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-created').addEventListener('change', function () {
+    toggleColumn('created', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-active').addEventListener('change', function () {
+    toggleColumn('active', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-anonymous_allowed').addEventListener('change', function () {
+    toggleColumn('anonymous_allowed', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-automatic_enrolment').addEventListener('change', function () {
+    toggleColumn('automatic_enrolment', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-actions').addEventListener('change', function () {
+    toggleColumn('actions', this.checked,"distributionsTable", table_columns_to_not_display_keyname);
+});
+
+
+
+// set table visibility defaults
+// make this sensitive to the size screen the user is using
+
+var not_show_by_default_columns = [];
+
+// check if not_show_by_default_columns has been set 
+const pagewidth = window.innerWidth;
+console.log("window.innerWidth: " + pagewidth);
+
+if (pagewidth < 300) { 
+    not_show_by_default_columns = ["created", "restrictions",  "actions" ];
+ console.debug("created", "restrictions",  "actions" );
+}else if (pagewidth < 600) {
+    not_show_by_default_columns = ["created", "restrictions"];
+console.debug("created", "restrictions");
+}else if (pagewidth < 1000) {
+console.debug("created", "restrictions");
+    not_show_by_default_columns = ["created", "restrictions"];
+} else if (pagewidth < 1200) {
+
+    not_show_by_default_columns = ["created","restrictions"];
+}
+
+
+
+
+// 
+getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+    not_show_by_default_columns = columns;
+    console.log(not_show_by_default_columns);
+}).catch(error => {
+    console.error('Error:', error);
+});
+
+
+// update the list of colmes and check/uncheck according to the list of columns to not display
+
+//not_show_by_default_columns.forEach(column => {
+//    console.debug("not show column: " + column);
+//    toggleColumn(column, false,"distributionsTable", table_columns_to_not_display_keyname);
+//    document.getElementById(`toggle-${column}`).checked = false;
+//});
+
+
+
+// call to database to get notes and place them in a table
+console.debug("calling fetchData");
+fetchData(not_show_by_default_columns)
+.then(function (d) {
+    console.log("toggle columns off by default");
+    console.log(not_show_by_default_columns);
+    not_show_by_default_columns.forEach(column => {
+        toggleColumn(column, false, "distributionsTable" , table_columns_to_not_display_keyname);
+        document.getElementById(`toggle-${column}`).checked = false;
+    });
+
+    });
 
 
 
@@ -414,6 +529,45 @@ async function setAnonymousByUUID(distributionlistid, anonymous_allowed) {
     }
 }
 
+
+
+// Function to use "fetch" to re-activate a data agreement
+async function setAutomaticByUUID(distributionlistid, automatic_enrolment) {
+    console.debug("setAutomaticByUUID" + distributionlistid, " automatic_enrolment: " + automatic_enrolment);
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+       
+        const message_body = JSON.stringify({
+                distributionlistid: distributionlistid,
+                automatic_enrolment: automatic_enrolment,
+            });
+        //console.debug(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_set_distributionlist_automatic_enrolment_status, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table
+
+        // Parse JSON data
+        const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 // Function to suspend all data agreements (not already suspended)
 async function suspendAll() {
     console.debug("suspendAll");
@@ -445,10 +599,378 @@ function activateAll() {
     }
 }
 
+
+
+
+function fetchData(not_show_by_default_columns) {
+    console.debug("fetchData.start");
+console.debug(not_show_by_default_columns);
+    return new Promise(
+        function (resolve, reject) {
+        var ynInstallationUniqueId = "";
+        var xYellownotesSession = "";
+        var distributionlists;
+        var data;
+        //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+
+
+        chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+            console.log(result);
+            console.log(ynInstallationUniqueId);
+            ynInstallationUniqueId = result[plugin_uuid_header_name];
+            xYellownotesSession = result[plugin_session_header_name];
+            console.log(ynInstallationUniqueId);
+            console.log(xYellownotesSession);
+            
+            return fetch(server_url + URI_plugin_user_get_own_distributionlists, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: ynInstallationUniqueId,
+                    [plugin_session_header_name]: xYellownotesSession,
+                },
+            });
+        }).then(response => {
+            if (!response.ok) {
+                reject(new Error('Network response was not ok'));
+            }
+            return response.json();
+        }).then(function (data) {
+           
+            console.log(data);
+
+            var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+            console.log(utc);
+            console.log(Date.now());
+            var now = new Date;
+            var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+                    now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+            console.log(utc_timestamp);
+            console.log(new Date().toISOString());
+            console.debug(data);
+            // Get table body element
+            const tableBody = document
+                .querySelector('table[name="distributionsTable"]')
+                .getElementsByTagName("tbody")[0];
+    
+            console.debug(tableBody);
+            // loop through the existing table and delete all rowsnewTableRow2
+            console.debug(tableBody.rows);
+            console.debug(tableBody.rows.length);
+            var list = tableBody.rows;
+            try {
+                if (tableBody.rows.length) {
+                    for (var li = list.length - 1; li >= 0; li--) {
+                        list[li].remove();
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            // Loop through data and (re-)populate the table with the results returned from the API
+            data.forEach(rowData => {
+                // Create new row
+                console.debug(rowData);
+                const newRow = tableBody.insertRow();
+                newRow.setAttribute("distributionlistid", rowData.distributionlistid);
+                // Create cells and populate them with data
+                const cell_name = newRow.insertCell(0);
+                const cell_desc = newRow.insertCell(1);
+                const cell_visibility = newRow.insertCell(2);
+                const cell_restrictions = newRow.insertCell(3);
+                const cell_postcount = newRow.insertCell(4);
+                const cell_subscribercount = newRow.insertCell(5);
+                const cell_createtime = newRow.insertCell(6);
+                const cell_status = newRow.insertCell(7);
+                const cell_anonymous = newRow.insertCell(8);
+                const cell_automatic = newRow.insertCell(9);
+                const cell_actions = newRow.insertCell(10);
+            
+            // name
+                cell_name.textContent = rowData.name;
+                cell_name.setAttribute("name", "name");
+                cell_name.setAttribute("class", "displayname");
+                cell_name.setAttribute("contenteditable", "true");
+                if (not_show_by_default_columns.includes("name")) {
+                    cell_visibility.classList.add('hidden');
+
+                }
+
+            // description
+                cell_desc.textContent = rowData.description;
+                cell_desc.setAttribute("name", "description");
+                cell_desc.setAttribute("contenteditable", "true");
+                cell_desc.setAttribute("class", "displayname");
+                if (not_show_by_default_columns.includes("description")) {
+                    cell_visibility.classList.add('hidden');
+
+                }
+            
+                // Create a dropdown for the visibility
+                const visibilityDropdown = document.createElement('select');
+                const options = ['PUBLIC', 'PRIVATE', 'INCOGNITO'];
+            
+                options.forEach(optionValue => {
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.textContent = optionValue;
+                    visibilityDropdown.appendChild(option);
+                });
+            
+                // Set the selected value
+                visibilityDropdown.value = rowData.visibility || 'PUBLIC';
+            
+
+                // Add dropdown to the table cell
+                //const visibilityCell = newRow.insertCell(5);
+                cell_visibility.appendChild(visibilityDropdown);
+                cell_visibility.setAttribute("name", "visibility");
+                cell_visibility.setAttribute("class", "compact");
+                if (not_show_by_default_columns.includes("visibility")) {
+                    cell_visibility.classList.add('hidden');
+
+                }
+
+            // restrictions
+                cell_restrictions.textContent = rowData.restrictions;
+                cell_postcount.setAttribute("class", "text");
+            
+                if (not_show_by_default_columns.includes("restrictions")) {
+                    cell_subscribercount.classList.add('hidden');
+            
+                }
+
+                // post count
+                cell_postcount.textContent = rowData.postcount;
+                cell_postcount.setAttribute("class", "compact");
+                if (not_show_by_default_columns.includes("postcount")) {
+                    cell_subscribercount.classList.add('hidden');
+            
+                }
+            // subscriber count
+                cell_subscribercount.textContent = rowData.subscriberscount;
+                cell_subscribercount.setAttribute("class", "compact");
+
+                if (not_show_by_default_columns.includes("subscriberscount")) {
+                    cell_subscribercount.classList.add('hidden');
+            
+                }
+
+                // time of creation
+                cell_createtime.setAttribute("value", "createdtime");
+                cell_createtime.setAttribute("class", "datetime");
+                console.debug(rowData.createdtime);
+                cell_createtime.textContent = reformatTimestamp(rowData.createdtime);
+                if (not_show_by_default_columns.includes("created")) {
+                    cell_createtime.classList.add('hidden');
+            
+                }
+
+    //Suspend/Active check switch
+    const suspendActButton = document.createElement("span");
+    if (rowData.active == 1) {
+        // active
+        suspendActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+    } else {
+        // deactivated
+        suspendActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+    }
+
+    const inputElement = suspendActButton.querySelector("input");
+    if (inputElement) {
+        inputElement.classList.add("input-class");
+    }
+
+    const labelElement = suspendActButton.querySelector("label");
+    if (labelElement) {
+        labelElement.classList.add("switch");
+    }
+    const spanElement = suspendActButton.querySelector("span");
+    if (spanElement) {
+        spanElement.classList.add("slider");
+    }
+    suspendActButton.addEventListener("change", async (e) => {
+        if (e.target.checked) {
+            await activateByUUID(rowData.distributionlistid);
+        } else {
+            await deactivateByUUID(rowData.distributionlistid);
+        }
+    });
+    cell_status.appendChild(suspendActButton);
+    cell_status.setAttribute("class", "checkbox");
+    if (not_show_by_default_columns.includes("active")) {
+        cell_status.classList.add('hidden');
+
+    }
+
+
+ //anonymous enrolment check switch
+ const anonActButton = document.createElement("span");
+ if (rowData.anonymous_allowed == 1) {
+     // active
+     anonActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+ } else {
+     // deactivated
+     anonActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+ }
+
+ const anonInputElement = anonActButton.querySelector("input");
+ if (anonInputElement) {
+    anonInputElement.classList.add("input-class");
+ }
+
+ const anonLabelElement = anonActButton.querySelector("label");
+ if (anonLabelElement) {
+    anonLabelElement.classList.add("switch");
+ }
+ const anonSpanElement = anonActButton.querySelector("span");
+ if (anonSpanElement) {
+    anonSpanElement.classList.add("slider");
+ }
+ anonActButton.addEventListener("change", async (e) => {
+     if (e.target.checked) {
+         await setAnonymousByUUID(rowData.distributionlistid, 1);
+     } else {
+         await setAnonymousByUUID(rowData.distributionlistid, 0);
+     }
+ });
+ cell_anonymous.appendChild(anonActButton);
+ cell_anonymous.setAttribute("class", "checkbox");
+
+//
+
+ //automatic enrolment check switch
+ const autoActButton = document.createElement("span");
+ if (rowData.automatic_allowed == 1) {
+     // active
+     autoActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+ } else {
+     // deactivated
+     autoActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+ }
+
+ const autoInputElement = autoActButton.querySelector("input");
+ if (autoInputElement) {
+    autoInputElement.classList.add("input-class");
+ }
+
+ const autoLabelElement = autoActButton.querySelector("label");
+ if (autoLabelElement) {
+    autoLabelElement.classList.add("switch");
+ }
+ const autoSpanElement = autoActButton.querySelector("span");
+ if (autoSpanElement) {
+    autoSpanElement.classList.add("slider");
+ }
+ autoActButton.addEventListener("change", async (e) => {
+     if (e.target.checked) {
+         await setAutomaticByUUID(rowData.distributionlistid, 1);
+     } else {
+         await setAutomaticByUUID(rowData.distributionlistid, 0);
+     }
+ });
+ cell_automatic.appendChild(autoActButton);
+ cell_automatic.setAttribute("class", "checkbox");
+
+
+
+    //
+    // action buttons
+    //
+    // Add delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.classList.add("deleteBtn");
+    deleteButton.onclick = function () {
+        // Remove the row from the table
+        newRow.remove();
+        // call to API to delete row from data base
+        deleteDataRowByDistributionlistId(rowData.distributionlistid);
+    };
+
+    // Add View Notes button
+    //const viewNotesButton = document.createElement("button");
+    //viewNotesButton.textContent = "View";
+    //viewNotesButton.classList.add("viewBtn");
+   // viewNotesButton.onclick = function () {
+        // call to API to delete row from data base
+   //     viewDistributionlist(rowData.distributionlistid);
+   // };
+
+    const viewNotesButton = document.createElement("a");
+    viewNotesButton.classList.add("viewBtn");
+//viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>' 
+
+    viewNotesButton.innerHTML =  '<a href="/pages/view_own_distributionlist.html?distributionlistid=' + rowData.distributionlistid + '"><button>Notes</button></a>' 
+
+        // Add View subscribers button
+    //const viewNotesButton = document.createElement("button");
+    //viewNotesButton.textContent = "View";
+    //viewNotesButton.classList.add("viewBtn");
+   // viewNotesButton.onclick = function () {
+        // call to API to delete row from data base
+   //     viewDistributionlist(rowData.distributionlistid);
+   // };
+
+   const viewSubscribersButton = document.createElement("a");
+   viewSubscribersButton.classList.add("viewBtn");
+//viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>' 
+
+    viewSubscribersButton.innerHTML =  '<a href="/pages/view_own_subscribers.html?distributionlistid=' + rowData.distributionlistid + '"><button>Subscribers</button></a>' 
+
+    // Add save button
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Save";
+    saveButton.classList.add("deleteBtn");
+    saveButton.onclick = function () {
+        // call to API to save row to data base
+        updateDataRowByUUID(rowData.distributionlistid);
+    };
+
+    // Add create invite button
+    const createInviteButton = document.createElement("button");
+
+   // title="Click to copy the invitation URL to your clipboard"
+    createInviteButton.title = "Click to create an invition to subscribe link, and copy it to the clipboard";
+    createInviteButton.textContent = "Invite";
+    createInviteButton.classList.add("deleteBtn");
+    createInviteButton.onclick = function () {
+        // call to API to save row to data base
+        createOpenInvitation(rowData.distributionlistid);
+    };
+
+
+
+    cell_actions.appendChild(viewNotesButton);
+    cell_actions.appendChild(viewSubscribersButton);
+    cell_actions.appendChild(deleteButton);
+    cell_actions.appendChild(saveButton);
+    cell_actions.appendChild(createInviteButton);
+    cell_actions.setAttribute("class", "action-5");
+
+
+            });
+
+           
+            resolve('Data saved OK');
+        });
+    });
+}
+
 // Function to fetch data and populate the table
-async function fetchData() {
-    console.debug("fetchData");
+async function DELETEfetchData(not_show_by_default_columns) {
+    console.debug("fetchData ");
+    console.debug(not_show_by_default_columns);
     try {
+
+
+        
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
@@ -529,7 +1051,7 @@ async function fetchData() {
     }
 }
 
-function newTableRow2(tableBody, rowData) {
+function DELETEnewTableRow2(tableBody, rowData) {
     console.debug("newTableRow2.start");
     console.debug(tableBody);
     console.debug(rowData);
@@ -589,7 +1111,7 @@ function newTableRow2(tableBody, rowData) {
     // set the genuine value of the field in an attribute
     cell_createtime.setAttribute("value", "createdtime");
     cell_createtime.setAttribute("class", "datetime");
-console.debug(rowData.createdtime);    
+    console.debug(rowData.createdtime);
     cell_createtime.textContent = reformatTimestamp(rowData.createdtime);
 
 
@@ -665,6 +1187,42 @@ console.debug(rowData.createdtime);
  cell_anonymous.appendChild(anonActButton);
  cell_anonymous.setAttribute("class", "checkbox");
 
+//
+
+ //automatic enrolment check switch
+ const autoActButton = document.createElement("span");
+ if (rowData.automatic_allowed == 1) {
+     // active
+     autoActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+ } else {
+     // deactivated
+     autoActButton.innerHTML =
+         '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+ }
+
+ const autoInputElement = autoActButton.querySelector("input");
+ if (autoInputElement) {
+    autoInputElement.classList.add("input-class");
+ }
+
+ const autoLabelElement = autoActButton.querySelector("label");
+ if (autoLabelElement) {
+    autoLabelElement.classList.add("switch");
+ }
+ const autoSpanElement = autoActButton.querySelector("span");
+ if (autoSpanElement) {
+    autoSpanElement.classList.add("slider");
+ }
+ autoActButton.addEventListener("change", async (e) => {
+     if (e.target.checked) {
+         await setAutomaticByUUID(rowData.distributionlistid, 1);
+     } else {
+         await setAutomaticByUUID(rowData.distributionlistid, 0);
+     }
+ });
+ cell_automatic.appendChild(autoActButton);
+ cell_automatic.setAttribute("class", "checkbox");
 
 
 
@@ -740,6 +1298,9 @@ console.debug(rowData.createdtime);
     cell_actions.appendChild(deleteButton);
     cell_actions.appendChild(saveButton);
     cell_actions.appendChild(createInviteButton);
+    cell_actions.setAttribute("class", "action-5");
+
+    console.debug("newTableRow2.end");
     
 }
 
@@ -818,7 +1379,7 @@ function filterTable(colheader) {
 }
 
 // Fetch data on page load
-fetchData();
+//fetchData();
 
 
 document

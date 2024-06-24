@@ -51,41 +51,41 @@ console.error('Error:', error.message);
 
 
 // which columns to display
-// The users can decide which columns to display
+// The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
 
 document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked,"dataTable");
+    toggleColumn('created', this.checked,"dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked,"dataTable");
+    toggleColumn('modified', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked,"dataTable");
+    toggleColumn('type', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked,"dataTable");
+    toggleColumn('feed', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked,"dataTable");
+    toggleColumn('message', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-selected').addEventListener('change', function () {
-    toggleColumn('selected', this.checked,"dataTable");
+    toggleColumn('selected', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked,"dataTable");
+    toggleColumn('active', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked,"dataTable");
+    toggleColumn('action', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked,"dataTable");
+    toggleColumn('location', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 
@@ -126,18 +126,19 @@ getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_def
     console.error('Error:', error);
 });
 
-// call to database to get noets and place them in a table
+
+// update the list of colmes and check/uncheck according to the list of columns to not display
+not_show_by_default_columns.forEach(column => {
+    toggleColumn(column, false,"dataTable", table_columns_to_not_display_keyname);
+    document.getElementById(`toggle-${column}`).checked = false;
+});
+
+
+// call to database to get notes and place them in a table
 fetchData(not_show_by_default_columns).then(function (d) {
     console.debug("render notes");
     console.debug(d);
 
-    
-
-
-not_show_by_default_columns.forEach(column => {
-    toggleColumn(column, false,"dataTable");
-    document.getElementById(`toggle-${column}`).checked = false;
-});
 
     // kick of the process of rendering the yellow sticky notes in the graphic form
 

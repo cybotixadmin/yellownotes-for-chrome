@@ -40,23 +40,23 @@
 
 
   <div class="tabContent scrollable-table">
-    <div class="tableResponsive">
-      <table class="distributionlistsTable" name="distributionsTable">
+  
+      <table class="dataTable" name="distributionsTable">
         <thead>
           <tr class="fixed-header">
           
             <!-- <th class="sortableCol">universaltime</th> -->
-            <th class="sortableCol displayname" sort_type="selectCaseExact">name<span class="sort-icon url">&#9650;</span></th>
-            <th class="sortableCol displayname" sort_type="selectCaseExact">description<span class="sort-icon url">&#9650;</span></th>
-            <th class="sortableCol">visibility</th>
-            <th class="sortableCol displayname" sort_type="selectCaseExact">restrictions<span class="sort-icon url">&#9650;</span></th>
-            <th class="sortableCol count">posts</th>
-            <th class="sortableCol count">subscribers</th>
-            <th class="sortableCol datetime" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
-            <th class="sortableCol checkbox">active</th>
-            <th class="sortableCol checkbox">anonymous allowes</th>
-            <th class="sortableCol checkbox">automatic enrolment</th>
-            <th></th>
+            <th name="name" class="sortableCol displayname" sort_type="stringCaseExact">name<span class="sort-icon url">&#9650;</span></th>
+            <th name="description" class="sortableCol displayname" sort_type="stringCaseExact">description<span class="sort-icon url">&#9650;</span></th>
+            <th name="visibility" class="compact sortableCol" sort_type="selectCaseExact">visibility<span class="sort-icon url">&#9650;</span></th>
+            <th name="restrictions" class="sortableCol displayname" sort_type="stringCaseExact">restrictions<span class="sort-icon url">&#9650;</span></th>
+            <th name="postcount" class="sortableCol compact" sort_type="stringCaseExact">posts<span class="sort-icon url">&#9650;</span></th>
+            <th name="subscriberscount" class="sortableCol compact" sort_type="stringCaseExact">subscribers<span class="sort-icon url">&#9650;</span></th>
+            <th name="created" class="sortableCol datetime" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
+            <th name="active" class="sortableCol checkbox" sort_type="stringCaseExact">active<span class="sort-icon url">&#9650;</span></th>
+            <th name="anonymous_allowed" class="sortableCol checkbox" sort_type="stringCaseExact">anonymous allowed<span class="sort-icon url">&#9650;</span></th>
+            <th name="automatic_enrolment" class="sortableCol checkbox" sort_type="stringCaseExact">automatic enrolment<span class="sort-icon url">&#9650;</span></th>
+            <th name="actions" class="action-5"></th>
           </tr>
 <!-- populate the table with the distribution list owned by this user  
 
@@ -70,20 +70,22 @@ The lists are returned by calling to the background script.
      
             <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th>
             <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th> 
-            <th filterableCol="wildcardmatch" class=""><select filterContent="1" class="filterContent"><option class=""></option><option class="">public</option><option class="">private</option></select></th>
+            <th filterableCol="wildcardmatch" class="compact"><select filterContent="1" class="filterContent"><option class=""></option><option class="">public</option><option class="">private</option></select></th>
             <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
-            <th filterableCol="wildcardmatch" class="count"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
-            <th filterableCol="wildcardmatch" class="count"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="compact"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="compact"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
             <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
             <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
-            <th></th>
+            <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+            <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+            <th class="action-5"></th>
     </tr> 
           </thead>
           <tbody>
             <!-- Rows will be added here -->
           </tbody>
         </table>
-      </div>
+     
     </div>
   
 
@@ -97,9 +99,72 @@ The lists are returned by calling to the background script.
       </div>
      
     
-    
+      
+
+which columns to show
+<div class="toggle-container">
  
-  
+  <div class="toggle-button">
+      <label for="toggle-type">Name</label>
+      <input type="checkbox" id="toggle-name" checked>
+  </div>
+  <div class="toggle-button">
+    <label for="toggle-feed">Description</label>
+    <input type="checkbox" id="toggle-description" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-visibility">visibility</label>
+  <input type="checkbox" id="toggle-visibility" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-restrictions">Restrictions</label>
+  <input type="checkbox" id="toggle-restrictions" checked>
+</div>
+
+
+<div class="toggle-button">
+  <label for="toggle-postcount">postcount</label>
+  <input type="checkbox" id="toggle-postcount" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-subscriberscount">subscriberscount</label>
+  <input type="checkbox" id="toggle-subscriberscount" checked>
+</div>
+
+
+<div class="toggle-button">
+  <label for="toggle-created">created</label>
+  <input type="checkbox" id="toggle-created" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-active">active</label>
+  <input type="checkbox" id="toggle-active" checked>
+</div>
+
+
+<div class="toggle-button">
+  <label for="toggle-anonymous_allowed">anonymous_allowed</label>
+  <input type="checkbox" id="toggle-anonymous_allowed" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-automatic_enrolment">automatic_enrolment</label>
+  <input type="checkbox" id="toggle-automatic_enrolment" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-actions">Actions</label>
+  <input type="checkbox" id="toggle-actions" checked>
+</div>
+</div>
+
+    
+
+ 
+<div id="my_distributions_field_explanations"></div>
 
     </div>
 <!-- body of document end -->

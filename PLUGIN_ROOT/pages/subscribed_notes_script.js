@@ -37,34 +37,34 @@ checkSessionJWTValidity()
 // The users can decide which columns to display
 
 document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked,"dataTable");
+    toggleColumn('created', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked,"dataTable");
+    toggleColumn('modified', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked,"dataTable");
+    toggleColumn('type', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked,"dataTable");
+    toggleColumn('feed', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked,"dataTable");
+    toggleColumn('message', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked,"dataTable");
+    toggleColumn('action', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked,"dataTable");
+    toggleColumn('location', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 
 document.getElementById('toggle-status').addEventListener('change', function () {
-    toggleColumn('status', this.checked,"dataTable");
+    toggleColumn('status', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 
@@ -694,7 +694,7 @@ fetchData(not_show_by_default_columns).then(() => {
     console.log("toggle columns off by default");
     console.log(not_show_by_default_columns);
     not_show_by_default_columns.forEach(column => {
-        toggleColumn(column, false, "dataTable");
+        toggleColumn(column, false, "dataTable" , table_columns_to_not_display_keyname);
         document.getElementById(`toggle-${column}`).checked = false;
     });
     });

@@ -5,17 +5,31 @@
     </p>
 
     <p>
-        Feeds have a visibility setting. This controls whether or not the feed will show up in searches. This can be either public or private. A public feed is visible to all users of the Yellownotes platform. 
+        Feeds have a VISIBILITY setting. This controls whether or not the feed will show up in searches. This can be either public or private. A public feed is visible to all users of the Yellownotes platform. 
         A private feed is only visible to its members.
     </p>
 
     <p>
-        Feeds can carry restrictions on who may subscribe, and how. These are set by you as the feed owner. By default, the setting is "NONE" which means that anyone may subscribe and their subscription is approved automatically. The owner of the feed may remove subscribers at any time.
+        Feeds can carry RESTRICTIONS on who may subscribe, and how. These are set by you as the feed owner. By default, the setting is "NONE" which means that anyone may subscribe and their subscription may be approved automatically. 
+        The owner of the feed may remove or suspend any subscriber at any time.
         <br/>Restrictions have not yet been implemented.
     </p>
 
     <p>
-        Feeds can be active or inactive. An inactive feed is not visible in searches. An active feed is visible in searches, and its subscribers are notified of new notes.
+        Granting access to ANONYMOUS users is set by you as the feed owner. By default, the setting is "YES" which means that unregistered user may apply to subscribe to the feed.
+        The theses users , while not known by their names, are stil subject to the RESTRICTIONS you set and will not be granted a subscrption AUTOMATICALLY unless AUTOMATIC_ENROLMENT is also enabled.
+    </p>
+
+    <p>
+        For convenience user who apply to subscribe cen be approved automatically provided they also satify all other requirements (e.g. RESTRICTIONS, ANONYMOUS_ALLOWED). This is the AUTOMATIC_ENROLMENT setting.
+    </p>
+
+    <p>
+        When you first create a new feed the default setting is that anonymous users are permitted access (ANONYMOUS_ALLOWED) and access is granted automatically (AUTOMATIC_ENROLMENT), with no RESTRICTIONS specified. This is the most permissive setting. This has been set up to facilitate the most convenient way to send a YellowNote to someone else. Someone who may not have an account, be loged in, or even have YellowNotes for the Cloud installed. With these setting another user may see the note in the way you have created it by simply installing the plugin. And if they have the plugin installed, they need to take no action at all apart from clicking the link you send them. 
+        <br/>
+    </p>
+    <p>
+        Feeds can be ACTIVE or inactive. An inactive feed is not visible in searches. An active feed is visible in searches, and its subscribers are notified of new notes.
 
     <p>
       Feeds can be deleted or deactivated by you at any time. Deletion is permanent. Deactivation is reversible at any time.

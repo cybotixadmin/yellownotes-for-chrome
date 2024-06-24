@@ -44,74 +44,42 @@ checkSessionJWTValidity()
 // The users can decide which columns to display
 
 document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked, "dataTable");
+    toggleColumn('created', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked, "dataTable";
+    toggleColumn('modified', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked, "dataTable");
+    toggleColumn('type', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked, "dataTable");
+    toggleColumn('feed', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked, "dataTable");
+    toggleColumn('message', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-selected').addEventListener('change', function () {
-    toggleColumn('selected', this.checked, "dataTable");
+    toggleColumn('selected', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked, "dataTable");
+    toggleColumn('active', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked, "dataTable");
+    toggleColumn('action', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked, "dataTable");
+    toggleColumn('location', this.checked, "dataTable", table_columns_to_not_display_keyname);
 });
 
 
 
-
-function toggleColumn(columnName, isChecked) {
-    console.log("toggleColumn: " + columnName + " isChecked: " + isChecked);
-    var table = document.querySelector('table[name = "dataTable"]');
-    // find out which column has the name columnName
-    console.log(table);
-    // thead tr:nth-child(2)
-    var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
-    console.log(col);
-    const columnIndex = getElementPosition(col);
-    console.log(getElementPosition(col));
-  
-    if (!isChecked) {
-        table.querySelectorAll('tr').forEach(row => {
-            // console.log(row);
-            // console.log(row.cells[columnIndex].classList);
-  
-            row.cells[columnIndex].classList.add("hidden");
-        });
-  
-    } else {
-        table.querySelectorAll('tr').forEach(row => {
-  
-            //console.log(row);
-            //console.log(row.cells[columnIndex].classList);
-            row.cells[columnIndex].classList.remove("hidden");
-        });
-  
-    }
-  
-   
-  }
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using

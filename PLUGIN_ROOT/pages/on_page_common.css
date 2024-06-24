@@ -256,7 +256,7 @@ table.notesTable th {
   max-width: 150px;
 }
 .checkbox {
-  max-width: 10px;
+  max-width: 25px;
   margin: 1px;
   padding: unset;
 
@@ -272,6 +272,16 @@ table.notesTable th {
 
 .status {
   max-width: 50px;
+}
+
+.action-3 {
+  max-width: 80px;
+}
+
+.action-5 {
+  min-width: 150px;
+  width: 150px;
+  max-width: 150px;
 }
 
 

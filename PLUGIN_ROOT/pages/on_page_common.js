@@ -750,11 +750,12 @@ function getClaimsFromJwt(token, claimNames) {
 }
 
 function getNotShowByDefaultColumns(key, defaultValue) {
+    console.log("getNotShowByDefaultColumns: " + key + " " + defaultValue);
     return new Promise((resolve, reject) => {
         try {
             //const key = 'name_not_show_by_default_columns';
             let value = localStorage.getItem(key);
-            console.debug("reading: " + value);
+            console.debug("reading (from key "+ key +"): " + value);
             console.debug(value);
             if (value === null) {
                 console.debug("setting the default value of which columns should be hidden.");
@@ -778,6 +779,7 @@ function getNotShowByDefaultColumns(key, defaultValue) {
  *
  */
 function modifyNotShowByDefaultColumns(value, action, key) {
+    console.log("modifyNotShowByDefaultColumns: value=" + value + " action=" + action + " key=" + key);
     return new Promise((resolve, reject) => {
         try {
             //const key = 'name_not_show_by_default_columns';
@@ -789,11 +791,13 @@ function modifyNotShowByDefaultColumns(value, action, key) {
             } else {
                 storedValue = JSON.parse(storedValue);
             }
-
+            console.debug("reading: " + storedValue);
             if (action === "set") {
                 // Add the value if it's not already present
                 if (!storedValue.includes(value)) {
                     storedValue.push(value);
+                    console.debug("setting new: " + storedValue);
+                    console.debug(storedValue);
                     localStorage.setItem(key, JSON.stringify(storedValue));
                 }
             } else if (action === "unset") {
@@ -802,19 +806,21 @@ function modifyNotShowByDefaultColumns(value, action, key) {
                 if (index !== -1) {
                     storedValue.splice(index, 1);
                     console.debug("setting new: " + storedValue);
+                    console.debug(storedValue);
                     localStorage.setItem(key, JSON.stringify(storedValue));
                 }
             }
-
+console.debug(storedValue);
             resolve(storedValue);
         } catch (error) {
+            console.error(error);
             reject(error);
         }
     });
 }
 
-function toggleColumn(columnName, isChecked, tableName) {
-    console.log("toggleColumn: " + columnName + " isChecked: " + isChecked);
+function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_display_keyname) {
+    console.log("toggleColumn.start: " + columnName + " isChecked: " + isChecked, " in table name="+ tableName + " with local storage keyname: " + table_columns_to_not_display_keyname);
     //var table = document.getElementById("dataTable");
     var table = document.querySelector('table[name="' + tableName + '"]');
     // find out which column has the name columnName
@@ -823,39 +829,41 @@ function toggleColumn(columnName, isChecked, tableName) {
     var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
     console.log(col);
     const columnIndex = getElementPosition(col);
-    console.log(getElementPosition(col));
-
+    console.log("column to hide:",  getElementPosition(col));
     if (!isChecked) {
-        table.querySelectorAll('tr').forEach(row => {
-            // console.log(row);
-            // console.log(row.cells[columnIndex].classList);
+        modifyNotShowByDefaultColumns(columnName, 'set', table_columns_to_not_display_keyname).then(updatedArray => {
+            //console.log(updatedArray);
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+        // loop over all rows and hide this column
+    table.querySelectorAll('tr').forEach(row => {
+             console.log(row);
+          //   console.log(row.cells[columnIndex].classList);
 
             row.cells[columnIndex].classList.add("hidden");
 
             // add column to supression list
             console.debug("hidden column: " + columnName);
 
-            modifyNotShowByDefaultColumns(columnName, 'set', table_columns_to_not_display_keyname).then(updatedArray => {
-                //console.log(updatedArray);
-            }).catch(error => {
-                console.error('Error:', error);
-            });
+           
 
         });
 
     } else {
+         // To remove a value from the supression list
+         modifyNotShowByDefaultColumns(columnName, 'unset', table_columns_to_not_display_keyname).then(updatedArray => {
+            console.log(updatedArray);
+        }).catch(error => {
+            console.error('Error:', error);
+        });
         table.querySelectorAll('tr').forEach(row => {
 
             //console.log(row);
             //console.log(row.cells[columnIndex].classList);
             row.cells[columnIndex].classList.remove("hidden");
 
-            // To remove a value
-            modifyNotShowByDefaultColumns(columnName, 'unset', table_columns_to_not_display_keyname).then(updatedArray => {
-                console.log(updatedArray);
-            }).catch(error => {
-                console.error('Error:', error);
-            });
+           
 
         });
 
