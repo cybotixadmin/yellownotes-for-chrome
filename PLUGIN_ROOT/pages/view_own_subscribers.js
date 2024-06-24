@@ -88,8 +88,9 @@ if (pagewidth < 300) {
     not_show_by_default_columns = [];
 }
 
+
 // call to database to get notes and place them in a table
-fetchData(null, not_show_by_default_columns).then(function (d) {
+fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_columns).then(function (d) {
     console.debug("read notes complete");
     console.debug(d);
 
@@ -117,6 +118,11 @@ fetchData(null, not_show_by_default_columns).then(function (d) {
                 xYellownotesSession = result[plugin_session_header_name];
                 console.log(ynInstallationUniqueId);
                 console.log(xYellownotesSession);
+                var msg = { distributionlistid: distributionlistid};
+                if (distributionlistid == null) {
+                    msg = {};
+                }
+                console.debug(msg);
                 return fetch(server_url + URI_plugin_user_get_my_feed_subscribers, {
                     method: 'POST',
                     headers: {
@@ -124,7 +130,7 @@ fetchData(null, not_show_by_default_columns).then(function (d) {
                         [plugin_uuid_header_name]: ynInstallationUniqueId,
                         [plugin_session_header_name]: xYellownotesSession,
                     },
-                    body: JSON.stringify({}) // example IDs, replace as necessary, the body is used to retrieve the notes of other users, default is to retrieve the notes of the authenticated user
+                    body: JSON.stringify(msg) // example IDs, replace as necessary, the body is used to retrieve the notes of other users, default is to retrieve the notes of the authenticated user
                 });
             }).then(response => {
                 if (!response.ok) {
@@ -650,9 +656,6 @@ async function fetchSubscribers(distributionlistid) {
 }
 
 // start populating data tables
-
-//fetchData(getQueryStringParameter('distributionlistid'));
-//fetchSubscribers(getQueryStringParameter('distributionlistid'));
 
 //traverse_text(document.documentElement);
 console.debug("################################################");
