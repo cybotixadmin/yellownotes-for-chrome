@@ -149,8 +149,6 @@ window.addEventListener('load', function() {
         console.log("3.2.9. page update completed ");
 
 
-
-
     })
     .catch(function(error) {
         console.error("An error occurred: " + error);
@@ -1080,8 +1078,8 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
             const textarea = node_root.querySelector('[name="message_display_text"]');
             console.log(textarea);
             // Set initial placeholder text that should vanish when typing begins
-            const placeholderText = "write your notes here..";
-            textarea.value = placeholderText;
+            const placeholderText = "write your note here..";
+            textarea.innerHTML = "<div>" + placeholderText + "</div>";
 
             // Attach a focus event listener to remove the text as soon as the textarea gains focus
             textarea.addEventListener('focus', function () {
@@ -1418,9 +1416,11 @@ function save_new_note(event) {
             selection_text = note_root.querySelectorAll('input[name="selection_text"]')[0].textContent.trim();
         } catch (e) {
             // set default, current timestamp
-
+selection_text = ""
         }
-
+if (selection_text == "") { 
+    // no selection text, try to get it from the note
+}
         console.debug(selection_text);
 
         var url = "";
@@ -1461,7 +1461,7 @@ function save_new_note(event) {
 
             var message_display_text = "";
             try {
-                message_display_text = note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim();
+                message_display_text = note_root.querySelector('[name="message_display_text"]').innerHTML;
 
             } catch (e) {}
 
@@ -1502,12 +1502,12 @@ function save_new_note(event) {
 
             console.debug("selection_text: " + selection_text);
 
-            let base64data = utf8_to_b64(selection_text);
-            console.log(utf8_to_b64(selection_text));
+            var base64data = utf8_to_b64(selection_text);
+            //console.log(utf8_to_b64(selection_text));
 
             var json_create = {
                 message_display_text: utf8_to_b64(message_display_text),
-                selection_text: utf8_to_b64(selection_text),
+                selection_text: base64data,
                 url: url,
                 enabled: "true",
                 distributionlistid: distributionlistid,
@@ -2868,14 +2868,30 @@ function update_note(event) {
         // check for content_url for notes that collect content from elsewhere
         try {
             content_url = note_root.querySelector('input[name="urlInput"]').value.trim();
-        } catch (e) {}
+        } catch (e) { 
+            console.error(e);
+
+        }
+
 
         var message_display_text = "";
         try {
+            //console.debug(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim())
+            const message_display_text_node = note_root.querySelector('[name="message_display_text"]');
+            console.debug(message_display_text_node);
+            console.debug(message_display_text_node.innerHTML);
+            message_display_text = note_root.querySelector('[name="message_display_text"]').innerHTML;
+
+            console.debug(note_root.querySelector('[name="message_display_text"]').value);
+            console.debug(note_root.querySelector('[name="message_display_text"]').textContent);
+
+
             console.debug(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim())
             console.debug(utf8_to_b64(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim()));
-            message_display_text = note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim();
-        } catch (e) {}
+        } catch (e) {
+            // set default, current timestamp
+            console.error(e);
+        }
 
         var enabled = "";
         try {
@@ -5395,11 +5411,18 @@ if (note_object_data.hasOwnProperty("note_type")) {
                 cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode("true"));
             }
 
-            // insert the displayed text content
+            // insert the displayed text(html) content that consitute the message itself
             try{
             if (note_object_data.hasOwnProperty("message_display_text")) {
-                console.debug(cont1.querySelector('[name="message_display_text"]'));
-                cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
+                const message_node = cont1.querySelector('[name="message_display_text"]');
+                console.debug(message_node);
+
+                //cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
+
+                message_node.innerHTML = b64_to_utf8(note_object_data.message_display_text);
+                console.debug(message_node);
+
+
             }
         }catch(e){  
             console.error(e);
@@ -6435,7 +6458,7 @@ function NoteDOM2JSON(note) {
         try {
             if (note.querySelector('[name="message_display_text"]')) {
 
-                message_display_text = utf8_to_b64(note.querySelector('[name="message_display_text"]').value.trim());
+                message_display_text = utf8_to_b64(note.querySelector('[name="message_display_text"]').innerHTML );
             }
 
         } catch (e) {

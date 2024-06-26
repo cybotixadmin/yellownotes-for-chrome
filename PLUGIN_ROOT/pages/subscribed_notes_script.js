@@ -62,6 +62,11 @@ document.getElementById('toggle-feed').addEventListener('change', function () {
 document.getElementById('toggle-message').addEventListener('change', function () {
     toggleColumn('message', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
+
+document.getElementById('toggle-selection_text').addEventListener('change', function () {
+    toggleColumn('selection_text', this.checked,"dataTable", table_columns_to_not_display_keyname );
+});
+
 document.getElementById('toggle-action').addEventListener('change', function () {
     toggleColumn('action', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
@@ -85,9 +90,9 @@ const pagewidth = window.innerWidth;
 console.log("window.innerWidth: " + pagewidth);
 
 if (pagewidth < 300) {
-    not_show_by_default_columns = ["created", "modified", "type", "feed", "status", "action" ];
+    not_show_by_default_columns = ["created", "modified", "type", "feed", "selection_text", "status", "action" ];
 }else if (pagewidth < 600) {
-    not_show_by_default_columns = ["modifie                                 d", "type", "status", "action"];
+    not_show_by_default_columns = ["modified", "type", "status", "action"];
 }else if (pagewidth < 800) {
     not_show_by_default_columns = ["modified","action"];
 }else  {
@@ -423,9 +428,10 @@ function fetchData(not_show_by_default_columns) {
                     const type_cell = newRow.insertCell(2);
                     const cell_name = newRow.insertCell(3);
                     const cell_url = newRow.insertCell(4);
-                    const cell_message_text = newRow.insertCell(5);
-                    const cell_status = newRow.insertCell(6);
-                    const cell_buttons = newRow.insertCell(7);
+                    const cell_selection_text = newRow.insertCell(5);
+                    const cell_message_text = newRow.insertCell(6);
+                    const cell_status = newRow.insertCell(7);
+                    const cell_buttons = newRow.insertCell(8);
 
                     // parse the JSON of the note
                     const obj = JSON.parse(row.json);
@@ -487,6 +493,29 @@ function fetchData(not_show_by_default_columns) {
                     if (not_show_by_default_columns.indexOf("location") !== -1) {
                         cell_url.className = "hidden";
                     }
+
+                      // display/selected text text
+                    // this message is a clickable link to the note
+
+                    cell_selection_text.textContent = b64_to_utf8(obj.selection_text);
+                      // Create the link element
+                      //const link = document.createElement('a');
+                      //link.href = 'http://somewhere.com/attr?parameter=value';
+                      //link.textContent = 'go there to collect';
+                      // Add the link to the cell
+                     // cell_message_text.appendChild(link);
+                      // Add onclick event to the cell to redirect to the link's href
+                     // cell_message_text.addEventListener('click', function() {
+                    //    window.location.href = "";
+                   // });
+                    console.log(not_show_by_default_columns.indexOf("selection_text"));
+                    cell_selection_text.onclick = function () {
+                        goThere(row);
+                    };
+                    if (not_show_by_default_columns.indexOf("selection_text") !== -1) {
+                        cell_selection_text.className = "hidden";
+                    }
+
 
                     // display/message text
                     // this message is a clickable link to the note
