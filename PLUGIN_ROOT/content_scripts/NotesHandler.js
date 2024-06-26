@@ -345,7 +345,7 @@ function listener(request, sender, sendResponse) {
                 return true;
             } else if (request.action == "createnote") {
                 // call to create a yellow note
-                console.debug("browsersolutions calling: create_newstickynote_node");
+                console.debug("browsersolutions calling: create_newstickynote_node(...)");
                 create_newstickynote_node(request.info, request.note_type, request.note_template, request.note_properties, request.session);
 
                 sendResponse({
@@ -872,7 +872,7 @@ function cropImage(base64Image, coords, scale = window.devicePixelRatio) {
 /* creates DOM object of the stick note */
 function create_newstickynote_node(info, note_type, html, note_properties, session) {
 
-    console.debug("# create_newstickynote_node start");
+    console.debug("# create_newstickynote_node.start");
     console.debug("info:");
     console.debug(info);
 
@@ -983,10 +983,15 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     console.debug("mouseX: " + mouseX);
     console.debug("mouseY: " + mouseY);
     var selection_text = "";
+    console.debug(info.selectionText);
+    console.debug(info.selectionText == undefined);
+    
     try {
-        if (info.selectionText != null && info.selectionText != "" && info.selectionText != undefined) {
+        if (!info.selectionText == undefined){
+        if (info.selectionText != "" && info.selectionText != null ) {
             selection_text = info.selectionText;
         }
+    }
     } catch (e) {
         console.error(e);
     }
@@ -1005,7 +1010,8 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     var highlightuniqueid = "";
 
     // is selection_text set ?
-    if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
+    note_object_data.selection_text = selection_text;
+    if (selection_text != '') {
         // Usage: Call this function with the text you want to highlight
         console.debug("selection_text: " + selection_text);
         console.debug(selection_text);
@@ -1021,8 +1027,8 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         node_root.setAttribute("highlightuniqueid", highlightuniqueid);
         //}
 
-        note_object_data.selection_text = selection_text;
-        note_object_data.message_display_text = selection_text;
+        
+        //note_object_data.message_display_text = selection_text;
     } else {
         // no selection_text
         console.debug("selection_text is not set or is blank: ");
@@ -1038,7 +1044,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
         node_root.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
 
-        if (!isUndefined(selection_text) && selection_text != null && selection_text != '') {
+        if (selection_text != '') {
             node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(utf8_to_b64(note_object_data.selection_text)));
         } else {
             node_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(""));

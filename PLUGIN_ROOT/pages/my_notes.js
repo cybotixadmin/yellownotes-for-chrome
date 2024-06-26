@@ -353,7 +353,7 @@ const sortStates = {
 
 function fetchData(not_show_by_default_columns) {
     console.log("fetchData");
-
+try {
     return new Promise(
         function (resolve, reject) {
         var ynInstallationUniqueId = "";
@@ -533,9 +533,9 @@ function fetchData(not_show_by_default_columns) {
                 suspendActButton.addEventListener("change", async(e) => {
                     if (e.target.checked) {
                         //         await disable_note_with_noteid(row.noteid);
-                        await setNoteActiveStatusByUUID(row.noteid, 1);
+                        await setSubscriptionActiveStatusByUUID(row.noteid, 1);
                     } else {
-                        await setNoteActiveStatusByUUID(row.noteid, 0);
+                        await setSubscriptionActiveStatusByUUID(row.noteid, 0);
                         //           await enable_note_with_noteid(row.noteid);
                     }
                 });
@@ -570,20 +570,40 @@ function fetchData(not_show_by_default_columns) {
                 // message payload
                 // contenteditable="true"
                 if (obj.note_type == "yellownote") {
-                    cell_message.textContent = b64_to_utf8(obj.message_display_text);
+                    try{
+              //      cell_message.textContent = b64_to_utf8(obj.message_display_text);
+
+                    console.debug(obj.message_display_text);
+    
+                    //cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
+    
+                    cell_message.innerHTML = "<div>" + b64_to_utf8(obj.message_display_text) + "</div>";
+                    console.debug(cell_message);
+
+                    //cell_message.textContent = b64_to_utf8(obj.message_display_text);
+                   
                     cell_message.setAttribute('name', 'message_display_text');
+                } catch (e) {
+                    console.debug(e);
+                }
                 } else if (obj.note_type == "webframe") {
                     cell_message.textContent = (obj.content_url);
                     cell_message.setAttribute('name', 'content_url');
                 } else {
-                    // default - will revisit this later (L.R.)
-                    cell_message.textContent = b64_to_utf8(obj.message_display_text);
+
+                 
+                    cell_message.innerHTML = b64_to_utf8(obj.message_display_text);
+                    console.debug(cell_message);
+
+                    //cell_message.textContent = b64_to_utf8(obj.message_display_text);
                     cell_message.setAttribute('name', 'message_display_text');
                 }
                 cell_message.setAttribute('contenteditable', 'true');
                 cell_message.setAttribute('data-label', 'text');
                 cell_message.setAttribute('name', 'message_display_text');
                 cell_message.setAttribute('class', 'text');
+
+
                 // Create the dropdown list for the distribution list
                 const dropdown = createDropdown(distributionListData, row.distributionlistid);
                 console.log(dropdown);
@@ -709,6 +729,9 @@ function fetchData(not_show_by_default_columns) {
             resolve('Data saved OK');
         });
     });
+}catch (error) {
+    console.error(error);
+}
 }
 
 function createDropdown(optionsArray, selectedDistributionListId) {
@@ -785,7 +808,7 @@ function createDropdown(optionsArray, selectedDistributionListId) {
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
 // Function to use "fetch" to re-activate a data agreement
-async function setNoteActiveStatusByUUID(noteid, status) {
+async function setSubscriptionActiveStatusByUUID(noteid, status) {
     console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status);
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
@@ -828,9 +851,12 @@ async function setNoteActiveStatusByUUID(noteid, status) {
  */
 async function saveChanges(noteid, event) {
     console.debug("saveChanges: " + noteid);
+    console.debug(event.target);
+    console.debug(event.target.parentNode);
 
-    console.debug(event.target.parentNode.parentNode.parentNode.parentNode);
-
+    
+    const row_root = document.querySelector('tr[noteid="' + noteid + '"]');
+    console.debug(row_root);
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -838,33 +864,24 @@ async function saveChanges(noteid, event) {
         var content_url;
         var message_display_text;
        
-        try {
-            //message_display_text = utf8_to_b64(event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="message_display_text"]').textContent);
-
-            console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
-
-            message_display_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="message_display_text"]').textContent.trim());
-        } catch (e) {
-            console.debug(e);
-        }
+        
 
         var selection_text;
        
         try {
            
-            selection_text = utf8_to_b64(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="selection_text"]').textContent.trim());
+            selection_text = utf8_to_b64(row_root.querySelector('[name="selection_text"]').textContent.trim());
         } catch (e) {
             console.debug(e);
         }
-        const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent;
-        const note_type = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="note_type"]').textContent;
+        const url = row_root.querySelector('[name="url"]').textContent;
+        const note_type = row_root.querySelector('[name="note_type"]').textContent;
 
         var message_body;
         if (note_type == "webframe") {
             console.debug("webframe");
             try {
-                //content_url = event.target.parentNode.parentNode.parentNode.parentNode.querySelector('[name="content_url"]').textContent;
-                content_url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="message_display_text"]').textContent.trim();
+                content_url = row_root.querySelector('[name="message_display_text"]').textContent.trim();
 
             } catch (e) {
                 console.debug(e);
@@ -878,11 +895,20 @@ async function saveChanges(noteid, event) {
         }else if (note_type == "capture_note") {
                 
         } else {
+            // yellownote
+          
+            try {
+                message_display_text = row_root.querySelector('[name="message_display_text"]').innerHTML;
+
+            } catch (e) {console.debug(e);  }
+console.debug("message_display_text: " + message_display_text);
+const encoded_message_display_text = utf8_to_b64(message_display_text);
+
             message_body = JSON.stringify({
                     noteid: noteid,
                     note_type: note_type,
                     url: url,
-                    message_display_text: message_display_text,
+                    message_display_text: encoded_message_display_text,
                     selection_text: selection_text
                 });
         }

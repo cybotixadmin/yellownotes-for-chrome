@@ -140,22 +140,3 @@ position: relative;
   z-index: 12000;
 }
 
-.button-container {
-  display: flex; /* Makes the container flex */
-  justify-content: space-between; /* Distributes space between the buttons */
-}
-
-.button-container > div {
-  margin-right: 1px; /* Adds spacing between buttons */
-}
-
-.button-container > div:last-child {
-  margin-right: 5px; /* Removes margin from the last button to avoid extra spacing */
-}
-
-
-.button-container > div:first-child {
-  margin-left: 5px; /* Removes margin from the last button to avoid extra spacing */
-}
-
-

@@ -285,6 +285,11 @@ table.notesTable th {
 }
 
 
+.table_row_actions_button {
+  height: 20px;
+position: relative;
+  z-index: 12000;
+}
 
 .delete_button {
   height: 20px;
@@ -298,6 +303,28 @@ position: relative;
   visibility: visible;
   z-index: 12000;
 }
+
+
+
+
+.button-container {
+  display: flex; 
+  justify-content: space-between; 
+}
+
+.button-container > div {
+  margin-right: 1px; 
+}
+
+.button-container > div:last-child {
+  margin-right: 5px; 
+}
+
+
+.button-container > div:first-child {
+  margin-left: 5px; 
+}
+
 
 
   table.notesTable tr th:nth-child(102){

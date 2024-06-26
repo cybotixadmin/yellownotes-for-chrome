@@ -490,6 +490,7 @@ function fetchData(not_show_by_default_columns) {
                     // url where note is attached
                     cell_url.textContent = obj.url;
                     cell_url.setAttribute('name', 'url');
+                    cell_url.innerHTML = '<a href="/pages/gothere.html?noteid='+row.noteid+'" target="_blank">' + obj.url + '</a>';
                     if (not_show_by_default_columns.indexOf("location") !== -1) {
                         cell_url.className = "hidden";
                     }

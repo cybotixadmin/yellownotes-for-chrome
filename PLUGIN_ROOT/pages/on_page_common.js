@@ -18,7 +18,6 @@ const URI_plugin_user_savechanges_yellownote = '/api/v1.0/plugin_user_savechange
 
 const URI_plugin_user_delete_subscription = "/api/v1.0/plugin_user_delete_subscription";
 
-const URI_plugin_user_set_subscription_active_status = "/api/v1.0/plugin_user_set_subscription_active_status";
 
 const URI_plugin_user_delete_distribution_list = "/api/v1.0/plugin_user_delete_distribution_list";
 const URI_plugin_user_get_distribution_list = "/api/v1.0/plugin_user_get_distribution_list";
@@ -30,6 +29,7 @@ const URI_plugin_user_add_subscription_v10 = "/api/v1.0/plugin_user_add_subscrip
 const URI_plugin_user_set_agreement_active_status = "/api/v1.0/plugin_user_set_subscription_active_status";
 
 const URI_plugin_user_set_all_subscriptions_active_status = "/api/v1.0/plugin_user_set_all_subscriptions_active_status";
+const URI_plugin_user_set_subscription_active_status = "/api/v1.0/plugin_user_set_subscription_active_status";
 
 const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subscriptions";
 
