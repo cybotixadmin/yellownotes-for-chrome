@@ -673,6 +673,7 @@ console.debug(not_show_by_default_columns);
                 console.debug(rowData);
                 const newRow = tableBody.insertRow();
                 newRow.setAttribute("distributionlistid", rowData.distributionlistid);
+                newRow.setAttribute('selectablecol', "true");
                 // Create cells and populate them with data
                 const cell_name = newRow.insertCell(0);
                 const cell_desc = newRow.insertCell(1);

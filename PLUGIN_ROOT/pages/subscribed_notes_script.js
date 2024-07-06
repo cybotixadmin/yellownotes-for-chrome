@@ -421,6 +421,7 @@ function fetchData(not_show_by_default_columns) {
                     // Create new row
                     const newRow = tableBody.insertRow();
                     newRow.setAttribute("noteid", row.noteid);
+                    newRow.setAttribute('selectablecol', "true");
                     // Create cells and populate them with data
                    
                     const cell_createtime = newRow.insertCell(0);

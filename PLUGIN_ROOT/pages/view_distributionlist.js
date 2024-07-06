@@ -401,6 +401,7 @@ async function fetchNotes(distributionlistid) {
 
         // Create new row
         const newRow = tableBody.insertRow();
+        newRow.setAttribute('selectablecol', "true");
         newRow.setAttribute('noteid', row.noteid);
         // Create cells and populate them with data
         const cell1 = newRow.insertCell(0);
@@ -437,7 +438,6 @@ async function fetchNotes(distributionlistid) {
         try {
             type_cell.textContent = obj.note_type;
             type_cell.setAttribute('name', 'note_type');
-
         } catch (e) {
             console.log(e);
         }

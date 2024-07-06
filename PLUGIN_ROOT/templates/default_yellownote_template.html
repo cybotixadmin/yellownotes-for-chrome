@@ -59,6 +59,14 @@ background: rgba(255, 255, 0, 0.7);">
 							<tr style="display: table; height: 22px; overflow: visible; ">
 								<!-- icons curtesy of https://buttonoptimizer.com/ -->
 								<!-- icon to go to where the note is attached -->
+								<td name="selectnotetype" subcomponentvisibility=",new,minimized,normalsized,fullscreen,"  style="position: absolute; right: 100px; top: -5px;  display: unset; padding: 0px; margin: 0px; text-align: left; width: 65px;  z-index: 20103; border: 0px solid #F00;">
+									<select name="select_notetype">
+										<option value="plaintext">text</option>
+										<option value="plainhtml">html</option>
+										<option value="canvas">canvas</option>
+										<option value="webframe">frame</option>
+									</select>
+								</td>
 								<td name="goto" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="goto_note" style="position: absolute; right: 60px; top: 0px;  display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
 									<style>
 										/* text content of tooltip */
@@ -126,7 +134,6 @@ background: rgba(255, 255, 0, 0.7);">
 						</table>
 					</td>
 				</tr>
-			
 			</table>
 		</td>
 	</tr>
@@ -136,12 +143,7 @@ background: rgba(255, 255, 0, 0.7);">
 			<div>
 			</div>
 		</div>
-		
 	</td>
-			<!--
-			<form name="note_form" style="border: 0px solid #ffff00;
- border-radius: 0px; width: 100%; overflow: hidden; padding: 0px; margin: 0px; position: relative; bottom: 0; z-index: 10104;">
- </form>-->
 			<input type="hidden" name="selection_text"></input>
 			<input type="hidden" name="encoded_selection_text"></input>
 			<input type="hidden" name="url"></input>
@@ -166,7 +168,7 @@ background: rgba(255, 255, 0, 0.7);">
 			<img height="20" width="50" src="data:image/png;base64,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" alt="Disable" js_action="disable_note" style="margin: 0px;height: 20px; z-index: 10103;"/>
 		</td>
 		<td subcomponentvisibility=",new,rw,normalsized,fullscreen," style="right: 80px; bottom: 0px; height: 20px; width: 20px; min-width: 20px; padding: 0px; border: 0px; margin: 0px; line-height: 1.0rem; overflow: visible;background: rgba(255, 255, 0, 0.8);">
-			<style>
+		<style>
 										.yellownote_distributionlist_icon_tooltip {
 											position: absolute;
 											bottom: 0px;
@@ -206,8 +208,8 @@ background: rgba(255, 255, 0, 0.7);">
 				<img class="yellownote_distributionlist_icon_tooltipLLL" js_action="distribute" height="20" width="20" src="data:image/png;base64,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" alt="distriutionlist"  style="margin: 0px;height: 20px; margin-bottom: 0px; z-index: 12103; position: unset"></img>
 			</div>
 		</td>
-		<td  name="distributionlistdropdowncontainer" subcomponentvisibility=",new,rw,normalsized,fullscreen," style="right: 0px; bottom: 0px; padding: 0px; max-width: 250px; border: 0px; margin: 0px; line-height: 1.0rem;overflow: hidden; background: rgba(255, 255, 0, 0.8);">
-			<select name="distributionlistdropdown" style="max-width: 250px; font-size: 1.0rem; height: 1.4rem;  padding: 0px; background: rgba(255, 255, 255, 0.8);"></select>
+		<td  name="distributionlistdropdowncontainer" subcomponentvisibility=",new,rw,normalsized,fullscreen," style="right: 0px; bottom: 0px; padding: 0px; max-width: 80px; border: 0px; margin: 0px; line-height: 1.0rem;overflow: hidden; background: rgba(255, 255, 0, 0.8);">
+			<select name="distributionlistdropdown" style="max-width: 80px; font-size: 1.0rem; height: 1.4rem;  padding: 0px; background: rgba(255, 255, 255, 0.8);"></select>
 		</td>
 	</tr>
 </table>

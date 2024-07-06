@@ -543,6 +543,7 @@ async function fetchSubscribers(distributionlistid) {
             // Create new row
             const newRow = tableBody.insertRow();
             newRow.setAttribute('subscriptionid', row.subscriptionid);
+            newRow.setAttribute('selectablecol', "true");
             // Create cells and populate them with data
 
             const cell_displayname = newRow.insertCell(0);

@@ -60,6 +60,9 @@ const URI_plugin_user_get_active_feed_notes = "/api/v1.0/plugin_user_get_active_
 
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
+const note_owners_control_bar_height = 23;
+
+
 async function page_display_login_status() {
     console.log("display_login_status()");
     //con
@@ -113,6 +116,115 @@ async function is_authenticated() {
     } else {
         return true;
     }
+}
+
+
+// Helper to get cached data , timeout in seconds
+function getCachedData(key, cachetimeout) {
+    console.log('getCachedData: Getting cached data for key:', key, ", with timeout:", cachetimeout);
+    return new Promise((resolve, reject) => {
+        try {
+            chrome.storage.local.get([key], function (result) {
+                if (result[key]) {
+                    console.log(`Cached data for key: ${key}`, result[key].timestamp);
+                    console.log((new Date().getTime() - result[key].timestamp));
+
+                    // only accept data less than 3 hours old
+                    //            if (result[key] && (new Date().getTime() - result[key].timestamp) < 3 * 3600 * 1000) {
+                    // only accept data less than 10 seconds old
+                    if (result[key] && (new Date().getTime() - result[key].timestamp) < cachetimeout * 1000) {
+                        console.log(result[key].data);
+                        resolve(result[key].data);
+                    } else {
+                        console.log("return null");
+                        resolve(null);
+                    }
+                } else {
+                    console.log("return null - cache miss");
+                    resolve(null);
+                }
+            });
+        } catch (e) {
+            console.debug(e);
+            reject(null);
+        }
+    });
+}
+
+
+function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
+    console.debug("# cachableCall2API_GET.start");
+    console.debug("cacheKey: " + cacheKey);
+    console.debug("cachetimeout: " + cachetimeout);
+    console.debug("protocol: " + protocol);
+    console.debug("endpoint: " + endpoint);
+    var ynInstallationUniqueId = "";
+    var xYellownotesSession = "";
+    var result_data = null;
+    return new Promise((resolve, reject) => {
+        getCachedData(cacheKey, cachetimeout).then(function (cachedResponse) {
+
+            console.log(cachedResponse);
+            if (cachedResponse) {
+                console.debug("Returning cached response on key: " + cacheKey);
+                // break here
+                resolve(cachedResponse);
+                console.debug(" complete ");
+                // break out of the promise chain
+                return;
+            } else {
+                console.debug("No cached response on key: " + cacheKey);
+            
+
+            // proceed to make the request
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
+            .then(function (result) {
+                console.debug(result);
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
+                xYellownotesSession = result[plugin_session_header_name];
+
+               console.debug("Cache key: " + cacheKey);
+
+                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
+
+                const opts = {
+                method: protocol,
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: ynInstallationUniqueId,
+                    [plugin_session_header_name]: xYellownotesSession
+                },
+                };
+                console.debug("make fresh request: ");
+                return fetch(endpoint, opts);
+                })
+                .then(function (response) {
+            console.debug(response);
+
+            return response.json();
+                })
+                .then(function (data) {
+            console.debug(data);
+
+            result_data = data;
+
+            // insert into the cache
+                return cacheData(cacheKey, result_data);
+            // return chrome.storage.local.set({ cacheKey: requestCacheEntry });
+                }).then(function (response) {
+                console.debug(response);
+                console.debug("result_data");
+                console.debug(result_data);
+                resolve(result_data);
+                })
+                .catch(function (error) {
+                 console.error('Fetch error: ', error);
+                });
+            }
+        });
+    });
+
 }
 
 function escapeRegex(text) {
@@ -828,7 +940,7 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
     var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
     console.log(col);
     const columnIndex = getElementPosition(col);
-    console.log("column to hide:",  getElementPosition(col));
+    console.log("column to hide:",  columnIndex);
     if (!isChecked) {
         modifyNotShowByDefaultColumns(columnName, 'set', table_columns_to_not_display_keyname).then(updatedArray => {
             //console.log(updatedArray);
@@ -836,9 +948,9 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
             console.error('Error:', error);
         });
         // loop over all rows and hide this column
-    table.querySelectorAll('tr').forEach(row => {
+    table.querySelectorAll('tr[selectablecol="true"]').forEach(row => {
              console.log(row);
-          //   console.log(row.cells[columnIndex].classList);
+             console.log(row.cells[columnIndex].classList);
 
             row.cells[columnIndex].classList.add("hidden");
 
@@ -856,10 +968,10 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
         }).catch(error => {
             console.error('Error:', error);
         });
-        table.querySelectorAll('tr').forEach(row => {
+        table.querySelectorAll('tr[selectablecol="true"]').forEach(row => {
 
-            //console.log(row);
-            //console.log(row.cells[columnIndex].classList);
+            console.debug(row);
+            console.debug(row.cells[columnIndex].classList);
             row.cells[columnIndex].classList.remove("hidden");
 
            

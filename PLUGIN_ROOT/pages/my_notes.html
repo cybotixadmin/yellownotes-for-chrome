@@ -32,33 +32,35 @@
 <div class="scrollable-table">
 <table name="dataTable" class="notesTable">
   <thead>
-    <tr class="fixed-header">
-      <th class="sortableCol datetime" name="created" sort_type="stringCaseExact">created<span class="sort-icon url">&#9650;</span></th>
-      <th class="sortableCol datetime" name="modified" sort_type="stringCaseExact">changed<span class="sort-icon url">&#9650;</span></th>
-      <th class="sortableCol" name="type" sort_type="stringCaseExact">type<span class="sort-icon">&#9650;</span></th>
-      <th name="active" class="checkbox">sta</th>
-      <th class="sortableCol url" name="location" sort_type="stringCaseIgnore">location<span class="sort-icon url">&#9650;</span></th>
-      <th class="sortableCol text"  name="selected"  sort_type="stringCaseExact">selected<span class="sort-icon">&#9650;</span></th>
+    <tr class="fixed-header" selectablecol="true">
+      <th class="sortableCol datetime" name="created" sort_type="stringCaseExact" >created<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol datetime" name="modified" sort_type="stringCaseExact" >changed<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol" name="type" sort_type="stringCaseExact"  >type<span class="sort-icon">&#9650;</span></th>
+      <th name="active" class="checkbox" >sta</th>
+      <th class="sortableCol url" name="location" sort_type="stringCaseIgnore" >location<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol text"  name="selected"  sort_type="stringCaseExact" >selected<span class="sort-icon">&#9650;</span></th>
       <th class="sortableCol text"  name="message" sort_type="stringCaseExact" >message<span class="sort-icon">&#9650;</span></th>
-      <th name="action">actions</th>
-      <th class="sortableCol" name="feed" sort_type="selectCaseExact">feed<span class="sort-icon url">&#9650;</span></th>
+      <th name="action" class="action-5" >actions</th>
+      <th class="sortableCol" name="feed" sort_type="selectCaseExact" >feed<span class="sort-icon url">&#9650;</span></th>
+      <th name="yellownote" class="yellownote" >notes</th>
       <!--
       <th class="sortableCol" sort_type="stringCaseExact">note<span class="sort-icon">&#9650;</span></th>
       -->
     </tr>
 
     <!-- Add a filter row -->
-    <tr class="fixed-header">
+    <tr class="fixed-header" selectablecol="true">
      
-      <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="datetime"><select filterContent="1" ><option class="filterContent"></option><option class="">webframe</option><option class="">yellownote</option></select></th>
-      <th filterableCol="checkedmatch" class="checkbox"><select filterContent="1" class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
-      <th filterableCol="wildcardmatch" class="url"><input filterContent="1" type="text" class="url" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="text"><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="text"><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="datetime" ><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="datetime" ><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="datetime" ><select filterContent="1" ><option class="filterContent"></option><option value="webframe" class="">webframe</option><option value="plaintext" class="">plaintext</option><option value="plainhtml" class="">plainhtml</option><option value="canvas" class="">canvas</option></select></th>
+      <th filterableCol="checkedmatch" class="checkbox" ><select filterContent="1" class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+      <th filterableCol="wildcardmatch" class="url" ><input filterContent="1" type="text" class="url" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="text" ><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
+      <th filterableCol="wildcardmatch" class="text" ><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
+      <th class="action-5" ></th>
+      <th filterableCol="selectmatch" class="text" ><input filterContent="1" type="text" class="filterContent" placeholder="Filter "></th>
       <th ></th>
-      <th filterableCol="selectmatch" class="text"><input filterContent="1" type="text" class="filterContent" placeholder="Filter "></th>
       
     </tr>
   </thead>
@@ -110,12 +112,19 @@ which columns to show
   <label for="toggle-location">Location</label>
   <input type="checkbox" id="toggle-location" checked>
 </div>
+<div class="toggle-button">
+  <label for="toggle-yellownote">YellowNote</label>
+  <input type="checkbox" id="toggle-yellownote" checked>
+</div>
 </div>
 
 <div id="my_notes_page_footer_text"></div>
 </div>
 <!-- main page end -->
     <script src="./on_page_common.js"></script>
+    <script src="./on_page_create_note_html.js"></script>
+    <script src="./on_page_note_actions.js"></script>
+
     <script src="./my_notes.js"></script>
 
 </body>

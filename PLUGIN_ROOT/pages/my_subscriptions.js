@@ -703,7 +703,8 @@ try {
                 newRow.setAttribute('subscriberuuid', row.subscriberuuid);
                 newRow.setAttribute('distributionlistid', row.distributionlistid);
                 newRow.setAttribute('creatorid', row.creatorid);
-
+                newRow.setAttribute('selectablecol', "true");
+                
                 // Create cells and populate them with data
        
                 const cell_name = newRow.insertCell(0);

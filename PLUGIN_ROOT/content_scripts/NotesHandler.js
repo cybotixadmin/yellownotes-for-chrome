@@ -49,14 +49,14 @@ document.addEventListener('contextmenu', function (event) {
 });
 
 document.addEventListener('oncontextmenu ', (event) => {
-    console.log("oncontextmenu detected at " + mouseX + " " + mouseY);
+    console.debug("oncontextmenu detected at " + mouseX + " " + mouseY);
     // keep the current cursor postion
 
     var mouseX = event.clientX;
     var mouseY = event.clientY;
 
     // Store or process the mouse position as needed
-    console.log('oncontextmenu Mouse position - X:', mouseX, 'Y:', mouseY);
+    console.debug('oncontextmenu Mouse position - X:', mouseX, 'Y:', mouseY);
 
     // You can perform additional actions here, such as displaying a custom context menu
 
@@ -69,7 +69,7 @@ document.addEventListener('oncontextmenu ', (event) => {
 
 var clickX, clickY;
 function logPosition(event) {
-    console.log("click detected: " + event.button);
+    console.debug("click detected: " + event.button);
     if (event.button === 2) {
         console.log("right click detected");
         clickX = event.clientX + window.scrollX;
@@ -78,16 +78,16 @@ function logPosition(event) {
             x: event.clientX + window.scrollX,
             y: event.clientY + window.scrollY
         };
-        console.log(cursorPosition);
+        console.debug(cursorPosition);
     } else {
-        console.log("not a right click");
+        console.debug("not a right click");
 
     }
 }
 
 // set a global variable on DOM being fully loaded
 var DOMfullyLoaded = false;
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.debug('###########################');
     console.debug('DOM fully loaded and parsed');
     console.debug('###########################');
@@ -106,18 +106,18 @@ var pageFullyLoaded = false;
 /*
 // set a listener for when the page is completely loaded, and then call the function to scan the page
 // and call for any yellownotes that may be applicable to the page
-*/
-window.addEventListener('load', function() {
+ */
+window.addEventListener('load', function () {
     console.debug('###########################');
     console.debug('Page fully loaded');
     console.debug('###########################');
     pageFullyLoaded = true;
-    // only scan the page if required beacuse some yellownotes need it (becasue they are attached to text)  
+    // only scan the page if required beacuse some yellownotes need it (becasue they are attached to text)
     scan_page();
     console.debug(whole_page_text);
     console.debug("calling getSliderPosition: ");
     getSliderPosition()
-    .then(function(position) {
+    .then(function (position) {
         console.log("position: " + position);
         return new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({
@@ -127,50 +127,48 @@ window.addEventListener('load', function() {
                         "position": position
                     }
                 }
-            }, function(response) {
+            }, function (response) {
                 console.debug("3.2.5. message sent to background.js with response: " + JSON.stringify(response));
                 resolve();
             });
         });
     })
-    .then(function() {
+    .then(function () {
         console.log("3.2.6. page update completed - delay 2 seconds before proceeding with further actions if any.");
         // Add a 2-second delay before proceeding
         return delay(2000);
     })
-    .then(function() {
+    .then(function () {
         // Code to execute after the delay
         console.log("3.2.7. 2-second delay completed, now proceeding with further actions if any.");
         // Here you can add any further actions that need to be executed after the delay
         console.log("position: " + position);
         return textnote_update(position);
     })
-    .then(function() {
+    .then(function () {
         console.log("3.2.9. page update completed ");
 
-
     })
-    .catch(function(error) {
+    .catch(function (error) {
         console.error("An error occurred: " + error);
     });
 
-    // 
+    //
 });
 
-
-/* 
+/*
 this function carried out the updates to which notes are shown on the page.
-The function is called from the local script 
-*/
+The function is called from the local script
+ */
 function textnote_update(position) {
     console.debug("textnote_update.start: " + position);
 
     return new Promise((resolve, reject) => {
         // chose which function to proceed with
         var shared_secret_to_identify_background_js_to_content_script_NoteSelectedHTML = "Glbx_marker6";
-       // console.debug("request0: " + request.action);
+        // console.debug("request0: " + request.action);
 
-       // const position = request.position;
+        // const position = request.position;
         console.log("update_notes_on_page, position: " + position);
 
         if (position == 1 || position == "1") {
@@ -209,11 +207,9 @@ function textnote_update(position) {
 
 }
 
-
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
 
 // get a unique reference for the URL
 var slidertag = getSliderTag();
@@ -225,27 +221,47 @@ function getSliderTag() {
 
 }
 
-function getSliderPosition(){
+function getSliderPosition() {
     console.log("slidertag: " + slidertag);
     return new Promise((resolve, reject) => {
-    chrome.storage.local.get(["isSlidersEnabled", "defaultSliderPosition", slidertag]).then(function (data) {
+        chrome.storage.local.get(["isSlidersEnabled", "defaultSliderPosition", slidertag]).then(function (data) {
 
-        console.log(JSON.stringify(data));
+            console.log(JSON.stringify(data));
 
-        try {
-            // console.log(JSON.stringify(data));
+            try {
+                // console.log(JSON.stringify(data));
 
-            if (!isUndefined(data[slidertag])) {
+                if (!isUndefined(data[slidertag])) {
 
-                console.log(JSON.stringify(data[slidertag]));
+                    console.log(JSON.stringify(data[slidertag]));
 
-                // first, check if there is a slider position value set for this URL
-                //console.log("--reading out position from local store: "+JSON.stringify(data.position));
-                position = data[slidertag].position;
-                console.log("position: " + position);
-                resolve(position );
-                
-            } else {
+                    // first, check if there is a slider position value set for this URL
+                    //console.log("--reading out position from local store: "+JSON.stringify(data.position));
+                    position = data[slidertag].position;
+                    console.log("position: " + position);
+                    resolve(position);
+
+                } else {
+                    chrome.runtime.sendMessage({
+                        action: "getSliderDefaultPosition"
+
+                    }, function (response) {
+                        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                        console.log("setting position to: " + response.defaultSliderPosition);
+                        position = response.defaultSliderPosition;
+                        console.log("position: " + position);
+                        resolve(position);
+
+                    });
+
+                }
+
+            } catch (e) {
+                console.log(e);
+                // if nothing specifically for this page is found, check with background for a general setting
+
+
+                // send request back to background.js
                 chrome.runtime.sendMessage({
                     action: "getSliderDefaultPosition"
 
@@ -254,32 +270,11 @@ function getSliderPosition(){
                     console.log("setting position to: " + response.defaultSliderPosition);
                     position = response.defaultSliderPosition;
                     console.log("position: " + position);
-resolve(position );
-                
+                    resolve(position);
                 });
-               
-
             }
-
-        } catch (e) {
-            console.log(e);
-            // if nothing specifically for this page is found, check with background for a general setting
-
-
-            // send request back to background.js
-            chrome.runtime.sendMessage({
-                action: "getSliderDefaultPosition"
-
-            }, function (response) {
-                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-                console.log("setting position to: " + response.defaultSliderPosition);
-                position = response.defaultSliderPosition;
-                console.log("position: " + position);
-                resolve(position );
-            });
-        }
+        });
     });
-});
 
 }
 
@@ -298,6 +293,9 @@ document.addEventListener('touchend', (event) => {
     }
 });
 
+/*
+Listener for request from background.js
+ */
 function listener(request, sender, sendResponse) {
 
     try {
@@ -334,19 +332,34 @@ function listener(request, sender, sendResponse) {
             if (request.action === "getPageContent") {
                 console.debug("getPageContent");
                 capturePageContent(request.url)
-                    .then(content => {
-                        sendResponse({ content });
-                    })
-                    .catch(error => {
-                        console.error("Error capturing page content:", error);
-                        sendResponse({ error: error.message });
+                .then(content => {
+                    sendResponse({
+                        content
                     });
+                })
+                .catch(error => {
+                    console.error("Error capturing page content:", error);
+                    sendResponse({
+                        error: error.message
+                    });
+                });
                 // Indicate that we want to send a response asynchronously
                 return true;
             } else if (request.action == "createnote") {
+                // call to create a universal yellownote
+                console.debug("browsersolutions calling: create_universal_yellownote");
+                create_universal_yellownote(request.info, request.note_type, request.note_template, request.notetype_template, request.note_properties, request.session, request.is_selection_text_connected);
+
+                sendResponse({
+                    success: true,
+                    data: "value"
+                });
+                return true;
+
+            } else if (request.action == "createnoteDISABLE") {
                 // call to create a yellow note
                 console.debug("browsersolutions calling: create_newstickynote_node(...)");
-                create_newstickynote_node(request.info, request.note_type, request.note_template, request.note_properties, request.session);
+                create_newstickynote_node(request.info, request.note_type, request.note_template, request.notetype_template, request.note_properties, request.session);
 
                 sendResponse({
                     success: true,
@@ -355,9 +368,11 @@ function listener(request, sender, sendResponse) {
                 return true;
             } else if (request.action == "placeYellowNoteOnPage") {
                 console.debug("placeYellowNoteOnPage");
-                console.debug(request.datarow);
-                console.debug(request.datarow.noteid);
-                console.debug(request.noteid);
+                console.debug(request);
+
+                //var cont1 = create_yellownote_DOM(request.note_template, request.notetype_template , "canvas", true, true)
+                //console.debug(cont1);
+
                 if (isNoteOnPage(request.noteid)) {
                     console.debug("yellownote is already on page");
                     // move focus to note
@@ -366,9 +381,10 @@ function listener(request, sender, sendResponse) {
                     console.debug("yellownote is NOT already on page");
                     // call the function that will place the note on the page
                     var note_template = safeParseInnerHTML(request.note_template, 'div');
+                    var notetype_template = safeParseInnerHTML(request.notetype_template, 'div');
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(JSON.parse(request.datarow.json), note_template, request.creatorDetails, request.isOwner, false, true)
-                    .then(function (res){
+                    placeStickyNote(request.note_data, request.note_template, request.notetype_template, request.creatorDetails, request.isOwner, false, true)
+                    .then(function (res) {
                         console.debug(res);
                         sendResponse({
                             success: true,
@@ -379,220 +395,18 @@ function listener(request, sender, sendResponse) {
                 return true;
             } else if (request.action == "moveFocusToNote") {
                 console.debug("calling moveFocusToNote");
-                moveFocusToNote(request.noteid);
+                moveFocusToNote(request.noteid).then(function (res) {
+                    console.debug(res);
+                    sendResponse({
+                        success: true,
+                    });
+                });
                 return true;
             } else if (request.action == "initiateSelection") {
                 /*
                  * selecting an area of the screen to capture
                  */
-                console.log("initiateSelection");
-                showMessage("Click and drag to select the area for capture.");
-
-                document.addEventListener('mousedown', startSelection);
-
-                console.debug(overlay);
-
-                function showMessage(text) {
-                    console.debug("showMessage");
-                    const messageBox = document.createElement('div');
-                    messageBox.style.position = 'absolute';
-                    messageBox.style.top = '10%';
-                    messageBox.style.left = '50%';
-                    messageBox.style.transform = 'translate(-50%, -50%)';
-                    messageBox.style.padding = '10px';
-                    messageBox.style.background = 'white';
-                    messageBox.style.border = '3px solid yellow';
-                    messageBox.style.zIndex = '10000';
-                    messageBox.style.display = 'none'; // Initially hidden
-                    document.body.appendChild(messageBox);
-                    messageBox.textContent = text;
-                    messageBox.style.display = 'block'; // Show the message
-                }
-
-                function startSelection(event) {
-                    console.log('Selection started');
-                    startX = event.pageX;
-                    startY = event.pageY;
-
-                    overlay.style.left = `${startX}px`;
-                    overlay.style.top = `${startY}px`;
-                    overlay.style.width = '0px';
-                    overlay.style.height = '0px';
-                    overlay.style.display = 'block';
-
-                    messageBox.style.display = 'none'; // Hide the message once selection starts
-
-                    document.addEventListener('mousemove', expandSelection);
-                    document.addEventListener('mouseup', endSelection);
-                }
-
-                function expandSelection(event) {
-                    console.log('Expanding selection');
-                    const currentX = event.pageX;
-                    const currentY = event.pageY;
-                    const width = currentX - startX;
-                    const height = currentY - startY;
-
-                    overlay.style.width = `${Math.abs(width)}px`;
-                    overlay.style.height = `${Math.abs(height)}px`;
-                    overlay.style.left = `${Math.min(startX, currentX)}px`;
-                    overlay.style.top = `${Math.min(startY, currentY)}px`;
-                }
-
-                function endSelection(event) {
-                    console.log("Selection ended")
-                    endX = event.pageX;
-                    endY = event.pageY;
-                    document.removeEventListener('mousemove', expandSelection);
-                    document.removeEventListener('mouseup', endSelection);
-                    // Capture the selection and process the data
-                    captureAndProcessSelection(startX, startY, endX, endY);
-                }
-
-                function captureAndProcessSelection(x1, y1, x2, y2) {
-                    console.log('Capturing and processing selection');
-                    var datauri;
-                    console.log(x1, y1, x2, y2);
-                    // Placeholder for capturing and processing logic
-                    const captureData = {
-                        x1,
-                        y1,
-                        x2,
-                        y2
-                    }; // Simulated capture data
-                    var linkedContentUniqueid = "";
-                    processData(captureData)
-                    .then(function (processedData) {
-                        console.log(processedData);
-                        datauri = processedData;
-                        return displayTable(processedData, x1, y1)
-                    })
-                    .then(function (id) {
-                        linkedContentUniqueid = id;
-                        console.log("linkedContentUniqueid: " + linkedContentUniqueid);
-                        // call out to get information about the note over
-                        const request_msg = {
-                            message: {
-                                "action": "get_note_creator_info"
-                            }
-                        }
-                        console.log("request to background: ");
-
-                        console.log(request_msg);
-
-                        return chrome.runtime.sendMessage(request_msg);
-
-                    }).then(function (response) {
-                        console.debug("message sent to backgroup.js with response: ");
-                        console.debug(response);
-                        // call out to create the note
-                        //create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (response) {
-                        const note_obj = {}
-                        var note_template = safeParseInnerHTML(response.note_template, 'div');
-                        create_stickynote_node(note_obj, note_template, response.note_properties, true, true).then(function (res) {
-                            console.debug("message sent to backgroup.js with response: ");
-
-                            // link in the captured image
-                            res.linkedContentUniqueid = linkedContentUniqueid;
-                            console.debug(res);
-                            //
-
-                            const newGloveboxNode = size_and_place_note_based_on_coordinates(res, note_obj, true, true);
-
-                            newGloveboxNode.linkedContentUniqueid = linkedContentUniqueid;
-                            // newGloveboxNode.setAttribute("linkedContentUniqueid", linkedContentUniqueid);
-                            newGloveboxNode.querySelector('input[type="hidden"][name="captured_image_datauri"]').replaceChildren(document.createTextNode(datauri));
-
-                            newGloveboxNode.setAttribute("note_type", "capture_note");
-                            console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
-                            attachEventlistenersToYellowStickynote(newGloveboxNode);
-                            // make some parts visible and other not visible
-                            console.debug("browsersolutions: makeEditButtonsVisible");
-                            console.debug("calling setComponentVisibility");
-                            setComponentVisibility(newGloveboxNode, ",new,.*normalsized");
-                            newGloveboxNode.setAttribute("button_arrangment", "rw");
-
-                            // internal scrolling for webframes
-
-                            // Make the stickynote draggable:
-                            console.debug("browsersolutions: makeDragAndResize");
-                            makeDragAndResize(newGloveboxNode);
-
-                        });
-
-                    })
-                    .catch(error => console.error("Error processing data:", error));
-                }
-
-                function processData(data) {
-                    console.log("Processing data...");
-                    // Simulate processing data and return a promise
-                    console.debug(data);
-                    // Send save request back to background to get the required information for creting a blank sticky note
-                    // Stickynotes are always enabled when created.
-                    var resp;
-                    return new Promise((resolve, reject) => {
-                        chrome.runtime.sendMessage({
-                            message: {
-                                "action": "create_capture_note",
-                                coords: data
-                            }
-                        }).then(function (response) {
-                            resp = response;
-                            console.debug("message sent to backgroup.js with response: ");
-                            console.debug(resp);
-
-                            // call the function that will crop the image
-                            return cropImage(resp.dataUrl, data);
-                        }).then(function (croppedImage) {
-                            console.log(croppedImage);
-                            resolve(croppedImage);
-                            // update the with the just cropped image
-                            //   resp.dataUrl = croppedImage;
-                            //    console.debug(resp);
-
-                            // call the function that will set which part of the note will be displayed
-                            // setComponentVisibility(note_root, ",rw,.*normalsized,");
-
-                            //  attachEventlistenersToYellowStickynote(note_root);
-
-                        });
-
-                    });
-                }
-
-                function displayTable(data, x, y) {
-                    console.log("Displaying table...");
-                    // Diplay the captured image data on page overlaying the original
-                    const capturedImageFrameTable = document.createElement('table');
-                    capturedImageFrameTable.style.position = 'fixed';
-                    capturedImageFrameTable.style.left = `${x}px`;
-                    capturedImageFrameTable.style.top = `${y}px`;
-                    capturedImageFrameTable.style.zIndex = '10001';
-                    capturedImageFrameTable.innerHTML = `<tr><td>${data.result}</td></tr>`; // Simplified table content
-                    // give the captured image a visible frame
-
-                    // asign the frame a uniqu value to be able to remove it later
-                    let guid = () => {
-                        let s4 = () => {
-                            return Math.floor((1 + Math.random()) * 0x10000)
-                            .toString(16)
-                            .substring(1);
-                        }
-                        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-                    }
-                    const linkedContentUniqueid = guid();
-
-                    return linkedContentUniqueid;
-                    capturedImageFrameTable.linkedContentUniqueid = linkedContentUniqueid;
-
-                    resp.linkedContentUniqueid = linkedContentUniqueid;
-                    // call the function that will create the note
-console.debug("calling create_newstickynote_node");
-                    create_newstickynote_node(resp, "capture_note", resp.note_template, resp.note_properties, resp.sessiontoken);
-
-                    document.body.appendChild(capturedImageFrameTable);
-                }
+                initiateScreenSelection();
                 return true;
             } else if (request.action == "update_notes_on_page") {
                 console.debug("update_notes_on_page");
@@ -721,7 +535,6 @@ console.debug("calling create_newstickynote_node");
                         brand = get_brand_from_sessiontoken(session[plugin_session_header_name]);
                         if (isUndefined(brand) || brand == null || brand == '' || brand == 'undefined') {
                             brand = "default";
-
                         }
                         // Collect template
                         console.debug("collect template based on brand (" + brand + "), note type (" + note_type + ")");
@@ -730,15 +543,16 @@ console.debug("calling create_newstickynote_node");
                                     action: "get_template",
                                     brand: brand,
                                     note_type: note_type
-
                                 }).then(function (response) {
                                     //console.debug("browsersolutions message sent to background.js with response: " + JSON.stringify(response));
-                                    const note_template = response;
+                                    const html_note_template = response;
                                     // console.debug("browsersolutions note_template: " + note_template);
-                                    console.debug("browsersolutions resolve");
-                                    var template = safeParseInnerHTML(note_template, 'div');
-                                    console.debug("browsersolutions placeStickyNote");
-                                    placeStickyNote(note_data, template, creatorDetails, isOwner, newNote, true).then(function (res){console.debug(res);});
+                                    //console.debug("browsersolutions resolve");
+                                    //var template = safeParseInnerHTML(note_template, 'div');
+                                    console.debug("calling placeStickyNote");
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote, true).then(function (res) {
+                                        console.debug(res);
+                                    });
                                     resolve({
                                         note_data,
                                         note_template
@@ -751,7 +565,6 @@ console.debug("calling create_newstickynote_node");
                         console.log("notes to be placed: " + promiseArray.length);
                     });
                 }
-
                 return true;
             } else if (request.action == "remove_single_note") {
                 console.log("remove note with noteid: " + request.noteid);
@@ -775,6 +588,215 @@ console.debug("calling create_newstickynote_node");
 
 chrome.runtime.onMessage.addListener(listener);
 
+function initiateScreenSelection() {
+    console.log("initiateSelection");
+    showMessage("Click and drag to select the area for capture.");
+
+    document.addEventListener('mousedown', startSelection);
+
+    console.debug(overlay);
+
+    function showMessage(text) {
+        console.debug("showMessage");
+        const messageBox = document.createElement('div');
+        messageBox.style.position = 'absolute';
+        messageBox.style.top = '10%';
+        messageBox.style.left = '50%';
+        messageBox.style.transform = 'translate(-50%, -50%)';
+        messageBox.style.padding = '10px';
+        messageBox.style.background = 'white';
+        messageBox.style.border = '3px solid yellow';
+        messageBox.style.zIndex = '10000';
+        messageBox.style.display = 'none'; // Initially hidden
+        document.body.appendChild(messageBox);
+        messageBox.textContent = text;
+        messageBox.style.display = 'block'; // Show the message
+    }
+
+    function startSelection(event) {
+        console.log('Selection started');
+        startX = event.pageX;
+        startY = event.pageY;
+
+        overlay.style.left = `${startX}px`;
+        overlay.style.top = `${startY}px`;
+        overlay.style.width = '0px';
+        overlay.style.height = '0px';
+        overlay.style.display = 'block';
+
+        messageBox.style.display = 'none'; // Hide the message once selection starts
+
+        document.addEventListener('mousemove', expandSelection);
+        document.addEventListener('mouseup', endSelection);
+    }
+
+    function expandSelection(event) {
+        console.log('Expanding selection');
+        const currentX = event.pageX;
+        const currentY = event.pageY;
+        const width = currentX - startX;
+        const height = currentY - startY;
+
+        overlay.style.width = `${Math.abs(width)}px`;
+        overlay.style.height = `${Math.abs(height)}px`;
+        overlay.style.left = `${Math.min(startX, currentX)}px`;
+        overlay.style.top = `${Math.min(startY, currentY)}px`;
+    }
+
+    function endSelection(event) {
+        console.log("Selection ended");
+        endX = event.pageX;
+        endY = event.pageY;
+        document.removeEventListener('mousemove', expandSelection);
+        document.removeEventListener('mouseup', endSelection);
+        // Capture the selection and process the data
+        captureAndProcessSelection(startX, startY, endX, endY);
+    }
+
+    function captureAndProcessSelection(x1, y1, x2, y2) {
+        console.log('Capturing and processing selection');
+        var datauri;
+        console.log(x1, y1, x2, y2);
+        // Placeholder for capturing and processing logic
+        const captureData = {
+            x1,
+            y1,
+            x2,
+            y2
+        }; // Simulated capture data
+        var linkedContentUniqueid = "";
+        processData(captureData)
+            .then(function (processedData) {
+                console.log(processedData);
+                datauri = processedData;
+                return displayTable(processedData, x1, y1);
+            })
+            .then(function (id) {
+                linkedContentUniqueid = id;
+                console.log("linkedContentUniqueid: " + linkedContentUniqueid);
+                // call out to get information about the note over
+                const request_msg = {
+                    message: {
+                        "action": "get_note_creator_info"
+                    }
+                };
+                console.log("request to background: ");
+
+                console.log(request_msg);
+
+                return chrome.runtime.sendMessage(request_msg);
+
+            }).then(function (response) {
+                console.debug("message sent to backgroup.js with response: ");
+                console.debug(response);
+                // call out to create the note
+                const note_obj = {};
+                var note_template = safeParseInnerHTML(response.note_template, 'div');
+                create_stickynote_node(note_obj, note_template, null, response.note_properties, true, true).then(function (res) {
+                    console.debug("message sent to backgroup.js with response: ");
+
+                    // link in the captured image
+                    res.linkedContentUniqueid = linkedContentUniqueid;
+                    console.debug(res);
+                    //
+                    console.debug("calling: size_and_place_note_based_on_coordinates");
+                    const newGloveboxNode = size_and_place_note_based_on_coordinates(res, note_obj, true, true);
+
+                    newGloveboxNode.linkedContentUniqueid = linkedContentUniqueid;
+                    // newGloveboxNode.setAttribute("linkedContentUniqueid", linkedContentUniqueid);
+                    newGloveboxNode.querySelector('input[type="hidden"][name="captured_image_datauri"]').replaceChildren(document.createTextNode(datauri));
+
+                    newGloveboxNode.setAttribute("note_type", "capture_note");
+                    console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
+                    attachEventlistenersToYellowStickynote(newGloveboxNode);
+                    // make some parts visible and other not visible
+                    console.debug("browsersolutions: makeEditButtonsVisible");
+                    console.debug("calling setComponentVisibility");
+                    setComponentVisibility(newGloveboxNode, ",new,.*normalsized");
+                    newGloveboxNode.setAttribute("button_arrangment", "rw");
+
+                    // internal scrolling for webframes
+                    // Make the stickynote draggable:
+                    //makeDragable(newGloveboxNode);
+                    //console.debug("calling makeResizeable");
+                    //makeResizeable(newGloveboxNode);
+                    console.debug("calling makeDragAndResize");
+                    makeDragAndResize(newGloveboxNode, true, true, true);
+                });
+
+            })
+            .catch(error => console.error("Error processing data:", error));
+    }
+
+    function processData(data) {
+        console.log("Processing data...");
+        // Simulate processing data and return a promise
+        console.debug(data);
+        // Send save request back to background to get the required information for creting a blank sticky note
+        // Stickynotes are always enabled when created.
+        var resp;
+        return new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({
+                message: {
+                    "action": "create_capture_note",
+                    coords: data
+                }
+            }).then(function (response) {
+                resp = response;
+                console.debug("message sent to backgroup.js with response: ");
+                console.debug(resp);
+
+                // call the function that will crop the image
+                return cropImage(resp.dataUrl, data);
+            }).then(function (croppedImage) {
+                console.log(croppedImage);
+                resolve(croppedImage);
+                // update the with the just cropped image
+                //   resp.dataUrl = croppedImage;
+                //    console.debug(resp);
+                // call the function that will set which part of the note will be displayed
+                // setComponentVisibility(note_root, ",rw,.*normalsized,");
+                //  attachEventlistenersToYellowStickynote(note_root);
+            });
+
+        });
+    }
+
+    function displayTable(data, x, y) {
+        console.log("Displaying table...");
+        // Diplay the captured image data on page overlaying the original
+        const capturedImageFrameTable = document.createElement('table');
+        capturedImageFrameTable.style.position = 'fixed';
+        capturedImageFrameTable.style.left = `${x}px`;
+        capturedImageFrameTable.style.top = `${y}px`;
+        capturedImageFrameTable.style.zIndex = '10001';
+        capturedImageFrameTable.innerHTML = `<tr><td>${data.result}</td></tr>`; // Simplified table content
+
+
+
+        // give the captured image a visible frame
+        // asign the frame a uniqu value to be able to remove it later
+        let guid = () => {
+            let s4 = () => {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            };
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        };
+        const linkedContentUniqueid = guid();
+
+        return linkedContentUniqueid;
+        capturedImageFrameTable.linkedContentUniqueid = linkedContentUniqueid;
+
+        resp.linkedContentUniqueid = linkedContentUniqueid;
+        // call the function that will create the note
+        console.debug("calling create_newstickynote_node");
+        create_newstickynote_node(resp, "capture_note", resp.note_template, resp.note_properties, resp.sessiontoken);
+
+        document.body.appendChild(capturedImageFrameTable);
+    }
+}
 
 function capturePageContent() {
     console.debug("capturePageContent.start");
@@ -792,40 +814,548 @@ function capturePageContent() {
 function capturePageForIframe(url) {
     console.debug("capturePageForIframe.start");
     return fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch the URL. Status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(htmlContent => {
-            // Create a Blob from the HTML content
-            const blob = new Blob([htmlContent], { type: 'text/html' });
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch the URL. Status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(htmlContent => {
+        // Create a Blob from the HTML content
+        const blob = new Blob([htmlContent], {
+                type: 'text/html'
+            });
 
-            // Create a URL for the Blob
-            const blobUrl = URL.createObjectURL(blob);
+        // Create a URL for the Blob
+        const blobUrl = URL.createObjectURL(blob);
 
-            // Create an iframe
-            const iframe = document.createElement('iframe');
+        // Create an iframe
+        const iframe = document.createElement('iframe');
 
-            // Set the sandbox attribute for security
-            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+        // Set the sandbox attribute for security
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
 
-            // Set the src attribute to the Blob URL
-            iframe.src = blobUrl;
+        // Set the src attribute to the Blob URL
+        iframe.src = blobUrl;
 
-            // Append the iframe to the body (or any other element)
-            document.body.appendChild(iframe);
+        // Append the iframe to the body (or any other element)
+        document.body.appendChild(iframe);
 
-            // Return the Blob URL
-            return blobUrl;
-        })
-        .catch(error => {
-            console.error('Error capturing page:', error);
-            throw error;
-        });
+        // Return the Blob URL
+        return blobUrl;
+    })
+    .catch(error => {
+        console.error('Error capturing page:', error);
+        throw error;
+    });
 }
 
+/* creates DOM object of the stick note */
+function create_universal_yellownote(info, note_type, html_note_template, html_notetype_template, note_properties, session, is_selection_text_connected) {
+
+    console.debug("create_universal_yellownote.start");
+    console.debug("info:");
+    console.debug(info);
+console.debug("note_type: " + note_type);
+console.debug("is_selection_text_connected: " + is_selection_text_connected);
+    // override
+    //note_type= "yellownote";
+
+
+    const isOwner = true;
+    const isNewNote = true;
+
+    /*
+    #############################
+
+    Create the note DOM object
+
+     */
+
+    // the root of the note object
+    var note_root = document.createElement('container');
+
+    // var fullURLToCSS = chrome.runtime.getURL("css/yellownote.css");
+
+    // insert the overall note template 
+
+    var note_template = safeParseInnerHTML(html_note_template, 'div');
+    // note_template = JSON.parse(html);
+    console.log(note_template);
+
+    note_root.setAttribute("class", "yellownotecontainer");
+    note_root.setAttribute("note_type", note_type);
+    note_root.setAttribute("button_arrangment", 'new');
+
+    note_root.setAttribute("isOwner", isOwner);
+    note_root.setAttribute("isNewNote", isNewNote);
+
+    note_root.appendChild(note_template);
+
+   
+// set the note_type as selected on the note_type drop-down menu
+    note_root.querySelector('select[name="select_notetype"]').value = note_type;
+
+     // update the body of the note which is different for each note type
+     console.debug("calling: updateNoteMiddleBar");
+     updateNoteMiddleBar(html_notetype_template, note_root);
+ 
+    /*
+    #####################################
+
+    populate the note DOM with data values
+     */
+
+    // create the note object data with suitable initial values for some fields
+    var note_object_data = {}
+    console.debug("note_properties: ");
+    console.debug(note_properties);
+    var userid = "";
+    console.debug("session: ");
+    console.debug(session);
+    // console.debug("selection text: " + info.selectionText);
+
+
+    var selection_text = "";
+    if (is_selection_text_connected) {
+    console.debug(info.selectionText);
+    console.debug(info.selectionText == undefined);
+
+    try {
+        if (!info.selectionText == undefined) {
+            if (info.selectionText != "" && info.selectionText != null) {
+                selection_text = info.selectionText;
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+
+    if (selection_text != '') {
+        note_root.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+        note_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(utf8_to_b64(note_object_data.selection_text)));
+    } else {
+        note_root.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(""));
+        note_root.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(""));
+    }
+}
+    try {
+
+        note_object_data.url = window.location.href;
+
+        if (typeof note_object_data.enabled != undefined) {
+            note_object_data.enabled = "true"
+        } else {
+            // default value if undefined, is enabled(=true)
+            note_object_data.enabled = "true"
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    const note_table = note_root.querySelector('[name="whole_note_table"]');
+
+    console.log("note_object_data: " + JSON.stringify(note_object_data));
+
+
+    try {
+        // itterate through the data container object in the not and populate them with values from the note_object_data
+        // capture local url
+        note_root.querySelector('input[type="hidden"][name="url"]').replaceChildren(document.createTextNode(note_object_data.url));
+        if (typeof note_object_data.enabled != undefined) {
+            note_root.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode(note_object_data.enabled));
+        } else {
+            // default value if undefined, is enabled(=true)
+            note_root.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode("true"));
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+
+    /*
+
+    give the note the correct size
+
+    customization of note
+    height, width, color, position, etc
+
+    Priority is given to the note-specific object data,
+    if not set, parameter specified for the note creator is used;
+    If not set, parameter specfied for the brand the creator is part of, is used;
+    if not set, the default values are used
+    Default values are specified in the template itself
+     */
+
+    var box_width = default_box_width + "px"; // set default value, override with more specific values if available
+    // attempt to read size parameters from the note object
+    if (note_table.hasAttribute("box_width")) {
+        console.debug("note_table has box_width, use it ");
+        box_width = note_table.getAttribute("box_width");
+    } else if (note_properties.box_width != undefined) {
+        console.debug("creator's note_properties has box_width, use it " + note_properties.box_width);
+        box_width = note_properties.box_width;
+    } else {
+        // brand-level not implemted yet
+    }
+    note_root.setAttribute("box_width", box_width);
+
+    var box_height = default_box_height + "px"; // set default value, override with more specific values if available
+    // attempt to read size parameters from the note object
+    if (note_table.hasAttribute("box_height")) {
+        console.debug("note_table has box_height, use it");
+        box_height = note_table.getAttribute("box_height");
+    } else if (note_properties.box_height) {
+        console.debug("creator's note_properties has box_height, use it " + note_properties.box_height);
+        box_height = note_properties.box_height;
+    } else {
+        // brand-level not implemted yet
+    }
+    note_root.setAttribute("box_height", box_height);
+    //note_table.st
+    update_note_internal_size(note_root);
+
+    // give the note color
+    var highlight_background = "rgb(" + hexToRGB(note_color) + ", 0.25)";
+
+    // what color to use for the note
+    var note_color = "#ffff00"; // set default value, override with more specific values if available
+    // attempt to read size parameters from the note properties of the creator
+    if (note_properties.note_color) {
+        note_color = note_properties.note_color
+            console.debug("creator's note_properties has note_color, use it " + note_color);
+
+    } else {
+        // brand-level not implemted yet
+    }
+    var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
+    console.log("box_background" + box_background);
+
+    // show/hide elements based on the ower and editing
+
+
+    // place the note on the page
+    console.debug("mouseX: " + mouseX);
+    console.debug("mouseY: " + mouseY);
+
+    // place the note there the cursor is placed
+    note_root.setAttribute("posx", mouseX + "px");
+    note_root.setAttribute("posy", mouseY + "px");
+
+    console.debug("selection_text: " + selection_text);
+    console.debug(selection_text);
+    console.debug((!isUndefined(selection_text)));
+    console.debug(selection_text != null);
+    console.debug(selection_text != '');
+    // uuid to connect to image inserted (for capture_note)
+    var linkedContentUniqueid = "";
+    // uuid to connect to the part fo the document that has been highlighted
+    var highlightuniqueid = "";
+
+    // is selection_text set ?
+    note_object_data.selection_text = selection_text;
+    if (selection_text != '') {
+        // Usage: Call this function with the text you want to highlight
+        console.debug("selection_text: " + selection_text);
+        console.debug(selection_text);
+        console.debug("calling highlightTextOccurrences");
+
+        highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
+
+        console.log("Highlights added with ID: ", highlightuniqueid);
+        console.log(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
+        // only include the highlight id with the note object if it is not null
+        //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
+        note_object_data.highlightuniqueid = highlightuniqueid;
+        note_root.setAttribute("highlightuniqueid", highlightuniqueid);
+        //}
+
+
+        //note_object_data.message_display_text = selection_text;
+    } else {
+        // no selection_text
+        console.debug("selection_text is not set or is blank: ");
+
+    }
+    console.log("highlightuniqueid: ", highlightuniqueid);
+
+    // attach event listeners to the note
+
+
+    // render template into a complete note object (with values)
+
+    //console.debug(note_table);
+
+
+    /* where on the page is the note going to be placed ?
+
+    If the not contains coordinates, use them. If not, use the cursor position
+     */
+
+    console.debug("calling createNoteHeader");
+    createNoteHeader(note_object_data, note_root, note_properties, isOwner, isNewNote)
+
+    try{
+        // set the note_type as selected on the note_type drop-down menu
+        const noteTypeSelect = note_root.querySelector('select[name="select_notetype"]');
+        console.debug(noteTypeSelect);
+        const option_shown = noteTypeSelect.querySelector('option[value="' + note_type + '"]');
+        console.debug(option_shown);
+        option_shown.setAttribute("selected", "selected");
+    } catch(e){
+            console.error(e);
+    }
+    // set background color of the note
+    setBackground(box_background, note_root);
+
+    // set sizing
+    console.debug("calling update_note_internal_size");
+    update_note_internal_size(note_root);
+
+    //console.debug("calling highlightTextOccurrences_old")
+    //highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
+    //console.debug("highlightuniqueid", highlightuniqueid)
+
+    //console.debug("calling getSelectionTextDOMPosition")
+    console.debug(note_root);
+
+    var doc = window.document;
+    var doc_root = doc.documentElement;
+    //console.debug(doc_root);
+
+    const insertedNode = doc_root.insertBefore(note_root, doc_root.firstChild);
+
+    console.log(insertedNode);
+  // attach event listeners to buttons and icons
+
+   noteTypeSpecificActions(note_type, insertedNode, info);
+    //insertedNode.setAttribute("isOwner: ", isOwner);
+    //insertedNode.setAttribute("newNote: ", isNewNote);
+    console.log("highlightuniqueid: ", highlightuniqueid);
+    if (highlightuniqueid && highlightuniqueid !== "0") {
+        // selection text was matched in the document
+        // place note next to where the text is highlighted
+
+
+        console.log("calling size_and_place_note_based_on_texthighlight");
+        size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
+
+      
+        insertedNode.setAttribute("highlightuniqueid", highlightuniqueid);
+        console.debug(insertedNode);
+console.debug("calling size_and_place_note_based_on_texthighlight");
+        size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
+        
+    } else {
+        // selection text was not matched in the document, or there is no selection text
+        console.log("selection text was not matched in the document, or there is no selection text");
+
+        // move to the default location on the screen if all else fails
+        //inserted.setAttribute("posx", 50);
+        //inserted.setAttribute("posy", 50);
+        //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
+        //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
+        console.debug("calling size_and_place_note_based_on_coordinates");
+        size_and_place_note_based_on_coordinates(insertedNode, note_object_data,isOwner, isNewNote);
+
+    }
+      // set the flag that contral which button are shown
+      insertedNode.setAttribute("button_arrangment", 'new');
+
+        // call the function that will set which part of the note will be displayed
+        console.debug("calling setComponentVisibility");
+        setComponentVisibility(insertedNode, ",new,.*normalsized,");
+
+       
+       
+        // move to the default location on the screen if all else fails
+        //inserted.setAttribute("posx", 50);
+        //inserted.setAttribute("posy", 50);
+        //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
+        //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
+        // width
+        console.log("setting box:width: " + insertedNode.getAttribute("box_width"));
+        insertedNode.querySelector('[name="whole_note_table"]').style.width = insertedNode.getAttribute("box_width");
+
+        // height
+
+
+        console.log("setting box_height: " + insertedNode.getAttribute("box_height"));
+        // since this is a new note, the height is padded by the control bar
+
+        insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
+
+        // place focus
+        try {
+            insertedNode.querySelector('[focus="true"]').focus();
+        } catch (e) {
+            console.log(e);
+        }
+
+
+    // call the function that will set which part of the note will be displayed
+    //console.debug("calling setComponentVisibility");
+    //setComponentVisibility(insertedNode, ",new,.*normalsized,");
+
+    // call the function that set sizing for note-internal compoents
+    console.debug("calling: update_note_internal_size");
+update_note_internal_size(insertedNode);
+
+    // call the function that will make the note draggable
+    //console.debug("calling: makeDragable");
+    //makeDragable(insertedNode);
+
+    //console.debug("calling: makeResizeable");
+    //makeResizeable(insertedNode);
+    console.debug("calling: makeDragAndResize");
+    makeDragAndResize(insertedNode, isOwner, isNewNote, true);
+
+    console.debug(insertedNode);
+    // attach eventlisteners to the note
+    
+    // call the function that will make the note resizeable
+    // console.debug("browsersolutions: makeResizeable");
+   
+    console.debug("browsersolutions: calling dropdownlist_add_option");
+    dropdownlist_add_option(insertedNode, "", "", "");
+
+     // attach eventlisteners to the note ( common to all types of notes)
+     attachEventlistenersToYellowStickynote(insertedNode);
+
+    // place focus on the new yellownote
+    try {
+        if (insertedNode.querySelector('[focus="true"]')){
+        insertedNode.querySelector('[focus="true"]').focus();
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    return;
+}
+
+function noteTypeSpecificActions(note_type, insertedNode, info) {
+    console.debug("calling note type-specific procedures");
+    if (note_type == "plaintext") {
+        // make the message in the textarea touch-n-go
+        preparePlainNote(insertedNode);
+    } else if (note_type == "plainhtml") {
+        // make the message in the textarea touch-n-go
+        preparePlainNote(insertedNode);
+    } else if (note_type == "yellownote") {
+        // make the message in the textarea touch-n-go
+        preparePlainNote(insertedNode);
+    } else if (note_type == "capture_note") {
+        prepareCaptureNote(insertedNode, info);
+    } else if (note_type == "canvas") {
+        prepareCanvasNoteForDrawing(insertedNode);
+    } else if (note_type == "webframe") {
+        console.debug("webframe");
+        //
+    }
+}
+
+function prepareCaptureNote(node_root, info) {
+    console.debug("prepareCaptureNote.start");
+
+    // place the note on the orignal capture coordinates
+    node_root.setAttribute("posx", info.coords.x1 + "px");
+    node_root.setAttribute("posy", info.coords.y1 + "px");
+    const img = new Image();
+    img.src = info.dataUrl;
+    img.style.position = 'fixed';
+    img.style.left = overlay.style.left;
+    img.style.top = overlay.style.top;
+    img.style.width = overlay.style.width;
+    img.style.height = overlay.style.height;
+    img.style.border = '3px solid yellow';
+    img.style.zIndex = '10000';
+    console.log(img);
+    // Add a close icon
+    const closeIcon = document.createElement('div');
+    closeIcon.textContent = '✖'; // Simple text close icon
+    closeIcon.style.position = 'absolute';
+    closeIcon.style.top = '-3';
+    closeIcon.style.right = '-3';
+    closeIcon.style.cursor = 'pointer';
+    closeIcon.style.zIndex = '10001';
+    closeIcon.addEventListener('click', function () {
+        console.debug("removing overlay image frame");
+        document.documentElement.removeChild(img);
+    });
+
+    img.appendChild(closeIcon);
+    const ins = document.documentElement.appendChild(img);
+    console.debug(ins);
+}
+
+function preparePlainNote(node_root) {
+    console.debug("preparePlainNote.start");
+    try {
+        const textarea = node_root.querySelector('[name="message_display_text"]');
+        console.log(textarea);
+        // Set initial placeholder text that should vanish when typing begins
+        const placeholderText = "write your notes here..";
+        textarea.innerHTML = "<div>" + placeholderText + "</div>";
+
+        // Attach a focus event listener to remove the text as soon as the textarea gains focus
+        textarea.addEventListener('focus', function () {
+            if (textarea.value === placeholderText) {
+                textarea.value = '';
+            }
+        });
+
+        // Attach an input event listener to handle the case where the user starts typing
+        textarea.addEventListener('input', function () {
+            if (textarea.value === '') {
+                textarea.value = placeholderText;
+            }
+        });
+
+        // Attach a blur event to reset placeholder if nothing is typed
+        textarea.addEventListener('blur', function () {
+            if (textarea.value === '') {
+                textarea.value = placeholderText;
+            }
+        });
+        console.debug("preparePlainNote.end");
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+
+function prepareFrameNote(node_root) {
+    console.debug("prepareFrameNote.start");
+    try {
+       
+
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+
+function updateNoteMiddleBar(html_notetype_template, node_root) {
+    console.debug("updateNoteMiddleBar.start");
+    //console.log(html_notetype_template);
+    console.log(node_root);
+    console.log(node_root.querySelector('[name]'));
+    var notetype_template = safeParseInnerHTML(html_notetype_template, 'div');
+    console.log(notetype_template);
+    const nodeToReplace = node_root.querySelector('[name="whole_note_middlebar"]');
+    console.debug(nodeToReplace);
+    const middle_bar = notetype_template.querySelector('tr[name="whole_note_middlebar"]');
+    console.debug(middle_bar);
+    //var importedContent = node_root.importNode(middle_bar.documentElement, true);
+    //nodeToReplace.parentNode.replaceChild(importedContent, nodeToReplace);
+    //nodeToReplace.parentNode.appendChild(middle_bar);
+    nodeToReplace.parentNode.insertBefore(middle_bar, nodeToReplace.nextSibling);
+
+    nodeToReplace.remove();
+
+    console.debug(node_root);
+    console.debug("updateNoteMiddleBar.end");
+}
 
 function cropImage(base64Image, coords, scale = window.devicePixelRatio) {
     return new Promise((resolve, reject) => {
@@ -870,7 +1400,7 @@ function cropImage(base64Image, coords, scale = window.devicePixelRatio) {
 }
 
 /* creates DOM object of the stick note */
-function create_newstickynote_node(info, note_type, html, note_properties, session) {
+function create_newstickynote_node(info, note_type, html, notetype_template, note_properties, session) {
 
     console.debug("# create_newstickynote_node.start");
     console.debug("info:");
@@ -880,10 +1410,10 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     const isNewNote = true;
     // create the note object data with suitable initial values for some fields
     var note_object_data = {}
-    console.debug("note_properties: " );
+    console.debug("note_properties: ");
     console.debug(note_properties);
     var userid = "";
-    console.debug("session: " );
+    console.debug("session: ");
     console.debug(session);
     // console.debug("selection text: " + info.selectionText);
 
@@ -985,13 +1515,13 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     var selection_text = "";
     console.debug(info.selectionText);
     console.debug(info.selectionText == undefined);
-    
+
     try {
-        if (!info.selectionText == undefined){
-        if (info.selectionText != "" && info.selectionText != null ) {
-            selection_text = info.selectionText;
+        if (!info.selectionText == undefined) {
+            if (info.selectionText != "" && info.selectionText != null) {
+                selection_text = info.selectionText;
+            }
         }
-    }
     } catch (e) {
         console.error(e);
     }
@@ -1027,7 +1557,7 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         node_root.setAttribute("highlightuniqueid", highlightuniqueid);
         //}
 
-        
+
         //note_object_data.message_display_text = selection_text;
     } else {
         // no selection_text
@@ -1065,14 +1595,15 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     }
 
     console.debug("calling createNoteHeader");
-    createNoteHeader(note_object_data, node_root, note_properties, isOwner, isNewNote)
+    createNoteHeader(note_object_data, node_root, note_properties, isOwner, isNewNote).then(function (res) {
+        console.debug(res);
 
     // set background color of the note
     setBackground(box_background, node_root);
 
     // set sizing
     console.debug("calling update_note_internal_size");
-    update_note_internal_size(box_width, box_height, node_root);
+    update_note_internal_size(node_root);
 
     // attach event listeners to buttons and icons
     //attachEventlistenersToYellowStickynote(node_root);
@@ -1147,6 +1678,15 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     } else if (note_type == "webframe") {
         console.debug("webframe");
         //
+    } else if (note_type == "canvas") {
+        console.debug("canvas");
+
+
+    // attach sepcific event listeners to the canvas note
+    prepareCanvasNote(node_root);
+
+        //
+ 
     }
 
     //console.debug("calling highlightTextOccurrences_old")
@@ -1185,8 +1725,8 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         setComponentVisibility(insertedNode, ",new,.*normalsized,");
 
         // call the function that will make the note draggable
-        console.debug("browsersolutions: makeDragAndResize");
-        makeDragAndResize(insertedNode);
+        console.debug("calling: makeDragAndResize");
+        makeDragAndResize(insertedNode, isOwner, isNewNote, true);
 
         // attach eventlisteners to the note
         attachEventlistenersToYellowStickynote(insertedNode);
@@ -1209,8 +1749,8 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
         insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
 
         // call the function that will make the note resizeable
-        // console.debug("browsersolutions: makeResizable");
-        // makeResizable(inserted);
+        // console.debug("browsersolutions: makeResizeable");
+        // makeResizeable(inserted);
         console.debug("browsersolutions: calling dropdownlist_add_option");
         dropdownlist_add_option(insertedNode, "", "", "");
 
@@ -1239,15 +1779,15 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
 
     // call the function that will make the note draggable
     console.debug("browsersolutions: makeDragAndResize");
-    makeDragAndResize(insertedNode);
+    makeDragAndResize(insertedNode, isOwner, isNewNote, true);
 
     console.debug(insertedNode);
     // attach eventlisteners to the note
     attachEventlistenersToYellowStickynote(insertedNode);
 
     // call the function that will make the note resizeable
-    // console.debug("browsersolutions: makeResizable");
-    // makeResizable(inserted);
+    // console.debug("browsersolutions: makeResizeable");
+    // makeResizeable(inserted);
     console.debug("browsersolutions: calling dropdownlist_add_option");
     dropdownlist_add_option(insertedNode, "", "", "");
 
@@ -1257,108 +1797,250 @@ function create_newstickynote_node(info, note_type, html, note_properties, sessi
     } catch (e) {
         console.error(e);
     }
-    return;
 
-    var out = getSelectionTextDOMPosition(info.selectionText);
-    console.debug(out);
+    }).catch(function (err) {
+        console.error(err);
+    });
 
-    if (out.selection_matched_in_document) {
-        // found selection text in document. get x,y positions
-        try {
-            console.debug(out.start_range_node);
-            console.debug(out.start_range_node.parentNode);
-            const p = getXYPositionOfDOMElement(out.start_range_node.parentNode);
-            console.log(p);
+}
 
-            console.log(p.left);
 
-            //const pos1 = getXYPositionOfDOMElement(out.start_range_node.parentNode);
-            //const pos2 = getXYPositionOfDOMElement(out.end_range_node.parentNode);
-            //console.debug(node_root);
-            node_root.setAttribute("posx", p.posx + "px");
-            //    console.debug(node_root);
-            node_root.setAttribute("posy", p.posy + "px");
-            node_root.setAttribute("scroll_x", p.scroll_x + "px");
-            node_root.setAttribute("scroll_y", p.scroll_y + "px");
-            //    console.debug(node_root);
-            node_root.setAttribute("posy", p.posy + "px");
-        } catch (e) {
-            console.error(e);
-            // in case of error, fall back on using cursor position
+function prepareCanvasNoteForDrawing(node_root) {
+    console.log("prepareCanvasNoteForDrawing.start");
+    console.log(node_root);
+    // Constants for canvas size and colors
+    const canvasWidth = 200;
+    const canvasHeightLarge = 250;
+    const canvasHeightSmall = 30;
+    const initialColor = '#FFFF00'; // Yellow
 
-            node_root.posx = mouseX + "px";
-            node_root.posy = mouseY + "px";
+    // Get the table cells for canvas and controls
+    //const canvasCell = document.getElementById('canvas-cell');
+    const canvasCell = node_root.querySelector('[name="canvas-cell"]');
+    //const controlsCell = document.getElementById('controls-cell');
+    const controlsCell = node_root.querySelector('[name="controls-cell"]');
 
-            var scrollTop = window.scrollY || window.pageYOffset;
-            node_root.setAttribute("scroll_y", scrollTop + "px");
-            var scrollLeft = window.scrollY || window.pageYOffset;
-            node_root.setAttribute("scroll_x", scrollLeft + "px");
+    // Create canvas element
+    //const canvas = node_root.createElement('canvas');
+    const canvas = node_root.querySelector('[name="canvas"]');
 
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeightLarge;
+    canvas.style.backgroundColor = initialColor; // Set initial color
+    canvasCell.appendChild(canvas);
+
+
+ // Bring focus back to the canvas
+ canvas.focus();
+
+ // Prevent event handlers from interfering with drawing
+ canvas.addEventListener('keydown', (e) => {
+     e.preventDefault();
+     e.stopPropagation();
+ });
+
+ canvas.addEventListener('keyup', (e) => {
+     e.preventDefault();
+     e.stopPropagation();
+ });
+
+ canvas.addEventListener('mousedown', (e) => {
+     e.preventDefault();
+     e.stopPropagation();
+     handleMouseDown(e);
+ });
+
+ canvas.addEventListener('mousemove', (e) => {
+     e.preventDefault();
+     e.stopPropagation();
+     handleMouseMove(e);
+ });
+
+ canvas.addEventListener('mouseup', (e) => {
+     e.preventDefault();
+     e.stopPropagation();
+     handleMouseUp(e);
+ });
+
+
+  function handleMouseDown(e) {
+      isDrawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+  }
+
+  function handleMouseMove(e) {
+      if (isDrawing) {
+          ctx.lineTo(e.offsetX, e.offsetY);
+          ctx.stroke();
+      }
+  }
+
+  function handleMouseUp(e) {
+      if (isDrawing) {
+          handleMouseMove(e);
+          isDrawing = false;
+      }
+  }
+
+    // Get canvas context
+    const ctx = canvas.getContext('2d');
+
+    // Variables to track drawing state
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // Function to draw a sample line based on selected type
+    function drawSampleLine(ctx, lineType, color, thickness) {
+        ctx.clearRect(0, 0, canvasWidth, canvasHeightSmall);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = thickness;
+
+        // Draw different types of lines
+        switch (lineType) {
+        case 'solid':
+            ctx.beginPath();
+            ctx.moveTo(10, 15);
+            ctx.lineTo(190, 15);
+            ctx.stroke();
+            break;
+        case 'widely_stapled':
+            ctx.beginPath();
+            ctx.moveTo(10, 15);
+            ctx.lineTo(70, 15);
+            ctx.moveTo(90, 15);
+            ctx.lineTo(150, 15);
+            ctx.stroke();
+            break;
+        case 'dencely_stapled':
+            ctx.beginPath();
+            ctx.moveTo(10, 15);
+            ctx.lineTo(50, 15);
+            ctx.moveTo(70, 15);
+            ctx.lineTo(110, 15);
+            ctx.moveTo(130, 15);
+            ctx.lineTo(170, 15);
+            ctx.stroke();
+            break;
+        default:
+            break;
         }
-
-    } else if (isNewNote) {
-        // use x,y position of cursor for new notes
-        console.debug("use x,y position of cursor for new note: " + mouseX + " " + mouseY);
-        node_root.posx = mouseX + "px";
-        node_root.posy = mouseY + "px";
-
-    } else if (haveValidXYPositons(node_root)) {
-        console.debug("use x,y position in the note, if any");
-        // use x,y position in the note, if any
-
-    } else {
-        // use default
-        console.debug("use default x,y position for new note");
     }
 
-    console.debug(node_root);
-    console.debug("browsersolutions: calling placeYellowNote");
+    // Color picker for canvas background
+    //const canvasColorPicker = node_root.createElement('input');
 
-    // set the flag that contral which button are shown
-    insertedNode.setAttribute("button_arrangment", 'new');
+    const canvasColorPicker = node_root.querySelector('[name="canvas-color-picker"]');
 
-    insertedNode.setAttribute("highlightuniqueid", highlightuniqueid);
-    console.debug(insertedNode);
-    // call the function that will set which part of the note will be displayed
-    console.debug("calling setComponentVisibility");
-    setComponentVisibility(insertedNode, ",new,.*normalsized,");
+    canvasColorPicker.type = 'color';
+    canvasColorPicker.value = initialColor;
+    canvasColorPicker.addEventListener('input', function () {
+        canvas.style.backgroundColor = canvasColorPicker.value;
+    });
+    controlsCell.appendChild(canvasColorPicker);
 
-    // call the function that will make the note draggable
-    console.debug("browsersolutions: makeDragAndResize");
-    makeDragAndResize(insertedNode);
+    // Color picker for drawing color
+    //const drawColorPicker = node_root.createElement('input');
+    const drawColorPicker = node_root.querySelector('[name="draw-color-picker"]');
 
-    // attach eventlisteners to the note
-    attachEventlistenersToYellowStickynote(insertedNode);
+    drawColorPicker.type = 'color';
+    drawColorPicker.value = '#000000'; // Black initially
+    drawColorPicker.addEventListener('input', function () {
+        ctx.strokeStyle = drawColorPicker.value;
+        drawSampleLine(ctx, lineTypeSelect.value, ctx.strokeStyle, lineWidthSelect.value);
+    });
+    controlsCell.appendChild(drawColorPicker);
 
-    // move to the default location on the screen
-    //inserted.setAttribute("posx", 50);
-    //inserted.setAttribute("posy", 50);
-    insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
-    insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
-    // width
-    console.log("setting box:width: " + insertedNode.getAttribute("box_width"));
-    insertedNode.querySelector('[name="whole_note_table"]').style.width = insertedNode.getAttribute("box_width");
+    // Line width selector
+    // const lineWidthSelect = node_root.createElement('select');
+    const lineWidthSelect = node_root.querySelector('select[name="line-width-select"]');
+    console.debug(lineWidthSelect);
+    // [1, 2, 3, 4, 5].forEach(function(num) {
+    //     const option = node_root.createElement('option');
+    //     option.value = num;
+    //     option.textContent = num;
+    //     lineWidthSelect.appendChild(option);
+    // });
+    lineWidthSelect.addEventListener('change', function () {
+        ctx.lineWidth = lineWidthSelect.value;
+        drawSampleLine(ctx, lineTypeSelect.value, ctx.strokeStyle, ctx.lineWidth);
+    });
+    //controlsCell.appendChild(lineWidthSelect);
 
-    // height
+    // Line type selector
+    //const lineTypeSelect = node_root.createElement('select');
+    const lineTypeSelect = node_root.querySelector('select[name="line-type-select"]');
 
+    // ['solid', 'widely_stapled', 'dencely_stapled'].forEach(function(type) {
+    //     const option = node_root.createElement('option');
+    //     option.value = type;
+    //     option.textContent = type.replace('_', ' ');
+    //     lineTypeSelect.appendChild(option);
+    // });
 
-    console.log("setting box_height: " + insertedNode.getAttribute("box_height"));
-    // since this is a new note, the height is padded by the control bar
+    lineTypeSelect.addEventListener('change', function () {
+        console.log('Line type:', lineTypeSelect.value);
+        drawSampleLine(ctx, lineTypeSelect.value, ctx.strokeStyle, lineWidthSelect.value);
+    });
 
-    insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
+    //controlsCell.appendChild(lineTypeSelect);
 
-    // call the function that will make the note resizeable
-    // console.debug("browsersolutions: makeResizable");
-    // makeResizable(inserted);
-    console.debug("browsersolutions: calling dropdownlist_add_option");
-    dropdownlist_add_option(insertedNode, "", "", "");
+    // Button to save canvas as PNG
+    //const saveButton = node_root.createElement('button');
+    //saveButton.textContent = 'Save as PNG';
+    const saveButton = node_root.querySelector('[name="save-button"]');
 
-    // place focus
-    try {
-        insertedNode.querySelector('[focus="true"]').focus();
-    } catch (e) {
-        console.error(e);
+    saveButton.addEventListener('click', function () {
+        const dataURI = canvas.toDataURL('image/png');
+        console.log('Image saved:', dataURI);
+        // Send dataURI to background script (example)
+        chrome.runtime.sendMessage({
+            action: 'saveImage',
+            imageDataURI: dataURI
+        }, function (response) {
+            console.log('Image saved:', response);
+        });
+    });
+    controlsCell.appendChild(saveButton);
+
+    // Function to handle mouse/touch down event for drawing
+    function startDrawing(e) {
+        e.preventDefault();
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX || e.touches[0].clientX, e.offsetY || e.touches[0].clientY];
     }
+
+    // Function to handle mouse/touch move event for drawing
+    function draw(e) {
+        e.preventDefault();
+        if (!isDrawing)
+            return;
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        [lastX, lastY] = [e.offsetX || e.touches[0].clientX, e.offsetY || e.touches[0].clientY];
+        ctx.lineTo(lastX, lastY);
+        ctx.stroke();
+    }
+
+    // Function to handle mouse/touch up event for drawing
+    function stopDrawing(e) {
+        e.preventDefault();
+        isDrawing = false;
+    }
+
+    // Event listeners for mouse events on the canvas
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+
+    // Event listeners for touch events on the canvas
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // Initial drawing of the sample line
+    drawSampleLine(ctx, 'solid', drawColorPicker.value, lineWidthSelect.value);
 
 }
 
@@ -1381,8 +2063,10 @@ function setBackground(newBackgroundRGB, note_root) {
 }
 
 function hexToRGB(hex) {
-    console.debug("browsersolutions ### hexToRGB (" + hex + ")");
+    console.debug("hexToRGB.start (" + hex + ")");
     try {
+if (hex) {
+
         // Remove the leading '#' if it exists
         if (hex.charAt(0) === '#') {
             hex = hex.slice(1);
@@ -1395,6 +2079,10 @@ function hexToRGB(hex) {
 
         // Return the RGB string
         return `${r},${g},${b}`;
+    }else{
+          // return the default color
+          return "255,255,0";
+    }
     } catch (e) {
         console.error(e);
         // return the default color
@@ -1403,7 +2091,7 @@ function hexToRGB(hex) {
 }
 
 function save_new_note(event) {
-    console.debug("save_new_note (event)");
+    console.debug("# save_new_note.start (event)");
     console.debug(event);
 
     // save note to database
@@ -1413,20 +2101,25 @@ function save_new_note(event) {
         var note_root = getYellowStickyNoteRoot(event.target);
         console.log(note_root);
 
+        // get note type which will determine which fields to read
         const note_type = note_root.getAttribute("note_type");
         console.log("note_type: " + note_type);
         // var note_table = event.target.parentNode.parentNode.parentNode;
         // console.debug(note_table);
+        console.debug(note_root.querySelectorAll('input[name="selection_text"]').length);
+        console.debug(note_root.querySelector('input[name="selection_text"]').textContent.trim());
+
         var selection_text = "";
         try {
             selection_text = note_root.querySelectorAll('input[name="selection_text"]')[0].textContent.trim();
         } catch (e) {
             // set default, current timestamp
-selection_text = ""
+            selection_text = ""
         }
-if (selection_text == "") { 
-    // no selection text, try to get it from the note
-}
+        if (note_root.querySelector('input[name="selection_text"]').textContent.trim() == undefined) {
+            console.debug("selection_text is undefined");
+            selection_text = "";
+        }
         console.debug(selection_text);
 
         var url = "";
@@ -1469,16 +2162,31 @@ if (selection_text == "") {
             try {
                 message_display_text = note_root.querySelector('[name="message_display_text"]').innerHTML;
 
-            } catch (e) {}
+            } catch (e) {
+                console.debug(e);
+            }
 
             var enabled = "";
             try {
                 enabled = note_root.querySelectorAll('input[name="enabled"]')[0].textContent.trim();
             } catch (e) {
                 // set default
+                console.debug(e);
                 enabled = true;
             }
 
+            var canvas_uri = "";
+            if (note_type == "canvas") {
+                var canvas;
+                try {
+                    canvas = note_root.querySelector('[name="canvas"]');
+                    console.debug(canvas);
+                    canvas_uri = canvas.toDataURL('image/png');
+                    console.debug(canvas_uri);
+                } catch (e) {
+                    console.debug(e);
+                }
+            }
             // update lastmodified timestamp every time
             var lastmodifiedtime = getCurrentTimestamp();
 
@@ -1507,13 +2215,14 @@ if (selection_text == "") {
             console.debug("url: " + url);
 
             console.debug("selection_text: " + selection_text);
-
+            console.debug("canvas_uri: " + canvas_uri);
             var base64data = utf8_to_b64(selection_text);
             //console.log(utf8_to_b64(selection_text));
 
             var json_create = {
                 message_display_text: utf8_to_b64(message_display_text),
                 selection_text: base64data,
+                canvas_uri: canvas_uri,
                 url: url,
                 enabled: "true",
                 distributionlistid: distributionlistid,
@@ -2441,10 +3150,10 @@ function isUndefined(variable) {
     return typeof variable === 'undefined';
 }
 
-/* 
+/*
 this function carried out the updates to which notes are shown on the page.
 This script is called from the background script and the listener is in this content script
-*/
+ */
 function page_update(request, sender, sendResponse) {
     console.debug("browsersolutions request: " + JSON.stringify(request));
 
@@ -2512,7 +3221,6 @@ function checkValueAndTriggerFunction() {
     });
 }
 
-
 function removeSubscribedNotes() {
     console.log("removeSubscribedNotes");
     // remove not not belonging to this user
@@ -2553,7 +3261,6 @@ function remove_noteid(noteid) {
     console.debug(note_root);
     //if (note_root != null || note_root != undefined) {
     remove_note(note_root);
-    
 
     //}
 }
@@ -2565,7 +3272,7 @@ function remove_note(noteroot) {
         //console.debug(noteroot.highlightuniqueid);
         //console.log( noteroot.getAttribute("highlightuniqueid"));
         //console.log( noteroot.ge);
-console.debug(noteroot.getAttribute("note_type"));
+        console.debug(noteroot.getAttribute("note_type"));
         try {
             const highlightuniqueid = noteroot.getAttribute("highlightuniqueid");
             console.debug("clearing hightlight with id: ", highlightuniqueid);
@@ -2574,10 +3281,10 @@ console.debug(noteroot.getAttribute("note_type"));
             console.log(e);
         }
         // Usage
-if(noteroot.getAttribute("note_type") == "webframe"){
+        if (noteroot.getAttribute("note_type") == "webframe") {
 
-        removeAllIframes(noteroot);
-}
+            removeAllIframes(noteroot);
+        }
         // if (noteroot == null || noteroot == undefined) {
         //     console.debug("no valid input");
 
@@ -2595,15 +3302,15 @@ if(noteroot.getAttribute("note_type") == "webframe"){
         noteroot.parentNode.removeChild(noteroot);
 
         var noteid = noteroot.getAttribute("noteid");
-//console.debug();
+        //console.debug();
 
         // call to background.js to record the note as read/dismissed - only for notes that are not new
         chrome.runtime.sendMessage({
             message: {
                 "action": "dismiss_note",
-                          "noteid": noteid,
-                    "enabled": false
-                
+                "noteid": noteid,
+                "enabled": false
+
             }
         }, function (response) {
             console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
@@ -2771,22 +3478,36 @@ function getOwnNotes(note_type) {
                         // Collect template
                         console.debug("collect template based on brand (" + brand + "), note type (" + note_data.note_type + ")");
                         let promise = new Promise((resolve, reject) => {
+                                var html_note_template;
+                                var html_notetype_template;
+
                                 chrome.runtime.sendMessage({
                                     action: "get_template",
                                     brand: brand,
-                                    note_type: note_data.note_type
+                                    note_type: note_type
 
                                 }).then(function (response) {
-                                    //console.debug("browsersolutions message sent to background.js with response: " + JSON.stringify(response));
-                                    const note_template = response;
-                                    // console.debug("browsersolutions note_template: " + note_template);
-                                    console.debug("browsersolutions resolve");
-                                    var template = safeParseInnerHTML(note_template, 'div');
+                                    html_note_template = response;
+                                    console.debug("calling getNotetypeTemplate");
+
+
+                                    return chrome.runtime.sendMessage({
+                                    action: "get_notetype_template",
+                                    brand: brand,
+                                    note_type: note_type
+
+                                });
+
+                                }).then(function (response) {
+                                    html_notetype_template = response;
+
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, template, creatorDetails, isOwner, newNote, false).then(function (res){console.debug(res);});
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                                        console.debug(res);
+                                    });
                                     resolve({
                                         note_data,
-                                        note_template
+                                        note_template: html_note_template
                                     });
                                 }).catch(reject);
                             });
@@ -2804,9 +3525,12 @@ function getOwnNotes(note_type) {
             Promise.all(promiseArray).then(results => {
                 results.forEach(result => {
                     //console.debug(result.note_template);
-                    var note_template = safeParseInnerHTML(result.note_template, 'div');
+                    // var note_template = safeParseInnerHTML(result.note_template, 'div');
+
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(result.note_data, note_template, creatorDetails, isOwner, newNote, false).then(function (res){console.debug(res);});
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                        console.debug(res);
+                    });
                 });
             }).catch(error => {
                 console.error("An error occurred: ", error);
@@ -2840,11 +3564,12 @@ function update_note(event) {
 
         console.debug(encoded_selection_text);
 
-        var note_type = "yellownote";
+        var note_type = "";
         try {
             note_type = note_root.getAttribute('note_type').trim();
         } catch (e) {
-            note_type = "yellownote";
+            console.error(e);
+            //note_type = "yellownote";
             // set default, current timestamp
         }
         var url = "";
@@ -2859,7 +3584,18 @@ function update_note(event) {
         } catch (e) {
             // set default, local url
         }
-
+        var canvas_uri = "";
+        if (note_type == "canvas") {
+            var canvas;
+            try {
+                canvas = note_root.querySelector('[name="canvas"]');
+                console.debug(canvas);
+                canvas_uri = canvas.toDataURL('image/png');
+                console.debug(canvas_uri);
+            } catch (e) {
+                console.debug(e);
+            }
+        }
         // carry createtime forwards unchanged
         var createtime = "";
         try {
@@ -2874,11 +3610,10 @@ function update_note(event) {
         // check for content_url for notes that collect content from elsewhere
         try {
             content_url = note_root.querySelector('input[name="urlInput"]').value.trim();
-        } catch (e) { 
+        } catch (e) {
             console.error(e);
 
         }
-
 
         var message_display_text = "";
         try {
@@ -2890,7 +3625,6 @@ function update_note(event) {
 
             console.debug(note_root.querySelector('[name="message_display_text"]').value);
             console.debug(note_root.querySelector('[name="message_display_text"]').textContent);
-
 
             console.debug(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim())
             console.debug(utf8_to_b64(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim()));
@@ -2969,6 +3703,7 @@ function update_note(event) {
             note_type: note_type,
             noteid: noteid,
             enabled: "true",
+            canvas_uri: canvas_uri,
             content_url: content_url,
             distributionlistid: distributionlistid,
             posx: posx,
@@ -3242,22 +3977,37 @@ function getSubscribedNotes(note_type) {
                         // Collect template
                         console.debug("collect template based on brand (" + brand + "), note type (" + note_type + ")");
                         let promise = new Promise((resolve, reject) => {
+                                var html_note_template;
+                                var html_notetype_template;
+
                                 chrome.runtime.sendMessage({
                                     action: "get_template",
                                     brand: brand,
                                     note_type: note_type
 
                                 }).then(function (response) {
-                                    //console.debug("browsersolutions message sent to background.js with response: " + JSON.stringify(response));
-                                    const note_template = response;
-                                    // console.debug("browsersolutions note_template: " + note_template);
-                                    console.debug("browsersolutions resolve");
-                                    var template = safeParseInnerHTML(note_template, 'div');
+                                    html_note_template = response;
+                                    console.debug("calling getNotetypeTemplate");
+
+
+                                    return chrome.runtime.sendMessage({
+                                    action: "get_notetype_template",
+                                    brand: brand,
+                                    note_type: note_type
+
+                                });
+
+                                }).then(function (response) {
+                                    html_notetype_template = response;
+                                    //console.debug("browsersolutions resolve");
+                                    //var template = safeParseInnerHTML(html_note_template, 'div');
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, template, note.creatorDetails, isOwner, newNote, false).then(function (res){console.debug(res);});
+                                    placeStickyNote(note_data, html_notetype_template, html_notetype_template, note.creatorDetails, isOwner, newNote, false).then(function (res) {
+                                        console.debug(res);
+                                    });
                                     resolve({
                                         note_data,
-                                        note_template
+                                        html_note_template
                                     });
                                 }).catch(reject);
                             });
@@ -3277,11 +4027,13 @@ function getSubscribedNotes(note_type) {
             Promise.all(promiseArray).then(results => {
                 results.forEach(result => {
                     //console.debug(result.note_template);
-                    var note_template = safeParseInnerHTML(result.note_template, 'div');
+                    // var note_template = safeParseInnerHTML(result.note_template, 'div');
                     // Call procedure that places the notes in thep age with the isOwner flag set to false, since these notes belong to others.
                     // The practical effect of this is to remove all buttons to perform edit-actions on the note, such as edit, delete, etc.
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(result.note_data, note_template, note.creatorDetails, isOwner, newNote, false).then(function (res){console.debug(res);});
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, note.creatorDetails, isOwner, newNote, false).then(function (res) {
+                        console.debug(res);
+                    });
                 });
             }).catch(error => {
                 console.error("An error occurred: ", error);
@@ -3409,19 +4161,34 @@ function getAllNotes() {
                         // Collect template
                         console.debug("collect template based on brand (" + brand + "), note type (" + note_type + ")");
                         let promise = new Promise((resolve, reject) => {
+                                var html_note_template;
+                                var html_notetype_template;
+
                                 chrome.runtime.sendMessage({
                                     action: "get_template",
                                     brand: brand,
                                     note_type: note_type
 
                                 }).then(function (response) {
-                                    //console.debug("browsersolutions message sent to background.js with response: " + JSON.stringify(response));
-                                    const note_template = response;
-                                    // console.debug("browsersolutions note_template: " + note_template);
-                                    console.debug("browsersolutions resolve");
-                                    var template = safeParseInnerHTML(note_template, 'div');
-                                    console.debug("browsersolutions placeStickyNote");
-                                    placeStickyNote(note_data, template, creatorDetails, isOwner, newNote, false).then(function (res){console.debug(res);});
+                                    html_note_template = response;
+                                    console.debug("calling getNotetypeTemplate");
+
+
+                                    return chrome.runtime.sendMessage({
+                                    action: "get_notetype_template",
+                                    brand: brand,
+                                    note_type: note_type
+
+                                });
+
+                                }).then(function (response) {
+                                    html_notetype_template = response;
+                                    // console.debug("browsersolutions resolve");
+                                    // var template = safeParseInnerHTML(html_note_template, 'div');
+                                    console.debug("calling placeStickyNote");
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                                        console.debug(res);
+                                    });
                                     resolve({
                                         note_data,
                                         note_template
@@ -3444,9 +4211,11 @@ function getAllNotes() {
             Promise.all(promiseArray).then(results => {
                 results.forEach(result => {
                     //console.debug(result.note_template);
-                    var note_template = safeParseInnerHTML(result.note_template, 'div');
-                    console.debug("browsersolutions placeStickyNote");
-                    placeStickyNote(result.note_data, note_template, creatorDetails, isOwner, newNote, false).then(function (res){console.debug(res);});
+                    //var note_template = safeParseInnerHTML(result.note_template, 'div');
+                    console.debug("calling placeStickyNote");
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                        console.debug(res);
+                    });
                 });
             }).catch(error => {
                 console.error("An error occurred: ", error);
@@ -3575,15 +4344,17 @@ newNote         boolean
 moveFocus       boolean     If set to true, move the focus to this note
  * */
 
-function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNote, moveFocus) {
-    console.debug("browsersolutions: placeStickyNote.start");
+function placeStickyNote(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote, moveFocus) {
+    console.debug("placeStickyNote.start");
     // contenttype
     // permitted values: text, html, embeded, linked
     console.debug(note_obj);
-    console.debug(note_template);
+    //console.debug(html_note_template);
+    //console.debug(html_notetype_template);
+
     console.debug(creatorDetails);
     console.debug(isOwner);
-    console.debug(newNote);
+    console.debug(isNewNote);
     console.debug(moveFocus);
 
     return new Promise(function (resolve, reject) {
@@ -3624,8 +4395,8 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                 reject();
             } else {
                 // if noe note, just use cursor position
-                if (newNote) {
-                    console.debug("browsersolutions: newnote=" + newNote);
+                if (isNewNote) {
+                    console.debug("browsersolutions: newnote=" + isNewNote);
                 } else {
                     console.debug(note_obj);
 
@@ -3683,15 +4454,11 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                 var selection_text = "";
                                 try {
                                     if (!isUndefined(note_obj.selection_text) && note_obj.selection_text != "" || note_obj.selection_text != null) {
-
-                                        if (newNote) {
-
+                                        if (isNewNote) {
                                             selection_text = note_obj.selection_text;
-
                                         } else {
                                             // for existing notes, the selection text has been base64 encoded before storage
                                             selection_text = b64_to_utf8(note_obj.selection_text);
-
                                         }
                                         console.debug("browsersolutions: selection_text: " + selection_text);
                                         //console.debug("calling: getDOMplacement");
@@ -3764,14 +4531,14 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                     // create the yellow note, later attach it to the right location in the DOM
                                     console.debug("browsersolutions: calling: create_stickynote_node");
                                     console.debug(note_obj);
-                                    create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (response) {
+                                    create_stickynote_node(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote).then(function (response) {
                                         var newGloveboxNode = response;
 
                                         // connect the note to the selection text
                                         newGloveboxNode.setAttribute("highlightuniqueid", highlightuniqueid);
                                         console.debug(newGloveboxNode);
                                         console.debug("browsersolutions: calling: size_and_place_note_based_on_texthighlight");
-                                        size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, isOwner, newNote);
+                                        size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, isOwner, isNewNote);
                                         console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
                                         attachEventlistenersToYellowStickynote(newGloveboxNode);
                                         // make some parts visible and other not visible
@@ -3795,8 +4562,8 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                         }
 
                                         // Make the stickynote draggable:
-                                        console.debug("browsersolutions: makeDragAndResize");
-                                        makeDragAndResize(newGloveboxNode);
+                                        console.debug("calling: makeDragAndResize");
+                                        makeDragAndResize(newGloveboxNode, isOwner, isNewNote, false);
                                         if (moveFocus) {
                                             moveFocusToNote(noteid);
                                         }
@@ -3826,10 +4593,10 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
 
                                         try {
                                             console.debug("browsersolutions: " + "calling create_stickynote_node");
-                                            create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (newGloveboxNode) {
+                                            create_stickynote_node(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote).then(function (newGloveboxNode) {
                                                 console.debug(newGloveboxNode);
                                                 console.debug("calling size_and_place_note_based_on_coordinates");
-                                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
+                                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, isNewNote);
 
                                                 console.debug("calling setComponentVisibility");
                                                 if (isOwner) {
@@ -3846,7 +4613,7 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                                 attachEventlistenersToYellowStickynote(newGloveboxNode);
 
                                                 console.debug("calling makeDragAndResize");
-                                                makeDragAndResize(newGloveboxNode);
+                                                makeDragAndResize(newGloveboxNode, isOwner, isNewNote, false);
 
                                                 if (isOwner) {
                                                     console.debug(newGloveboxNode);
@@ -3884,14 +4651,14 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                         // if no selection_text, only position co-ordinates can place the note
 
                         try {
-                            console.debug("browsersolutions: calling: create_stickynote_node");
-                            create_stickynote_node(note_obj, note_template, creatorDetails, isOwner, newNote).then(function (response) {
+                            console.debug("calling: create_stickynote_node");
+                            create_stickynote_node(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote).then(function (response) {
                                 var newGloveboxNode = response;
 
                                 console.debug(newGloveboxNode);
-                                console.debug("browsersolutions: calling: size_and_place_note_based_on_coordinates");
-                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote);
-                                console.debug("browsersolutions: calling: attachEventlistenersToYellowStickynote");
+                                console.debug("calling: size_and_place_note_based_on_coordinates");
+                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, isNewNote);
+                                console.debug("calling: attachEventlistenersToYellowStickynote");
                                 attachEventlistenersToYellowStickynote(newGloveboxNode);
                                 // make some parts visible and other not visible
                                 if (isOwner) { // if the note is the user's own note, then make the edit buttons visible
@@ -3908,8 +4675,11 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
                                 // internal scrolling for webframes
 
                                 // Make the stickynote draggable:
-                                console.debug("browsersolutions: makeDragAndResize");
-                                makeDragAndResize(newGloveboxNode);
+                                console.debug("calling makeDragAndResize");
+                                //makeDragable(newGloveboxNode);
+                                //console.debug("calling makeResizeable");
+                               // makeResizeable(newGloveboxNode);
+                                makeDragAndResize(newGloveboxNode, isOwner, isNewNote, false);
                                 resolve(newGloveboxNode);
                             });
                         } catch (e) {
@@ -3925,40 +4695,50 @@ function placeStickyNote(note_obj, note_template, creatorDetails, isOwner, newNo
     });
 }
 
-
 function moveFocusToNote(noteid) {
     console.debug("moveFocusToNote (" + noteid + ")");
 
     console.debug("The current URL is:", window.location.href);
 
-   // // Send a message to the background script
-   // chrome.runtime.sendMessage({
+    // // Send a message to the background script
+    // chrome.runtime.sendMessage({
     //    action: "focusTab"
     //});
     try {
-console.debug(isNoteOnPage(noteid));
 
-        // Find the element by its ID
-        const note_root = document.querySelectorAll('[noteid="' + noteid + '"]')[0];
-        console.debug(note_root);
-        if (note_root != null) {
-        const element = note_root.querySelector('table[name="whole_note_table"]');
-        // Check if the element exists
-        console.debug(element);
-        if (element) {
-            // Scroll the element into view
-            element.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-        } else {
-            console.log('Element not found: ' + elementId);
-            // sendResponse({
-            //     success: true,
-            //     data: "value"
-            // });
-        }
-        }
+        return new Promise((resolve, reject) => {
+            console.debug(isNoteOnPage(noteid));
+
+            // Find the element by its ID
+            const note_root = document.querySelectorAll('[noteid="' + noteid + '"]')[0];
+            console.debug(note_root);
+            if (note_root != null) {
+                const element = note_root.querySelector('table[name="whole_note_table"]');
+                // Check if the element exists
+                console.debug(element);
+                if (element) {
+
+                    // Scroll the element into view
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    resolve(true);
+                } else {
+                    console.debug('Element not found: ' + elementId);
+                    // sendResponse({
+                    //     success: true,
+                    //     data: "value"
+                    // });
+                    resolve(true);
+                }
+
+            } else {
+                console.debug("browsersolutions: note not found");
+                resolve(false);
+            }
+
+        });
 
     } catch (f) {
         console.log(f);
@@ -4396,9 +5176,68 @@ function longest_common_substring(lcstest_raw, lcstarget_raw) {
     return result;
 }
 
-function attachEventlistenersToYellowStickynote(note) {
+function replaceNoteType(note_root, new_note_type) {
+    console.debug("replaceNoteType.start");
+
+    console.debug(note_root);
+    console.debug(new_note_type);
+
+    return new Promise(function (resolve, reject) {
+
+        // get the note type select element
+        const noteTypeSelect = note_root.querySelector('select[name="select_notetype"]');
+        console.debug(noteTypeSelect);
+        chrome.runtime.sendMessage({
+            action: 'get_notetype_template',
+            note_type: new_note_type
+        }).then(function (response) {
+            if (chrome.runtime.lastError) {
+                resolve(reject(chrome.runtime.lastError));
+            }
+            console.debug(response);
+            note_root.setAttribute("note_type", new_note_type);
+            console.debug("calling updateNoteMiddleBar");
+            console.debug(note_root);
+            updateNoteMiddleBar(response, note_root);
+            console.debug("calling updateNoteMiddleBar.done");
+            console.debug("calling update_note_internal_size");
+            update_note_internal_size(note_root);
+            console.debug("calling noteTypeSpecificActions");
+            noteTypeSpecificActions(new_note_type, note_root, null);
+            resolve(true);
+        });
+
+    });
+
+}
+
+
+function attachEventlistenersToYellowStickynote(note_root) {
     console.log("attachEventlistenersToYellowStickynote.start");
-    console.debug(JSON.stringify(note));
+
+    console.debug("7.7.1");
+    console.debug(note_root);
+
+    console.debug("note_type: " + note_root.getAttribute("note_type"));
+
+    try {
+// drop-down for selecting the note type 
+       const noteTypeSelect = note_root.querySelector('select[name="select_notetype"]');
+        console.debug(noteTypeSelect);
+
+        noteTypeSelect.addEventListener('change', function () {
+            console.debug("noteTypeSelect.change");
+            console.debug("calling replaceNoteType with " + noteTypeSelect.value);
+            console.debug(note_root);
+            replaceNoteType(note_root, noteTypeSelect.value).then(function (response) {
+                console.debug(response);
+                noteTypeSpecificActions(note_root.getAttribute("note_type"), note_root, null);
+            });
+        });
+
+    } catch (e) {
+        console.error(e);
+    }
 
     try {
 
@@ -4413,7 +5252,7 @@ function attachEventlistenersToYellowStickynote(note) {
         };
 
         // for save buttons/icons
-        var allGoTo3 = note.querySelectorAll('[js_action="save_new_note"]');
+        var allGoTo3 = note_root.querySelectorAll('[js_action="save_new_note"]');
         for (var i = 0; i < allGoTo3.length; i++) {
             allGoTo3[i].removeEventListener("click", mySave_new_note);
             allGoTo3[i].removeEventListener("click", myupdate_note);
@@ -4433,7 +5272,7 @@ function attachEventlistenersToYellowStickynote(note) {
             update_note(event);
             event.stopPropagation();
         };
-        var allGoTo7 = note.querySelectorAll('[js_action="update_note"]');
+        var allGoTo7 = note_root.querySelectorAll('[js_action="update_note"]');
         for (var i = 0; i < allGoTo7.length; i++) {
             allGoTo7[i].removeEventListener("click", mySave_new_note);
             allGoTo7[i].removeEventListener("click", myupdate_note);
@@ -4451,7 +5290,7 @@ function attachEventlistenersToYellowStickynote(note) {
             event.stopPropagation();
         };
         // for close buttons/icons
-        var allGoTo = note.querySelectorAll('[js_action="close_note"]');
+        var allGoTo = note_root.querySelectorAll('[js_action="close_note"]');
         for (var i = 0; i < allGoTo.length; i++) {
             console.log("attach close note event listener");
             allGoTo[i].removeEventListener("click", myclose_note);
@@ -4467,7 +5306,7 @@ function attachEventlistenersToYellowStickynote(note) {
             copy_note_to_clipboard(event);
             event.stopPropagation();
         };
-        var allGoTo5 = note.querySelectorAll('[js_action="copy_note_to_clipboard"]');
+        var allGoTo5 = note_root.querySelectorAll('[js_action="copy_note_to_clipboard"]');
         for (var i = 0; i < allGoTo5.length; i++) {
             console.debug(allGoTo5[i]);
             allGoTo5[i].removeEventListener("click", myCopy_note_to_clipboard);
@@ -4485,7 +5324,7 @@ function attachEventlistenersToYellowStickynote(note) {
             event.stopPropagation();
         };
 
-        var allGoTo12 = note.querySelectorAll('[js_action="minimize_note"]');
+        var allGoTo12 = note_root.querySelectorAll('[js_action="minimize_note"]');
         for (var i = 0; i < allGoTo12.length; i++) {
             allGoTo12[i].removeEventListener("click", myminimize_note);
             console.log("minimized_note event listener removed")
@@ -4504,7 +5343,7 @@ function attachEventlistenersToYellowStickynote(note) {
             event.stopPropagation();
         };
 
-        var allGoTo13 = note.querySelectorAll('[js_action="fullscreen_note"]');
+        var allGoTo13 = note_root.querySelectorAll('[js_action="fullscreen_note"]');
         for (var i = 0; i < allGoTo13.length; i++) {
             allGoTo13[i].addEventListener("click", function (event) {
                 fullscreen_note(event);
@@ -4525,7 +5364,7 @@ function attachEventlistenersToYellowStickynote(note) {
             rightsize_note(event);
             event.stopPropagation();
         };
-        var allGoTo14 = note.querySelectorAll('[js_action="rightsize_note"]');
+        var allGoTo14 = note_root.querySelectorAll('[js_action="rightsize_note"]');
         for (var i = 0; i < allGoTo14.length; i++) {
             allGoTo14[i].removeEventListener("click", myrightsize_note);
             allGoTo14[i].addEventListener("click", myrightsize_note);
@@ -4541,7 +5380,7 @@ function attachEventlistenersToYellowStickynote(note) {
             event.stopPropagation();
         };
         // for delete buttons/icons
-        var allGoTo2 = note.querySelectorAll('[js_action="delete_note"]');
+        var allGoTo2 = note_root.querySelectorAll('[js_action="delete_note"]');
         for (var i = 0; i < allGoTo2.length; i++) {
             allGoTo2[i].removeEventListener("click", mydelete_note);
             allGoTo2[i].addEventListener("click", mydelete_note);
@@ -4550,16 +5389,13 @@ function attachEventlistenersToYellowStickynote(note) {
         console.error(e);
     }
 
-
-
-
     try {
 
         const mydismiss_note = (event) => {
             dismiss_note(event);
             event.stopPropagation();
         };
-        var allGoTo18 = note.querySelectorAll('[js_action="dismiss_note"]');
+        var allGoTo18 = note_root.querySelectorAll('[js_action="dismiss_note"]');
         for (var i = 0; i < allGoTo18.length; i++) {
             allGoTo18[i].removeEventListener("click", mydismiss_note);
             allGoTo18[i].addEventListener("click", mydismiss_note);
@@ -4570,14 +5406,13 @@ function attachEventlistenersToYellowStickynote(note) {
         console.log(e);
     }
 
-
     try {
 
         const mydisable_note = (event) => {
             disable_note(event);
             event.stopPropagation();
         };
-        var allGoTo8 = note.querySelectorAll('[js_action="disable_note"]');
+        var allGoTo8 = note_root.querySelectorAll('[js_action="disable_note"]');
         for (var i = 0; i < allGoTo8.length; i++) {
             allGoTo8[i].removeEventListener("click", mydisable_note);
             allGoTo8[i].addEventListener("click", mydisable_note);
@@ -4588,18 +5423,7 @@ function attachEventlistenersToYellowStickynote(note) {
         console.log(e);
     }
 
-
-    try {
-// Attach an event listener to the message text inside yellownotes
-// that prevent drag when clicking on the text
-note.querySelector('[name="message_display_text"]').addEventListener('mousedown', function(e) {
-console.log("prevent drag on text");
-    e.stopPropagation();
-});
-} catch (e) {
-    console.log(e);
-}
-
+   
 
     // goto
     try {
@@ -4613,13 +5437,13 @@ console.log("prevent drag on text");
 
          */
         // for button going to note location
-        const noteid = note.getAttribute("noteid");
-        const distributionlistid = note.getAttribute("distributionlistid");
+        const noteid = note_root.getAttribute("noteid");
+        const distributionlistid = note_root.getAttribute("distributionlistid");
 
         console.log("noteid: " + noteid);
         console.log("distributionlistid: " + distributionlistid);
 
-        var allGoTo112 = note.querySelectorAll('[name="goto_notetarget_link"]');
+        var allGoTo112 = note_root.querySelectorAll('[name="goto_notetarget_link"]');
         if (distributionlistid != null && distributionlistid != "" && distributionlistid != undefined) {
             for (var i = 0; i < allGoTo112.length; i++) {
                 console.log("goto_notetarget_link");
@@ -4645,7 +5469,7 @@ console.log("prevent drag on text");
         };
         // load_url
 
-        var allGoTo1_14 = note.querySelectorAll('[js_action="load_url"]');
+        var allGoTo1_14 = note_root.querySelectorAll('[js_action="load_url"]');
         console.debug(allGoTo1_14);
         for (var i = 0; i < allGoTo1_14.length; i++) {
             allGoTo1_14[i].removeEventListener("click", myload_url);
@@ -4663,7 +5487,7 @@ console.log("prevent drag on text");
             event.stopPropagation();
         };
         // for button setting up distribution dropdown list
-        var distlist = note.querySelectorAll('[js_action="distribute"]');
+        var distlist = note_root.querySelectorAll('[js_action="distribute"]');
         for (var i = 0; i < distlist.length; i++) {
             distlist[i].removeEventListener("click", mydistributionlist_dropdown);
             distlist[i].addEventListener("click", mydistributionlist_dropdown);
@@ -4716,7 +5540,11 @@ function load_url(event) {
                     "url": url
                 }
             };
-            msg = { action: 'capturePage', url: url, timeout: 2 };
+            msg = {
+                action: 'capturePage',
+                url: url,
+                timeout: 2
+            };
 
             console.debug(msg);
             chrome.runtime.sendMessage(msg).then(function (response) {
@@ -4728,23 +5556,23 @@ function load_url(event) {
 
                 //set scroll position
                 var framenote_scroll_y = 0;
-                try{
-                if (note_object_data.framenote_scroll_x !== undefined) {
-                    framenote_scroll_x = note_object_data.framenote_scroll_x;
-                    cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
+                try {
+                    if (note_object_data.framenote_scroll_x !== undefined) {
+                        framenote_scroll_x = note_object_data.framenote_scroll_x;
+                        cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
+                    }
+                } catch (e) {
+                    console.log(e);
                 }
-            } catch (e) {
-                console.log(e);
-            }
                 var framenote_scroll_y = 0;
-                try{
-                if (note_object_data.framenote_scroll_y !== undefined) {
-                    framenote_scroll_y = note_object_data.framenote_scroll_y;
-                    cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
+                try {
+                    if (note_object_data.framenote_scroll_y !== undefined) {
+                        framenote_scroll_y = note_object_data.framenote_scroll_y;
+                        cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
+                    }
+                } catch (e) {
+                    console.log(e);
                 }
-            } catch (e) {
-                console.log(e);
-            }
                 console.log("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
 
                 resolve(response);
@@ -5213,53 +6041,292 @@ function isExcluded(elm) {
     return false
 }
 
-function create_stickynote_node(note_object_data, note_template, creatorDetails, isOwner, newNote) {
-    console.log("browsersolutions create_stickynote_node.start");
+function create_yellownote_DOM(html_note_template, html_notetype_template, note_type, isOwner, isNewNote) {
+    console.debug("create_yellownote_DOM.start");
+    try {
+        return new Promise(function (resolve, reject) {
+            // the root of the note object
+            //console.debug(html_note_template);
+            //console.debug(html_notetype_template);
+            console.debug(note_type);
+            console.debug(isOwner);
+            console.debug(isNewNote);
+            var node_root = document.createElement('container');
+            //console.debug(node_root.outerHTML);
+
+            //const modifiedDoc2 = mergeDOMTrees(doc1, "querySelector", doc2, '#destination');
+            console.debug("calling mergeHTMLTrees");
+            mergeHTMLTrees(html_notetype_template, "querySelector", html_note_template, '#destination').then(function (response) {
+
+                const modifiedDoc2 = response;
+
+                //console.log(modifiedDoc2.outerHTML);
+
+                // Example usage:
+                //const doc1 = new DOMParser().parseFromString(html_notetype_template, 'text/html');
+                //const doc2 = new DOMParser().parseFromString(html_note_template, 'text/html');
+                //console.log(doc1.documentElement.outerHTML);
+                //console.log(doc2.documentElement.outerHTML);
+
+
+                // var fullURLToCSS = chrome.runtime.getURL("css/yellownote.css");
+
+                // insert the overall note template
+
+                //var note_template = safeParseInnerHTML(html_note_template, 'div');
+                // note_template = JSON.parse(html);
+                //console.debug(note_template);
+
+                node_root.setAttribute("class", "yellownotecontainer");
+                node_root.setAttribute("note_type", note_type);
+                node_root.setAttribute("button_arrangment", 'new');
+
+                //node_root.setAttribute("isOwner", isOwner);
+                //node_root.setAttribute("isNewNote", isNewNote);
+
+                node_root.appendChild(modifiedDoc2);
+
+                console.log(node_root);
+                // update the body of the note which is different for each note type
+
+                //console.log(node_root.querySelector('[name]'));
+                //var notetype_template = safeParseInnerHTML(html_notetype_template, 'div');
+                //console.log(notetype_template);
+                //const nodeToReplace = node_root.querySelector('[name="whole_note_middlebar"]');
+                //console.debug(nodeToReplace);
+                //const middle_bar = notetype_template.querySelector('tr[name="whole_note_middlebar"]');
+                //console.debug(middle_bar);
+                //nodeToReplace.parentNode.insertBefore(middle_bar, nodeToReplace.nextSibling);
+
+                //nodeToReplace.remove();
+
+                //console.debug(node_root.outerHTML);
+                resolve(node_root);
+            });
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function mergeHTMLTrees(doc1, selector1, doc2, selector2) {
+    console.debug("#mergeHTMLTrees.start");
+    return new Promise(function (resolve, reject) {
+        //console.debug("0.0.0");
+        try {
+            //console.log("doc1");
+            // Select the element from the first document using the provided selector
+            //var notetype_template = safeParseInnerHTML(doc1, 'div');
+            var notetype_template = document.createElement("div");
+            // Populate it with the raw HTML content
+
+            notetype_template.innerHTML = doc1;
+
+            //console.debug(notetype_template.outerHTML);
+            // var note_template = safeParseInnerHTML(doc2, 'div');
+
+            var note_template = document.createElement("div");
+            // Populate it with the raw HTML content
+
+            note_template.innerHTML = doc2;
+            //console.debug(note_template.outerHTML);
+
+            const elementFromDoc1 = notetype_template.querySelector('[name="whole_note_middlebar"]');
+            //console.log(elementFromDoc1.outerHTML);
+            // Select the target element in the second document using the provided selector
+            const targetElementInDoc2 = note_template.querySelector('[name="whole_note_middlebar"]');
+            //console.debug(targetElementInDoc2.outerHTML);
+            // If either of the selected elements is not found, throw an error
+            if (!elementFromDoc1) {
+                throw new Error('Element not found in the first document using the selector: ' + selector1);
+            }
+            if (!targetElementInDoc2) {
+                throw new Error('Target element not found in the second document using the selector: ' + selector2);
+            }
+
+            // Clone the element from the first document to preserve the original
+            const elementToInsert = elementFromDoc1.cloneNode(true);
+            //console.debug(elementToInsert.outerHTML);
+
+            // Replace the target element in the second document with the cloned element
+            const one = targetElementInDoc2.replaceWith(elementToInsert);
+            //console.log(note_template.outerHTML);
+            // Return the modified second document
+            console.debug("0.0.3");
+            resolve(note_template);
+        } catch (e) {
+            console.debug("0.0.1");
+            console.error(e);
+            resolve(null);
+        }
+    });
+
+}
+
+function create_stickynote_node(note_object_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote) {
+    console.log("create_stickynote_node.start");
     return new Promise(function (resolve, reject) {
         console.debug(note_object_data);
-        console.debug(note_template);
+        //console.debug(html_note_template);
+        //console.debug(html_notetype_template);
         console.debug(creatorDetails);
         console.debug(isOwner);
         console.debug(newNote);
         // create the "wrapping" container that hold the DOM-structure of the note
-        var cont1 = document.createElement('container');
 
-        //<!--<link rel="stylesheet" type="text/css" href="message-box.css">-->
-
-
-        // var fullURLToCSS = browser.runtime.getURL("css/yellownote.css");
-        //  var link1 = document.createElement('link');
-        //  link1.setAttribute("rel", 'stylesheet');
-        //  link1.setAttribute("type", 'text/css');
-        //  link1.setAttribute("href", fullURLToCSS);
-        //  cont1.appendChild(link1);
-
-        cont1.setAttribute("class", "yellownotecontainer");
-        // use this attribute to mark this as a stickynote object
-        cont1.setAttribute("note_type", note_object_data.note_type);
-
+        var cont1;
+        console.debug("calling create_yellownote_DOM");
+        create_yellownote_DOM(html_note_template, html_notetype_template, note_object_data.note_type, isOwner, newNote).
+        then(function (response) {
+            cont1 = response;
+            //console.debug(cont1.outerHTML);
+            // if the note is new, there is no noteid yet
+            if (newNote) {
+                console.debug("new note, not yet a noteid");
+                cont1.setAttribute("newNote", "true");
+            }else{
+                console.debug("not a new note");
+               cont1.setAttribute("noteid", note_object_data.noteid);
         
-        cont1.setAttribute("noteid", note_object_data.noteid); // attach a unique ID to the
+            }
 
-        // if the not is new, there is no noteid yet
-        if (newNote) {
-            console.debug("new note, not yet a noteid");
-            //cont1.setAttribute("newNote", "true");
-            cont1.setAttribute("noteid", note_object_data.noteid);
+            if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
+                cont1.setAttribute("distributionlistid", note_object_data.distributionlistid);
+            }
+
+            //cont1.appendChild(create_note_table(note_object_data,note_template));
+
+            // render a webframe note
+
+
+            // render a canvas note
+
+
+            // render a plainhtml note
+            console.debug("browsersolutions calling processNoteMiddleBody");
+            processNoteMiddleBody(note_object_data, cont1, resolve, creatorDetails, isOwner, newNote).
+            then(function (response) {
+                console.debug("processNoteMiddleBody.complete");
+                console.debug(response);
+                //    resolve(response);
+                console.debug("calling createNoteFooter");
+                return createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newNote);
+            }).then(function (response) {
+                console.debug("createNoteFooter.complete");
+                console.debug("calling createNoteHeader");
+                return createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+            }).then(function (response) {
+                console.debug("createNoteHeader.complete");
+
+                //console.debug(noteForm);
+
+                // there directly by just clicking on this link
+
+                // setup event listener whereby the user can configure this link
+                // rewriting to be automatic
+
+                // where to anchor the tooltip
+                // setup node in the DOM tree to contain content of message box
+                // var newGloveboxNode = document.createElement("Glovebox");
+                // console.debug(newGloveboxNode);
+
+                // set note size
+                // set default values first
+                // then replace those values with more specific ones if they are available
+
+                // set defaults
+                var box_width = default_box_width + "px";
+                var box_height = default_box_height + "px";
+
+                // check for template-specific values - not implemented yet
+
+                // set background color of note
+                // what color to use for the note
+                console.debug("calling setNoteColor");
+                setNoteColor(creatorDetails, cont1);
+
+                // check for brand/organization-specific values - not implemented yet
+
+                try {
+                    // check for creator specific values
+                    if (creatorDetails.box_width) {
+                        box_width = creatorDetails.box_width;
+                        console.debug("creator's note_properties has box_width, use it " + box_width);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+
+                try {
+                    if (creatorDetails.box_height) {
+                        box_height = creatorDetails.box_height;
+                        console.debug("creator's note_properties has box_width, use it " + box_height);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+                // check for feed-specific values - not implemented yet
+
+
+                // check for note specific values
+
+
+                cont1.setAttribute("box_height", box_height);
+                cont1.setAttribute("box_width", box_width);
+
+                console.debug(cont1);
+
+                resolve(cont1);
+            });
+        });
+    });
+}
+
+/**
+ * process the middle part of the note. This is the part where there are diference between the different types of yellownotes
+ */
+function processNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, newNote) {
+    console.debug("processNoteMiddleBody.start");
+    console.debug(note_object_data);
+    console.debug(cont1);
+    console.debug(creatorDetails);
+    console.debug(isOwner);
+    console.debug(newNote);
+
+    const note_type = note_object_data.note_type;
+    console.debug("note_type: " + note_type);
+    return new Promise(function (resolve, reject) {
+
+        // part pertain to all note types
+        try {
+            if (note_object_data.hasOwnProperty("createtime")) {
+                cont1.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
+            }
+            if (note_object_data.hasOwnProperty("lastmodifiedtime")) {
+                cont1.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
+            }
+            if (note_object_data.hasOwnProperty("note_type")) {
+                cont1.querySelector('input[type="hidden"][name="note_type"]').replaceChildren(document.createTextNode(note_object_data.note_type));
+            }
+
+            // capture local url
+            cont1.querySelector('input[type="hidden"][name="url"]').replaceChildren(document.createTextNode(note_object_data.url));
+            if (typeof note_object_data.enabled != undefined) {
+                cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode(note_object_data.enabled));
+            } else {
+                // default value if undefined, is enabled(=true)
+                cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode("true"));
+            }
+
+            if (note_object_data.hasOwnProperty("noteid")) {
+                cont1.querySelector('input[type="hidden"][name="noteid"]').replaceChildren(document.createTextNode(note_object_data.noteid));
+            }
+
+        } catch (e) {
+            console.error(e);
         }
 
-        cont1.setAttribute("isOwner", isOwner);
-
-        if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
-            cont1.setAttribute("distributionlistid", note_object_data.distributionlistid);
-        }
-
-        //cont1.appendChild(create_note_table(note_object_data,note_template));
-
-        cont1.appendChild(note_template);
-        console.debug(cont1);
-
-        if (note_object_data.note_type == "http_get_url" || note_object_data.note_type == "webframe" || note_object_data.type == "webframe") {
+        if (note_type == "http_get_url" || note_type == "webframe" || note_object_data.type == "webframe") {
             // part pertain only to notes of type http_get_url (looking up URLs)
             // Locate the form element
             console.debug("webframe note type");
@@ -5276,7 +6343,6 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                 var content_iframe = cont1.querySelector('[name="contentframe"]');
                 //console.log("content_iframe: " );
                 //console.log(content_iframe);
-
                 // send message to background serviceworker and it will lookup the URL. This is to bypass any CORS issues
                 // Send save request back to background
                 // Stickynotes are always enabled when created.
@@ -5309,67 +6375,48 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                     resolve(cont1);
                 });
 
-                /*
-                the note header contains source info on the note
-                 */
-                console.debug("browsersolutions calling createNoteHeader");
-                createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
-                // set up the drop-down menu for distribution lists/feeds
-                // pre-select the distribution list drop down menu
-                const dl_container = cont1.querySelector('[name="distributionlistdropdown"]');
-
-                if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
-                    console.debug("there is a distribution list assigned already: " + note_object_data.distributionlistid);
-                    console.debug("calling: get_distributionlist");
-                    get_distributionlist().then(function (response) {
-                        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-                        try {
-                            const selectElement = document.getElementById('distributionList');
-                            response.forEach(item => {
-                                console.log(item);
-                                const option = document.createElement('option');
-                                option.value = item.distributionlistid;
-                                option.textContent = `${item.name} ${item.description}`;
-                                if (item.distributionlistid == note_object_data.distributionlistid) {
-                                    option.setAttribute("selected", "selected");
-                                }
-                                dl_container.appendChild(option);
-                            });
-                            // add the option of not sharing the note with any distribution list/feeds
-                            const option0 = document.createElement('option');
-                            option0.value = '';
-                            option0.textContent = 'do not share';
-                            dl_container.appendChild(option0);
-
-                        } catch (e) {
-                            console.error(e);
-                        }
-                    });
-
-                } else {
-                    console.debug("calling: get_distributionlist");
-                    get_distributionlist().then(function (response) {
-                        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-                        // add the option of not sharing the note with any distribution list/feeds
-                        const option0 = document.createElement('option');
-                        option0.value = '';
-                        option0.textContent = 'do not share';
-                        dl_container.appendChild(option0);
-
-                        const selectElement = document.getElementById('distributionList');
-                        response.forEach(item => {
-                            console.log(item);
-                            const option = document.createElement('option');
-                            option.value = item.distributionlistid;
-                            option.textContent = `${item.name} ${item.description}`;
-                            dl_container.appendChild(option);
-                        });
-
-                    });
-                }
             } catch (e) {
                 console.error(e);
             }
+        } else if (note_type == "canvas") {
+            // part pertain only to notes of type canvas
+            console.debug("part pertain only to notes of type canvas");
+
+// read the canvase data uri frm the note object
+const canvas_uri = note_object_data.canvas_uri;
+
+console.debug(canvas_uri);
+
+
+// Create a new image
+const img = new Image();
+// Set the source of the image to the data URI
+
+img.onload = function() {
+    console.debug("image load");
+    const canvas = cont1.querySelector('canvas[name="canvas"]');
+console.debug(canvas);
+const ctx = canvas.getContext('2d');
+    // Set canvas size to match the image size
+//    canvas.width = 200px;
+  //  canvas.height = img.height;
+
+    // Draw the image onto the canvas
+    ctx.drawImage(img, 0, 0);
+     //draw a box over the top
+    // ctx.fillStyle = "rgba(200, 0, 0, 0.5)";
+    // ctx.fillRect(0, 0, 500, 500);
+    console.debug("image loaded");
+    console.debug(ctx);
+    console.debug(canvas);
+    console.debug(img);
+};
+img.src = canvas_uri;
+console.debug("image src set");
+console.debug("calling prepareCanvasNoteForDrawing");
+prepareCanvasNoteForDrawing(cont1);
+            resolve(cont1);
+
         } else {
             // "regular" yellow note type, use this as the default but type="yellownote should be set regardless"
             console.debug("yellownote note type");
@@ -5384,9 +6431,6 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                 }
                 cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
             }
-            if (note_object_data.hasOwnProperty("noteid")) {
-                cont1.querySelector('input[type="hidden"][name="noteid"]').replaceChildren(document.createTextNode(note_object_data.noteid));
-            }
             if (note_object_data.hasOwnProperty("selection_text")) {
                 try {
                     cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
@@ -5397,43 +6441,22 @@ function create_stickynote_node(note_object_data, note_template, creatorDetails,
                 }
                 cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
             }
-if (note_object_data.hasOwnProperty("createtime")) {
-                cont1.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
-            }
-if (note_object_data.hasOwnProperty("lastmodifiedtime")) {
-                cont1.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
-            }
-if (note_object_data.hasOwnProperty("note_type")) {
-                cont1.querySelector('input[type="hidden"][name="note_type"]').replaceChildren(document.createTextNode(note_object_data.note_type));
-            }
-
-            
-            // capture local url
-            cont1.querySelector('input[type="hidden"][name="url"]').replaceChildren(document.createTextNode(note_object_data.url));
-            if (typeof note_object_data.enabled != undefined) {
-                cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode(note_object_data.enabled));
-            } else {
-                // default value if undefined, is enabled(=true)
-                cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode("true"));
-            }
 
             // insert the displayed text(html) content that consitute the message itself
-            try{
-            if (note_object_data.hasOwnProperty("message_display_text")) {
-                const message_node = cont1.querySelector('[name="message_display_text"]');
-                console.debug(message_node);
+            try {
+                if (note_object_data.hasOwnProperty("message_display_text")) {
+                    const message_node = cont1.querySelector('[name="message_display_text"]');
+                    console.debug(message_node);
 
-                //cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
+                    //cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
+                    message_node.innerHTML = b64_to_utf8(note_object_data.message_display_text);
+                    console.debug(message_node);
 
-                message_node.innerHTML = b64_to_utf8(note_object_data.message_display_text);
-                console.debug(message_node);
-
-
+                }
+            } catch (e) {
+                console.error(e);
             }
-        }catch(e){  
-            console.error(e);
-        }
-            
+
             console.debug(JSON.stringify(creatorDetails));
             console.debug(cont1.querySelector('td[name="topbar_filler"]'));
             console.debug(creatorDetails != undefined);
@@ -5441,7 +6464,6 @@ if (note_object_data.hasOwnProperty("note_type")) {
                 try {
                     if (creatorDetails.displayname != undefined) {
                         //cont1.querySelector('[name="creator"]').replaceChildren(document.createTextNode(creatorDetails.displayname));
-
                     }
                 } catch (e) {
                     console.error(e);
@@ -5450,30 +6472,7 @@ if (note_object_data.hasOwnProperty("note_type")) {
 
             }
 
-            /* the note header contains source info on the note
-
-             */
-            console.debug("browsersolutions calling createNoteHeader");
-            createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
-            console.debug(cont1);
-
-            // set background color of note
-            // what color to use for the note
-            var note_color = "#ffff00"; // set default value, override with more specific values if available
-            // attempt to read size parameters from the note properties of the creator
-            if (creatorDetails != undefined) {
-                if (creatorDetails.hasOwnProperty("note_color") && creatorDetails.note_color) {
-                    note_color = creatorDetails.note_color
-                        console.debug("creator's note_properties has note_color, use it " + note_color);
-                }
-
-            } else {
-                // brand-level not implemted yet
-            }
-            var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
-            console.log("box_background" + box_background);
-
-            setBackground(box_background, cont1);
+            console.debug("8.0.3");
 
             // set up the drop-down menu for distribution lists/feeds
             // pre-select the distribution list drop down menu
@@ -5484,8 +6483,9 @@ if (note_object_data.hasOwnProperty("note_type")) {
                 // check if the note already has a distributionlist assigned to it
                 if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
                     console.debug("there is a distribution list assigned to this note already: " + note_object_data.distributionlistid);
-                    console.debug("calling: get_distributionlist");
+                    
                     try {
+                        console.debug("calling: get_distributionlist");
                         get_distributionlist().then(function (response) {
                             console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                             try {
@@ -5534,63 +6534,159 @@ if (note_object_data.hasOwnProperty("note_type")) {
 
                     });
                 }
+                // });
             }
+            resolve(cont1);
         }
-        //console.debug(noteForm);
+    });
+}
 
-        // there directly by just clicking on this link
-
-        // setup event listener whereby the user can configure this link
-        // rewriting to be automatic
-
-        // where to anchor the tooltip
-        // setup node in the DOM tree to contain content of message box
-        // var newGloveboxNode = document.createElement("Glovebox");
-        // console.debug(newGloveboxNode);
-
-        // set note size
-        // set default values first
-        // then replace those values with more specific ones if they are available
-
-        // set defaults
-        var box_width = default_box_width + "px";
-        var box_height = default_box_height + "px";
-
-        // check for template-specific values - not implemented yet
+function setNoteColor(creatorDetails, cont1) {
+    console.debug("setNoteColor.start");
+    var note_color = "#ffff00"; // set default value, override with more specific values if available
 
 
-        // check for brand/organization-specific values - not implemented yet
-
-        try {
-            // check for creator specific values
-            if (creatorDetails.box_width) {
-                box_width = creatorDetails.box_width;
-                console.debug("creator's note_properties has box_width, use it " + box_width);
-            }
-        } catch (e) {
-            console.error(e);
+    // attempt to read size parameters from the note properties of the creator
+    if (creatorDetails != undefined) {
+        if (creatorDetails.hasOwnProperty("note_color") && creatorDetails.note_color) {
+            note_color = creatorDetails.note_color;
+            console.debug("creator's note_properties has note_color, use it " + note_color);
         }
 
-        try {
-            if (creatorDetails.box_height) {
-                box_height = creatorDetails.box_height;
-                console.debug("creator's note_properties has box_width, use it " + box_height);
-            }
-        } catch (e) {
-            console.error(e);
+    } else {
+        // brand-level not implemted yet
+    }
+    var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
+    console.log("box_background" + box_background);
+
+    setBackground(box_background, cont1);
+}
+
+function createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote) {
+    console.debug("createNoteHeader.start");
+    console.debug(note_object_data);
+    console.debug(cont1);
+    console.debug(creatorDetails);
+    console.debug(isOwner);
+    console.debug(newNote);
+    return new Promise(function (resolve, reject) {
+        //createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+        // set up the drop-down menu for distribution lists/feeds
+        // pre-select the distribution list drop down menu
+        const dl_container = cont1.querySelector('[name="distributionlistdropdown"]');
+
+        if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
+            console.debug("there is a distribution list assigned already: " + note_object_data.distributionlistid);
+            console.debug("calling: get_distributionlist");
+            get_distributionlist().then(function (response) {
+                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                try {
+                    const selectElement = document.getElementById('distributionList');
+                    response.forEach(item => {
+                        console.log(item);
+                        const option = document.createElement('option');
+                        option.value = item.distributionlistid;
+                        option.textContent = `${item.name} ${item.description}`;
+                        if (item.distributionlistid == note_object_data.distributionlistid) {
+                            option.setAttribute("selected", "selected");
+                        }
+                        dl_container.appendChild(option);
+                    });
+                    // add the option of not sharing the note with any distribution list/feeds
+                    const option0 = document.createElement('option');
+                    option0.value = '';
+                    option0.textContent = 'do not share';
+                    dl_container.appendChild(option0);
+                    resolve();
+                } catch (e) {
+                    console.error(e);
+                    reject();
+                }
+            });
+
+        } else {
+            console.debug("calling: get_distributionlist");
+            get_distributionlist().then(function (response) {
+                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                // add the option of not sharing the note with any distribution list/feeds
+                const option0 = document.createElement('option');
+                option0.value = '';
+                option0.textContent = 'do not share';
+                dl_container.appendChild(option0);
+
+                const selectElement = document.getElementById('distributionList');
+                response.forEach(item => {
+                    console.log(item);
+                    const option = document.createElement('option');
+                    option.value = item.distributionlistid;
+                    option.textContent = `${item.name} ${item.description}`;
+                    dl_container.appendChild(option);
+                });
+                resolve();
+            
+            });
         }
-        // check for feed-specific values - not implemented yet
+    });
+}
 
+function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newNote) {
+    console.debug("createNoteFooter.start");
+    return new Promise(function (resolve, reject) {
+        //createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+        // set up the drop-down menu for distribution lists/feeds
+        // pre-select the distribution list drop down menu
+        const dl_container = cont1.querySelector('[name="distributionlistdropdown"]');
 
-        // check for note specific values
+        if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
+            console.debug("there is a distribution list assigned already: " + note_object_data.distributionlistid);
+            console.debug("calling: get_distributionlist");
+            get_distributionlist().then(function (response) {
+                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                try {
+                    const selectElement = document.getElementById('distributionList');
+                    response.forEach(item => {
+                        console.log(item);
+                        const option = document.createElement('option');
+                        option.value = item.distributionlistid;
+                        option.textContent = `${item.name} ${item.description}`;
+                        if (item.distributionlistid == note_object_data.distributionlistid) {
+                            option.setAttribute("selected", "selected");
+                        }
+                        dl_container.appendChild(option);
+                    });
+                    // add the option of not sharing the note with any distribution list/feeds
+                    const option0 = document.createElement('option');
+                    option0.value = '';
+                    option0.textContent = 'do not share';
+                    dl_container.appendChild(option0);
 
+                    resolve(null);
+                } catch (e) {
+                    console.error(e);
+                }
+            });
 
-        cont1.setAttribute("box_height", box_height);
-        cont1.setAttribute("box_width", box_width);
+        } else {
+            console.debug("calling: get_distributionlist");
+            get_distributionlist().then(function (response) {
+                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                // add the option of not sharing the note with any distribution list/feeds
+                const option0 = document.createElement('option');
+                option0.value = '';
+                option0.textContent = 'do not share';
+                dl_container.appendChild(option0);
 
-        console.debug(cont1);
-
-        resolve(cont1);
+                const selectElement = document.getElementById('distributionList');
+                response.forEach(item => {
+                    console.log(item);
+                    const option = document.createElement('option');
+                    option.value = item.distributionlistid;
+                    option.textContent = `${item.name} ${item.description}`;
+                    dl_container.appendChild(option);
+                });
+                resolve(null);
+            });
+        }
     });
 }
 
@@ -5647,7 +6743,7 @@ If the note is one the user is subscribing to, the link goes to the feed in the 
 
 
  */
-function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, isNewNote) {
+function createNoteHeaderDELETE(note_object_data, note_root, creatorDetails, isOwner, isNewNote) {
     console.debug("browsersolutions #createNoteHeader");
     console.debug(note_object_data);
     console.debug(note_root);
@@ -5924,43 +7020,40 @@ function close_note(event) {
     }
 }
 
-
 function close_noteid(noteid) {
     console.debug("# close yellownote: " + noteid);
 
     // loop upwards from the target nodes to locate the root node for the sticky note
     var note_root = document.querySelectorAll('[class][note_type][noteid="' + noteid + '"]')[0];
-console.debug(note_root);
-if (note_root == undefined){
-    try {
-        remove_note(note_root);
+    console.debug(note_root);
+    if (note_root == undefined) {
+        try {
+            remove_note(note_root);
 
-// Send mesage to backend to report the note closed/dismissed and record this in the database
-// The note will then note be automcatically reopened when the page is reloaded
+            // Send mesage to backend to report the note closed/dismissed and record this in the database
+            // The note will then note be automcatically reopened when the page is reloaded
 
-chrome.runtime.sendMessage({
-    message: {
-        "action": "dismiss_note",
-                  "noteid": noteid,
-            "enabled": false
-        
-    }
-}, function (response) {
-    console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-    // finally, call "close" on the note
-    //  try{
-    //  	close_note(event);
-    //  }catch(g){console.debug(g);}
-    //remove_noteid(noteid);
-});
+            chrome.runtime.sendMessage({
+                message: {
+                    "action": "dismiss_note",
+                    "noteid": noteid,
+                    "enabled": false
 
-    } catch (e) {
-        console.error(e);
+                }
+            }, function (response) {
+                console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                // finally, call "close" on the note
+                //  try{
+                //  	close_note(event);
+                //  }catch(g){console.debug(g);}
+                //remove_noteid(noteid);
+            });
+
+        } catch (e) {
+            console.error(e);
+        }
     }
 }
-}
-
-
 
 // for subscribers: make the note no longer appear in context (only in the own subscriptions page)
 function dismiss_note(event) {
@@ -5975,27 +7068,26 @@ function dismiss_note(event) {
 
     const stickynote_rootnode = getYellowStickyNoteRoot(event.target);
 
-
     try {
         var noteid = stickynote_rootnode.getAttribute("noteid");
         //console.debug();
-        
-                // call to background.js to record the note as read/dismissed - only for notes that are not new
-                chrome.runtime.sendMessage({
-                    message: {
-                        "action": "dismiss_note",
-                                  "noteid": noteid,
-                            "enabled": false
-                        
-                    }
-                }, function (response) {
-                    console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-                    // finally, call "close" on the note
-                    //  try{
-                    //  	close_note(event);
-                    //  }catch(g){console.debug(g);}
-                    remove_noteid(noteid);
-                });
+
+        // call to background.js to record the note as read/dismissed - only for notes that are not new
+        chrome.runtime.sendMessage({
+            message: {
+                "action": "dismiss_note",
+                "noteid": noteid,
+                "enabled": false
+
+            }
+        }, function (response) {
+            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+            // finally, call "close" on the note
+            //  try{
+            //  	close_note(event);
+            //  }catch(g){console.debug(g);}
+            remove_noteid(noteid);
+        });
 
     } catch (e) {
         console.error(e);
@@ -6056,7 +7148,7 @@ var textnode_map = [];
 
 
 function safeParseInnerHTML(rawHTML, targetElementName) {
-
+    console.debug("# safeParseInnerHTML.start");
     // list of acceptable html tags
 
 
@@ -6069,13 +7161,50 @@ function safeParseInnerHTML(rawHTML, targetElementName) {
 
     const container = document.createElement(targetElementName);
     // Populate it with the raw HTML content
+    //console.debug(rawHTML);
     container.innerHTML = rawHTML;
-
+    console.debug(container);
     return container;
 }
 
-function makeDragAndResize(note) {
+function makeDragAndResize(note, isOwner, isNewNote, isEditing) {
     console.debug("# makeDragAndResize.start");
+console.debug("isOwner: " + isOwner);
+console.debug("isNewNote: " + isNewNote);
+console.debug("isEditing: " + isEditing);
+
+// set usefull defaults if the values are not set in the function call
+if (isOwner==null   ) {
+    console.debug("isOwner is null");
+    isOwner = false;
+    console.debug("isOwner (default): " + isOwner);
+}
+if (isNewNote==null   ) {
+    console.debug("isNewNote is null");
+    isNewNote = true;
+    console.debug("isNewNote (default): " + isNewNote);
+}
+if (isEditing==null   ) {
+    console.debug("isEditing is null");
+    if (isNewNote) {
+        // new notes are allways in editing mode
+        isEditing = true;
+        console.debug("isEditing (default): " + isEditing);
+    } else {
+        if (isOwner) {
+            // if the note is not new, it can still be in editing mode if the user is also the owner
+            isEditing = true;
+            console.debug("isEditing (default): " + isEditing);
+        } else {
+        isEditing = false;
+        console.debug("isEditing (default): " + isEditing);
+        }
+    }
+}
+
+
+// which parts of the note is usable for dragging is affected by wether or not the note is in editing mode
+
 
     //document.addEventListener('DOMContentLoaded', function() {
     //const tableContainer = document.getElementById('tableContainer');
@@ -6083,8 +7212,7 @@ function makeDragAndResize(note) {
     // the margin within which the user can resize the note by dragging the edges
     const resizeBorderMargin = 5;
 
-    const tableContainer = note.querySelector('[name="whole_note_table"]');
-    //console.debug(tableContainer);
+   
     let isDragging = false,
     isResizing = false;
     let startX,
@@ -6096,10 +7224,53 @@ function makeDragAndResize(note) {
     posx,
     posy;
 
-    tableContainer.addEventListener('mousedown', startAction);
-    tableContainer.addEventListener('touchstart', startAction, {
+// note in editing mode should not have the drag-event handler on the middle bar (which is used for editing)
+const tableContainer = note.querySelector('[name="whole_note_table"]');
+
+   // tableContainer.addEventListener('mousedown', startAction);
+   // tableContainer.addEventListener('touchstart', startAction, {
+   //     passive: false
+   // });
+if (isEditing) {
+    const topRow = note.querySelector('[name="whole_note_topbar"]');
+    topRow.addEventListener('mousedown', startAction);
+    topRow.addEventListener('touchstart', startAction, {
         passive: false
     });
+
+    const middleRow = note.querySelector('tr[name="whole_note_middlebar"]');
+    middleRow.removeEventListener('mousedown', startAction);
+    middleRow.removeEventListener('touchstart', startAction, {
+        passive: false
+    });
+
+    const bottomRow = note.querySelector('[name="whole_note_bottombar"]');
+    bottomRow.addEventListener('mousedown', startAction);
+    bottomRow.addEventListener('touchstart', startAction, {
+        passive: false
+    });
+}else{
+
+    const topRow = note.querySelector('tr[name="whole_note_topbar"]');
+    topRow.addEventListener('mousedown', startAction);
+    topRow.addEventListener('touchstart', startAction, {
+        passive: false
+    });
+
+    
+    const middleRow = note.querySelector('tr[name="whole_note_middlebar"]');
+    middleRow.addEventListener('mousedown', startAction);
+    middleRow.addEventListener('touchstart', startAction, {
+        passive: false
+    });
+    const bottomRow = note.querySelector('tr[name="whole_note_bottombar"]');
+    bottomRow.addEventListener('mousedown', startAction);
+    bottomRow.addEventListener('touchstart', startAction, {
+        passive: false
+    });
+
+}
+
 
     function startAction(e) {
         console.debug("# startAction");
@@ -6122,7 +7293,10 @@ function makeDragAndResize(note) {
             console.debug(e.target);
             console.debug(e.target.hasAttribute("js_action"));
             console.debug(e.target.getAttribute("js_action"));
-
+        } else if (e.target.tagName === 'DIV' && e.target.getAttribute("name") === 'message_display_text') {
+            // allow default action on the input field
+            console.debug("allow default action on message_display_text field");
+  
         } else if (e.target.tagName === 'INPUT') {
             // allow default action on the input field
         } else {
@@ -6287,7 +7461,7 @@ function makeDragAndResize(note) {
             //var message_field = note.querySelector('[name="message_display_text"]');
             //console.debug(message_field);
             console.debug("calling update_note_internal_size");
-            update_note_internal_size(number_w, number_h, note);
+            update_note_internal_size(note);
 
             tableContainer.removeEventListener('mousemove', drag);
             tableContainer.removeEventListener('touchmove', drag);
@@ -6302,49 +7476,558 @@ function makeDragAndResize(note) {
 
 }
 
-function update_note_internal_size(box_width, box_height, note) {
+
+function DELETEmakeDragable(note) {
+    console.debug("# makeDragable.start");
+
+    //document.addEventListener('DOMContentLoaded', function() {
+    //const tableContainer = document.getElementById('tableContainer');
+
+    // the margin within which the user can resize the note by dragging the edges
+    const resizeBorderMargin = 5;
+
+    /**
+     * not the hole notw can be used for dragging the note
+     * 
+     */
+    const tableContainer = note.querySelector('[name="whole_note_table"]');
+
+    //tableContainer.addEventListener('mousedown', startAction);
+    //tableContainer.addEventListener('touchstart', startAction, {
+    //    passive: false
+    //});
+
+    const topRow = note.querySelector('[name="whole_note_topbar"]');
+    topRow.addEventListener('mousedown', startAction);
+    topRow.addEventListener('touchstart', startAction, {
+        passive: false
+    });
+
+     // add eventlisteners to terminate dragging/resizing
+     topRow.addEventListener('mouseup', stopAction);
+     topRow.addEventListener('touchend', stopAction);
+
+    const bottomRow = note.querySelector('[name="whole_note_bottombar"]');
+    bottomRow.addEventListener('mousedown', startAction);
+    bottomRow.addEventListener('touchstart', startAction, {
+        passive: false
+    });
+
+     // add eventlisteners to terminate dragging/resizing
+     document.addEventListener('mouseup', stopAction);
+     document.addEventListener('touchend', stopAction);
+
+   
+    let isDragging = false,
+    isResizing = false;
+    let startX,
+    startY,
+    startWidth,
+    startHeight,
+    startMiddleHeight,
+    topBarFillerWidth,
+    posx,
+    posy;
+
+
+    function startAction(e) {
+        console.debug("# startAction");
+
+        // if this is on top of any buttons of drop down lists, in which case allow other events to take place
+
+        console.debug(e);
+        console.debug(e.target.tagName);
+        console.debug(e.target);
+
+        if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') {
+            console.debug("on top of a drop down list");
+            // allow action on the drop down list
+        } else if (e.target.tagName === 'TEXTAREA') {
+            console.debug("on top of textarea");
+            // allow action on the drop down list
+        } else if (e.target.tagName === 'CANVAS') {
+            console.debug("on top of convas");
+            // allow action on the drop down list
+        } else if (e.target.tagName === 'IMG') {
+            // the click was on an image inside the note
+            // is the image was an icon that has an action connection to it, then disallow the drag action
+            console.debug("on top of an image");
+            console.debug(e.target);
+            console.debug(e.target.hasAttribute("js_action"));
+            console.debug(e.target.getAttribute("js_action"));
+
+        } else if (e.target.tagName === 'INPUT') {
+            // allow default action on the input field
+        } else if (e.target.tagName === 'DIV' && e.target.getAttribute("name") === 'message_display_text') {
+            // allow default action on the input field
+            console.debug("allow default action on message_display_text field");
+    } else {
+            // no action on the note
+            // prevent action "behind" the note
+            e.preventDefault();
+
+        }
+
+        
+        // check if the cursor is on any part of the note that should be draggable (for instance: the canvas element)
+const noDrag = false;
+
+if (e.target.tagName === 'CANVAS') {
+    console.debug("on top of convas, do not drag (this limitation for note owner only ?)");
+    noDrag = true;
+}
+        //           e.stopPropagation();
+        // add eventlisteners to terminate dragging/resizing
+        //document.addEventListener('mouseup', stopAction);
+        //document.addEventListener('touchend', stopAction);
+
+        const rect = tableContainer.getBoundingClientRect();
+        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        startWidth = rect.width;
+        startHeight = rect.height;
+        startLeft = tableContainer.offsetLeft;
+        startTop = tableContainer.offsetTop;
+
+        const regex = /\d+/;
+        const h = tableContainer.querySelector('[name="whole_note_middlebar"]').style.height;
+        const resulth = h.match(regex);
+        const number_h = resulth ? parseInt(resulth[0], 10) : null;
+        startMiddleHeight = number_h;
+        console.debug("startMiddleHeight: " + startMiddleHeight);
+
+        console.debug(tableContainer.querySelector('[name="topbar_filler"]'));
+        const w = tableContainer.querySelector('[name="topbar_filler"]').style.width;
+        const resultw = w.match(regex);
+        const number_w = resultw ? parseInt(resultw[0], 10) : null;
+        topBarFillerWidth = number_w;
+        console.debug("topBarFillerWidth: " + topBarFillerWidth);
+
+
+        // Check if the action is near the border (within set number of px)
+        // Check if the action is near any edge (within 5px)
+        const nearLeftEdge = startX - rect.left <= 5;
+        const nearTopEdge = startY - rect.top <= 5;
+        const nearRightEdge = rect.right - startX <= 5;
+        const nearBottomEdge = rect.bottom - startY <= 5;
+
+      //  if (nearRightEdge || nearBottomEdge || nearLeftEdge || nearTopEdge) {
+      //      // Start resizing
+      //      console.debug("# start resizing");
+     //       isResizing = true;
+     //       tableContainer.addEventListener('mousemove', resize);
+     //       tableContainer.addEventListener('touchmove', resize, {
+     //           passive: false
+     //       });
+     //   } else {
+     if (!noDrag){
+            // Start dragging
+            console.debug("# start dragging");
+            isDragging = true;
+            tableContainer.addEventListener('mousemove', drag);
+            tableContainer.addEventListener('touchmove', drag, {
+                passive: false
+            });
+        }
+     //   }
+
+    }
+
+    function drag(e) {
+        console.debug("# drag: " + isDragging);
+        if (isDragging) {
+            const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+            posx = tableContainer.offsetLeft + dx
+                tableContainer.style.left = (tableContainer.offsetLeft + dx) + 'px';
+            posy = tableContainer.offsetTop + dy
+                tableContainer.style.top = (tableContainer.offsetTop + dy) + 'px';
+            startX = currentX;
+            startY = currentY;
+        }
+    }
+
+    function resize(e) {
+        console.debug("# resize: " + isResizing);
+        if (isResizing) {
+            const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+
+            console.debug(topBarFillerWidth);
+            console.debug(currentX);
+            console.debug(startX);
+
+            console.debug("topBarFillerWidth: " + (topBarFillerWidth + currentX - startX) + 'px');
+            // update the width of the filler that padds out the top bar enough to place the icons over in the right corner
+            tableContainer.querySelector('[name="topbar_filler"]').style.width = (topBarFillerWidth + currentX - startX) + 'px';
+            console.debug("startMiddleHeight: " + (startMiddleHeight + currentY - startY) + 'px');
+
+            tableContainer.querySelector('[name="whole_note_middlebar"]').style.height = (startMiddleHeight + currentY - startY) + 'px';
+
+            if (startX - tableContainer.offsetLeft <= 5) {
+                tableContainer.style.width = (startWidth - dx) + 'px';
+                tableContainer.style.left = (startLeft + dx) + 'px';
+            } else {
+                tableContainer.style.width = (startWidth + dx) + 'px';
+            }
+
+            if (startY - tableContainer.offsetTop <= 5) {
+                tableContainer.style.height = (startHeight - dy) + 'px';
+                tableContainer.style.top = (startTop + dy) + 'px';
+            } else {
+                tableContainer.style.height = (startHeight + dy) + 'px';
+            }
+        }
+    }
+
+    function stopAction() {
+        isDragging = false;
+        isResizing = false;
+
+        // update the note object internal structure with the new size information
+        //console.debug("startMiddleHeight: " +  (startMiddleHeight + currentY - startY) + 'px');
+
+        console.debug(note);
+        console.debug(posx);
+        console.debug(posy);
+        //console.debug(note);
+        // store the new position coordinates with root node of the note object
+        if (!isUndefined(posx) && !isUndefined(posy)) {
+            console.debug("update the position properties of the note root node");
+            note.setAttribute("posx", posx + "px");
+            note.setAttribute("posy", posy + "px");
+
+        } {
+            console.debug("do NOT update the position properties of the note object, as there are no new values.");
+        }
+
+        // whole_note_middlebar
+
+
+        // store the new size information in the note object
+
+        console.debug("sizeproperties: " + note.getAttribute("sizeproperties"));
+        if (note.getAttribute("sizeproperties") === "frozen") {
+            console.debug("do NOT update the size properties of the note object, as it is frozen.");
+        } else {
+
+            console.debug("free to update the size properties of the note object");
+
+            //console.debug(note);
+            //console.debug(note.querySelector('[name="box_width"]'));
+            const regex = /\d+/;
+            const w = tableContainer.style.width;
+            const resultw = w.match(regex);
+            const number_w = resultw ? parseInt(resultw[0], 10) : null;
+            //console.debug(number_w);
+            note.setAttribute("box_width", number_w + "px");
+            const h = tableContainer.style.height;
+            const resulth = h.match(regex);
+            const number_h = resulth ? parseInt(resulth[0], 10) : null;
+            console.debug("box_height: " + number_h);
+            note.setAttribute("box_height", number_h + "px");
+           
+
+            tableContainer.removeEventListener('mousemove', drag);
+            tableContainer.removeEventListener('touchmove', drag);
+            tableContainer.removeEventListener('mousemove', resize);
+            tableContainer.removeEventListener('touchmove', resize);
+            document.removeEventListener('mouseup', stopAction);
+            document.removeEventListener('touchend', stopAction);
+        }
+        //});
+
+    }
+
+}
+
+/**
+ *
+ * @param {*} note
+ *
+ * set event handler that lets the user rezie the node by dragging the edges
+ */
+function DELETEmakeResizeable(note) {
+    console.debug("# makeResizeable.start");
+
+    //document.addEventListener('DOMContentLoaded', function() {
+    //const tableContainer = document.getElementById('tableContainer');
+
+    // the margin within which the user can resize the note by dragging the edges
+    const resizeBorderMargin = 5;
+
+    const tableContainer = note.querySelector('[name="whole_note_table"]');
+    //console.debug(tableContainer);
+    let isDragging = false,
+    isResizing = false;
+    let startX,
+    startY,
+    startWidth,
+    startHeight,
+    startMiddleHeight,
+    topBarFillerWidth,
+    posx,
+    posy;
+
+    tableContainer.addEventListener('mousedown', startAction);
+    tableContainer.addEventListener('touchstart', startAction, {
+        passive: false
+    });
+
+    function startAction(e) {
+        console.debug("# startAction");
+
+        // if this is on top of any buttons of drop down lists, in which case allow other events to take place
+
+        console.debug(e);
+        console.debug(e.target.tagName);
+        console.debug(e.target);
+        console.debug(e.target.getAttribute("name")); 
+        // in the case of canvas notes, the user should be able to draw on the canvas, and not drag the note when doing so
+
+        if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') {
+            console.debug("on top of a drop down list");
+            // allow action on the drop down list
+        } else if (e.target.tagName === 'CANVAS') {
+            console.debug("on top of canvas");
+
+        } else if (e.target.tagName === 'TEXTAREA') {
+            console.debug("on top of textarea");
+            // allow action on the drop down list
+        } else if (e.target.tagName === 'IMG') {
+            // the click was on an image inside the note
+            // is the image was an icon that has an action connection to it, then disallow the drag action
+            console.debug("on top of an image");
+            console.debug(e.target);
+            console.debug(e.target.hasAttribute("js_action"));
+            console.debug(e.target.getAttribute("js_action"));
+        } else if (e.target.tagName === 'DIV' && e.target.getAttribute("name") === 'message_display_text') {
+            // allow default action on the input field
+            console.debug("allow default action on message_display_text field");
+      
+        } else if (e.target.tagName === 'INPUT') {
+            // allow default action on the input field
+            console.debug("allow default action on input field");
+        } else {
+            // no action on the note
+            // prevent action "behind" the note
+            console.debug("no action on the note- revent action 'behind' the note");
+            e.preventDefault();
+
+        }
+
+        //           e.stopPropagation();
+        // add eventlisteners to terminate dragging/resizing
+        document.addEventListener('mouseup', stopAction);
+        document.addEventListener('touchend', stopAction);
+
+        const rect = tableContainer.getBoundingClientRect();
+        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        startWidth = rect.width;
+        startHeight = rect.height;
+        startLeft = tableContainer.offsetLeft;
+        startTop = tableContainer.offsetTop;
+
+        const regex = /\d+/;
+        const h = tableContainer.querySelector('[name="whole_note_middlebar"]').style.height;
+        const resulth = h.match(regex);
+        const number_h = resulth ? parseInt(resulth[0], 10) : null;
+        startMiddleHeight = number_h;
+        console.debug("startMiddleHeight: " + startMiddleHeight);
+
+        console.debug(tableContainer.querySelector('[name="topbar_filler"]'));
+        const w = tableContainer.querySelector('[name="topbar_filler"]').style.width;
+        const resultw = w.match(regex);
+        const number_w = resultw ? parseInt(resultw[0], 10) : null;
+        topBarFillerWidth = number_w;
+        console.debug("topBarFillerWidth: " + topBarFillerWidth);
+
+        // Check if the action is near the border (within set number of px)
+        // Check if the action is near any edge (within 5px)
+        const nearLeftEdge = startX - rect.left <= 5;
+        const nearTopEdge = startY - rect.top <= 5;
+        const nearRightEdge = rect.right - startX <= 5;
+        const nearBottomEdge = rect.bottom - startY <= 5;
+
+        if (nearRightEdge || nearBottomEdge || nearLeftEdge || nearTopEdge) {
+            // Start resizing
+            console.debug("# start resizing");
+            isResizing = true;
+            tableContainer.addEventListener('mousemove', resize);
+            tableContainer.addEventListener('touchmove', resize, {
+                passive: false
+            });
+        //} else {
+          //  // Start dragging
+         //   console.debug("# start dragging");
+         //   isDragging = true;
+            //tableContainer.addEventListener('mousemove', drag);
+            //tableContainer.addEventListener('touchmove', drag, {
+            //    passive: false
+            //});
+        }
+
+    }
+
+    function drag(e) {
+        console.debug("# drag: " + isDragging);
+        if (isDragging) {
+            const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+            posx = tableContainer.offsetLeft + dx
+                tableContainer.style.left = (tableContainer.offsetLeft + dx) + 'px';
+            posy = tableContainer.offsetTop + dy
+                tableContainer.style.top = (tableContainer.offsetTop + dy) + 'px';
+            startX = currentX;
+            startY = currentY;
+        }
+    }
+
+    function resize(e) {
+        console.debug("# resize: " + isResizing);
+        if (isResizing) {
+            const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+
+            console.debug(topBarFillerWidth);
+            console.debug(currentX);
+            console.debug(startX);
+
+            console.debug("topBarFillerWidth: " + (topBarFillerWidth + currentX - startX) + 'px');
+            // update the width of the filler that padds out the top bar enough to place the icons over in the right corner
+            tableContainer.querySelector('[name="topbar_filler"]').style.width = (topBarFillerWidth + currentX - startX) + 'px';
+            console.debug("startMiddleHeight: " + (startMiddleHeight + currentY - startY) + 'px');
+
+            tableContainer.querySelector('[name="whole_note_middlebar"]').style.height = (startMiddleHeight + currentY - startY) + 'px';
+
+            if (startX - tableContainer.offsetLeft <= 5) {
+                tableContainer.style.width = (startWidth - dx) + 'px';
+                tableContainer.style.left = (startLeft + dx) + 'px';
+            } else {
+                tableContainer.style.width = (startWidth + dx) + 'px';
+            }
+
+            if (startY - tableContainer.offsetTop <= 5) {
+                tableContainer.style.height = (startHeight - dy) + 'px';
+                tableContainer.style.top = (startTop + dy) + 'px';
+            } else {
+                tableContainer.style.height = (startHeight + dy) + 'px';
+            }
+        }
+    }
+
+    function stopAction() {
+        isDragging = false;
+        isResizing = false;
+
+        // update the note object internal structure with the new size information
+        //console.debug("startMiddleHeight: " +  (startMiddleHeight + currentY - startY) + 'px');
+
+        console.debug(note);
+        console.debug(posx);
+        console.debug(posy);
+        //console.debug(note);
+        // store the new position coordinates with root node of the note object
+        if (!isUndefined(posx) && !isUndefined(posy)) {
+            console.debug("update the position properties of the note root node");
+            note.setAttribute("posx", posx + "px");
+            note.setAttribute("posy", posy + "px");
+
+        } {
+            console.debug("do NOT update the position properties of the note object, as there are no new values.");
+        }
+
+        // whole_note_middlebar
+
+
+        // store the new size information in the note object
+
+        console.debug("sizeproperties: " + note.getAttribute("sizeproperties"));
+        if (note.getAttribute("sizeproperties") === "frozen") {
+            console.debug("do NOT update the size properties of the note object, as it is frozen.");
+        } else {
+
+            console.debug("free to update the size properties of the note object");
+
+            //console.debug(note);
+            //console.debug(note.querySelector('[name="box_width"]'));
+            const regex = /\d+/;
+            const w = tableContainer.style.width;
+            const resultw = w.match(regex);
+            const number_w = resultw ? parseInt(resultw[0], 10) : null;
+            //console.debug(number_w);
+            note.setAttribute("box_width", number_w + "px");
+            const h = tableContainer.style.height;
+            const resulth = h.match(regex);
+            const number_h = resulth ? parseInt(resulth[0], 10) : null;
+            console.debug("box_height: " + number_h);
+            note.setAttribute("box_height", number_h + "px");
+            // update the message field height to track the note expasion
+            //var message_field = note.querySelector('[name="message_display_text"]');
+            //console.debug(message_field);
+            console.debug("calling update_note_internal_size");
+            update_note_internal_size(note);
+
+            tableContainer.removeEventListener('mousemove', drag);
+            tableContainer.removeEventListener('touchmove', drag);
+            tableContainer.removeEventListener('mousemove', resize);
+            tableContainer.removeEventListener('touchmove', resize);
+            document.removeEventListener('mouseup', stopAction);
+            document.removeEventListener('touchend', stopAction);
+        }
+        //});
+
+    }
+
+}
+
+/* update the sizing of internal items in the note object
+such as the canvas for the canvas note, the message display area for the yellow note, etc.
+ */
+function update_note_internal_size(note) {
     console.debug("update_note_internal_size.start");
-    console.debug("box_width: " + box_width);
-    console.debug("box_height: " + box_height);
     console.debug(note);
     const note_type = note.getAttribute("note_type");
+    console.debug("note_type: ", note_type);
+
+    const box_width = parseInt(note.getAttribute("box_width"), 10);
+    const box_height = parseInt(note.getAttribute("box_height"), 10);
+    console.debug("box_width: " + box_width);
+    console.debug("box_height: " + box_height);
+
     // update some internal objects in the note object to reflect the new overall size of the note
     const usable_width = (parseInt(box_width) - note_internal_width_padding);
     const usable_height = (parseInt(box_height) - note_internal_height_padding);
     console.debug("setting new content frame usable width " + usable_width);
     console.debug("setting new content frame usable height " + usable_height);
 
-    if (note_type === "webframe") {
-        try {
-            console.debug("setting new (fake)iframe width " + usable_width);
-            note.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-     //       note.querySelector('[name="fakeiframe"]').style.height = (usable_height - note_owners_control_bar_height) + 'px';
-            note.querySelector('[name="fakeiframe"]').style.height = (usable_height - 55) + 'px';
+    // webframe
 
-        } catch (e) {
-            //console.error(e);
-        }
+    // if (note_type === "webframe") {
+    try {
+        console.debug("setting new (fake)iframe width " + usable_width);
+        note.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
+        //       note.querySelector('[name="fakeiframe"]').style.height = (usable_height - note_owners_control_bar_height) + 'px';
+        note.querySelector('[name="fakeiframe"]').style.height = (usable_height - 55) + 'px';
+
+    } catch (e) {
+        //console.error(e);
     }
+    //}
     try {
         note.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
         note.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
     } catch (e) {
         //console.error(e);
-    }
-
-    if (note_type === "yellownote") {
-        try {
-            note.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
-            note.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
-        } catch (e) {
-            console.error(e);
-        }
-    }
-    try {
-
-        note.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';
-    } catch (e) {
-        console.error(e);
     }
 
     // update the URL box on webframe note
@@ -6356,7 +8039,62 @@ function update_note_internal_size(box_width, box_height, note) {
         //console.error(e);
     }
 
+    // plainhtml / yellownote
+
+    try {
+        note.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
+        note.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
+    } catch (e) {
+        //console.debug(e);
+    }
+
+    // cancase
+if (note_type === "canvas"){
+    // a convas is wiped everytime it is resized. Therefore manipulation of the note should not by itself resize the canvas, as this looks like a bug to the user 
+    try {
+console.debug( "canvas current width: ", note.querySelector('[name="canvas"]').getAttribute("width") );
+console.debug( "canvas new width: ", usable_width );
+console.debug( "canvas current height: ", note.querySelector('[name="canvas"]').getAttribute("height") );
+console.debug( "canvas new height: ", (usable_height - canvas_toolbar_height) );
+
+        // make sure the size parameters are not updates unless there is an actual change in values
+        if (note.querySelector('[name="canvas"]').getAttribute("width") == usable_width) {
+            console.debug("no need to update canvas width");
+        } else {
+           // console.debug("setting new canvas width " + usable_width);
+           // note.querySelector('[name="canvas"]').setAttribute("width", usable_width);
+           // const new_canvas_width = (usable_width );
+           // console.debug("setting new canvas_width " + new_canvas_width);
+           // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_width);
+           // note.setAttribute("canvas_width", (new_canvas_width ) + "px");
+        }
+        if (note.querySelector('[name="canvas"]').getAttribute("height") == (usable_height - canvas_toolbar_height)) {
+            console.debug("no need to update canvas height");
+        } else {
+           // const new_canvas_height = (usable_height - canvas_toolbar_height);
+           // console.debug("setting new canvas height " + new_canvas_height);
+           // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_height);
+           // note.setAttribute("canvas_height", (new_canvas_height ) + "px");
+
+        }
+
+    } catch (e) {
+        console.debug(e);
+    }
 }
+    try {
+
+        note.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';
+    } catch (e) {
+        console.debug(e);
+    }
+
+}
+
+/**
+ * the cavnas needs a toolbar, do not place this within the note, but expand the note to accomodate this toolbar  
+ */
+const canvas_toolbar_height = 100;
 
 /*
  * serialize the note object into a form which is suitable for pasting into chat messages, email and the like.
@@ -6464,7 +8202,7 @@ function NoteDOM2JSON(note) {
         try {
             if (note.querySelector('[name="message_display_text"]')) {
 
-                message_display_text = utf8_to_b64(note.querySelector('[name="message_display_text"]').innerHTML );
+                message_display_text = utf8_to_b64(note.querySelector('[name="message_display_text"]').innerHTML);
             }
 
         } catch (e) {
@@ -6646,8 +8384,11 @@ function ignore(elm) {
     return false
 }
 
+
+
+
 function delete_note(event) {
-    console.debug("browsersolutions delete note");
+    console.debug("delete_note.start");
     console.debug(event);
     // stop clicking anything behind the button
     event.stopPropagation();
@@ -6666,6 +8407,15 @@ function delete_note(event) {
     // send delete request back to server to delete the note.
     // rely on the browser already having an authenticated session with the server.
 
+    delete_note_by_noteid(noteid);
+}
+
+
+
+function delete_note_by_noteid(noteid) {
+    console.debug("delete_note_by_noteid.start");
+    
+
 
     chrome.runtime.sendMessage({
         message: {
@@ -6680,6 +8430,8 @@ function delete_note(event) {
 
     });
 }
+
+
 
 // check if a yellownote is already on the page
 function isNoteOnPage(noteid) {
@@ -6849,7 +8601,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     try {
         if (note_type === "webframe") {
             insertedNode.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-            insertedNode.querySelector('[name="fakeiframe"]').style.height = (usable_height - frame_note_url_bar_height)  + 'px';
+            insertedNode.querySelector('[name="fakeiframe"]').style.height = (usable_height - frame_note_url_bar_height) + 'px';
         }
 
     } catch (e) {
@@ -6945,6 +8697,12 @@ function placeNodeRelativeTo(firstNode, secondNode, x, y) {
     return [newLeft, newTop];
 }
 
+
+// When placeing note that are not anochored to any selected text, place them at the top of the visible page (adjusting for scroll)
+// with the following offset from the top-left corner
+const note_default_placement_x_offset = "20px";
+const note_default_placement_y_offset = "150px";
+
 /**
  *
  * @param {*} newGloveboxNode
@@ -6957,23 +8715,34 @@ function placeNodeRelativeTo(firstNode, secondNode, x, y) {
  */
 
 function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote) {
-    console.debug("" + "size_and_place_note_based_on_coordinates.start");
+    console.debug("size_and_place_note_based_on_coordinates.start");
+    console.debug(newGloveboxNode);
+    console.debug(note_obj);
+    console.debug(isOwner);
+    console.debug("newNote: ", newNote);
     // final placement
     // check if note contains position coordinates/parameters. If so, try to use them to place the note
 
     console.debug(note_obj);
-    var posx = note_obj.posx;
-    var posy = note_obj.posy;
+    var posx;
+    var posy;
+    // new note have no coordinates, so they will be placed at the top of the page
+    if(newNote){
+        console.debug("new note, placing at top of page (adjusted for scrolling)");
+    console.debug("scrollX: ", window.scrollX);
+    console.debug("scrollY: ", window.scrollY);
+posx = (window.scrollX + parseInt(note_default_placement_x_offset))+ "px";
+posy = (window.scrollY + parseInt(note_default_placement_y_offset))+ "px";
+    }else{
+    posx = note_obj.posx;
+     posy = note_obj.posy;
+    }
+    console.debug("posx:" + posx);
+    console.debug("posy:" + posy);
 
-    console.debug("browsersolutions posx:" + posx);
-    console.debug("browsersolutions posy:" + posy);
-
-    //console.debug("browsersolutions " + valid_stickynote_position_coordinate_regexp.test(posx));
-    //console.debug("browsersolutions " + valid_stickynote_position_coordinate_regexp.test(posy));
-
-    const rootElement = document.documentElement;
-    //console.debug(rootElement);
-    // check on more time if the note is already on the page
+     const rootElement = document.documentElement;
+   
+     // check on more time if the note is already on the page
     if (!isNoteOnPage(note_obj.noteid)) {
         let insertedNode = rootElement.insertBefore(newGloveboxNode, rootElement.firstChild.nextSibling);
 
@@ -6983,6 +8752,8 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
 
         console.debug("moving to posx:" + posx + " posy:" + posy);
 
+        insertedNode.posy = posy;
+        insertedNode.posx = posx;
         insertedNode.style.top = posy;
         insertedNode.querySelector('[name="whole_note_table"]').style.top = posy;
         insertedNode.style.left = posx;
@@ -6992,6 +8763,7 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
         insertedNode.style.zIndex = "10000";
 
         //newGloveboxNode.style.position = 'relative';
+
 
         // for webframes, set any aplicable internal scrolling
         const node_type = insertedNode.getAttribute("note_type");
@@ -7081,11 +8853,11 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
         if (note_type === "webframe") {
             try {
                 insertedNode.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-                insertedNode.querySelector('[name="fakeiframe"]').style.height = (usable_height - frame_note_url_bar_height)  + 'px';
+                insertedNode.querySelector('[name="fakeiframe"]').style.height = (usable_height - frame_note_url_bar_height) + 'px';
             } catch (e) {
                 console.error(e);
             }
-        } else if (note_type === "yellownote") {
+        } else  {
             try {
                 insertedNode.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
                 insertedNode.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
@@ -7110,8 +8882,9 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
         insertedNode.setAttribute("box_width", box_width);
         insertedNode.setAttribute("box_height", box_height);
         console.debug(insertedNode);
-
-        console.debug("browsersolutions: " + "#size_and_place_note_based_on_coordinates.end");
+        //console.debug("calling: size_and_place_note_based_on_coordinates");
+                   
+        console.debug("size_and_place_note_based_on_coordinates.end");
 
         return insertedNode;
     } else {

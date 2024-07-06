@@ -1,5 +1,5 @@
 
-console.debug("start with Yellow Notes");
+console.debug("start with YellowNotes for the Cloud");
 
 /*
  *
@@ -37,8 +37,6 @@ const URI_plugin_user_get_own_url_yellownotes = "/api/v1.0/plugin_user_get_own_u
 const URI_plugin_user_update_subscribednote_status = "/api/v1.0/plugin_user_update_subscribednote_status";
 
 const URI_plugin_user_get_own_url_yellownotes_with_selection_text = "/api/v1.0/plugin_user_get_own_url_yellownotes_with_selection_text";
-
-
 
 const URI_plugin_user_get_my_distribution_lists = "/api/v1.0/plugin_user_get_my_distribution_lists";
 
@@ -157,8 +155,6 @@ return response;
 
  */
 
-
-
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
         chrome.tabs.create({
@@ -209,7 +205,7 @@ chrome.contextMenus.create({
 });
 
 chrome.contextMenus.create({
-    id: "create-yellownote",
+    id: "create-attached-yellownote",
     parentId: "yellownotes",
     title: "attach yellow note to selection",
     contexts: ["selection"]
@@ -223,12 +219,12 @@ chrome.contextMenus.create({
 //});
 
 // create the notes posting external content
-chrome.contextMenus.create({
-    id: "pin-content-note",
-    parentId: "yellownotes",
-    title: "attach other web content to selection (in testing)",
-    contexts: ["selection"]
-});
+//chrome.contextMenus.create({
+//    id: "pin-content-note",
+//    parentId: "yellownotes",
+//    title: "attach other web content to selection (in testing)",
+//    contexts: ["selection"]
+//});
 
 // to create blank stickynote on any page, not tied to a text selection
 chrome.contextMenus.create({
@@ -237,19 +233,26 @@ chrome.contextMenus.create({
     title: "attach yellow note on page",
     contexts: ["all"]
 });
-chrome.contextMenus.create({
-    id: "create-free-webframenote",
-    parentId: "yellownotes",
-    title: "attach other web content on page (in testing)",
-    contexts: ["all"]
-});
+//chrome.contextMenus.create({
+//    id: "create-free-webframenote",
+//    parentId: "yellownotes",
+//    title: "attach other web content on page (in testing)",
+//    contexts: ["all"]
+//});
 
-chrome.contextMenus.create({
-    id: "captureSelection",
-    parentId: "yellownotes",
-    title: "Select and Capture (in development)",
-    contexts: ["all"]
-});
+//chrome.contextMenus.create({
+//    id: "captureSelection",
+//    parentId: "yellownotes",
+//    title: "Select and Capture (in development)",
+//    contexts: ["all"]
+//});
+
+//chrome.contextMenus.create({
+//    id: "create-free-canvasnote",
+//    parentId: "yellownotes",
+//    title: "Select and Canvas (in development)",
+//    contexts: ["all"]
+//});
 
 // listener for context menu clicks
 
@@ -257,20 +260,14 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     console.debug("chrome.contextMenus.onClicked.addListener:info:" + JSON.stringify(info));
     console.debug("chrome.contextMenus.onClicked.addListener:tab:" + JSON.stringify(tab));
 
-    if (info.menuItemId === "create-yellownote") {
-        console.debug("# create-yellownote");
+    if (info.menuItemId === "create-attached-yellownote") {
+        console.debug("# create-attached-yellownote");
         // use embeded as the content type. It captures more data some of which will not be used, but it more likely to be uniquely anchored.
         //create_yellownote(info, tab, 'anchor');
-        pinYellowNote(info, tab, 'yellownote', 'default');
+        pinYellowNote(info, tab, 'yellownote', 'default', true, 'plaintext');
     } else if (info.menuItemId === "pin-content-note") {
         // pinContentNote(info, tab, 'webframe', 'default');
-        pinYellowNote(info, tab, 'webframe', 'default');
-    } else if (info.menuItemId === "pin-dagensneringsliv-note") {
-        pinYellowNote(info, tab, 'webframe', 'dagensneringsliv');
-    } else if (info.menuItemId === "pin-klassekampen-note") {
-        pinYellowNote(info, tab, 'webframe', 'klassekampen.no');
-    } else if (info.menuItemId === "pin-faktisk-note") {
-        pinYellowNote(info, tab, 'webframe', 'faktisk.no');
+        pinYellowNote(info, tab, 'yellownote', 'default', true, 'webframe');
     } else if (info.menuItemId === "captureSelection") {
         chrome.tabs.sendMessage(tab.id, {
             action: "initiateSelection",
@@ -281,11 +278,15 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     } else if (info.menuItemId === "create-free-yellownote") {
         console.debug("# create-free-yellownote");
         //create_free_yellownote(info, tab);
-        pinYellowNote(info, tab, 'yellownote', 'default');
+        pinYellowNote(info, tab, 'yellownote', 'default', false, 'plaintext');
     } else if (info.menuItemId === "create-free-webframenote") {
         console.debug("# create-free-webframenote");
         //create_free_webframe_note(info, tab);
-        pinYellowNote(info, tab, 'webframe', 'default');
+        pinYellowNote(info, tab, 'yellownote', 'default', false, 'webframe');
+    } else if (info.menuItemId === "create-free-canvasnote") {
+        console.debug("# create-free-canvasnote");
+        //create_free_webframe_note(info, tab);
+        pinYellowNote(info, tab, 'yellownote', 'default', false, 'canvas');
     }
 });
 
@@ -313,8 +314,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-function pinYellowNote(info, tab, note_type, brand) {
-
+function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected, type) {
+    console.debug("pinYellowNote.start (info, note_type: " + type + ") and brand: " + brand);
     try {
         // contenttype
         // permitted values: text, html, embeded, http_get_url
@@ -323,9 +324,9 @@ function pinYellowNote(info, tab, note_type, brand) {
 
         // Should the user later click "save" The event handler for the save-event in the content script will then call back to the background script to save the note to the database.
 
-        console.debug("pinYellowNote (info," + note_type + ") and " + brand);
-        console.debug(JSON.stringify(info));
-        console.debug(JSON.stringify(tab));
+
+        console.debug(info);
+        console.debug(tab);
         var pageUrl = info.pageUrl;
         // this is the selection the user flagged.
         var selectionText = info.selectionText;
@@ -353,6 +354,7 @@ function pinYellowNote(info, tab, note_type, brand) {
 
         // lookup the template file
         var note_template;
+        var notetype_template;
         var note_properties;
         var sessionToken;
         chrome.storage.local.get([plugin_session_header_name]).then(function (result) {
@@ -362,12 +364,16 @@ function pinYellowNote(info, tab, note_type, brand) {
             uuid = getUuid(sessionToken);
             console.log("uuid: " + uuid);
             // get a template, even if it is the default one
-            return getTemplate(brand, note_type);
+            return getTemplate(brand, "yellownote");
         }).then(function (result) {
             //console.log(result);
             note_template = result;
-            console.log("note_template");
-            //console.log(note_template);
+            console.log("note_template read");
+            return getNotetypeTemplate(type);
+        }).then(function (result) {
+            //console.log(result);
+            notetype_template = result;
+            console.log("notetype_template read");
 
             // get personal template related informaton
             console.log("uuid" + uuid);
@@ -380,7 +386,7 @@ function pinYellowNote(info, tab, note_type, brand) {
             note_properties = result;
             console.log("note_properties");
             console.log(note_properties);
-            // if not was returned, use default
+            // if nothing was returned, use default
 
             if (note_properties == null) {
                 // use default for note properties
@@ -390,7 +396,17 @@ function pinYellowNote(info, tab, note_type, brand) {
                     "note_color": "#ffff00"
                 };
             }
+            return chrome.tabs.query({
+                active: true,
+                currentWindow: true
+            });
 
+        }).then(function (tabs) {
+            console.log(tabs);
+            console.log(tabs[0]);
+            console.log(tabs[0].id);
+            tab_id = tabs[0].id;
+            console.log("tabs[0].id: " + tab_id);
             //      return fetch(server_url + '/api/v1.0/get_note_properties', {
             //          method: 'POST',
             //          headers: {
@@ -427,15 +443,18 @@ function pinYellowNote(info, tab, note_type, brand) {
             const msg = {
                 action: "createnote",
                 sharedsecret: PinToSelectedHTML_sharedsecret,
-                note_type: note_type,
+                note_type: type,
                 brand: brand,
                 note_template: note_template,
+                notetype_template: notetype_template,
                 note_properties: note_properties,
                 session: sessionToken,
+                is_selection_text_connected: is_selection_text_connected,
                 info: info,
                 tab: tab
             };
-            console.debug("sending message back to tab: " + JSON.stringify(msg));
+            console.debug("sending message back to tab: ");
+            console.debug(msg);
             return chrome.tabs.sendMessage(tab_id, msg);
         }).then(function (res) {
             console.debug("###### pinYellowNote response " + JSON.stringify(res));
@@ -470,13 +489,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     console.debug(message);
     console.debug(sender);
     console.debug(message.action);
-    console.debug("received from page: " + JSON.stringify(message));
+    //console.debug("received from page: " + JSON.stringify(message));
 
     var tab_id = "";
-    try{
-         tab_id = sender.tab.id;
+    try {
+        tab_id = sender.tab.id;
 
-    }catch(e){
+    } catch (e) {
         console.log(e);
     }
     try {
@@ -646,17 +665,20 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         } else if (action === "capturePage") {
 
             console.debug("browsersolutions calling: capturePage");
-          
+
             console.debug(message);
-                const url = message.url;
-                const timeout  = message.timeout;
-                
-                capturePageAsPng(url, timeout)
-                    .then(dataUrl => sendResponse({ dataUrl }))
-                    .catch(error => sendResponse({ error }));
-                return true; // Keep the message channel open for async response
-          
-            
+            const url = message.url;
+            const timeout = message.timeout;
+
+            capturePageAsPng(url, timeout)
+            .then(dataUrl => sendResponse({
+                    dataUrl
+                }))
+            .catch(error => sendResponse({
+                    error
+                }));
+            return true; // Keep the message channel open for async response
+
 
         } else if (action === "simple_url_lookup") {
             console.log("simple_url_lookup " + JSON.stringify(message));
@@ -751,28 +773,30 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             return true;
 
         } else if (action === "attach_to_current_tab") {
-/**some website replace the default browser context meny with one of their own creation (Spotify is an example)
- * This interferes with how Yellownotes operates. The context menu is replaced with a custom one, and the Yellownotes options are not available.
- * To address this limitation, there option to create a note from the context menu is also available from the browser action icon.
- * 
- */
+            /**some website replace the default browser context meny with one of their own creation (Spotify is an example)
+             * This interferes with how Yellownotes operates. The context menu is replaced with a custom one, and the Yellownotes options are not available.
+             * To address this limitation, there option to create a note from the context menu is also available from the browser action icon.
+             *
+             */
             console.debug("attach_to_current_tab");
             console.debug(message);
             console.debug(message.url);
-const url = message.url;
-const note_type = message.note_type;
-const psuedo_info= {
-    pageUrl: url,
-    selectionText: ""
-};
+            const url = message.url;
+            const note_type = message.note_type;
+            const psuedo_info = {
+                pageUrl: url,
+                selectionText: ""
+            };
 
-const tab = {
-    id: message.tab_id
-};
+            const tab = {
+                id: message.tab_id
+            };
 
-pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
+            pinYellowNote(psuedo_info, tab, 'yellownote', 'default', false, 'plainhtml');
+            //pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
 
-            return true;
+            // close the connection to the calling popup immediately
+            return false;
 
         } else if (action === "undismiss_note") {
             console.log("undismiss_note " + JSON.stringify(message));
@@ -1168,7 +1192,7 @@ pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
 
             const note_type = message.note_type;
             console.debug("calling getTemplate");
-            getTemplate(brand, note_type).then(function (result) {
+            getTemplate(brand, "yellownote").then(function (result) {
                 //console.debug(result);
                 sendResponse(result);
             });
@@ -1216,34 +1240,37 @@ pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
             });
 
             return true;
+        } else if (action == 'get_notetype_template') {
+
+            console.debug("action: get_notetype_template");
+            const brand = message.brand;
+            console.debug(message);
+            console.debug("calling getNotetypeTemplate");
+            getNotetypeTemplate(message.note_type).then(function (result) {
+                // console.debug(result);
+                sendResponse(result);
+            });
+
+            return true;
         } else if (action == 'get_my_distribution_lists') {
             console.debug("request: get_my_distribution_lists");
             // if update is to disable the note, remove it from the in-memory store
+            const cacheKey = URI_plugin_user_get_my_distribution_lists.replace(/\//g, "_");
+            //const cacheKey = "cacheKey0002";
 
+            console.debug("Cache key: " + cacheKey);
+            const currentTime = Date.now();
 
-            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
-                ynInstallationUniqueId = result[plugin_uuid_header_name];
-                xYellownotesSession = result[plugin_session_header_name];
-                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                console.debug("xYellownotesSession: " + xYellownotesSession);
+            console.debug("currentTime: " + currentTime);
+            const cachetimeout = 60;
+            const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
+            const protocol = "GET";
 
-                const opts = {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [plugin_uuid_header_name]: ynInstallationUniqueId,
-                        [plugin_session_header_name]: xYellownotesSession
-                    },
-
-                };
-                return fetch(server_url + URI_plugin_user_get_my_distribution_lists, opts);
-            }).then(function (response) {
-                //                console.log(response);
-                return response.json();
-            }).then(function (data) {
-                //                  console.log(data);
+            // Accept data from cache if it is less than 60 seconds old
+            // Make changes to this timeout when there is a procedure to empty the cache if the value has been updated.
+            cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint).then(function (data) {
+                console.debug(data);
                 sendResponse(data);
-
             });
 
             return true;
@@ -1371,9 +1398,11 @@ pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
             });
 
         } else if (action == 'gothere') {
+            console.debug("#############################################");
             console.debug("action: gothere");
             console.debug(message);
-            // lookup the details of the not in the database
+            console.debug("#############################################");
+            // lookup the details of the note in the database
 
 
             // open the url the note belongs to
@@ -1381,21 +1410,20 @@ pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
             // place the note on the page
 
             // move focus to the note
-var use_this_tab;
+            var use_this_tab;
             //console.debug(message.go_to_note_details);
             var datarow;
-            const noteid = message.go_to_note_details.datarow.noteid;
-            var note_type = message.go_to_note_details.datarow.note_type;
-            if (note_type == null || note_type == "" || note_type == "undefined" || note_type == undefined) {
-                note_type = "yellownote";
-            }
+            const noteid = message.go_to_note_details.noteid;
+            var note_type;
+
             // brand has not yet been implemented
             const brand = message.go_to_note_details.datarow.brand;
             const session_uuid = message.go_to_note_details.session_uuid;
             var creatorDetails;
             const note_data = message.go_to_note_details.datarow;
             var note_template = null;
-
+            var note_obj;
+            var notetype_template = null;
             // Is this note owned by the current user?
             // Assume so, buth check against the sessiontoken further down
             var isOwner = true;
@@ -1421,53 +1449,71 @@ var use_this_tab;
                     })
                 };
                 console.debug(JSON.stringify(opts));
+                console.debug("calling fetch");
                 return fetch(server_url + URI_plugin_user_get_an_authorized_note, opts);
             }).then(function (response) {
                 console.debug(response);
+                console.debug("######## ####### 0 ######### ######## #######");
+
                 return response.json();
             }).then(function (data) {
                 console.debug(data);
                 datarow = data[0];
                 // the API returns notes that the user may not own, so we need to mark them all accordingly
                 // datarow.
-                // console.debug(datarow);
+                console.debug(datarow);
+                note_obj = JSON.parse(datarow.json);
+                note_type = note_obj.note_type;
+                console.debug("note_type: " + note_type);
                 // datarow.isowner = false;
                 // open the url the note belongs to
                 console.debug("######## ####### 1 ######### ######## #######");
-                return openURLinTab(sender.tab, datarow.url);
+                console.debug("calling openURLinTab");
+                return openURLinTab(sender.tab, note_obj.url);
             }).then(function (res) {
                 use_this_tab = res;
                 console.debug(use_this_tab);
                 console.debug("######## ####### 2 ######### ######## #######");
+                console.debug("calling fetchCreatorDataThroughAPI");
+
                 return fetchCreatorDataThroughAPI(creatorid);
             }).then(function (response) {
                 console.debug(response);
                 creatorDetails = response;
                 console.debug("######## ####### 3 ######### ######## #######");
-
-                return getTemplate(brand, note_type);
+                console.debug("calling getTemplate");
+                return getTemplate(brand, "yellownote");
             }).then(function (response) {
-note_template = response;
-                // place the note on the page
-                //  return placeNoteOnTab(sender.tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
-                // function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid)
-                //  return placeNoteOnTab(use_this_tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
-                // calling this function in the note_handler script
-                //  placeStickyNote(request.note_data, request.note_template, request.creatorDetails, request.isOwner, false, true);
-                const msg = {
+                note_template = response;
+                console.log("calling getNotetypeTemplate");
+                return getNotetypeTemplate(note_type);
+            }).then(function (result) {
+                //console.log(result);
+                notetype_template = result;
+                console.log("notetype_template");
+
+                const note_data = JSON.parse(datarow.json)
+                    // place the note on the page
+                    //  return placeNoteOnTab(sender.tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
+                    // function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid)
+                    //  return placeNoteOnTab(use_this_tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
+                    // calling this function in the note_handler script
+                    //  placeStickyNote(request.note_data, request.note_template, request.creatorDetails, request.isOwner, false, true);
+                    const msg = {
                     action: "placeYellowNoteOnPage",
                     sharedsecret: "secret1234",
                     datarow: datarow,
                     noteid: noteid,
                     session_uuid: session_uuid,
-                    note_data:datarow,
-                    note_template:note_template,
-                    creatorDetails:creatorDetails,
-                    isOwner:isOwner
+                    note_data: note_data,
+                    note_template: note_template,
+                    notetype_template: notetype_template,
+                    creatorDetails: creatorDetails,
+                    isOwner: isOwner
                 }
                 console.debug(msg);
                 console.debug("######## ####### 4 ######### ######## #######");
-
+                console.debug("calling chrome.tabs.sendMessage");
                 return chrome.tabs.sendMessage(use_this_tab, msg);
             }).then(function (response) {
                 console.debug(response);
@@ -1476,16 +1522,16 @@ note_template = response;
                 const msg = {
                     action: "moveFocusToNote",
                     sharedsecret: "secret1234",
-                 
                     noteid: noteid
-                
+
                 }
                 //chrome.tabs.sendMessage(tabs[i].id, msg);
+                console.debug(msg);
+                console.debug("calling chrome.tabs.sendMessage");
                 return chrome.tabs.sendMessage(tab_id, msg);
 
-                
             }).then(function (response) {
-console.debug(response);
+                console.debug(response);
                 console.debug("######## ####### 6 ######### ######## #######");
                 sendResponse(response);
             });
@@ -1573,9 +1619,9 @@ console.debug(response);
                     console.debug("error: initialData is undefined");
                     sendResponse(null);
                 } else {
-                    console.log(initialData);
+                    console.debug(initialData);
                 }
-                console.log(JSON.stringify(initialData));
+                console.debug(initialData);
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
                             console.debug("calling fetchCreatorDataThroughAPI");
@@ -1586,20 +1632,18 @@ console.debug(response);
                         }
                         return Promise.resolve();
                     });
-                console.log(promises);
+                console.debug(promises);
                 return Promise.all(promises).then(() => initialData);
             })
             .then(function (data) {
-                console.log(data);
-                console.log("session_uuid: " + session_uuid);
+                console.debug(data);
+                console.debug("session_uuid: " + session_uuid);
                 const msg = {
                     session_uuid: session_uuid,
                     data: data
                 }
-                console.log(JSON.stringify(msg));
-
+                console.debug(msg);
                 sendResponse(msg);
-
             }).catch(function (error) {
                 console.log(error);
                 sendResponse(null);
@@ -1654,7 +1698,7 @@ console.debug(response);
                             console.debug("calling fetchCreatorDataThroughAPI");
                             return fetchCreatorDataThroughAPI(item.creatorid).then(creatorData => {
                                 item.creatorDetails = creatorData;
-                                
+
                             });
                         }
                         return Promise.resolve();
@@ -1716,7 +1760,7 @@ console.debug(response);
             var APIendpoint = server_url + URI_plugin_user_get_own_url_yellownotes;
             if (note_type == "selection_text") {
                 APIendpoint = server_url + URI_plugin_user_get_own_url_yellownotes_with_selection_text;
-           
+
             }
 
             // call out to database
@@ -1773,20 +1817,99 @@ console.debug(response);
     return true;
 });
 
+function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
+    console.debug("# cachableCall2API_GET.start");
+    console.debug("cacheKey: " + cacheKey);
+    console.debug("cachetimeout: " + cachetimeout);
+    console.debug("protocol: " + protocol);
+    console.debug("endpoint: " + endpoint);
+    var ynInstallationUniqueId = "";
+    var xYellownotesSession = "";
+    var result_data = null;
+    return new Promise((resolve, reject) => {
+        getCachedData(cacheKey, cachetimeout).then(function (cachedResponse) {
+
+            console.log(cachedResponse);
+            if (cachedResponse) {
+                console.debug("Returning cached response on key: " + cacheKey);
+                // break here
+                resolve(cachedResponse);
+                console.debug(" complete ");
+                // break out of the promise chain
+                return;
+            } else {
+                console.debug("No cached response on key: " + cacheKey);
+            
+
+            // proceed to make the request
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
+            .then(function (result) {
+                console.debug(result);
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
+                xYellownotesSession = result[plugin_session_header_name];
+
+               console.debug("Cache key: " + cacheKey);
+
+                console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                console.debug("xYellownotesSession: " + xYellownotesSession);
+
+                const opts = {
+                method: protocol,
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: ynInstallationUniqueId,
+                    [plugin_session_header_name]: xYellownotesSession
+                },
+                };
+                console.debug("make fresh request: ");
+                return fetch(endpoint, opts);
+                })
+                .then(function (response) {
+            console.debug(response);
+
+            return response.json();
+                })
+                .then(function (data) {
+            console.debug(data);
+
+            result_data = data;
+
+            // insert into the cache
+                return cacheData(cacheKey, result_data);
+            // return chrome.storage.local.set({ cacheKey: requestCacheEntry });
+                }).then(function (response) {
+                console.debug(response);
+                console.debug("result_data");
+                console.debug(result_data);
+                resolve(result_data);
+                })
+                .catch(function (error) {
+                 console.error('Fetch error: ', error);
+                });
+            }
+        });
+    });
+
+}
 
 // Function to capture a page as a PNG image, convert it to Base64, and return the data URL
 function capturePageAsPng(url, timeout) {
     console.log('capturePageAsPng: Capturing page as PNG image:', url);
     return new Promise((resolve, reject) => {
         // Open a new tab with the specified URL
-        chrome.tabs.create({ url, active: false }, (tab) => {
+        chrome.tabs.create({
+            url,
+            active: false
+        }, (tab) => {
             const tabId = tab.id;
             console.log("tabId: " + tabId);
 
             // Wait for the specified timeout
             setTimeout(() => {
                 // Capture the tab as a PNG image
-                chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' }, (dataUrl) => {
+                chrome.tabs.captureVisibleTab(tab.windowId, {
+                    format: 'png'
+                }, (dataUrl) => {
                     console.log('capturePageAsPng: Captured page as PNG image:', dataUrl);
                     if (chrome.runtime.lastError) {
                         reject(chrome.runtime.lastError.message);
@@ -1795,7 +1918,7 @@ function capturePageAsPng(url, timeout) {
                         chrome.tabs.remove(tabId);
                         return;
                     }
-console.log("resolve dataUrl");
+                    console.log("resolve dataUrl");
                     // Resolve with the Base64 data URL
                     resolve(dataUrl);
 
@@ -1859,9 +1982,12 @@ function getCachedData(key, cachetimeout) {
     return new Promise((resolve, reject) => {
         try {
             chrome.storage.local.get([key], function (result) {
+                console.log('getCachedData: Cached data:');
+                console.log(result);
                 if (result[key]) {
                     console.log(`Cached data for key: ${key}`, result[key].timestamp);
-                    console.log((new Date().getTime() - result[key].timestamp));
+                    console.log("cache entry age (seconds): ", ((new Date().getTime() - result[key].timestamp)) / 1000);
+                    console.log(((new Date().getTime() - result[key].timestamp)) < cachetimeout * 1000);
 
                     // only accept data less than 3 hours old
                     //            if (result[key] && (new Date().getTime() - result[key].timestamp) < 3 * 3600 * 1000) {
@@ -1938,9 +2064,6 @@ function fetchNewData(creatorId, cacheKey) {
         });
     })
     .then(response => {
-       
-
-
 
         if (!response.ok) {
             console.log(response);
@@ -1948,13 +2071,13 @@ function fetchNewData(creatorId, cacheKey) {
             // if an invalid session token was sent, it should be removed from the local storage
             if (response.status == 401) {
                 // compare the response body with the string "Invalid session token" to determine if the session token is invalid
-                if(response.headers.get("session") == "DELETE_COOKIE"){
-                        console.log("Session token is invalid, remove it from local storage.");
-                        chrome.storage.local.remove([plugin_session_header_name]);
-                        // redirect to the front page returning the user to unauthenticated status.
-                        // unauthenticated functionality will be in effect until the user authenticates
-                        //window.location.href = "/pages/my_account.html";
-                        throw new Error('logout');
+                if (response.headers.get("session") == "DELETE_COOKIE") {
+                    console.log("Session token is invalid, remove it from local storage.");
+                    chrome.storage.local.remove([plugin_session_header_name]);
+                    // redirect to the front page returning the user to unauthenticated status.
+                    // unauthenticated functionality will be in effect until the user authenticates
+                    //window.location.href = "/pages/my_account.html";
+                    throw new Error('logout');
                 } else {
                     throw new Error('Network response was not ok');
                 }
@@ -1964,7 +2087,6 @@ function fetchNewData(creatorId, cacheKey) {
         } else {
             return response.json();
         }
-
 
     })
     .then(data => {
@@ -1979,20 +2101,20 @@ function fetchNewData(creatorId, cacheKey) {
 }
 
 function focusOnNote(tab_id, noteid) {
-console.debug("focusOnNote: ");
-console.debug(tab_id);
-console.debug(noteid);
-return new Promise((resolve, reject) => {
-const msg = {
-    action: "moveFocusToNote",
-    sharedsecret: "secret1234",
- 
-    noteid: noteid
+    console.debug("focusOnNote: ");
+    console.debug(tab_id);
+    console.debug(noteid);
+    return new Promise((resolve, reject) => {
+        const msg = {
+            action: "moveFocusToNote",
+            sharedsecret: "secret1234",
 
-}
-//chrome.tabs.sendMessage(tabs[i].id, msg);
-resolve(chrome.tabs.sendMessage(tab_id, msg));
-});
+            noteid: noteid
+
+        }
+        //chrome.tabs.sendMessage(tabs[i].id, msg);
+        resolve(chrome.tabs.sendMessage(tab_id, msg));
+    });
 
 }
 
@@ -2967,9 +3089,9 @@ function getTemplate(brand, note_type) {
                 // nothing found locally for the brand, try remote
 
 
-                console.log("looking for template file " + './templates/' + brand + '_' + note_type + '_template.html locally');
+                console.log("looking for template file " + './templates/' + brand + '_yellownote_template.html locally');
                 // look for template file in local filesystem
-                fetch(chrome.runtime.getURL('./templates/' + brand + '_' + note_type + '_template.html')).then(function (response) {
+                fetch(chrome.runtime.getURL('./templates/' + brand +  '_yellownote_template.html')).then(function (response) {
                     // found the file locally, use it
                     console.debug("found the file locally, use it");
                     console.log(response);
@@ -3005,8 +3127,8 @@ function getTemplate(brand, note_type) {
                         console.log(template);
                         if (response.status != 200) {
                             // an error, look for default template file of the requested note type
-                            console.log('looking for template file ./templates/default_' + note_type + '_template.html');
-                            fetch(chrome.runtime.getURL('./templates/default_' + note_type + '_template.html')).then(function (response) {
+                            console.log('looking for template file ./templates/default_yellonwote_template.html');
+                            fetch(chrome.runtime.getURL('./templates/default_yellonwote_template.html')).then(function (response) {
                                 // found the file locally
                                 console.log(response);
                                 template = response.text();
@@ -3015,27 +3137,59 @@ function getTemplate(brand, note_type) {
                                 console.log(err);
                                 reject(err);
                             });
-
                         } else {
                             resolve(template);
                         }
                     }).catch(function (err) {
                         console.log(err);
                         // no luck with the brand,  try the default
-                        console.log('looking for template file ./templates/default_template.html');
-                        fetch(chrome.runtime.getURL('./templates/default_' + note_type + '_template.html')).then(function (response) {
+                        console.log('looking for template file ./templates/default_yellonwote_template.html');
+                        fetch(chrome.runtime.getURL('./templates/default_yellonwote_template.html')).then(function (response) {
                             // found the file locally
                             console.log(response);
                             template = response.text();
                             resolve(template);
                         }).catch(function (err) {
                             console.log(err);
-                            reject(err);
+                            resolve("");
                         });
                     });
                 });
             }
+        });
+    });
+}
 
+/**
+ * Get the type template file from the server
+ */
+function getNotetypeTemplate(note_type) {
+    console.log("getNotetypeTemplate(note_type): " + note_type);
+    // lookup the template file
+
+    // The notes are/can be branded. The brand is a feature for premium users.
+    // The user can also be part of a brand/organization. If so, the notes are branded accordingly.
+
+    // feature priority: brand over user. Check first if the user is part of a brand. If so, search for a template belonging to this brand first.
+    // search order: local filesystem, remote database, default templates
+
+    // If searches return nothing or fail, the default templates are used.
+
+
+    return new Promise(function (resolve, reject) {
+
+        var typetemplate;
+
+        // no luck with the brand,  try the default
+        console.log('looking for template file ./templates/typetemplate_yellownote_' + note_type + '.html');
+        fetch(chrome.runtime.getURL('./templates/typetemplate_yellownote_' + note_type + '.html')).then(function (response) {
+            // found the file locally
+            console.log(response);
+            typetemplate = response.text();
+            resolve(typetemplate);
+        }).catch(function (err) {
+            console.log(err);
+            reject(err);
         });
 
     });

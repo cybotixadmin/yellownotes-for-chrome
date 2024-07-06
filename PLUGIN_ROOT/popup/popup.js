@@ -142,7 +142,7 @@ document.querySelector('#option_all_notes').addEventListener('click', () => {
 });
 
 document.querySelector('#attach_note_to_current_tab').addEventListener('click', () => {
-    console.log("attach_note_to_currenttab selected");
+    console.log("attach_note_to_current_tab selected");
     var url = window.location.href;
     console.debug("to url: " , url);
     getCurrentTabUrl().then((tabInfo) => {
@@ -153,14 +153,14 @@ document.querySelector('#attach_note_to_current_tab').addEventListener('click', 
         console.debug("to url: " , url);
         return chrome.runtime.sendMessage({
         action: "attach_to_current_tab",
-        note_type: "yellownote",
+        note_type: "plaintext",
         url: url,
         tab_id: tab_id
         });
 
     }).then((response) => {
         console.log(response);
-
+        window.close();
         // send message to background that this is the new default for all new pages, and all pages where there is no value specifically set.
   
     

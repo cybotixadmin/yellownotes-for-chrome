@@ -44,7 +44,7 @@ console.error('Error:', error.message);
 
 
 
-const table_columns_to_not_display_keyname = "mynotes_hide_columns";
+const table_columns_to_not_display_keyname = "my_notes_hide_columns";
 
 
 
@@ -86,8 +86,9 @@ document.getElementById('toggle-action').addEventListener('change', function () 
 document.getElementById('toggle-location').addEventListener('change', function () {
     toggleColumn('location', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
-
-
+document.getElementById('toggle-yellownote').addEventListener('change', function () {
+    toggleColumn('yellownote', this.checked,"dataTable", table_columns_to_not_display_keyname );
+});
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
@@ -111,10 +112,6 @@ if (pagewidth < 300) {
 
 
 
-
-
-
-
 // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
 getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
@@ -124,9 +121,6 @@ getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_def
 });
 
 
-
-
-
 // call to database to get notes and place them in a table
 fetchData(not_show_by_default_columns).then(function (d) {
     console.debug("read notes complete");
@@ -134,34 +128,51 @@ fetchData(not_show_by_default_columns).then(function (d) {
 
     // update the list of colmes and check/uncheck according to the list of columns to not display
 not_show_by_default_columns.forEach(column => {
+    console.log("hide column: ", column);
     toggleColumn(column, false,"dataTable", table_columns_to_not_display_keyname);
     document.getElementById(`toggle-${column}`).checked = false;
+
+
+// itterate through all entries in the yellownote column and reder as yellow notes their contents
+
+const querySelector = 'tr td:nth-child(2)';
+
+console.log("calling");
+ // Call the updateTableColumn function
+ updateTableColumn(querySelector, processCellValue).then((note_root) => {
+    console.log('All table cells have been processed and updated.');
+    console.log(note_root);
+}).catch(error => {
+    console.error('Error processing table cells:', error);
+});
+
+
 });
 
     // kick of the process of rendering the yellow sticky notes in the graphic form
 
-    var doc = window.document;
+  //  var doc = window.document;
 
-    var root_node = doc.documentElement;
-    console.debug(root_node);
+   // var root_node = doc.documentElement;
+  //  console.debug(root_node);
 
     // start analyzing the DOM (the page/document)
 
-    var note_template = null;
-    // collect the template, for later use
-    fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
-    then((response) => response.text())
-    .then((html) => {
+  //  var note_template = null;
+ //   // collect the template, for later use
+ //   fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
+ //   then((response) => response.text())
+ //   .then((html) => {
         //console.debug(html);
         //note_template_html = html;
         //const note_template = document.createElement('div');
         // container.innerHTML = html;
-        note_template = safeParseInnerHTML(html, 'div');
-        console.log("browsersolutions " + note_template);
-        console.debug(note_template);
+//        note_template = safeParseInnerHTML(html, 'div');
+//        console.log("browsersolutions " + note_template);
+//        console.debug(note_template);
 
-    });
-    console.debug(note_template);
+  //  });
+  //  console.debug(note_template);
 });
 
 // Function to use "fetch" to delete a data row
@@ -446,6 +457,7 @@ try {
                 // Create new row
                 const newRow = tableBody.insertRow();
                 newRow.setAttribute('noteid', row.noteid);
+                newRow.setAttribute('selectablecol', "true");
 
                 // Create cells and populate them with data
                
@@ -458,6 +470,9 @@ try {
                 const cell_message = newRow.insertCell(6);
                 const cell_actions = newRow.insertCell(7);
                 const cell_distributionlist = newRow.insertCell(8);
+                const cell_note = newRow.insertCell(9);
+
+
                 const obj = JSON.parse(row.json);
                 // key column - not to be displayed
                 // create timestamp - not to be dsiplayed either
@@ -500,6 +515,7 @@ try {
                 try {
                     type_cell.textContent = obj.note_type;
                     type_cell.setAttribute('name', 'note_type');
+                    type_cell.setAttribute('class', 'compact');
                 } catch (e) {
                     console.log(e);
                 }
@@ -631,7 +647,7 @@ try {
                     // Remove the row from the table
                     newRow.remove();
                     // call to API to delete row from data base
-                    deleteSubscription(row.noteid);
+                    delete_note_by_noteid(row.noteid);
                 };
                 deleteButtonContainer.appendChild(deleteButton);
                 actionButtonContainer.appendChild(deleteButtonContainer);
@@ -714,9 +730,21 @@ try {
                     };
                 }
                 cell_actions.appendChild(actionButtonContainer);
-
+                cell_actions.setAttribute('name', 'action');
+                cell_actions.setAttribute('class', 'action-5');
                 cell_actions.setAttribute('data-label', 'text');
                
+/* cell_note contains the note in graphical form
+ the purpose of this cell is that if all the other columns are de-selected by the user, the remaining column will look like a feed of notes^. 
+ Much like any other newsfeed.
+ The differece is that the user can filter feed by the columns that are not displayed.
+*/
+
+
+                cell_note.textContent =  row.json;
+                cell_note.setAttribute('name', 'yellownote');
+                cell_note.setAttribute('rendering', 'json');
+                cell_note.setAttribute('class', 'yellownote');
 
 
                 // Adding data-label for mobile responsive
@@ -904,13 +932,15 @@ async function saveChanges(noteid, event) {
 console.debug("message_display_text: " + message_display_text);
 const encoded_message_display_text = utf8_to_b64(message_display_text);
 
-            message_body = JSON.stringify({
-                    noteid: noteid,
-                    note_type: note_type,
-                    url: url,
-                    message_display_text: encoded_message_display_text,
-                    selection_text: selection_text
-                });
+const msg = {
+    noteid: noteid,
+    note_type: note_type,
+    url: url,
+    message_display_text: encoded_message_display_text,
+    selection_text: selection_text
+}
+console.debug(msg);
+            message_body = JSON.stringify(msg);
         }
 
         console.log(message_body);
@@ -973,6 +1003,27 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
         console.error(error);
     }
 }
+
+
+function delete_note_by_noteid(noteid) {
+    console.debug("delete_note_by_noteid.start");
+    
+
+
+    chrome.runtime.sendMessage({
+        message: {
+            "action": "single_note_delete",
+            "delete_details": {
+                "noteid": noteid
+            }
+        }
+    }, function (response) {
+        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+        console.debug("message sent to backgroup.js with response code: " + response.statuscode);
+
+    });
+}
+
 
 function disable_note_with_noteid(noteid) {
     console.debug("disable_note_with_noteid: " + noteid);

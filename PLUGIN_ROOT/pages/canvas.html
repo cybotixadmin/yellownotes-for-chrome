@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing Canvas with Controls</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <td id="canvas-cell"></td>
+        </tr>
+        <tr>
+            <td id="controls-cell">
+                <input type="color" id="canvas-color-picker" value="#FFFF00">
+                <input type="color" id="draw-color-picker" value="#000000">
+                <select id="line-width-select">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <select id="line-type-select">
+                    <option value="solid">Solid Line</option>
+                    <option value="widely_stapled">Widely Stapled Line</option>
+                    <option value="dencely_stapled">Densely Stapled Line</option>
+                </select>
+                <button id="save-button">Save as PNG</button>
+            </td>
+        </tr>
+    </table>
+    <script src="canvas.js"></script>
+</body>
+</html>

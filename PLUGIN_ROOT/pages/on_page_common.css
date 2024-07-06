@@ -297,6 +297,13 @@ position: relative;
   z-index: 12000;
 }
 
+.yellownote {
+  height: 100px;
+  width: 250px;
+position: relative;
+  z-index: 12000;
+}
+
 .delete_button:hover::after {
   /* Show the tooltip */
   opacity: 1;
@@ -364,9 +371,6 @@ table.notesTable tr th:nth-child(9) {
   width: 120px;
 }
 
-table.notesTable tr th:nth-child(10) {
-  width: 20px;
-}
 
 
 table.notesTable tr th:nth-child(11) {
@@ -378,7 +382,7 @@ table.notesTable tr th:nth-child(11) {
 
 table.notesTable td {
   padding: 0px;
-  width: 50px;
+  
   height: 15px;
   font-size: 10px;
   line-height: 1;
@@ -420,9 +424,6 @@ table.notesTable tr td:nth-child(9) {
   width: 120px;
 }
 
-table.notesTable tr td:nth-child(10) {
-  width: 20px;
-}
 
 
 table.notesTable tr td:nth-child(11) {
