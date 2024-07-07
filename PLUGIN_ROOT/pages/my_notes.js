@@ -133,11 +133,11 @@ not_show_by_default_columns.forEach(column => {
     document.getElementById(`toggle-${column}`).checked = false;
 
 
-// itterate through all entries in the yellownote column and reder as yellow notes their contents
+// itterate through all entries in the yellownote column and reder as graphical yellow notes their contents
 
 const querySelector = 'tr td:nth-child(2)';
 
-console.log("calling");
+console.log("calling updateTableColumn");
  // Call the updateTableColumn function
  updateTableColumn(querySelector, processCellValue).then((note_root) => {
     console.log('All table cells have been processed and updated.');

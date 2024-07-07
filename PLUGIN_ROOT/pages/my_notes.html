@@ -122,8 +122,13 @@ which columns to show
 </div>
 <!-- main page end -->
     <script src="./on_page_common.js"></script>
-    <script src="./on_page_create_note_html.js"></script>
-    <script src="./on_page_note_actions.js"></script>
+   <!-- <script src="./on_page_create_note_html.js"></script>-->
+     <!-- reference functions needed to render a yellownote-->
+    <script src="../content_scripts/NotesHandler.js"></script>
+    <!-- reference functions needed to render a yellownote from serlialized form-->
+    <script src="../content_scripts/RenderEmbeddedYelloNotes_libraries.js"></script>
+
+    <script src="./common_cache_functions.js"></script>
 
     <script src="./my_notes.js"></script>
 

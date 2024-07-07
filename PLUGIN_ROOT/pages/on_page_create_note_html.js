@@ -17,7 +17,7 @@ function processCellValue(cellValue) {
 
         console.debug("3.1.1");
 
-        createNote(JSON.parse(cellValue)).then(function (response) {
+        createYellowNoteFromNoteDataObject(JSON.parse(cellValue)).then(function (response) {
             console.debug("createNote.complete");
             console.debug(response.outerHTML);
             console.debug("3.1.1.1");
@@ -32,7 +32,9 @@ function processCellValue(cellValue) {
 }
 
 function updateTableColumn(querySelector, processFunction) {
-    console.log("updateTableColumn.start");
+    console.debug("updateTableColumn.start");
+    console.debug(querySelector);
+    console.debug(processFunction);
     // Select the cells in the column based on the querySelector
     const cells = document.querySelector('table[name="dataTable"]').querySelectorAll('td[name="yellownote"][rendering="json"]');
 
@@ -168,9 +170,6 @@ function fetchNewData(creatorId, cacheKey) {
     })
     .then(response => {
        
-
-
-
         if (!response.ok) {
             console.log(response);
 
@@ -504,7 +503,7 @@ function prepareCanvasNoteForDrawing(node_root) {
 /**
  *  creating the complete not for display in a html page
  */
-function createNote(note_obj){
+function createYellowNoteFromNoteDataObject(note_obj){
     console.debug("createNote().start");
     console.debug(note_obj);
     return new Promise(function (resolve, reject) {
