@@ -36,7 +36,7 @@
       <th class="sortableCol datetime" name="created" sort_type="stringCaseExact" >created<span class="sort-icon url">&#9650;</span></th>
       <th class="sortableCol datetime" name="modified" sort_type="stringCaseExact" >changed<span class="sort-icon url">&#9650;</span></th>
       <th class="sortableCol" name="type" sort_type="stringCaseExact"  >type<span class="sort-icon">&#9650;</span></th>
-      <th name="active" class="checkbox" >sta</th>
+      <th name="enabled_status" class="checkbox" >enabled</th>
       <th class="sortableCol url" name="location" sort_type="stringCaseIgnore" >location<span class="sort-icon url">&#9650;</span></th>
       <th class="sortableCol text"  name="selected"  sort_type="stringCaseExact" >selected<span class="sort-icon">&#9650;</span></th>
       <th class="sortableCol text"  name="message" sort_type="stringCaseExact" >message<span class="sort-icon">&#9650;</span></th>
@@ -96,8 +96,8 @@ which columns to show
 </div>
 
 <div class="toggle-button">
-  <label for="toggle-active">active</label>
-  <input type="checkbox" id="toggle-active" checked>
+  <label for="toggle-enabled_status">enabled</label>
+  <input type="checkbox" id="toggle-enabled_status" checked>
 </div>
 
 <div class="toggle-button">
@@ -125,8 +125,14 @@ which columns to show
    <!-- <script src="./on_page_create_note_html.js"></script>-->
      <!-- reference functions needed to render a yellownote-->
     <script src="../content_scripts/NotesHandler.js"></script>
+
+    <script src="../content_scripts/Canvas_handler.js"></script>
+
+
     <!-- reference functions needed to render a yellownote from serlialized form-->
     <script src="../content_scripts/RenderEmbeddedYelloNotes_libraries.js"></script>
+    <script src="../content_scripts/test.js"></script>
+
 
     <script src="./common_cache_functions.js"></script>
 

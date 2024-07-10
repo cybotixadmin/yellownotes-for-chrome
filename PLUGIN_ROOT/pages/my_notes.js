@@ -75,8 +75,8 @@ document.getElementById('toggle-selected').addEventListener('change', function (
     toggleColumn('selected', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
-document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked,"dataTable", table_columns_to_not_display_keyname );
+document.getElementById('toggle-enabled_status').addEventListener('change', function () {
+    toggleColumn('enabled_status', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-action').addEventListener('change', function () {
@@ -86,6 +86,7 @@ document.getElementById('toggle-action').addEventListener('change', function () 
 document.getElementById('toggle-location').addEventListener('change', function () {
     toggleColumn('location', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
+
 document.getElementById('toggle-yellownote').addEventListener('change', function () {
     toggleColumn('yellownote', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
@@ -449,10 +450,13 @@ try {
             const tableBody = document.querySelector('table[name="dataTable"]').getElementsByTagName('tbody')[0];
             // Loop through data and populate the table
             data.forEach(row => {
-                console.log(row);
-                console.log(JSON.stringify(row));
-                console.log(row.noteid);
-
+                console.debug(row);
+                console.log(row.json);
+                const note_obj = JSON.parse(row.json);
+                console.debug(JSON.stringify(row));
+                console.debug(row.noteid);
+                note_obj.creatorid = row.creatorid;
+                console.debug(note_obj);
 
                 // Create new row
                 const newRow = tableBody.insertRow();
@@ -464,7 +468,7 @@ try {
                 const cell_createtime = newRow.insertCell(0);
                 const cell_lastmodified = newRow.insertCell(1);
                 const type_cell = newRow.insertCell(2);
-                const cell_status = newRow.insertCell(3);
+                const cell_enabled_status = newRow.insertCell(3);
                 const cell_url = newRow.insertCell(4);
                 const cell_selection = newRow.insertCell(5);
                 const cell_message = newRow.insertCell(6);
@@ -522,7 +526,7 @@ try {
 
                 // render a check box to enable/disable the note
                 const suspendActButton = document.createElement("span");
-                if (row.status == 1) {
+                if (row.enabled_status == 1) {
                     // active
                     suspendActButton.innerHTML =
                         '<label><input type="checkbox" class="checkbox" placeholder="Enter text" checked/><span></span></label>';
@@ -549,14 +553,15 @@ try {
                 suspendActButton.addEventListener("change", async(e) => {
                     if (e.target.checked) {
                         //         await disable_note_with_noteid(row.noteid);
-                        await setSubscriptionActiveStatusByUUID(row.noteid, 1);
+                        await setNoteEnabledStatusByUUID(row.noteid, 1);
                     } else {
-                        await setSubscriptionActiveStatusByUUID(row.noteid, 0);
+                        await setNoteEnabledStatusByUUID(row.noteid, 0);
                         //           await enable_note_with_noteid(row.noteid);
                     }
                 });
-                cell_status.appendChild(suspendActButton);
-                cell_status.setAttribute('class', 'checkbox');
+                cell_enabled_status.appendChild(suspendActButton);
+                cell_enabled_status.setAttribute('class', 'checkbox');
+                cell_enabled_status.setAttribute('name', 'enabled_status');
 
                 // where note is attached
                 //contenteditable="true"
@@ -741,11 +746,24 @@ try {
 */
 
 
-                cell_note.textContent =  row.json;
+                //cell_note.textContent =  row.json;
                 cell_note.setAttribute('name', 'yellownote');
-                cell_note.setAttribute('rendering', 'json');
+                //cell_note.setAttribute('rendering', 'json');
                 cell_note.setAttribute('class', 'yellownote');
-
+                
+                console.debug("calling createYellowNoteFromNoteDataObject");
+                createYellowNoteFromNoteDataObject(note_obj, true, false ).then(function(note){
+                    console.debug(note);
+                     // make certain redaction from the note that should not bee shown in feed-mode
+                const note_table = note.querySelector('table[name="whole_note_table"]');
+                note_table.removeAttribute("style");
+                    // add the completed graphical yellownote to the table cell
+const inserted = cell_note.appendChild(note);
+// make the cell size large enough to contain the note
+                    cell_note.setAttribute("style", "height: 280px; width: 250px;");
+                    console.debug("calling attachEventlistenersToYellowStickynote");
+                    attachEventlistenersToYellowStickynote(inserted , true, false);
+                });
 
                 // Adding data-label for mobile responsive
                 cell_createtime.setAttribute('data-label', 'createtime');
@@ -836,17 +854,46 @@ function createDropdown(optionsArray, selectedDistributionListId) {
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
 // Function to use "fetch" to re-activate a data agreement
-async function setSubscriptionActiveStatusByUUID(noteid, status) {
-    console.debug("setNoteActiveStatusByUUID: " + noteid + " status: " + status);
+async function setNoteEnabledStatusByUUID(noteid, enabled_status) {
+    console.debug("setNoteEnabledStatusByUUID: " + noteid + " status: " + enabled_status);
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         const userid = "";
         const message_body = JSON.stringify({
                 noteid: noteid,
-                status: status,
+                enabled_status: enabled_status,
             });
         //console.log(message_body);
+
+        // check if url is on http (and therefore not in the plugin GUI), which should not ordinarily be the case
+        // if it is, then the note is not in the plugin GUI and the note in the table should not be updated
+ // update the table of notes
+ if (!isHttpUrl()) {
+    console.debug("not a http url");
+    // update the table of notes
+    //  update_notes_table();
+    const table_row = document.querySelector('tr[noteid="' + noteid + '"]');
+    console.debug(table_row);
+    const all_boxes = table_row.querySelectorAll('[name="enabled_status"][type="checkbox"]');
+    console.debug(all_boxes);
+    all_boxes.forEach(box => {
+        console.debug(box);
+        console.debug(enabled_status);
+        if (enabled_status == 1) {
+            box.setAttribute("checked", "true");
+        } else {
+
+        box.removeAttribute("checked");
+        }
+    });
+} else {
+    // the note is on a page somewhere, nevermind about additional form updates
+    console.debug("a http url");
+ 
+}
+
+
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_set_note_active_status, {

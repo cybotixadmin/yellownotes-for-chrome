@@ -24,7 +24,7 @@ function processCellValue(cellValue) {
         const isNewNote = false;
         console.debug("calling createYellowNoteFromNoteDataObject")
         createYellowNoteFromNoteDataObject(JSON.parse(cellValue), isOwner, isNewNote).then(function (response) {
-            console.debug("createNote.complete");
+            console.debug("createYellowNoteFromNoteDataObject.complete");
             console.debug(response.outerHTML);
             console.debug("3.1.1.1");
             resolve(response);
@@ -36,6 +36,7 @@ function processCellValue(cellValue) {
         //  }, 1000);
     });
 }
+
 
 function updateTableColumn(querySelector, processFunction) {
     console.debug("updateTableColumn.start");
@@ -59,7 +60,7 @@ function updateTableColumn(querySelector, processFunction) {
                 cell.textContent = "";
                 cell.setAttribute("style", "height: 250px; width: 250px;");
 
-                // make certain redaction fro mthe note that should not bee shown in feed-mode
+                // make certain redaction from the note that should not bee shown in feed-mode
                 const note_table = processedValue.querySelector('table[name="whole_note_table"]');
                 note_table.removeAttribute("style");
 
@@ -78,7 +79,6 @@ function removeStyleAttributes(node, attributesToRemove) {
         console.error('Provided node is not a valid HTML element');
         return;
     }
-
     attributesToRemove.forEach(attribute => {
         console.debug(`Removing style attribute: ${attribute}`);
         console.debug(node.style);
@@ -154,23 +154,44 @@ function fetchNewData(creatorId, cacheKey) {
     });
 }
 
+
 /**
  *  creating the complete not for display in a html page
  */
 function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
-    console.debug("createNote().start");
+    console.debug("createYellowNoteFromNoteDataObject().start");
     console.debug(note_obj);
     console.debug(isOwner);
     console.debug(isNewNote);
+
+    console.debug(note_obj.noteid);
+    
     return new Promise(function (resolve, reject) {
         const brand = "default";
         const nodeid = note_obj.noteid;
+// check if noteid is in the cache, and if it is, use it
+getCachedData(nodeid, 300).then(cachedData => {
+    console.log('createYellowNoteFromNoteDataObject: data returned from cache:', cachedData);
+
+if (cachedData == "null") {
+    console.log('Returning cached data for noteid:', nodeid);
+
+    console.debug(cachedData);
+
+    resolve(cachedData);
+
+
+}else {
+     console.log(' not in cache, create the note afresh');
+
+
+
         const creatorid = note_obj.creatorid;
         const note_type = note_obj.note_type;
         var html_note_template;
         var html_notetype_template;
         var creatorDetails;
-
+        var node_root;
         const msg = {
             action: "get_template",
             brand: brand,
@@ -196,19 +217,49 @@ function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
             return fetchCreatorDataThroughAPI(creatorid);
         }).then(function (response) {
             creatorDetails = response;
-            console.debug(note_obj);
+            console.debug(creatorDetails);
+            test();
             console.debug("calling create_stickynote_node");
             return create_stickynote_node(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote);
         }).then(function (response) {
-            var node_root = document.createElement('container');
-            node_root.appendChild(response);
+            console.debug("createNote.complete");
+            //console.debug(response.outerHTML);
+            //var node_root = document.createElement('container');
+            node_root = response;
+if (isOwner) {
+    if (isNewNote   ) {
+        setComponentVisibility(node_root,",new,.*normalsized");
+    }else{
+        setComponentVisibility(node_root,",rw,.*normalsized");
+    }
+}else{
+    if (isNewNote   ) {
+        setComponentVisibility(node_root,",new,.*normalsized");
+    }else{
+        setComponentVisibility(node_root,",ro,.*normalsized");
+    }
+}
+            // put the completed note into the note cache
+            console.log('Caching data for', nodeid);
+
+            return cacheData(nodeid, node_root);            
+        }).then(function ( ) {
+            console.debug('Cached data for', nodeid);
             console.debug(node_root.outerHTML);
             resolve(node_root);
         });
 
-    });
 
+    }
+}).catch(error => {
+    console.error("Error during createYellowNoteFromNoteDataObject:", error);
+});
+
+
+
+    });
 }
+
 
 // Helper to fetch data from API_URL_2
 function fetchCreatorDataThroughAPI(creatorId) {

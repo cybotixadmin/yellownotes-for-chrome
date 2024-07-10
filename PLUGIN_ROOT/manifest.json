@@ -36,10 +36,9 @@
             "matches": ["*://www.yellownotes.cloud/*"],
             "js": ["./content_scripts/local_GUI_intercept.js"],
             "run_at": "document_start"
-       
-         }, {
+        }, {
             "matches": ["<all_urls>"],
-            "js": ["./content_scripts/NotesHandler.js"],
+            "js": ["./content_scripts/test.js","./content_scripts/NotesHandler.js"],
             "run_at": "document_start"
         }
     ],

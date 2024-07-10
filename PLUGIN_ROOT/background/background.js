@@ -1322,9 +1322,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         } else if (action == 'single_note_disable') {
             console.debug("request: disable a single yellow note");
             console.debug(JSON.stringify(message));
-            console.debug(JSON.stringify(message.message.disable_details));
+            console.debug(JSON.stringify(message.disable_details));
 
-            const noteid = message.message.disable_details.noteid;
+            const noteid = message.disable_details.noteid;
+            const enabled_status = message.disable_details.enabled_status;
+            
             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
@@ -1340,30 +1342,37 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     },
                     body: JSON.stringify({
                         noteid: noteid,
-                        status: 0
+                        enabled_status: enabled_status
                     })
                 };
                 console.debug(JSON.stringify(opts));
                 return fetch(server_url + URI_plugin_user_setstatus_yellownote, opts);
             }).then(function (response) {
-                console.debug("notify tab to disable note with uuid: " + uuid);
+                console.debug("response: " + JSON.stringify(   response));
+                console.debug("notify tab to disable note with noteid: " + noteid);
                 // send notification to all pages that this note should be removed from the page
                 return chrome.tabs.sendMessage(sender.tab.id, {
                     sharedsecret: "qwertyui",
                     action: "disable_single_note",
-                    uuid: uuid
+                    noteid: noteid
 
                 });
             }).then(function (res) {
+                console.debug("response: " + JSON.stringify(res));
                 sendResponse('{"response":"ok"}');
 
+            }).catch(function (error) {
+                console.debug("error: " + error);
+                sendResponse('{"response":"error"}');
             });
+            return true;
         } else if (action == 'single_note_enable') {
             console.debug("request: enable a single yellow note");
             console.debug(JSON.stringify(message));
             console.debug(JSON.stringify(message.message.enable_details));
 
-            const uuid = message.message.enable_details.uuid;
+            //const uuid = message.message.enable_details.uuid;
+            const noteid = message.disable_details.noteid;
             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
@@ -1378,8 +1387,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                         [plugin_session_header_name]: xYellownotesSession
                     },
                     body: JSON.stringify({
-                        uuid: uuid,
-                        status: 1
+                        noteid: noteid,
+                        enabled_status: 1
                     })
                 };
                 console.debug(JSON.stringify(opts));

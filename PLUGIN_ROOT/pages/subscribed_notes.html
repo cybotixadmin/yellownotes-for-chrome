@@ -24,27 +24,41 @@
 
     <!--
     yellowstickynote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellowstickynote
-  -->
+  
+  
+    <tr class="fixed-header" selectablecol="true">
+      <th class="sortableCol datetime" name="created" sort_type="stringCaseExact" >created<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol datetime" name="modified" sort_type="stringCaseExact" >changed<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol" name="type" sort_type="stringCaseExact"  >type<span class="sort-icon">&#9650;</span></th>
+      <th name="enabled_status" class="checkbox" >enabled</th>
+      <th class="sortableCol url" name="location" sort_type="stringCaseIgnore" >location<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol text"  name="selected"  sort_type="stringCaseExact" >selected<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol text"  name="message" sort_type="stringCaseExact" >message<span class="sort-icon">&#9650;</span></th>
+      <th name="action" class="action-5" >actions</th>
+      <th class="sortableCol" name="feed" sort_type="selectCaseExact" >feed<span class="sort-icon url">&#9650;</span></th>
+      <th name="yellownote" class="yellownote" >notes</th>
+  
+    -->
     <!-- Empty table structure -->
 <div class="scrollable-table">
 <table name="dataTable" class="notesTable">
   <thead>
-    <tr class="fixed-header">
+    <tr class="fixed-header" selectablecol="true">
       
-      <th class="sortableCol" name="created">created<span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" name="modified">modified<span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" name="type">type<span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" name="feed">feed <span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" name="location">location(URL)<span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" name="selection_text">selected text<span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" name="message">message<span class="sort-icon" ">&#9650;</span></th>
-      <th class="sortableCol" name="status">status<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="createtime" sort_type="stringCaseExact">created<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="lastmodifiedtime" sort_type="stringCaseExact">modified<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="type" sort_type="stringCaseExact">type<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="feed" sort_type="stringCaseExact">feed <span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="location" sort_type="stringCaseExact">location(URL)<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="selection_text" sort_type="stringCaseExact">selected text<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="message" sort_type="stringCaseExact">message<span class="sort-icon" ">&#9650;</span></th>
+      <th class="sortableCol" name="status" sort_type="stringCaseExact">status<span class="sort-icon" ">&#9650;</span></th>
       <th name="action">action</th>
-      
+      <th name="yellownote" class="yellownote" >notes</th>
     </tr>
     
     <!-- Add a filter row -->
-    <tr class="fixed-header">
+    <tr class="fixed-header" selectablecol="true">
       <th filterableCol="wildcardmatch"><input filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
       <th filterableCol="wildcardmatch"><input filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
       <th filterableCol="wildcardmatch"><select filterContent="1" class="compact"><option class="compact"</option><option class="compact">webframe</option><option class="compact">yellownote</option></select></th>
@@ -53,6 +67,7 @@
       <th filterableCol="wildcardmatch"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th filterableCol="wildcardmatch"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th filterableCol="wildcardmatch"><select filterContent="1" class="compact"><option class="compact"</option><option class="compact">dismissed</option><option class="compact">unread</option></select></th>
+      <th ></th>
       <th ></th>
     </tr>
 
@@ -69,12 +84,12 @@
 which columns to show
 <div class="toggle-container">
   <div class="toggle-button">
-      <label for="toggle-created">Created</label>
-      <input type="checkbox" id="toggle-created" checked>
+      <label for="toggle-createtime">Created</label>
+      <input type="checkbox" id="toggle-createtime" checked>
   </div><br/>
   <div class="toggle-button">
-      <label for="toggle-modified">Modified</label>
-      <input type="checkbox" id="toggle-modified" checked>
+      <label for="toggle-lastmodifiedtime">Modified</label>
+      <input type="checkbox" id="toggle-lastmodifiedtime" checked>
   </div><br/>
   <div class="toggle-button">
       <label for="toggle-type">Type</label>
@@ -104,12 +119,28 @@ which columns to show
   <label for="toggle-status">Status</label>
   <input type="checkbox" id="toggle-status" checked>
 </div>
+<div class="toggle-button">
+  <label for="toggle-yellownote">YellowNote</label>
+  <input type="checkbox" id="toggle-yellownote" checked>
+</div>
 </div>
 
 
 <div id="subscribed_notes_page_footer_text"></div>
 </div>
     <script  src="on_page_common.js"></script>
+    <script src="../content_scripts/NotesHandler.js"></script>
+
+    <script src="../content_scripts/Canvas_handler.js"></script>
+
+
+    <!-- reference functions needed to render a yellownote from serlialized form-->
+    <script src="../content_scripts/RenderEmbeddedYelloNotes_libraries.js"></script>
+    <script src="../content_scripts/test.js"></script>
+
+
+    <script src="./common_cache_functions.js"></script>
+
     <script src="./subscribed_notes_script.js"></script>
 
 <!--   <script src="./RenderEmbeddedNotes.js"></script>

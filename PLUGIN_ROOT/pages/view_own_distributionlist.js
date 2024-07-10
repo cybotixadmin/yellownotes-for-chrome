@@ -643,7 +643,7 @@ async function setNoteActiveStatusByUUID(noteid, status) {
         const userid = "";
         const message_body = JSON.stringify({
                 noteid: noteid,
-                status: status,
+                enabled_status: status,
             });
         //console.log(message_body);
         // Fetch data from web service (replace with your actual API endpoint)

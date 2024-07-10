@@ -39,17 +39,17 @@ checkSessionJWTValidity()
 
 
 
-const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns";
+const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns1";
 
 
 
 
-document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked,"dataTable", table_columns_to_not_display_keyname );
+document.getElementById('toggle-createtime').addEventListener('change', function () {
+    toggleColumn('createtime', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
-document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked,"dataTable", table_columns_to_not_display_keyname );
+document.getElementById('toggle-lastmodifiedtime').addEventListener('change', function () {
+    toggleColumn('lastmodifiedtime', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-type').addEventListener('change', function () {
@@ -59,25 +59,32 @@ document.getElementById('toggle-type').addEventListener('change', function () {
 document.getElementById('toggle-feed').addEventListener('change', function () {
     toggleColumn('feed', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
-document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked,"dataTable", table_columns_to_not_display_keyname );
+document.getElementById('toggle-location').addEventListener('change', function () {
+    toggleColumn('location', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-selection_text').addEventListener('change', function () {
     toggleColumn('selection_text', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
-document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked,"dataTable", table_columns_to_not_display_keyname );
+document.getElementById('toggle-message').addEventListener('change', function () {
+    toggleColumn('message', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
-document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked,"dataTable", table_columns_to_not_display_keyname );
-});
 
 
 document.getElementById('toggle-status').addEventListener('change', function () {
     toggleColumn('status', this.checked,"dataTable", table_columns_to_not_display_keyname );
+});
+
+document.getElementById('toggle-action').addEventListener('change', function () {
+    toggleColumn('action', this.checked,"dataTable", table_columns_to_not_display_keyname );
+});
+
+
+
+document.getElementById('toggle-yellownote').addEventListener('change', function () {
+    toggleColumn('yellownote', this.checked,"dataTable", table_columns_to_not_display_keyname );
 });
 
 // set table visibility defaults
@@ -89,12 +96,13 @@ var not_show_by_default_columns = [];
 const pagewidth = window.innerWidth;
 console.log("window.innerWidth: " + pagewidth);
 
+// the space available is sufficiently narrow, show only the yellownote column 
 if (pagewidth < 300) {
-    not_show_by_default_columns = ["created", "modified", "type", "feed", "selection_text", "status", "action" ];
+    not_show_by_default_columns = ["createtime", "modifilastmodifiedtimeed", "type", "selection_text", "status", "action" ];
 }else if (pagewidth < 600) {
-    not_show_by_default_columns = ["modified", "type", "status", "action"];
+    not_show_by_default_columns = ["lastmodifiedtime", "type", "status", "action"];
 }else if (pagewidth < 800) {
-    not_show_by_default_columns = ["modified","action"];
+    not_show_by_default_columns = ["lastmodifiedtime","action"];
 }else  {
     not_show_by_default_columns = [];
 }
@@ -421,9 +429,10 @@ function fetchData(not_show_by_default_columns) {
                     // Create new row
                     const newRow = tableBody.insertRow();
                     newRow.setAttribute("noteid", row.noteid);
+                    newRow.setAttribute("distributionlistid", row.distributionlistid);
                     newRow.setAttribute('selectablecol', "true");
                     // Create cells and populate them with data
-                   
+                 
                     const cell_createtime = newRow.insertCell(0);
                     const cell_lastmodifiedtime = newRow.insertCell(1);
                     const type_cell = newRow.insertCell(2);
@@ -433,10 +442,10 @@ function fetchData(not_show_by_default_columns) {
                     const cell_message_text = newRow.insertCell(6);
                     const cell_status = newRow.insertCell(7);
                     const cell_buttons = newRow.insertCell(8);
-
+                    const cell_note = newRow.insertCell(9);
                     // parse the JSON of the note
-                    const obj = JSON.parse(row.json);
-                    console.log(obj);
+                    const note_obj = JSON.parse(row.json);
+                    console.log(note_obj);
 
                    
                     // last create timestamp
@@ -458,7 +467,7 @@ function fetchData(not_show_by_default_columns) {
                     try {
                         cell_lastmodifiedtime.textContent = timestampstring2timestamp(row.lastmodifiedtime);
                         cell_lastmodifiedtime.setAttribute('name', 'lastmodifiedtime');
-                        if (not_show_by_default_columns.indexOf("modified") !== -1) {
+                        if (not_show_by_default_columns.indexOf("lastmodifiedtime") !== -1) {
                             cell_lastmodifiedtime.className = "hidden";
                        
                         }
@@ -468,7 +477,7 @@ function fetchData(not_show_by_default_columns) {
 
                     // type
                     try {
-                        type_cell.textContent = obj.note_type;
+                        type_cell.textContent = note_obj.note_type;
                         type_cell.setAttribute('name', 'note_type');
                         if (not_show_by_default_columns.indexOf("type") !== -1) {
                             type_cell.className = "hidden";
@@ -489,9 +498,9 @@ function fetchData(not_show_by_default_columns) {
                     }
 
                     // url where note is attached
-                    cell_url.textContent = obj.url;
+                    cell_url.textContent = note_obj.url;
                     cell_url.setAttribute('name', 'url');
-                    cell_url.innerHTML = '<a href="/pages/gothere.html?noteid='+row.noteid+'" target="_blank">' + obj.url + '</a>';
+                    cell_url.innerHTML = '<a href="/pages/gothere.html?noteid='+row.noteid+'" target="_blank">' + note_obj.url + '</a>';
                     if (not_show_by_default_columns.indexOf("location") !== -1) {
                         cell_url.className = "hidden";
                     }
@@ -499,7 +508,7 @@ function fetchData(not_show_by_default_columns) {
                       // display/selected text text
                     // this message is a clickable link to the note
 
-                    cell_selection_text.textContent = b64_to_utf8(obj.selection_text);
+                    cell_selection_text.textContent = b64_to_utf8(note_obj.selection_text);
                       // Create the link element
                       //const link = document.createElement('a');
                       //link.href = 'http://somewhere.com/attr?parameter=value';
@@ -522,7 +531,7 @@ function fetchData(not_show_by_default_columns) {
                     // display/message text
                     // this message is a clickable link to the note
 
-                    cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
+                    cell_message_text.textContent = b64_to_utf8(note_obj.message_display_text);
                       // Create the link element
                       //const link = document.createElement('a');
                       //link.href = 'http://somewhere.com/attr?parameter=value';
@@ -588,7 +597,32 @@ function fetchData(not_show_by_default_columns) {
 
                     cell_buttons.appendChild(actionButtonContainer);
 
+        
+/* cell_note contains the note in graphical form
+ the purpose of this cell is that if all the other columns are de-selected by the user, the remaining column will look like a feed of notes^. 
+ Much like any other newsfeed.
+ The differece is that the user can filter feed by the columns that are not displayed.
+*/
 
+
+                //cell_note.textContent =  row.json;
+                cell_note.setAttribute('name', 'yellownote');
+                //cell_note.setAttribute('rendering', 'json');
+                cell_note.setAttribute('class', 'yellownote');
+                
+                console.debug("calling createYellowNoteFromNoteDataObject");
+                createYellowNoteFromNoteDataObject(note_obj, false, false ).then(function(note){
+                    console.debug(note);
+                     // make certain redaction from the note that should not bee shown in feed-mode
+                const note_table = note.querySelector('table[name="whole_note_table"]');
+                note_table.removeAttribute("style");
+                    // add the completed graphical yellownote to the table cell
+const inserted = cell_note.appendChild(note);
+// make the cell size large enough to contain the note
+                    cell_note.setAttribute("style", "height: 280px; width: 250px;");
+                    console.debug("calling attachEventlistenersToYellowStickynote");
+                    attachEventlistenersToYellowStickynote(inserted , false, false);
+                });
 
 
 

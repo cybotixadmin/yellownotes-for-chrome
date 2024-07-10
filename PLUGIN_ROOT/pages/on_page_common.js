@@ -119,6 +119,17 @@ async function is_authenticated() {
 }
 
 
+/**
+ * this function exists in two forms, one for the GUI script and one for the content script
+ * 
+ * This version is ment for the GUI scripts and in addition to removeing the noted from the page, also removes the table row the note is part of
+ * @param {*} noteid 
+ */
+function remove_noteid(noteid){
+console.debug("remove_noteid(" + noteid + ")");
+
+
+}
 
 
 function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
