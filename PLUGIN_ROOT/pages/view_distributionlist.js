@@ -490,7 +490,6 @@ async function fetchNotes(distributionlistid) {
                 link.appendChild(goThereButton);
                 goThereButtonContainer.appendChild(link);
                
-
         cell_buttons.appendChild(goThereButtonContainer);
 
         //cell_buttons.appendChild(goThereButton);
@@ -500,8 +499,6 @@ async function fetchNotes(distributionlistid) {
     });
 
 }
-
-
 
 
 async function fetchNote(distributionlistid, noteid) {

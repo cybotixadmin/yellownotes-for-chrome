@@ -170,8 +170,9 @@ function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
         const brand = "default";
         const nodeid = note_obj.noteid;
 // check if noteid is in the cache, and if it is, use it
-getCachedData(nodeid, 300).then(cachedData => {
-    console.log('createYellowNoteFromNoteDataObject: data returned from cache:', cachedData);
+getCachedData(nodeid, 10).then(cachedData => {
+    console.debug('createYellowNoteFromNoteDataObject: data returned from cache:');
+    console.debug(cachedData);
 
 if (cachedData == "null") {
     console.log('Returning cached data for noteid:', nodeid);
@@ -213,8 +214,10 @@ if (cachedData == "null") {
             return chrome.runtime.sendMessage(msg);
         }).then(function (response) {
             html_notetype_template = response;
-            console.debug("calling fetchCreatorDataThroughAPI");
-            return fetchCreatorDataThroughAPI(creatorid);
+            console.debug("calling cachableCall2API_POST");
+         
+            return cachableCall2API_POST( creatorid + "_creator_data", 30, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: creatorid } );
+
         }).then(function (response) {
             creatorDetails = response;
             console.debug(creatorDetails);
@@ -223,9 +226,7 @@ if (cachedData == "null") {
             return create_stickynote_node(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote);
         }).then(function (response) {
             console.debug("createNote.complete");
-            //console.debug(response.outerHTML);
-            //var node_root = document.createElement('container');
-            node_root = response;
+             node_root = response;
 if (isOwner) {
     if (isNewNote   ) {
         setComponentVisibility(node_root,",new,.*normalsized");
@@ -272,7 +273,7 @@ function fetchCreatorDataThroughAPI(creatorId) {
 
     const cacheKey = creatorId + "_creator_data";
 
-    return getCachedData(cacheKey, CACHE_DURATION)
+    return getCachedData(cacheKey, 3)
     .then(cachedData => {
         console.log('fetchCreatorDataThroughAPI: data returned from cache:', cachedData);
 

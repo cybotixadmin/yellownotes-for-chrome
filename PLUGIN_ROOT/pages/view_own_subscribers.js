@@ -157,7 +157,7 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
                 }
             }).then(function (resp) {
                 data = resp;
-                return fetch(server_url + URI_plugin_user_get_own_distributionlists, {
+                return fetch(server_url + URI_plugin_user_get_my_distribution_lists, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

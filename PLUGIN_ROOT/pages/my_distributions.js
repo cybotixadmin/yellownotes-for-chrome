@@ -612,30 +612,24 @@ console.debug(not_show_by_default_columns);
         var distributionlists;
         var data;
         //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+        console.debug("request: get_my_distribution_lists");
+        // if update is to disable the note, remove it from the in-memory store
+        const cacheKey = URI_plugin_user_get_my_distribution_lists.replace(/\//g, "_");
+        //const cacheKey = "cacheKey0002";
 
+        console.debug("Cache key: " + cacheKey);
+        const currentTime = Date.now();
 
-        chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
-            console.log(result);
-            console.log(ynInstallationUniqueId);
-            ynInstallationUniqueId = result[plugin_uuid_header_name];
-            xYellownotesSession = result[plugin_session_header_name];
-            console.log(ynInstallationUniqueId);
-            console.log(xYellownotesSession);
-            
-            return fetch(server_url + URI_plugin_user_get_own_distributionlists, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: ynInstallationUniqueId,
-                    [plugin_session_header_name]: xYellownotesSession,
-                },
-            });
-        }).then(response => {
-            if (!response.ok) {
-                reject(new Error('Network response was not ok'));
-            }
-            return response.json();
-        }).then(function (data) {
+        console.debug("currentTime: " + currentTime);
+        const cachetimeout = 60;
+        const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
+        const protocol = "GET";
+
+        // Accept data from cache if it is less than 60 seconds old
+        // Make changes to this timeout when there is a procedure to empty the cache if the value has been updated.
+        console.debug("calling cachableCall2API_GET" );
+        cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint)
+        .then(function (data) {
            
             console.log(data);
 

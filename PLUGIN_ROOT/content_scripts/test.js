@@ -1,5 +1,14 @@
 
 
+// main a contstant for how heigh the bar should be for the controls only accessible to the note owner (or administrator)
+/*
+the owner of the note have extra controls in a bar on the bottom (buttons, drop-downs etc.)
+
+This is height is added to the heigh the note will ordinarily have and is substracted fro mthe height of the note when the note is saved to the database.
+
+ */
+
+const note_owners_control_bar_height = 23;
 
 function test() {
     console.log("test");
@@ -130,8 +139,8 @@ function mergeHTMLTrees(doc1, selector1, doc2, selector2) {
 /**
  * process the middle part of the note. This is the part where there are diference between the different types of yellownotes
  */
-function processNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, newNote) {
-    console.debug("processNoteMiddleBody.start");
+function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, newNote) {
+    console.debug("createNoteMiddleBody.start");
     console.debug(note_object_data);
     console.debug(cont1);
     console.debug(creatorDetails);
@@ -271,7 +280,6 @@ function processNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner,
                 } catch (e) {
                     console.error(e);
                     cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(""));
-
                 }
                 cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
             }
@@ -289,13 +297,17 @@ function processNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner,
             // insert the displayed text(html) content that consitute the message itself
             try {
                 if (note_object_data.hasOwnProperty("message_display_text")) {
-                    const message_node = cont1.querySelector('[name="message_display_text"]');
-                    console.debug(message_node);
+                    console.debug(cont1.querySelector('[name="message_display_text"]'));
+                    const message_html = b64_to_utf8(note_object_data.message_display_text);
+                    console.debug(message_html);
 
                     //cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
-                    message_node.innerHTML = b64_to_utf8(note_object_data.message_display_text);
-                    console.debug(message_node);
+                    console.debug(cont1.querySelector('[name="message_display_text"]').innerHTML );
+                    cont1.querySelector('[name="message_display_text"]').innerHTML = message_html;
+                    console.debug(cont1.querySelector('[name="message_display_text"]').innerHTML );
 
+                }else{
+                    console.debug("no message_display_text attribute defined");
                 }
             } catch (e) {
                 console.error(e);
@@ -380,6 +392,7 @@ function processNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner,
                 }
                 // });
             }
+            //console.debug(cont1.innerHTML)
             resolve(cont1);
         }
     });
@@ -410,13 +423,28 @@ function setNoteColor(creatorDetails, cont1) {
 
 /*
 create the header bar of the yellownotes
-This field is party customizable by the user, 
-in the profile the user may set a defaul images to be added here.
 
-This image my be futher customed in a per-feed/distributionlist level (not yet implemented)
+The header bar contains the following elements:
 
-In the user have not selected an image for the field, there will be text displayed instead
-The image or text is clickable and will take the user to the feed page of which the note is part.
+1. an icon representing the creator of the note. It appears on the far left of the header bar
+2. the name of the creator of the note. It appears in tiny letters below the creator icon
+3. an icon or text representing the feed/distribution list the note belongs to. It appears to the right of the creator icon (and to the left of the tools buttons)
+
+1. This icon is customizable by the user, 
+
+It is customizable at different levels (creator/brand)
+
+In the profile YellowNote template the user can select the images to be displayed in the creator field. For all notes created by the user, this image is displayed. If no image is set, a default person icon is shown instead.
+If no image is set, a default person icon is shown instead. The icon is clickable and will take the user to the profile page of the creator.
+
+2. The display name of the creator is customizable in the profile page.
+
+3. This field may beither text or image. The image is customizable by the user. The user can select the image to be displayed in the feed field.
+The image is clickable and will take the user to the feed page of which the note is part.
+If no image is selected the feed name is displayed instead.
+
+
+
 From this page the user may unsubscribe from the feed.  
 
 
@@ -472,15 +500,38 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
 
     var headerhtml = "";
 
-    var link_target = "";
+    var feed_link_target = "";
+
+    var creator_link_target = "";
     var display_text = "";
 
-    if (isOwner) {
-        link_target = "https://www.yellownotes.cloud/pages/my_notes.html?noteid=" + note_object_data.creatorid;
-    } else {
-        link_target = 'https://www.yellownotes.cloud/pages/my_subscriptions.html?distributionlistid=' + note_object_data.distributionlistid;
+//    if (isOwner) {
+//        creator_link_target = "https://www.yellownotes.cloud/pages/my_notes.html?noteid=" + note_object_data.creatorid;
+//    } else {
+//        creator_link_target = 'https://www.yellownotes.cloud/pages/my_subscriptions.html?distributionlistid=' + note_object_data.distributionlistid;
+//    }
+    creator_link_target = 'https://www.yellownotes.cloud/pages/publicprofile.html?creatorid=' + note_object_data.creatorid;
+
+    console.debug( "creator_link_target: " + creator_link_target   );
+
+  
+    try{
+
+        console.debug(note_root.querySelector('[name="creator_link_target"]'));
+        note_root.querySelector('[name="creator_link_target"]').setAttribute("href", creator_link_target);
+    }catch(e){
+        console.error(e);
     }
-console.debug( "link_target: " + link_target   );
+    if (isOwner) {
+        // the owner will see a more tools-rich version of the distributionlist page
+    feed_link_target = 'https://www.yellownotes.cloud/pages/view_own_distributionlist.html?distributionlistid=' + note_object_data.distributionlistid;
+    }else{
+        feed_link_target = 'https://www.yellownotes.cloud/pages/view_distributionlist.html?distributionlistid=' + note_object_data.distributionlistid;
+
+    }
+    console.debug( "feed_link_target: " + feed_link_target   );
+
+
     // check if there is a brand (with a possible logo) associated with the note
     if (isOwner) {
         if (note_object_data.distributionlistname != undefined) {
@@ -500,7 +551,7 @@ console.debug( "link_target: " + link_target   );
     console.debug(headerhtml);
 
     // is there a banner image for the creator of the note ?
-    var banner_image = "";
+    var creator_banner_image = "";
 
     if (creatorDetails != undefined) {
         try {
@@ -511,7 +562,7 @@ console.debug( "link_target: " + link_target   );
         console.debug(creatorDetails.banner_image != undefined);
         if (creatorDetails.banner_image != undefined) {
             // Create a new img element
-            banner_image = creatorDetails.banner_image;
+            creator_banner_image = creatorDetails.banner_image;
         }
 
     } else {
@@ -520,9 +571,40 @@ console.debug( "link_target: " + link_target   );
         // There is no option for setting image at the level of the feed or the individial note at this time
     }
 
+if (creatorDetails.note_display_name != undefined) {
+    const topbarcreatordisplayname = note_root.querySelector('[name="creator_note_display_name"]');
+    console.debug(topbarcreatordisplayname);
+    topbarcreatordisplayname.replaceChildren(document.createTextNode(creatorDetails.note_display_name));
+
+    topbarcreatordisplayname.setAttribute("href", creator_link_target);
+
+}
+// if there is abannerimage defined for this user, put it in the creator icon field
+    if (creator_banner_image != "") {
+
+        note_root.querySelector('[name="creator_icon"]').setAttribute("src", creator_banner_image);
+    
+    }else{
+        // leave default icon in place  
+    }
+
+
+// set the link to the feed page
+try{
+   // if (note_object_data.distributionlistname != undefined) {
+        const topbar_feed_link_target = note_root.querySelector('[name="feed_link_target"]');
+        console.debug(topbar_feed_link_target);
+        topbar_feed_link_target.replaceChildren(document.createTextNode("feed: " + note_object_data.distributionlistname));
+        topbar_feed_link_target.setAttribute("href", feed_link_target);
+   // }
+}catch(e){
+    console.error(e);
+}
+
+return;
     const topbarfield = note_root.querySelector('td[name="topbar_filler"]');
     console.debug(topbarfield);
-    if (banner_image != "") {
+    if (creator_banner_image != "") {
         //console.debug(topbarfield);
         //topbarfield.innerHTML = headerhtml;
         var imgElement = document.createElement('img');
@@ -530,7 +612,7 @@ console.debug( "link_target: " + link_target   );
         // Set attributes
         imgElement.setAttribute('height', '20');
         //imgElement.setAttribute('width', '170');
-        imgElement.setAttribute('src', banner_image);
+        imgElement.setAttribute('src', creator_banner_image);
 
         // Apply inline styles
         imgElement.style.margin = '0px';
@@ -542,7 +624,7 @@ console.debug( "link_target: " + link_target   );
         console.debug(imgElement);
 
         var aElement = document.createElement('a');
-        aElement.setAttribute('href', link_target);
+        aElement.setAttribute('href', creator_link_target);
         aElement.setAttribute('target', "_blank");
         aElement.setAttribute('rel', "noopener noreferrer");
 
@@ -551,7 +633,7 @@ console.debug( "link_target: " + link_target   );
         topbarfield.appendChild(aElement);
     } else {
         // no image, use text
-        headerhtml = '<div style="word-wrap: break-word; line-height: 1; letter-spacing: -0.5px;">feed: <a href="' + link_target + '" target="_blank" rel="noopener noreferrer"><b>' + display_text + '</b></a></div>\n<br/>\n';
+        headerhtml = '<div style="word-wrap: break-word; line-height: 1; letter-spacing: -0.5px;">feed: <a href="' + creator_link_target + '" target="_blank" rel="noopener noreferrer"><b>' + display_text + '</b></a></div>\n<br/>\n';
 
         // return the top bar field
         topbarfield.innerHTML = headerhtml;
@@ -574,6 +656,8 @@ console.debug( "link_target: " + link_target   );
  */
 function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newNote) {
     console.debug("createNoteFooter.start");
+    // only do this for the note owner (and later administrator and some other roles)
+    if (isOwner) {
 console.debug(note_object_data);
 console.debug(cont1);
 
@@ -667,6 +751,14 @@ enablecheckbox.setAttribute("checked","true");
             });
         }
     });
+}else{
+// if the user is not the owner of the note, do not show the footer
+// return a promise that resolves to null
+return new Promise(function (resolve, reject) {
+    resolve(null);
+});
+
+}
 }
 
 function prepareCanvasNoteForDrawing(node_root) {
@@ -1289,14 +1381,20 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
     const note_type = note_root.getAttribute("note_type");
     console.debug("calling note type-specific procedures (for " + note_type + ")");
     if (note_type == "plaintext") {
+        if (isNewNote  ){
         // make the message in the textarea touch-n-go
-        preparePlainNoteEventlistener(note_root);
+        prepareNewTextNoteEventlistener(note_root);
+        }
     } else if (note_type == "plainhtml") {
-        // make the message in the textarea touch-n-go
-        preparePlainNoteEventlistener(note_root);
+        if (isNewNote  ){
+            // make the message in the textarea touch-n-go
+        prepareNewTextNoteEventlistener(note_root);
+        }
     } else if (note_type == "yellownote") {
-        // make the message in the textarea touch-n-go
-        preparePlainNoteEventlistener(note_root);
+        if (isNewNote  ){
+            // make the message in the textarea touch-n-go
+        prepareNewTextNoteEventlistener(note_root);
+        }
     } else if (note_type == "capture_note") {
         prepareCaptureNoteEventlistener(note_root, info);
     } else if (note_type == "canvas") {
@@ -1522,7 +1620,7 @@ function delete_note_by_noteid(noteid) {
 }
 
 
-function preparePlainNoteEventlistener(note_root) {
+function prepareNewTextNoteEventlistener(note_root) {
     console.debug("preparePlainNoteEventlistener.start");
     // make the message in the textarea touch-n-go
     try {
@@ -1687,10 +1785,10 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
 
 
             // render a plainhtml note
-            console.debug("browsersolutions calling processNoteMiddleBody");
-            processNoteMiddleBody(note_object_data, cont1, resolve, creatorDetails, isOwner, newNote).
+            console.debug("calling createNoteMiddleBody");
+            createNoteMiddleBody(note_object_data, cont1, resolve, creatorDetails, isOwner, newNote).
             then(function (response) {
-                console.debug("processNoteMiddleBody.complete");
+                console.debug("createNoteMiddleBody.complete");
                 console.debug(response);
                 //    resolve(response);
                 console.debug("calling createNoteFooter");
@@ -1717,9 +1815,14 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
                 // var newGloveboxNode = document.createElement("Glovebox");
                 // console.debug(newGloveboxNode);
 
+                // set background color of note
+                // what color to use for the note
+                console.debug("calling setNoteColor");
+                setNoteColor(creatorDetails, cont1);
+
                 // set note size
                 // set default values first
-                // then replace those values with more specific ones if they are available
+                // then replace those values with more specific ones if they are available/applicable
 
                 // set defaults
                 var box_width = default_box_width + "px";
@@ -1727,10 +1830,6 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
 
                 // check for template-specific values - not implemented yet
 
-                // set background color of note
-                // what color to use for the note
-                console.debug("calling setNoteColor");
-                setNoteColor(creatorDetails, cont1);
 
                 // check for brand/organization-specific values - not implemented yet
 

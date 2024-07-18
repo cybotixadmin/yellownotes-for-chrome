@@ -217,15 +217,15 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/view_yellownotes/)).test(wind
 /*
 
 */
-else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/DISABLEDgothere.html/)).test(window.location.href)) {
-    console.log("redirect this link to plugin /pages/gothere.html")
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/publicprofile.html/)).test(window.location.href)) {
+    console.log("redirect this link to plugin /pages/publicprofile.html")
     // Notify the background script to redirect
 
 
     // Extract query string (everything after the '?' character)
     const queryString = (window.location.href).split('?')[1] || '';
 
-    const new_uri = "/pages/gothere.html?" + queryString;
+    const new_uri = "/pages/publicprofile.html?" + queryString;
 
     chrome.runtime.sendMessage({
         action: "local_pages_intercept",

@@ -46,49 +46,49 @@ console.error('Error:', error.message);
 
 const table_columns_to_not_display_keyname = "my_notes_hide_columns";
 
-
+const table_name ="myYellowNotesDataTable" ;
 
 
 // which columns to display
 // The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
 
 document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked,"dataTable", table_columns_to_not_display_keyname);
+    toggleColumn('created', this.checked,table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('modified', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('type', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('feed', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('message', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-selected').addEventListener('change', function () {
-    toggleColumn('selected', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('selected', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-enabled_status').addEventListener('change', function () {
-    toggleColumn('enabled_status', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('enabled_status', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('action', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('location', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-yellownote').addEventListener('change', function () {
-    toggleColumn('yellownote', this.checked,"dataTable", table_columns_to_not_display_keyname );
+    toggleColumn('yellownote', this.checked,table_name, table_columns_to_not_display_keyname );
 });
 
 // set table visibility defaults
@@ -130,7 +130,7 @@ fetchData(not_show_by_default_columns).then(function (d) {
     // update the list of colmes and check/uncheck according to the list of columns to not display
 not_show_by_default_columns.forEach(column => {
     console.log("hide column: ", column);
-    toggleColumn(column, false,"dataTable", table_columns_to_not_display_keyname);
+    toggleColumn(column, false,table_name, table_columns_to_not_display_keyname);
     document.getElementById(`toggle-${column}`).checked = false;
 
 
@@ -347,7 +347,7 @@ async function editNote(noteid) {
 }
 
 // setup table items for sorting and filtering
-setupTableFilteringAndSorting("dataTable");
+setupTableFilteringAndSorting(table_name);
 
 
 // Sort states for each column
@@ -416,19 +416,23 @@ try {
             }
         }).then(function (resp) {
             data = resp;
-            return fetch(server_url + URI_plugin_user_get_own_distributionlists, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [plugin_uuid_header_name]: ynInstallationUniqueId,
-                    [plugin_session_header_name]: xYellownotesSession,
-                },
-            });
-        }).then(response => {
-            if (!response.ok) {
-                reject(new Error('Network response was not ok'));
-            }
-            return response.json();
+            console.debug("request: get_my_distribution_lists");
+            // if update is to disable the note, remove it from the in-memory store
+            const cacheKey = URI_plugin_user_get_my_distribution_lists.replace(/\//g, "_");
+            //const cacheKey = "cacheKey0002";
+    
+            console.debug("Cache key: " + cacheKey);
+            const currentTime = Date.now();
+    
+            console.debug("currentTime: " + currentTime);
+            const cachetimeout = 60;
+            const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
+            const protocol = "GET";
+    
+            // Accept data from cache if it is less than 60 seconds old
+            // Make changes to this timeout when there is a procedure to empty the cache if the value has been updated.
+            console.debug("calling cachableCall2API_GET" );
+            return cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint);
         }).then(function (dist) {
             distributionListData = dist;
 
@@ -446,8 +450,7 @@ try {
             console.log(new Date().toISOString());
 
             // Get table body element
-            //const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-            const tableBody = document.querySelector('table[name="dataTable"]').getElementsByTagName('tbody')[0];
+            const tableBody = document.querySelector('table[name="'+table_name+'"]').getElementsByTagName('tbody')[0];
             // Loop through data and populate the table
             data.forEach(row => {
                 console.debug(row);

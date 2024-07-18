@@ -223,6 +223,9 @@ async function saveData() {
     const width = banner.offsetWidth;
     const height = banner.offsetHeight;
 
+    const displayName = document.getElementById('displayName').value;
+
+
     const bannerImgElement = document.getElementById('bannerImage');
         if (bannerImgElement) {
             
@@ -232,6 +235,7 @@ async function saveData() {
     
     newdata = {
         banner_image: img,
+        note_display_name: displayName,
         note_color: color,
         box_width: width + "px",
         box_height: height + "px"
@@ -239,6 +243,7 @@ async function saveData() {
 }else{
     newdata = {
         note_color: color,
+        note_display_name: displayName,
         box_width: width + "px",
         box_height: height + "px",
         banner_image: ""
@@ -259,7 +264,7 @@ async function saveData() {
     console.log(message_body);
     // Fetch data from web service (replace with your actual API endpoint)
     const response = await fetch(
-            server_url + URI_plugin_user_update_yellownote_attributes, {
+            server_url + URI_plugin_user_update_yellownote_creatorlevel_attributes, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -297,7 +302,7 @@ async function fetchAndUpdateBannerImage() {
             creatorid: uuid
         });
 
-    fetch(server_url + '/api/v1.0/get_note_properties', {
+    fetch(server_url + '/api/v1.0/get_creatorlevel_note_properties', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",

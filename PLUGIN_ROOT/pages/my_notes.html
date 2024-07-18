@@ -30,7 +30,7 @@
   
     <!-- Empty table structure -->
 <div class="scrollable-table">
-<table name="dataTable" class="notesTable">
+<table name="myYellowNotesDataTable" class="notesTable">
   <thead>
     <tr class="fixed-header" selectablecol="true">
       <th class="sortableCol datetime" name="created" sort_type="stringCaseExact" >created<span class="sort-icon url">&#9650;</span></th>
@@ -49,16 +49,16 @@
     </tr>
 
     <!-- Add a filter row -->
-    <tr class="fixed-header" selectablecol="true">
+    <tr name="filter_row" class="fixed-header" selectablecol="true">
      
-      <th filterableCol="wildcardmatch" class="datetime" ><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="datetime" ><input filterContent="1" type="text" class="datetime" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="datetime" ><select filterContent="1" ><option class="filterContent"></option><option value="webframe" class="">webframe</option><option value="plaintext" class="">plaintext</option><option value="plainhtml" class="">plainhtml</option><option value="canvas" class="">canvas</option></select></th>
+      <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
+      <th class="filterableCol" filter_type="datetimeRange"><input id="lastmodified-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th filterableCol="checkedmatch" class="checkbox" ><select filterContent="1" class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
-      <th filterableCol="wildcardmatch" class="url" ><input filterContent="1" type="text" class="url" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="text" ><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
-      <th filterableCol="wildcardmatch" class="text" ><input filterContent="1" type="text" class="text" placeholder="Filter "></th>
-      <th class="action-5" ></th>
+      <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
+      <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
+      <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
+       <th class="action-5" ></th>
       <th filterableCol="selectmatch" class="text" ><input filterContent="1" type="text" class="filterContent" placeholder="Filter "></th>
       <th ></th>
       

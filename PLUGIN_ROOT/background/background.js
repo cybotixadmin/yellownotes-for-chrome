@@ -2059,7 +2059,7 @@ function fetchNewData(creatorId, cacheKey) {
         setTimeout(() => controller.abort(), 8000);
 
         console.log('fetchCreatorDataThroughAPI: Fetching new data from API');
-        return fetch(server_url + '/api/v1.0/get_note_properties', {
+        return fetch(server_url + '/api/v1.0/get_creatorlevel_note_properties', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

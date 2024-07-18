@@ -133,7 +133,7 @@ try {
 
         addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid")).then(function (data) {
 
-            // it a post action URL has been prescribed using the quertstring parameter "redirecturi", then redirect to that URL now
+            // it a post action URL has been prescribed using the querystring parameter "redirecturi", then redirect to that URL now
             uri = getQueryStringParameter("redirecturi");
             console.debug("redirect to ", uri);
             if (uri) {

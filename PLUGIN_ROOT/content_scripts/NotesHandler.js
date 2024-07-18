@@ -7463,10 +7463,4 @@ const note_internal_height_padding = 25;
 
 const note_internal_width_padding = 2;
 
-/*
-the owner of the note have extra controls in a bar on the bottom (buttons, drop-downs etc.)
 
-This is height is added to the heigh the note will ordinarily have and is substracted fro mthe height of the note when the note is saved to the database.
-
- */
-const note_owners_control_bar_height = 23;

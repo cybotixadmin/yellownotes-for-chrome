@@ -298,8 +298,8 @@ position: relative;
 }
 
 .yellownote {
-  height: 100px;
-  width: 250px;
+  height: 200px;
+  min-width: 250px;
 position: relative;
   z-index: 12000;
 }
