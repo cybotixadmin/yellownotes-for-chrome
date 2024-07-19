@@ -604,7 +604,7 @@ function activateAll() {
 
 function fetchData(not_show_by_default_columns) {
     console.debug("fetchData.start");
-console.debug(not_show_by_default_columns);
+    console.debug(not_show_by_default_columns);
     return new Promise(
         function (resolve, reject) {
         var ynInstallationUniqueId = "";

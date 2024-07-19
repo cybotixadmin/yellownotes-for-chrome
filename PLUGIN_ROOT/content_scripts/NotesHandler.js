@@ -987,7 +987,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     Default values are specified in the template itself
      */
 
-    var box_width = default_box_width + "px"; // set default value, override with more specific values if available
+    var box_width = default_box_width ; // set default value, override with more specific values if available
     // attempt to read size parameters from the note object
     if (note_table.hasAttribute("box_width")) {
         console.debug("note_table has box_width, use it ");
@@ -1000,7 +1000,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     }
     note_root.setAttribute("box_width", box_width);
 
-    var box_height = default_box_height + "px"; // set default value, override with more specific values if available
+    var box_height = default_box_height; // set default value, override with more specific values if available
     // attempt to read size parameters from the note object
     if (note_table.hasAttribute("box_height")) {
         console.debug("note_table has box_height, use it");
@@ -1463,7 +1463,7 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
     Default values are specified in the template itself
      */
 
-    var box_width = default_box_width + "px"; // set default value, override with more specific values if available
+    var box_width = default_box_width ; // set default value, override with more specific values if available
     // attempt to read size parameters from the note object
     if (note_table.hasAttribute("box_width")) {
         console.debug("note_table has box_width, use it ");
@@ -1476,7 +1476,7 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
     }
     node_root.setAttribute("box_width", box_width);
 
-    var box_height = default_box_height + "px"; // set default value, override with more specific values if available
+    var box_height = default_box_height ; // set default value, override with more specific values if available
     // attempt to read size parameters from the note object
     if (note_table.hasAttribute("box_height")) {
         console.debug("note_table has box_height, use it");
@@ -3233,212 +3233,6 @@ function getOwnNotes(note_type) {
     });
 }
 
-function update_note(event) {
-    console.debug("update_note (event)");
-    console.debug(event);
-
-    // save note to database
-    try {
-        // get the table node that is the root of the note data.
-
-        var note_root = getYellowStickyNoteRoot(event.target);
-        console.log(note_root);
-
-        // var note_table = event.target.parentNode.parentNode.parentNode;
-        // console.debug(note_table);
-        var encoded_selection_text = "";
-        try {
-            encoded_selection_text = note_root.querySelectorAll('input[name="encoded_selection_text"]')[0].textContent.trim();
-        } catch (e) {
-            // set default, current timestamp
-        }
-
-        console.debug(encoded_selection_text);
-
-        var note_type = "";
-        try {
-            note_type = note_root.getAttribute('note_type').trim();
-        } catch (e) {
-            console.error(e);
-            //note_type = "yellownote";
-            // set default, current timestamp
-        }
-        var url = "";
-        try {
-            url = note_root.querySelectorAll('input[name="url"]')[0].textContent.trim();
-        } catch (e) {
-            // set default, local url
-        }
-        var noteid = "";
-        try {
-            noteid = note_root.getAttribute('noteid').trim();
-        } catch (e) {
-            // set default, local url
-        }
-        var canvas_uri = "";
-        if (note_type == "canvas") {
-            var canvas;
-            try {
-                canvas = note_root.querySelector('[name="canvas"]');
-                console.debug(canvas);
-                canvas_uri = canvas.toDataURL('image/png');
-                console.debug(canvas_uri);
-            } catch (e) {
-                console.debug(e);
-            }
-        }
-        // carry createtime forwards unchanged
-        var createtime = "";
-        try {
-            createtime = note_root.querySelectorAll('input[name="createtime"]')[0].textContent.trim();
-        } catch (e) {
-            // set default, current timestamp
-            createtime = getCurrentTimestamp();
-
-        }
-
-        var content_url = "";
-        // check for content_url for notes that collect content from elsewhere
-        try {
-            content_url = note_root.querySelector('input[name="urlInput"]').value.trim();
-        } catch (e) {
-            console.error(e);
-
-        }
-
-        var message_display_text = "";
-        try {
-            //console.debug(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim())
-            const message_display_text_node = note_root.querySelector('[name="message_display_text"]');
-            console.debug(message_display_text_node);
-            console.debug(message_display_text_node.innerHTML);
-            message_display_text = note_root.querySelector('[name="message_display_text"]').innerHTML;
-
-            console.debug(note_root.querySelector('[name="message_display_text"]').value);
-            console.debug(note_root.querySelector('[name="message_display_text"]').textContent);
-
-            console.debug(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim())
-            console.debug(utf8_to_b64(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim()));
-        } catch (e) {
-            // set default, current timestamp
-            console.error(e);
-        }
-
-        var enabled = "";
-        try {
-            enabled = note_root.querySelectorAll('input[name="enabled"]')[0].textContent.trim();
-        } catch (e) {
-            // set default
-            enabled = true;
-        }
-
-        // the list of distribution lists is a dropdown. There is an empty field there where the user can select "no distribution list"
-
-        var distributionlistid;
-        try {
-            distributionlistid = note_root.querySelector('[name="distributionlistdropdown"]').value;
-            console.log('Selected distributionlistid:', distributionlistid);
-
-            // update the reference to the current distributionlist for this note in the root node of the note
-            note_root.setAttribute("distributionlistid", distributionlistid);
-
-            // update the goto-link
-            var goto_link = note_root.querySelector('[name="goto_notetarget_link"]');
-            goto_link.setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
-            console.debug("browsersolutions: goto_link update to ", goto_link.getAttribute("href"));
-        } catch (e) {
-            console.error(e);
-        }
-
-        // create out position parameters
-
-        // var note_root = note_table.parentNode;
-        // console.debug(note_root);
-
-        // capture new positon and size of note
-
-        //const posx = processBoxParameterInput(note_root.getAttribute("posx"), 0, 0, 1200);
-        var posx = note_root.getAttribute("posx");
-        if (posx == null || posx == undefined) {
-            posx = 0 + "px";
-        }
-
-        //const posy = processBoxParameterInput(note_root.getAttribute("posy"), 0, 0, 5000);
-        var posy = note_root.getAttribute("posy");
-        if (posy == null || posy == undefined) {
-            posy = 0 + "px";
-        }
-
-        //const box_width = processBoxParameterInput(note_root.getAttribute("box_width"), 250, 50, 500);
-        var box_width = note_root.getAttribute("box_width");
-        if (box_width == null || box_width == undefined) {
-            box_width = default_box_width + "px";
-        }
-
-        //const box_height = processBoxParameterInput(note_root.getAttribute("box_height"), 250, 50, 500);
-        var box_height = note_root.getAttribute("box_height");
-        if (box_height == null || box_height == undefined) {
-            box_height = default_box_height + "px";
-        }
-
-        console.debug("message_display_text: " + message_display_text);
-        console.debug("url: " + url);
-        console.debug("noteid: " + noteid);
-
-        console.debug("selection_text (encoded): " + encoded_selection_text);
-
-        var json_update = {
-            message_display_text: utf8_to_b64(message_display_text),
-            selection_text: encoded_selection_text,
-            url: url,
-            note_type: note_type,
-            noteid: noteid,
-            enabled_status: 1,
-            canvas_uri: canvas_uri,
-            content_url: content_url,
-            distributionlistid: distributionlistid,
-            posx: posx,
-            posy: posy,
-            box_width: box_width,
-            box_height: box_height
-        };
-
-        if (note_type == "webframe") {
-            // capture the scroll position of the iframe
-            if (note_type == "webframe") {
-                // capture the scroll position of the iframe
-                var framenote_scroll_x = note_root.querySelector('[name="fakeiframe"]').scrollLeft.toString();
-                if (framenote_scroll_x == null || framenote_scroll_x == undefined) {
-                    framenote_scroll_x = "0";
-                }
-                json_update.framenote_scroll_x = framenote_scroll_x;
-                var framenote_scroll_y = note_root.querySelector('[name="fakeiframe"]').scrollTop.toString();
-                if (framenote_scroll_y == null || framenote_scroll_y == undefined) {
-                    framenote_scroll_y = "0";
-                }
-                json_update.framenote_scroll_y = framenote_scroll_y;
-            }
-
-        }
-
-        console.debug(json_update);
-
-        // Send save request back to background
-        // Stickynotes are always enabled when created.
-        chrome.runtime.sendMessage({
-            message: {
-                "action": "single_yellownote_update",
-                "update_details": json_update
-            }
-        }, function (response) {
-            console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-
-        });
-
-    } catch (e) {
-        console.error(e);
-    }
-}
 
 function getCurrentTimestamp() {
 
@@ -6662,106 +6456,6 @@ function DELETEmakeResizeable(note) {
 
 }
 
-/* update the sizing of internal items in the note object
-such as the canvas for the canvas note, the message display area for the yellow note, etc.
- */
-function update_note_internal_size(note) {
-    console.debug("update_note_internal_size.start");
-    console.debug(note);
-    const note_type = note.getAttribute("note_type");
-    console.debug("note_type: ", note_type);
-
-    const box_width = parseInt(note.getAttribute("box_width"), 10);
-    const box_height = parseInt(note.getAttribute("box_height"), 10);
-    console.debug("box_width: " + box_width);
-    console.debug("box_height: " + box_height);
-
-    // update some internal objects in the note object to reflect the new overall size of the note
-    const usable_width = (parseInt(box_width) - note_internal_width_padding);
-    const usable_height = (parseInt(box_height) - note_internal_height_padding);
-    console.debug("setting new content frame usable width " + usable_width);
-    console.debug("setting new content frame usable height " + usable_height);
-
-    // webframe
-
-    // if (note_type === "webframe") {
-    try {
-        console.debug("setting new (fake)iframe width " + usable_width);
-        note.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-        //       note.querySelector('[name="fakeiframe"]').style.height = (usable_height - note_owners_control_bar_height) + 'px';
-        note.querySelector('[name="fakeiframe"]').style.height = (usable_height - 55) + 'px';
-
-    } catch (e) {
-        //console.error(e);
-    }
-    //}
-    try {
-        note.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
-        note.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
-    } catch (e) {
-        //console.error(e);
-    }
-
-    // update the URL box on webframe note
-    try {
-        const new_field_width = (parseInt(box_width) - 40);
-        console.debug("setting new url intput field width " + new_field_width);
-        note.querySelector('[name="urlInput"]').style.width = new_field_width + 'px';
-    } catch (e) {
-        //console.error(e);
-    }
-
-    // plainhtml / yellownote
-
-    try {
-        note.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
-        note.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
-    } catch (e) {
-        //console.debug(e);
-    }
-
-    // cancase
-if (note_type === "canvas"){
-    // a convas is wiped everytime it is resized. Therefore manipulation of the note should not by itself resize the canvas, as this looks like a bug to the user 
-    try {
-console.debug( "canvas current width: ", note.querySelector('[name="canvas"]').getAttribute("width") );
-console.debug( "canvas new width: ", usable_width );
-console.debug( "canvas current height: ", note.querySelector('[name="canvas"]').getAttribute("height") );
-console.debug( "canvas new height: ", (usable_height - canvas_toolbar_height) );
-
-        // make sure the size parameters are not updates unless there is an actual change in values
-        if (note.querySelector('[name="canvas"]').getAttribute("width") == usable_width) {
-            console.debug("no need to update canvas width");
-        } else {
-           // console.debug("setting new canvas width " + usable_width);
-           // note.querySelector('[name="canvas"]').setAttribute("width", usable_width);
-           // const new_canvas_width = (usable_width );
-           // console.debug("setting new canvas_width " + new_canvas_width);
-           // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_width);
-           // note.setAttribute("canvas_width", (new_canvas_width ) + "px");
-        }
-        if (note.querySelector('[name="canvas"]').getAttribute("height") == (usable_height - canvas_toolbar_height)) {
-            console.debug("no need to update canvas height");
-        } else {
-           // const new_canvas_height = (usable_height - canvas_toolbar_height);
-           // console.debug("setting new canvas height " + new_canvas_height);
-           // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_height);
-           // note.setAttribute("canvas_height", (new_canvas_height ) + "px");
-
-        }
-
-    } catch (e) {
-        console.debug(e);
-    }
-}
-    try {
-
-        note.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';
-    } catch (e) {
-        console.debug(e);
-    }
-
-}
 
 /**
  * the cavnas needs a toolbar, do not place this within the note, but expand the note to accomodate this toolbar  
@@ -7198,7 +6892,6 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
 
 }
 
-const frame_note_url_bar_height = 30;
 
 function placeNodeRelativeTo(firstNode, secondNode, x, y) {
     console.debug("placeNodeRelativeTo.start");
@@ -7458,9 +7151,3 @@ posy = (window.scrollY + parseInt(note_default_placement_y_offset))+ "px";
     }
 
 }
-
-const note_internal_height_padding = 25;
-
-const note_internal_width_padding = 2;
-
-

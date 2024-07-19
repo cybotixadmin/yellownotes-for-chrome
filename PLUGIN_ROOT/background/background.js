@@ -508,6 +508,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             }
         }
         try {
+            // keep this code around until all messgae formats have been migrated to the new format
             if (isUndefined(message.stickynote)) {
                 if (isUndefined(message.stickynote.request)) {
                     if (message.stickynote.request) {
@@ -1187,15 +1188,38 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             console.debug("action: get_template");
             console.debug(message);
-
+            var template;
             const brand = message.brand;
 
-            const note_type = message.note_type;
-            console.debug("calling getTemplate");
-            getTemplate(brand, "yellownote").then(function (result) {
-                //console.debug(result);
-                sendResponse(result);
+            var note_type = message.note_type;
+            // ignore notetype, there is only one template for now - yellownote
+            note_type = "yellownote";
+            // check of there is a cached copy of the template
+            const cacheKey = "template_" + brand + "_" + note_type;
+            const cachetimeout = 10;
+            getCachedData(cacheKey, cachetimeout).then(function (data) {
+                //console.debug("cache data: " + data);
+                if (data != null) {
+                    console.debug("cache hit");
+                    sendResponse(data);
+                } else {
+                    console.debug("cache miss");
+                    // get the template from further afield
+                    getTemplate(brand, note_type).then(function (result) {
+                       template = result;
+                        //console.debug(template);
+
+                        // ignore this function being async, it is not needed to wait for the cache to be updated
+                        cacheData(cacheKey, template);
+                        sendResponse(template);
+
+                    });
+                }
             });
+
+
+
+            
 
             return true;
 

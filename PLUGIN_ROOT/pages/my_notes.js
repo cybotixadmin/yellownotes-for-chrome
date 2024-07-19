@@ -419,13 +419,12 @@ try {
             console.debug("request: get_my_distribution_lists");
             // if update is to disable the note, remove it from the in-memory store
             const cacheKey = URI_plugin_user_get_my_distribution_lists.replace(/\//g, "_");
-            //const cacheKey = "cacheKey0002";
-    
+          
             console.debug("Cache key: " + cacheKey);
             const currentTime = Date.now();
     
             console.debug("currentTime: " + currentTime);
-            const cachetimeout = 60;
+            const cachetimeout = 5;
             const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
             const protocol = "GET";
     
@@ -499,7 +498,9 @@ try {
                         cell_createtime.setAttribute('class', 'datetime');
 
                     }
-
+                    // Adding data-label for mobile responsive
+                    cell_createtime.setAttribute('data-label', 'createtime');
+             
                 } catch (e) {
                     console.log(e);
                 }
@@ -515,6 +516,9 @@ try {
                         cell_lastmodified.textContent = integerstring2timestamp(row.lastmodifiedtime);
                         cell_lastmodified.setAttribute('class', 'datetime');
                     }
+                            // Adding data-label for mobile responsive
+                            cell_lastmodified.setAttribute('data-label', 'lastmodified');
+            
                 } catch (e) {
                     console.log(e);
                 }
@@ -742,11 +746,13 @@ try {
                 cell_actions.setAttribute('class', 'action-5');
                 cell_actions.setAttribute('data-label', 'text');
                
-/* cell_note contains the note in graphical form
- the purpose of this cell is that if all the other columns are de-selected by the user, the remaining column will look like a feed of notes^. 
- Much like any other newsfeed.
- The differece is that the user can filter feed by the columns that are not displayed.
-*/
+                /* 
+                cell_note field contains the note in graphical form, the way it will be seen in "the field" on web pages.
+                The purpose of this cell/column is that if all the other columns are de-selected by the user, the remaining column will look like a feed of notes^. 
+                Much like any other newsfeed.
+                
+                The difference is that with the YellowNotes tool the user can filter their feed by the columns that are not displayed.
+                */
 
 
                 //cell_note.textContent =  row.json;
@@ -755,24 +761,25 @@ try {
                 cell_note.setAttribute('class', 'yellownote');
                 
                 console.debug("calling createYellowNoteFromNoteDataObject");
-                createYellowNoteFromNoteDataObject(note_obj, true, false ).then(function(note){
-                    console.debug(note);
-                     // make certain redaction from the note that should not bee shown in feed-mode
-                const note_table = note.querySelector('table[name="whole_note_table"]');
+                createYellowNoteFromNoteDataObject(note_obj, true, false ).then(function(note_root){
+                    console.debug(note_root);
+                     // make certain redaction from the note that should not be shown in feed-mode
+                const note_table = note_root.querySelector('table[name="whole_note_table"]');
                 note_table.removeAttribute("style");
+// but set the sizing for the note to be displayed in the table
+                    note_root.querySelector('table[name="whole_note_table"]').setAttribute("style", "height: " + note_root.getAttribute("box_height") + "; width: " + note_root.getAttribute("box_width") );
+
+                    note_root.setAttribute("style", "position: absolute; top: 0px; left: 0px");
+                 
+
                     // add the completed graphical yellownote to the table cell
-const inserted = cell_note.appendChild(note);
+const inserted = cell_note.appendChild(note_root);
+//console.debug(inserted.outerHTML);
 // make the cell size large enough to contain the note
-                    cell_note.setAttribute("style", "height: 280px; width: 250px;");
+                   cell_note.setAttribute("style", "height: " + (parseInt(note_root.getAttribute("box_height")) + parseInt( note_owners_control_bar_height)) + "px" + "; width: 250px;");
                     console.debug("calling attachEventlistenersToYellowStickynote");
                     attachEventlistenersToYellowStickynote(inserted , true, false);
                 });
-
-                // Adding data-label for mobile responsive
-                cell_createtime.setAttribute('data-label', 'createtime');
-                //cell_createtime.setAttribute('class', 'timestamp');
-                cell_lastmodified.setAttribute('data-label', 'lastmodfiedtime');
-                //cell_lastmodified.setAttribute('class', 'timestamp');
 
             });
             resolve('Data saved OK');
@@ -783,76 +790,7 @@ const inserted = cell_note.appendChild(note);
 }
 }
 
-function createDropdown(optionsArray, selectedDistributionListId) {
-    // Create a select element
-    const selectElement = document.createElement('select');
 
-    // Add a blank option as the first option
-    const blankOption = document.createElement('option');
-    blankOption.value = '';
-    selectElement.appendChild(blankOption);
-
-    // Loop through the array and create an option for each object
-    optionsArray.forEach(item => {
-        const option = document.createElement('option');
-        option.textContent = item.name; // Set the display text
-        option.value = item.distributionlistid; // Set the option value
-        selectElement.appendChild(option);
-    });
-
-    // Set the selected option based on distributionListId argument
-    selectElement.value = selectedDistributionListId && optionsArray.some(item => item.distributionlistid === selectedDistributionListId)
-         ? selectedDistributionListId
-         : '';
-
-    // Add an event listener for the 'change' event
-    selectElement.addEventListener('change', (event) => {
-        const selectedId = event.target.value;
-        console.debug(event.target.parentNode);
-        console.debug(event.target.parentNode.parentNode);
-        console.debug(event.target.parentNode.parentNode.firstChild.textContent);
-        noteid = event.target.parentNode.parentNode.getAttribute('noteid');
-
-        // Only trigger fetch call if the selected value is not empty
-        if (selectedId) {
-            console.debug("update the note with this distrubtionlistid: " + selectedId);
-
-            setNoteDistributionlistId(noteid, selectedId);
-
-        } else {
-            console.debug("no distributionlist selected");
-            // remove distributionlist from note
-
-            setNoteDistributionlistId(noteid, "");
-        }
-        // update the "gothere" url
-        var textToCopy;
-        const link_obj = event.target.parentNode.parentNode.querySelector('[name="go_to_note"]');
-        try {
-            console.debug(link_obj);
-
-            distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
-            console.log(distributionlistid);
-            if (distributionlistid == "") {
-                //        throw "no distributionlistid";
-                textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
-                link_obj.href = textToCopy;
-            } else {
-
-                const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
-                textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
-
-                link_obj.href = textToCopy;
-            }
-        } catch (e) {
-            console.log(e);
-            textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
-            link_obj.href = textToCopy;
-        }
-
-    });
-    return selectElement;
-}
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 

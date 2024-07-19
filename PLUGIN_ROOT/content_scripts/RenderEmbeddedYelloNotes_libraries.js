@@ -4,8 +4,8 @@
  *
  */
 
-const DELETEdefault_box_width = 250;
-const DELETEdefault_box_height = 250;
+const DELETEdefault_box_width = "250px";
+const DELETEdefault_box_height = "250px";
 
 //const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const CACHE_DURATION = 60 * 1000; // 1 minute in milliseconds
@@ -159,7 +159,7 @@ function fetchNewData(creatorId, cacheKey) {
  *  creating the complete not for display in a html page
  */
 function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
-    console.debug("createYellowNoteFromNoteDataObject().start");
+    console.debug("createYellowNoteFromNoteDataObject.start");
     console.debug(note_obj);
     console.debug(isOwner);
     console.debug(isNewNote);
@@ -170,6 +170,7 @@ function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
         const brand = "default";
         const nodeid = note_obj.noteid;
 // check if noteid is in the cache, and if it is, use it
+// only accept cache entried less than 10 seconds old
 getCachedData(nodeid, 10).then(cachedData => {
     console.debug('createYellowNoteFromNoteDataObject: data returned from cache:');
     console.debug(cachedData);
@@ -200,7 +201,7 @@ if (cachedData == "null") {
 
         }
         console.debug(msg);
-
+        // call to get the note template to use
         chrome.runtime.sendMessage(msg).then(function (response) {
             html_note_template = response;
             console.debug("calling getNotetypeTemplate");
