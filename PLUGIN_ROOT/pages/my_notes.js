@@ -2,7 +2,7 @@
 // check if the user is authenticated
 checkSessionJWTValidity()
 .then(isValid => {
-    console.log('JWT is valid:', isValid);
+    console.debug('JWT is valid:', isValid);
     if (isValid) {
         console.debug("JWT is valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
@@ -35,7 +35,7 @@ checkSessionJWTValidity()
 /*
 checkSessionJWTValidity()
 .then(isValid => {
-console.log('JWT is valid:', isValid);
+console.debug('JWT is valid:', isValid);
 })
 .catch(error => {
 console.error('Error:', error.message);
@@ -98,7 +98,7 @@ var not_show_by_default_columns = [];
 
 // check if not_show_by_default_columns has been set 
 const pagewidth = window.innerWidth;
-console.log("window.innerWidth: " + pagewidth);
+console.debug("window.innerWidth: " + pagewidth);
 
 if (pagewidth < 300) { 
     not_show_by_default_columns = ["created", "modified", "type", "feed", "selected", "active", "action" ];
@@ -116,7 +116,7 @@ if (pagewidth < 300) {
 // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
 getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
-    console.log(not_show_by_default_columns);
+    console.debug(not_show_by_default_columns);
 }).catch(error => {
     console.error('Error:', error);
 });
@@ -129,7 +129,7 @@ fetchData(not_show_by_default_columns).then(function (d) {
 
     // update the list of colmes and check/uncheck according to the list of columns to not display
 not_show_by_default_columns.forEach(column => {
-    console.log("hide column: ", column);
+    console.debug("hide column: ", column);
     toggleColumn(column, false,table_name, table_columns_to_not_display_keyname);
     document.getElementById(`toggle-${column}`).checked = false;
 
@@ -138,11 +138,11 @@ not_show_by_default_columns.forEach(column => {
 
 const querySelector = 'tr td:nth-child(2)';
 
-console.log("calling updateTableColumn");
+console.debug("calling updateTableColumn");
  // Call the updateTableColumn function
  updateTableColumn(querySelector, processCellValue).then((note_root) => {
-    console.log('All table cells have been processed and updated.');
-    console.log(note_root);
+    console.debug('All table cells have been processed and updated.');
+    console.debug(note_root);
 }).catch(error => {
     console.error('Error processing table cells:', error);
 });
@@ -169,7 +169,7 @@ console.log("calling updateTableColumn");
         //const note_template = document.createElement('div');
         // container.innerHTML = html;
 //        note_template = safeParseInnerHTML(html, 'div');
-//        console.log("browsersolutions " + note_template);
+//        console.debug("browsersolutions " + note_template);
 //        console.debug(note_template);
 
   //  });
@@ -181,15 +181,15 @@ async function deleteSubscription(noteid) {
     try {
 
         const userid = "";
-        console.log("deleting: " + noteid);
+        console.debug("deleting: " + noteid);
         const message_body = '{ "noteid":"' + noteid + '" }';
-        //console.log(message_body);
+        //console.debug(message_body);
         const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
 
-        console.log(installationUniqueId);
+        console.debug(installationUniqueId);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(server_url + URI_plugin_user_delete_yellownote, {
                 method: 'POST',
@@ -200,7 +200,7 @@ async function deleteSubscription(noteid) {
                 },
                 body: message_body // example IDs, replace as necessary
             });
-        console.log(response);
+        console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -218,17 +218,17 @@ async function goThere(datarow) {
     try {
 
         const userid = "";
-        console.log("go to url: " + datarow.url);
+        console.debug("go to url: " + datarow.url);
 
-        console.log("go lookup creatorid: " + datarow.creatorid);
+        console.debug("go lookup creatorid: " + datarow.creatorid);
         const noteid = datarow.noteid;
 
-        console.log("go lookup noteid: " + noteid);
+        console.debug("go lookup noteid: " + noteid);
 
-        console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
+        console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
 
         const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
-        console.log(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim());
+        console.debug(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim());
 
         // lookup the target url in the table (the user may have changed it !)
 
@@ -264,8 +264,8 @@ async function goThere(datarow) {
 // append a redirecturi that redicts the the page showing the distribution list
 
 function createNoteShareLink(datarow) {
-    console.log("createNoteShareLink (datarow)");
-    console.log(datarow);
+    console.debug("createNoteShareLink (datarow)");
+    console.debug(datarow);
 
     // link must make the user subscribe to the feed the note belongs to, before directing the user to the note.
     // if the feed/distributionlist allowd anonymous access, the unknown/unauthenticated user will be directed to the note directly after subscribing to the feed
@@ -280,33 +280,33 @@ function createNoteShareLink(datarow) {
 
 
     const userid = "";
-    console.log("go to url: " + datarow.url);
+    console.debug("go to url: " + datarow.url);
 
     const noteid = datarow.noteid;
 
-    console.log("go lookup noteid: " + noteid);
+    console.debug("go lookup noteid: " + noteid);
 
-    console.log(document.querySelector('tr[noteid="' + noteid + '"]'));
+    console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
 
     const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
-    console.log(url);
+    console.debug(url);
 
     var textToCopy;
     var distributionlistid;
     try {
 
         distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
-        console.log(distributionlistid);
+        console.debug(distributionlistid);
         const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
         textToCopy = "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
     } catch (e) {
-        console.log(e);
+        console.debug(e);
         textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
     }
 
     // place the url value in the clipboard
    // navigator.clipboard.writeText(textToCopy).then(() => {
-   //     console.log('Invitation URL copied to clipboard: ' + textToCopy);
+   //     console.debug('Invitation URL copied to clipboard: ' + textToCopy);
     //}).catch(err => {
    //     console.error('Error in copying text: ', err);
    // });
@@ -317,7 +317,7 @@ async function editNote(noteid) {
     try {
 
         const userid = "";
-        console.log("deleting: " + noteid);
+        console.debug("deleting: " + noteid);
         const message_body = '{ "noteid":"' + noteid + '" }';
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -332,7 +332,7 @@ async function editNote(noteid) {
                 },
                 body: message_body // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -364,7 +364,7 @@ const sortStates = {
 
 
 function fetchData(not_show_by_default_columns) {
-    console.log("fetchData");
+    console.debug("fetchData");
 try {
     return new Promise(
         function (resolve, reject) {
@@ -374,12 +374,12 @@ try {
         var data;
      
         chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
-            console.log(result);
-            console.log(ynInstallationUniqueId);
+            console.debug(result);
+            console.debug(ynInstallationUniqueId);
             ynInstallationUniqueId = result[plugin_uuid_header_name];
             xYellownotesSession = result[plugin_session_header_name];
-            console.log(ynInstallationUniqueId);
-            console.log(xYellownotesSession);
+            console.debug(ynInstallationUniqueId);
+            console.debug(xYellownotesSession);
             return fetch(server_url + URI_plugin_user_get_own_yellownotes, {
                 method: 'POST',
                 headers: {
@@ -391,13 +391,13 @@ try {
             });
         }).then(response => {
             if (!response.ok) {
-                console.log(response);
+                console.debug(response);
 
                 // if an invalid session token was sent, it should be removed from the local storage
                 if (response.status == 401) {
                     // compare the response body with the string "Invalid session token" to determine if the session token is invalid
                     if(response.headers.get("session") == "DELETE_COOKIE"){
-                            console.log("Session token is invalid, remove it from local storage.");
+                            console.debug("Session token is invalid, remove it from local storage.");
                             chrome.storage.local.remove([plugin_session_header_name]);
                             // redirect to the front page returning the user to unauthenticated status.
                             // unauthenticated functionality will be in effect until the user authenticates
@@ -433,25 +433,25 @@ try {
         }).then(function (dist) {
             distributionListData = dist;
 
-            console.log(distributionListData);
+            console.debug(distributionListData);
 
-            console.log(data);
+            console.debug(data);
 
             var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
-            console.log(utc);
-            console.log(Date.now());
+            console.debug(utc);
+            console.debug(Date.now());
             var now = new Date;
             var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
                     now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-            console.log(utc_timestamp);
-            console.log(new Date().toISOString());
+            console.debug(utc_timestamp);
+            console.debug(new Date().toISOString());
 
             // Get table body element
             const tableBody = document.querySelector('table[name="'+table_name+'"]').getElementsByTagName('tbody')[0];
             // Loop through data and populate the table
             data.forEach(row => {
                 console.debug(row);
-                console.log(row.json);
+                console.debug(row.json);
                 const note_obj = JSON.parse(row.json);
                 console.debug(JSON.stringify(row));
                 console.debug(row.noteid);
@@ -481,17 +481,17 @@ try {
                 // key column - not to be displayed
                 // create timestamp - not to be dsiplayed either
                 try {
-                    console.log(row.createtime);
-                    console.log(/20/.test(row.createtime));
+                    console.debug(row.createtime);
+                    console.debug(/20/.test(row.createtime));
                     if (/2024/.test(row.createtime)) {
-                        console.log("createtime is timestamp: " + row.createtime);
-                        //console.log("createtime: " + integerstring2timestamp(row.createtime));
+                        console.debug("createtime is timestamp: " + row.createtime);
+                        //console.debug("createtime: " + integerstring2timestamp(row.createtime));
 
                         cell_createtime.textContent = timestampstring2timestamp(row.createtime);
                         cell_createtime.setAttribute('class', 'datetime');
                     } else {
 
-                        console.log("createtime is integer: " + row.createtime)
+                        console.debug("createtime is integer: " + row.createtime)
                         cell_createtime.textContent = integerstring2timestamp(row.createtime);
                         cell_createtime.setAttribute('class', 'datetime');
 
@@ -500,17 +500,17 @@ try {
                     cell_createtime.setAttribute('data-label', 'createtime');
              
                 } catch (e) {
-                    console.log(e);
+                    console.debug(e);
                 }
                 try {
-                    console.log(row.lastmodifiedtime);
-                    console.log(/2024/.test(row.lastmodifiedtime));
+                    console.debug(row.lastmodifiedtime);
+                    console.debug(/2024/.test(row.lastmodifiedtime));
                     if (/2024/.test(row.lastmodifiedtime)) {
-                        console.log("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
+                        console.debug("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
                         cell_lastmodified.textContent = timestampstring2timestamp(row.lastmodifiedtime);
                         cell_lastmodified.setAttribute('class', 'datetime');
                     } else {
-                        console.log("lastmodifiedtime is integer: " + row.lastmodifiedtime)
+                        console.debug("lastmodifiedtime is integer: " + row.lastmodifiedtime)
                         cell_lastmodified.textContent = integerstring2timestamp(row.lastmodifiedtime);
                         cell_lastmodified.setAttribute('class', 'datetime');
                     }
@@ -518,7 +518,7 @@ try {
                             cell_lastmodified.setAttribute('data-label', 'lastmodified');
             
                 } catch (e) {
-                    console.log(e);
+                    console.debug(e);
                 }
 
                 try {
@@ -526,7 +526,7 @@ try {
                     type_cell.setAttribute('name', 'note_type');
                     type_cell.setAttribute('class', 'compact');
                 } catch (e) {
-                    console.log(e);
+                    console.debug(e);
                 }
 
                 // render a check box to enable/disable the note
@@ -630,9 +630,9 @@ try {
 
 
                 // Create the dropdown list for the distribution list
-                console.log("calling createDropdown");
+                console.debug("calling createDropdown");
                 const dropdown = createDropdown(distributionListData, row.distributionlistid);
-                console.log(dropdown);
+                console.debug(dropdown);
                 cell_distributionlist.appendChild(dropdown);
                 //cell_distributionlist.setAttribute('name', 'distributionlistid');
                 cell_distributionlist.firstChild.setAttribute('name', 'distributionlistid');
@@ -688,9 +688,9 @@ try {
                 const goThereButtonContainer = document.createElement('div');
                 goThereButtonContainer.setAttribute('class', 'go_to_location_button');
                 const link = document.createElement('a');
-                console.log(row);
+                console.debug(row);
                 const u = createNoteShareLink(row);
-                console.log(u);
+                console.debug(u);
                 link.href = u;
                 link.target = "_blank";
                 link.name = "go_to_note";
@@ -803,7 +803,7 @@ async function setNoteEnabledStatusByUUID(noteid, enabled_status) {
                 noteid: noteid,
                 enabled_status: enabled_status,
             });
-        //console.log(message_body);
+        //console.debug(message_body);
 
         // check if url is on http (and therefore not in the plugin GUI), which should not ordinarily be the case
         // if it is, then the note is not in the plugin GUI and the note in the table should not be updated
@@ -844,7 +844,7 @@ async function setNoteEnabledStatusByUUID(noteid, enabled_status) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -929,7 +929,7 @@ console.debug(msg);
             message_body = JSON.stringify(msg);
         }
 
-        console.log(message_body);
+        console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_savechanges_yellownote, {
@@ -941,7 +941,7 @@ console.debug(msg);
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -977,7 +977,7 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

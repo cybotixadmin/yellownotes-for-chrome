@@ -101,7 +101,7 @@ var not_show_by_default_columns = [];
 
 // check if not_show_by_default_columns has been set 
 const pagewidth = window.innerWidth;
-console.log("window.innerWidth: " + pagewidth);
+console.debug("window.innerWidth: " + pagewidth);
 
 if (pagewidth < 300) { 
     not_show_by_default_columns = ["created", "restrictions",  "actions" ];
@@ -123,7 +123,7 @@ console.debug("created", "restrictions");
 // 
 getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
-    console.log(not_show_by_default_columns);
+    console.debug(not_show_by_default_columns);
 }).catch(error => {
     console.error('Error:', error);
 });
@@ -143,8 +143,8 @@ getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_def
 console.debug("calling fetchData");
 fetchData(not_show_by_default_columns)
 .then(function (d) {
-    console.log("toggle columns off by default");
-    console.log(not_show_by_default_columns);
+    console.debug("toggle columns off by default");
+    console.debug(not_show_by_default_columns);
     not_show_by_default_columns.forEach(column => {
         toggleColumn(column, false, "distributionsTable" , table_columns_to_not_display_keyname);
         document.getElementById(`toggle-${column}`).checked = false;
@@ -631,16 +631,16 @@ function fetchData(not_show_by_default_columns) {
         cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint)
         .then(function (data) {
            
-            console.log(data);
+            console.debug(data);
 
             var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
-            console.log(utc);
-            console.log(Date.now());
+            console.debug(utc);
+            console.debug(Date.now());
             var now = new Date;
             var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
                     now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-            console.log(utc_timestamp);
-            console.log(new Date().toISOString());
+            console.debug(utc_timestamp);
+            console.debug(new Date().toISOString());
             console.debug(data);
             // Get table body element
             const tableBody = document

@@ -3,7 +3,7 @@
 // check if the user is authenticated
 checkSessionJWTValidity()
   .then(isValid => {
-      console.log('JWT is valid:', isValid);
+      console.debug('JWT is valid:', isValid);
 if (isValid){
     console.debug("JWT is valid - show menu accordingly");
     fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
@@ -29,7 +29,7 @@ if (isValid){
 
 
 document.getElementById('drop_zone').addEventListener('click', function () {
-    console.log("drop_zone clicked");
+    console.debug("drop_zone clicked");
     document.getElementById('file_input').click();
 });
 
@@ -70,23 +70,23 @@ document.querySelector('.remove-icon').addEventListener('click', function(event)
 
 
         const bannerImgElement = document.getElementById('bannerImage');
-        console.log(bannerImgElement);
+        console.debug(bannerImgElement);
         if (bannerImgElement) {
             bannerImgElement.remove();
         } else {
-            console.log('Banner image data not found on page');
+            console.debug('Banner image data not found on page');
         }
 
 
 
-        console.log("Installation Unique ID:", ynInstallationUniqueId);
-        console.log("Session:", xYellownotesSession);
+        console.debug("Installation Unique ID:", ynInstallationUniqueId);
+        console.debug("Session:", xYellownotesSession);
       })
       .catch(function(error) {
         console.error("Error fetching data from chrome storage:", error);
       }).then(function(result) {
         // After fetching the values, perform the fetch call
-     console.log("make API call to remove banner");
+     console.debug("make API call to remove banner");
     
      // Perform the fetch call in the background
         return fetch(server_url+ plugin_remove_banner_uri, { 
@@ -108,7 +108,7 @@ document.querySelector('.remove-icon').addEventListener('click', function(event)
       })
       .then(data => {
         // Log the success data to console
-        console.log('Success:', data);
+        console.debug('Success:', data);
       })
       .catch(error => {
         // Log any errors to the console
@@ -119,7 +119,7 @@ document.querySelector('.remove-icon').addEventListener('click', function(event)
 
 
 function handleFileSelect(evt) {
-    console.log("handleFileSelect()");
+    console.debug("handleFileSelect()");
     processFile(evt.target.files[0]);
 }
 
@@ -137,7 +137,7 @@ function handleFileDrop(evt) {
 
 try {
     fetchAndDisplayStaticContent("/fragments/en_US/editnotetemplate_information.html", "editnotetemplate_information").then(() => {
-        console.log("fetchAndDisplayStaticContent() done");
+        console.debug("fetchAndDisplayStaticContent() done");
         page_display_login_status();
         // login_logout_action();
 
@@ -160,7 +160,7 @@ function processFile(file) {
     const reader = new FileReader();
     reader.onload = function (e) {
         const base64Image = e.target.result;
-        console.log('Base64 Encoded Image:', base64Image);
+        console.debug('Base64 Encoded Image:', base64Image);
 
         // send this to the users profile as the banner image of their yellow notes
         // You can add additional actions here, e.g., displaying the image or sending it to a server
@@ -182,7 +182,7 @@ if (exitingBannerImgElement) {
         bannerImgElement.setAttribute( "alt", "Banner Image");
         bannerImgElement.setAttribute( "src", base64Image);
 
-        console.log(bannerImgElement);
+        console.debug(bannerImgElement);
         const contElem = document.getElementById('drop_zone');
         try{
       // Insert the new node as the first child of the parent node
@@ -202,7 +202,7 @@ if (contElem.firstChild) {
      //   if (bannerImgElement) {
      //       bannerImgElement.src = base64Image;
      //   } else {
-     //       console.log('Banner image data not found in response');
+     //       console.debug('Banner image data not found in response');
      //   }
     };
     reader.readAsDataURL(file);
@@ -213,10 +213,10 @@ function changeBannerColor(evt) {
 }
 
 async function saveData() {
-    console.log("saveData()");
+    console.debug("saveData()");
     var newdata;
-    //console.log(bannerImgElement);
-    //console.log(bannerImgElement.src);
+    //console.debug(bannerImgElement);
+    //console.debug(bannerImgElement.src);
 
     const color = document.getElementById('colorPicker').value;
     const banner = document.getElementById('bannerContainer');
@@ -261,7 +261,7 @@ async function saveData() {
     let session = await chrome.storage.local.get([plugin_session_header_name]);
     const userid = "";
     const message_body = JSON.stringify(newdata);
-    console.log(message_body);
+    console.debug(message_body);
     // Fetch data from web service (replace with your actual API endpoint)
     const response = await fetch(
             server_url + URI_plugin_user_update_yellownote_creatorlevel_attributes, {
@@ -282,7 +282,7 @@ async function saveData() {
     // Parse JSON data
     const r_data = await response.json();
 
-    console.log(r_data);
+    console.debug(r_data);
 
 }
 
@@ -291,7 +291,7 @@ async function fetchAndUpdateBannerImage() {
 
     let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
     let session = await chrome.storage.local.get([plugin_session_header_name]);
-    console.log(session);
+    console.debug(session);
     const sessiontoken = session[plugin_session_header_name];
 
     const claimNames = ['userid', 'uuid']; // Replace with the claims you want to extract
@@ -318,12 +318,12 @@ async function fetchAndUpdateBannerImage() {
         return response.json();
     })
     .then(data => {
-        console.log('Success:');
-        console.log(data);
+        console.debug('Success:');
+        console.debug(data);
 
         var bannerImgElement; // = document.getElementById('bannerImage');
-console.log(bannerImgElement);
-        console.log(bannerImgElement);
+console.debug(bannerImgElement);
+        console.debug(bannerImgElement);
 
         
         if (data.banner_image) {
@@ -335,10 +335,10 @@ console.log(bannerImgElement);
             bannerImgElement.setAttribute( "alt", "Banner Image");
             
         } else {
-            console.log('Banner image data not found in response');
+            console.debug('Banner image data not found in response');
         }
         if (data.banner_image !== "" && data.banner_image !== null) {
-            console.log("data.banner_image is not null");
+            console.debug("data.banner_image is not null");
             document.getElementById('bannerContainer').querySelector('#drop_zone').appendChild(bannerImgElement);
             const n = document.getElementById('bannerContainer').querySelector('#drop_zone');
             n.insertBefore(bannerImgElement, n.firstChild);
@@ -349,19 +349,19 @@ console.log(bannerImgElement);
             colorElement.value = data.note_color;
             document.getElementById('bannerContainer').style.backgroundColor = data.note_color;
         } else {
-            console.log('Banner color data not found in response');
+            console.debug('Banner color data not found in response');
         }
 
         if (data.box_width) {
             document.getElementById('bannerContainer').style.width = data.box_width;
         } else {
-            console.log('Banner width data not found in response');
+            console.debug('Banner width data not found in response');
         }
 
         if (data.box_height) {
             document.getElementById('bannerContainer').style.height = data.box_height;
         } else {
-            console.log('Banner height data not found in response');
+            console.debug('Banner height data not found in response');
         }       
 
     })

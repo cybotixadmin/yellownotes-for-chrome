@@ -103,7 +103,7 @@ function fetchNewData(creatorId, cacheKey) {
         const controller = new AbortController();
         setTimeout(() => controller.abort(), 8000);
 
-        console.log('fetchCreatorDataThroughAPI: Fetching new data from API');
+        console.debug('fetchCreatorDataThroughAPI: Fetching new data from API');
         return fetch(server_url + '/api/v1.0/get_note_properties', {
             method: 'POST',
             headers: {
@@ -120,13 +120,13 @@ function fetchNewData(creatorId, cacheKey) {
     .then(response => {
 
         if (!response.ok) {
-            console.log(response);
+            console.debug(response);
 
             // if an invalid session token was sent, it should be removed from the local storage
             if (response.status == 401) {
                 // compare the response body with the string "Invalid session token" to determine if the session token is invalid
                 if (response.headers.get("session") == "DELETE_COOKIE") {
-                    console.log("Session token is invalid, remove it from local storage.");
+                    console.debug("Session token is invalid, remove it from local storage.");
                     chrome.storage.local.remove([plugin_session_header_name]);
                     // redirect to the front page returning the user to unauthenticated status.
                     // unauthenticated functionality will be in effect until the user authenticates
@@ -144,7 +144,7 @@ function fetchNewData(creatorId, cacheKey) {
 
     })
     .then(data => {
-        console.log('Caching data for', creatorId);
+        console.debug('Caching data for', creatorId);
         return cacheData(cacheKey, data)
         .then(() => data);
     })
@@ -176,7 +176,7 @@ getCachedData(nodeid, 10).then(cachedData => {
     console.debug(cachedData);
 
 if (cachedData == "null") {
-    console.log('Returning cached data for noteid:', nodeid);
+    console.debug('Returning cached data for noteid:', nodeid);
 
     console.debug(cachedData);
 
@@ -184,7 +184,7 @@ if (cachedData == "null") {
 
 
 }else {
-     console.log(' not in cache, create the note afresh');
+     console.debug(' not in cache, create the note afresh');
 
 
 
@@ -242,7 +242,7 @@ if (isOwner) {
     }
 }
             // put the completed note into the note cache
-            console.log('Caching data for', nodeid);
+            console.debug('Caching data for', nodeid);
 
             return cacheData(nodeid, node_root);            
         }).then(function ( ) {
@@ -265,7 +265,7 @@ if (isOwner) {
 
 // Helper to fetch data from API_URL_2
 function fetchCreatorDataThroughAPI(creatorId) {
-    console.log('fetchCreatorDataThroughAPI: Fetching data for creatorId:', creatorId);
+    console.debug('fetchCreatorDataThroughAPI: Fetching data for creatorId:', creatorId);
 
     if (!creatorId) {
         // If no creator ID is supplied, resolve immediately with null
@@ -276,10 +276,10 @@ function fetchCreatorDataThroughAPI(creatorId) {
 
     return getCachedData(cacheKey, 3)
     .then(cachedData => {
-        console.log('fetchCreatorDataThroughAPI: data returned from cache:', cachedData);
+        console.debug('fetchCreatorDataThroughAPI: data returned from cache:', cachedData);
 
         if (cachedData) {
-            console.log('Returning cached data for creatorId:', creatorId, "cacheKey:", cacheKey);
+            console.debug('Returning cached data for creatorId:', creatorId, "cacheKey:", cacheKey);
             return cachedData;
         } else {
             return fetchNewData(creatorId, cacheKey);

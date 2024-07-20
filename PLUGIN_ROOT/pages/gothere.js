@@ -2,11 +2,11 @@
  * This script intercept cliks to links that should be redirected to /pages/ hosted on the plugin
  *
  */
-console.log("gothere.js loaded");
+console.debug("gothere.js loaded");
 
-console.log(window.location.href);
+console.debug(window.location.href);
 
-console.log("redirect to go to note")
+console.debug("redirect to go to note")
 
 // first check if user is authorized for note
 const noteid = getQueryStringParameter('noteid');
@@ -25,15 +25,15 @@ chrome.runtime.sendMessage({
     }
     console.debug(ret.session_uuid);
     const uuid  = ret.session_uuid
-    console.log("uuid: ", uuid);
+    console.debug("uuid: ", uuid);
 
     note_data = ret.data
-    console.log("note_data");
-    console.log(note_data);
+    console.debug("note_data");
+    console.debug(note_data);
     datarow = note_data[0];
-    console.log(datarow);
+    console.debug(datarow);
     const note_obj = JSON.parse(datarow.json);
-    console.log(note_obj);
+    console.debug(note_obj);
     const note_type = note_obj.note_type;
 
     // brand not yet implemented
@@ -53,7 +53,7 @@ chrome.runtime.sendMessage({
 
         }
     }
-    console.log(msg);
+    console.debug(msg);
     // add functionality to scroll to the note in question
     // invoke the background script to scroll to the note in question
     return chrome.runtime.sendMessage( msg );
@@ -70,7 +70,7 @@ chrome.runtime.sendMessage({
 
 
 }).catch(function (error) {
-    console.log("error: " + error);
+    console.debug("error: " + error);
 });
 
 // Function to get the value of the 'dist' query string parameter

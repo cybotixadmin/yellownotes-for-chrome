@@ -17,15 +17,15 @@ var mouseX, mouseY;
 // Attach the event listener to the document to make the mouse coordinates available to the extension
 // in order to correctly place notes
 document.addEventListener('mousemove', (event) => {
-    // console.log("mousemove detected");
-    // console.log(event);
-    //  console.log(event.target);
+    // console.debug("mousemove detected");
+    // console.debug(event);
+    //  console.debug(event.target);
 
     // Extract the x and y coordinates of the mouse cursor
     mouseX = event.clientX + window.scrollX;
     mouseY = event.clientY + window.scrollY
 
-        //console.log(mouseX, mouseY ); // For demonstration purposes
+        //console.debug(mouseX, mouseY ); // For demonstration purposes
 
 });
 
@@ -36,7 +36,7 @@ document.addEventListener('contextmenu', function (event) {
     var mouseY = event.clientY;
 
     // Store or process the mouse position as needed
-    console.log('Mouse position - X:', mouseX, 'Y:', mouseY);
+    console.debug('Mouse position - X:', mouseX, 'Y:', mouseY);
 
     // You can perform additional actions here, such as displaying a custom context menu
 
@@ -69,7 +69,7 @@ var clickX, clickY;
 function logPosition(event) {
     console.debug("click detected: " + event.button);
     if (event.button === 2) {
-        console.log("right click detected");
+        console.debug("right click detected");
         clickX = event.clientX + window.scrollX;
         clickY = event.clientY + window.scrollY;
         const cursorPosition = {
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //scan_page();
     console.debug("calling getSliderPosition: ");
     getSliderPosition().then(function (position) {
-        console.log("position: " + position);
+        console.debug("position: " + position);
         // Your code here
     });
     // Your code here
@@ -118,7 +118,7 @@ window.addEventListener('load', function () {
     console.debug("calling getSliderPosition: ");
     getSliderPosition()
     .then(function (position) {
-        console.log("position: " + position);
+        console.debug("position: " + position);
         return new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({
                 message: {
@@ -134,19 +134,19 @@ window.addEventListener('load', function () {
         });
     })
     .then(function () {
-        console.log("3.2.6. page update completed - delay 2 seconds before proceeding with further actions if any.");
+        console.debug("3.2.6. page update completed - delay 2 seconds before proceeding with further actions if any.");
         // Add a 2-second delay before proceeding
         return delay(2000);
     })
     .then(function () {
         // Code to execute after the delay
-        console.log("3.2.7. 2-second delay completed, now proceeding with further actions if any.");
+        console.debug("3.2.7. 2-second delay completed, now proceeding with further actions if any.");
         // Here you can add any further actions that need to be executed after the delay
-        console.log("position: " + position);
+        console.debug("position: " + position);
         return textnote_update(position);
     })
     .then(function () {
-        console.log("3.2.9. page update completed ");
+        console.debug("3.2.9. page update completed ");
 
     })
     .catch(function (error) {
@@ -169,7 +169,7 @@ function textnote_update(position) {
         // console.debug("request0: " + request.action);
 
         // const position = request.position;
-        console.log("update_notes_on_page, position: " + position);
+        console.debug("update_notes_on_page, position: " + position);
 
         if (position == 1 || position == "1") {
             // close all notes on this page - not needed but may be included later
@@ -201,7 +201,7 @@ function textnote_update(position) {
     });
 
     // noteSelectedHTML(request, sender, sendResponse).then(function (res) {
-    //       console.log(res);
+    //       console.debug(res);
 
     //});
 
@@ -222,23 +222,23 @@ function getSliderTag() {
 }
 
 function getSliderPosition() {
-    console.log("slidertag: " + slidertag);
+    console.debug("slidertag: " + slidertag);
     return new Promise((resolve, reject) => {
         chrome.storage.local.get(["isSlidersEnabled", "defaultSliderPosition", slidertag]).then(function (data) {
 
-            console.log(JSON.stringify(data));
+            console.debug(JSON.stringify(data));
 
             try {
-                // console.log(JSON.stringify(data));
+                // console.debug(JSON.stringify(data));
 
                 if (!isUndefined(data[slidertag])) {
 
-                    console.log(JSON.stringify(data[slidertag]));
+                    console.debug(JSON.stringify(data[slidertag]));
 
                     // first, check if there is a slider position value set for this URL
-                    //console.log("--reading out position from local store: "+JSON.stringify(data.position));
+                    //console.debug("--reading out position from local store: "+JSON.stringify(data.position));
                     position = data[slidertag].position;
-                    console.log("position: " + position);
+                    console.debug("position: " + position);
                     resolve(position);
 
                 } else {
@@ -247,9 +247,9 @@ function getSliderPosition() {
 
                     }, function (response) {
                         console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-                        console.log("setting position to: " + response.defaultSliderPosition);
+                        console.debug("setting position to: " + response.defaultSliderPosition);
                         position = response.defaultSliderPosition;
-                        console.log("position: " + position);
+                        console.debug("position: " + position);
                         resolve(position);
 
                     });
@@ -257,7 +257,7 @@ function getSliderPosition() {
                 }
 
             } catch (e) {
-                console.log(e);
+                console.debug(e);
                 // if nothing specifically for this page is found, check with background for a general setting
 
 
@@ -267,9 +267,9 @@ function getSliderPosition() {
 
                 }, function (response) {
                     console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-                    console.log("setting position to: " + response.defaultSliderPosition);
+                    console.debug("setting position to: " + response.defaultSliderPosition);
                     position = response.defaultSliderPosition;
-                    console.log("position: " + position);
+                    console.debug("position: " + position);
                     resolve(position);
                 });
             }
@@ -281,7 +281,7 @@ function getSliderPosition() {
 document.addEventListener('click', logPosition);
 
 document.addEventListener('touchstart', (event) => {
-    console.log("touch detected: " + event.touches[0].clientX + " " + event.touches[0].clientY);
+    console.debug("touch detected: " + event.touches[0].clientX + " " + event.touches[0].clientY);
     if (event.touches.length > 0) {
         logPosition(event.touches[0]);
     }
@@ -419,7 +419,7 @@ function listener(request, sender, sendResponse) {
 
                 if (request.action == "update_notes_on_page") {
 
-                    console.log("update_notes_on_page, position: " + request.position);
+                    console.debug("update_notes_on_page, position: " + request.position);
 
                     page_update(request, sender, sendResponse).then(function (res) {
                         sendResponse({
@@ -435,11 +435,11 @@ function listener(request, sender, sendResponse) {
                 }
                 return true;
             } else if (request.action == "update_single_note_on_page") {
-                console.log("update note with noteid: " + request.noteid);
+                console.debug("update note with noteid: " + request.noteid);
                 // not implemented yet
             } else if (request.action == "disable_single_note") {
 
-                console.log("disable note with noteid: " + request.noteid);
+                console.debug("disable note with noteid: " + request.noteid);
                 // not implemented yet
 
                 // remove the note from the page
@@ -452,7 +452,7 @@ function listener(request, sender, sendResponse) {
 
             } else if (request.action == "scroll_to_note") {
                 const noteid = request.noteid;
-                console.log("scroll to note with noteid: " + noteid);
+                console.debug("scroll to note with noteid: " + noteid);
 
                 // Find the element by its ID
                 const note_root = document.querySelectorAll('[type="yellownote"][noteid="' + noteid + '"]')[0];
@@ -465,27 +465,27 @@ function listener(request, sender, sendResponse) {
                         block: 'center'
                     });
                 } else {
-                    console.log('Element not found: ' + elementId);
+                    console.debug('Element not found: ' + elementId);
                 }
                 return true;
             } else if (request.action == "create_and_scroll_to_note") {
-                console.log("create_and_scroll_to_note");
+                console.debug("create_and_scroll_to_note");
                 const noteid = request.noteid;
-                console.log(request);
-                console.log("scroll to note with noteid: " + noteid);
+                console.debug(request);
+                console.debug("scroll to note with noteid: " + noteid);
                 const notes = request.notes;
-                console.log(notes);
+                console.debug(notes);
                 const note_creatorid = notes.notes_found[0].creatorid;
                 const note_type = request.note_type
                     const note_data = JSON.parse(notes.notes_found[0].json);
                 const creatorDetails = notes.creatorDetails;
-                console.log("creatorDetails: ");
-                console.log(creatorDetails);
+                console.debug("creatorDetails: ");
+                console.debug(creatorDetails);
                 // make sure the note is there
                 const isNewNote = false;
 
                 var selection_text;
-                console.log("calling: scan_page");
+                console.debug("calling: scan_page");
                 scan_page();
                 // console.debug(whole_page_text);
                 // console.debug(textnode_map);
@@ -494,14 +494,14 @@ function listener(request, sender, sendResponse) {
                 } catch (e) {
                     selection_text = "";
                 }
-                console.log("selection_text: " + selection_text);
+                console.debug("selection_text: " + selection_text);
                 // collectec distributionlist id from the note metadata and place it inside the note data object
                 note_data.distributionlistid = notes.notes_found[0].distributionlistid;
 
                 // change this to compare authenticated user with creatorid inside note data
-                console.log("note_creatorid: " + note_creatorid);
-                console.log("note_data: creatorid: ", note_data.creatorid);
-                console.log("session_uuid: " + notes.session_uuid);
+                console.debug("note_creatorid: " + note_creatorid);
+                console.debug("note_data: creatorid: ", note_data.creatorid);
+                console.debug("session_uuid: " + notes.session_uuid);
 
                 var isOwner = true;
                 if (notes.session_uuid == note_creatorid) {
@@ -560,14 +560,14 @@ function listener(request, sender, sendResponse) {
                                 }).catch(reject);
                             });
 
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                         promiseArray.push(promise);
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                     });
                 }
                 return true;
             } else if (request.action == "remove_single_note") {
-                console.log("remove note with noteid: " + request.noteid);
+                console.debug("remove note with noteid: " + request.noteid);
                 console.debug("browsersolutions calling: remove_noteid");
                 remove_noteid(request.noteid);
                 sendResponse({
@@ -589,7 +589,7 @@ function listener(request, sender, sendResponse) {
 chrome.runtime.onMessage.addListener(listener);
 
 function initiateScreenSelection() {
-    console.log("initiateSelection");
+    console.debug("initiateSelection");
     showMessage("Click and drag to select the area for capture.");
 
     document.addEventListener('mousedown', startSelection);
@@ -614,7 +614,7 @@ function initiateScreenSelection() {
     }
 
     function startSelection(event) {
-        console.log('Selection started');
+        console.debug('Selection started');
         startX = event.pageX;
         startY = event.pageY;
 
@@ -631,7 +631,7 @@ function initiateScreenSelection() {
     }
 
     function expandSelection(event) {
-        console.log('Expanding selection');
+        console.debug('Expanding selection');
         const currentX = event.pageX;
         const currentY = event.pageY;
         const width = currentX - startX;
@@ -644,7 +644,7 @@ function initiateScreenSelection() {
     }
 
     function endSelection(event) {
-        console.log("Selection ended");
+        console.debug("Selection ended");
         endX = event.pageX;
         endY = event.pageY;
         document.removeEventListener('mousemove', expandSelection);
@@ -654,9 +654,9 @@ function initiateScreenSelection() {
     }
 
     function captureAndProcessSelection(x1, y1, x2, y2) {
-        console.log('Capturing and processing selection');
+        console.debug('Capturing and processing selection');
         var datauri;
-        console.log(x1, y1, x2, y2);
+        console.debug(x1, y1, x2, y2);
         // Placeholder for capturing and processing logic
         const captureData = {
             x1,
@@ -667,22 +667,22 @@ function initiateScreenSelection() {
         var linkedContentUniqueid = "";
         processData(captureData)
             .then(function (processedData) {
-                console.log(processedData);
+                console.debug(processedData);
                 datauri = processedData;
                 return displayTable(processedData, x1, y1);
             })
             .then(function (id) {
                 linkedContentUniqueid = id;
-                console.log("linkedContentUniqueid: " + linkedContentUniqueid);
+                console.debug("linkedContentUniqueid: " + linkedContentUniqueid);
                 // call out to get information about the note over
                 const request_msg = {
                     message: {
                         "action": "get_note_creator_info"
                     }
                 };
-                console.log("request to background: ");
+                console.debug("request to background: ");
 
-                console.log(request_msg);
+                console.debug(request_msg);
 
                 return chrome.runtime.sendMessage(request_msg);
 
@@ -729,7 +729,7 @@ function initiateScreenSelection() {
     }
 
     function processData(data) {
-        console.log("Processing data...");
+        console.debug("Processing data...");
         // Simulate processing data and return a promise
         console.debug(data);
         // Send save request back to background to get the required information for creting a blank sticky note
@@ -749,7 +749,7 @@ function initiateScreenSelection() {
                 // call the function that will crop the image
                 return cropImage(resp.dataUrl, data);
             }).then(function (croppedImage) {
-                console.log(croppedImage);
+                console.debug(croppedImage);
                 resolve(croppedImage);
                 // update the with the just cropped image
                 //   resp.dataUrl = croppedImage;
@@ -763,7 +763,7 @@ function initiateScreenSelection() {
     }
 
     function displayTable(data, x, y) {
-        console.log("Displaying table...");
+        console.debug("Displaying table...");
         // Diplay the captured image data on page overlaying the original
         const capturedImageFrameTable = document.createElement('table');
         capturedImageFrameTable.style.position = 'fixed';
@@ -881,7 +881,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
 
     var note_template = safeParseInnerHTML(html_note_template, 'div');
     // note_template = JSON.parse(html);
-    console.log(note_template);
+    console.debug(note_template);
 
     note_root.setAttribute("class", "yellownotecontainer");
     note_root.setAttribute("note_type", note_type);
@@ -955,7 +955,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     }
     const note_table = note_root.querySelector('[name="whole_note_table"]');
 
-    console.log("note_object_data: " + JSON.stringify(note_object_data));
+    console.debug("note_object_data: " + JSON.stringify(note_object_data));
 
 
     try {
@@ -1029,7 +1029,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
         // brand-level not implemted yet
     }
     var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
-    console.log("box_background" + box_background);
+    console.debug("box_background" + box_background);
 
     // show/hide elements based on the ower and editing
 
@@ -1062,8 +1062,8 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
 
         highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
 
-        console.log("Highlights added with ID: ", highlightuniqueid);
-        console.log(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
+        console.debug("Highlights added with ID: ", highlightuniqueid);
+        console.debug(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
         // only include the highlight id with the note object if it is not null
         //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
         note_object_data.highlightuniqueid = highlightuniqueid;
@@ -1077,7 +1077,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
         console.debug("selection_text is not set or is blank: ");
 
     }
-    console.log("highlightuniqueid: ", highlightuniqueid);
+    console.debug("highlightuniqueid: ", highlightuniqueid);
 
     // attach event listeners to the note
 
@@ -1125,19 +1125,19 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
 
     const insertedNode = doc_root.insertBefore(note_root, doc_root.firstChild);
 
-    console.log(insertedNode);
+    console.debug(insertedNode);
   // attach event listeners to buttons and icons
 
    noteTypeSpecificActions(note_type, insertedNode, info);
     //insertedNode.setAttribute("isOwner: ", isOwner);
     //insertedNode.setAttribute("isNewNote: ", isNewNote);
-    console.log("highlightuniqueid: ", highlightuniqueid);
+    console.debug("highlightuniqueid: ", highlightuniqueid);
     if (highlightuniqueid && highlightuniqueid !== "0") {
         // selection text was matched in the document
         // place note next to where the text is highlighted
 
 
-        console.log("calling size_and_place_note_based_on_texthighlight");
+        console.debug("calling size_and_place_note_based_on_texthighlight");
         size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
 
       
@@ -1148,7 +1148,7 @@ console.debug("calling size_and_place_note_based_on_texthighlight");
         
     } else {
         // selection text was not matched in the document, or there is no selection text
-        console.log("selection text was not matched in the document, or there is no selection text");
+        console.debug("selection text was not matched in the document, or there is no selection text");
 
         // move to the default location on the screen if all else fails
         //inserted.setAttribute("posx", 50);
@@ -1174,13 +1174,13 @@ console.debug("calling size_and_place_note_based_on_texthighlight");
         //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
         //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
         // width
-        console.log("setting box:width: " + insertedNode.getAttribute("box_width"));
+        console.debug("setting box:width: " + insertedNode.getAttribute("box_width"));
         insertedNode.querySelector('[name="whole_note_table"]').style.width = insertedNode.getAttribute("box_width");
 
         // height
 
 
-        console.log("setting box_height: " + insertedNode.getAttribute("box_height"));
+        console.debug("setting box_height: " + insertedNode.getAttribute("box_height"));
         // since this is a new note, the height is padded by the control bar
 
         insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
@@ -1189,7 +1189,7 @@ console.debug("calling size_and_place_note_based_on_texthighlight");
         try {
             insertedNode.querySelector('[focus="true"]').focus();
         } catch (e) {
-            console.log(e);
+            console.debug(e);
         }
 
 
@@ -1269,7 +1269,7 @@ function prepareCaptureNote(node_root, info) {
     img.style.height = overlay.style.height;
     img.style.border = '3px solid yellow';
     img.style.zIndex = '10000';
-    console.log(img);
+    console.debug(img);
     // Add a close icon
     const closeIcon = document.createElement('div');
     closeIcon.textContent = '✖'; // Simple text close icon
@@ -1292,7 +1292,7 @@ function preparePlainNote(node_root) {
     console.debug("preparePlainNote.start");
     try {
         const textarea = node_root.querySelector('[name="message_display_text"]');
-        console.log(textarea);
+        console.debug(textarea);
         // Set initial placeholder text that should vanish when typing begins
         const placeholderText = "write your notes here..";
         textarea.innerHTML = "<div>" + placeholderText + "</div>";
@@ -1337,11 +1337,11 @@ function prepareFrameNote(node_root) {
 
 function updateNoteMiddleBar(html_notetype_template, node_root) {
     console.debug("updateNoteMiddleBar.start");
-    //console.log(html_notetype_template);
-    console.log(node_root);
-    console.log(node_root.querySelector('[name]'));
+    //console.debug(html_notetype_template);
+    console.debug(node_root);
+    console.debug(node_root.querySelector('[name]'));
     var notetype_template = safeParseInnerHTML(html_notetype_template, 'div');
-    console.log(notetype_template);
+    console.debug(notetype_template);
     const nodeToReplace = node_root.querySelector('[name="whole_note_middlebar"]');
     console.debug(nodeToReplace);
     const middle_bar = notetype_template.querySelector('tr[name="whole_note_middlebar"]');
@@ -1441,7 +1441,7 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
 
     var note_template = safeParseInnerHTML(html, 'div');
     // note_template = JSON.parse(html);
-    console.log(note_template);
+    console.debug(note_template);
 
     node_root.setAttribute("class", "yellownotecontainer");
     node_root.setAttribute("note_type", note_type);
@@ -1501,7 +1501,7 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
         // brand-level not implemted yet
     }
     var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
-    console.log("box_background" + box_background);
+    console.debug("box_background" + box_background);
 
     var highlight_background = "rgb(" + hexToRGB(note_color) + ", 0.25)";
 
@@ -1549,8 +1549,8 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
 
         highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
 
-        console.log("Highlights added with ID: ", highlightuniqueid);
-        console.log(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
+        console.debug("Highlights added with ID: ", highlightuniqueid);
+        console.debug(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
         // only include the highlight id with the note object if it is not null
         //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
         note_object_data.highlightuniqueid = highlightuniqueid;
@@ -1564,9 +1564,9 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
         console.debug("selection_text is not set or is blank: ");
 
     }
-    console.log("highlightuniqueid: ", highlightuniqueid);
+    console.debug("highlightuniqueid: ", highlightuniqueid);
 
-    console.log("note_object_data: " + JSON.stringify(note_object_data));
+    console.debug("note_object_data: " + JSON.stringify(note_object_data));
 
     node_root.appendChild(note_template);
     try {
@@ -1613,7 +1613,7 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
         try {
             // Grab the textarea element
             const textarea = node_root.querySelector('[name="message_display_text"]');
-            console.log(textarea);
+            console.debug(textarea);
             // Set initial placeholder text that should vanish when typing begins
             const placeholderText = "write your note here..";
             textarea.innerHTML = "<div>" + placeholderText + "</div>";
@@ -1658,7 +1658,7 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
         img.style.height = overlay.style.height;
         img.style.border = '3px solid yellow';
         img.style.zIndex = '10000';
-        console.log(img);
+        console.debug(img);
         // Add a close icon
         const closeIcon = document.createElement('div');
         closeIcon.textContent = '✖'; // Simple text close icon
@@ -1702,17 +1702,17 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
 
     const insertedNode = doc_root.insertBefore(node_root, doc_root.firstChild);
 
-    console.log(insertedNode);
+    console.debug(insertedNode);
 
     //insertedNode.setAttribute("isOwner: ", isOwner);
     //insertedNode.setAttribute("isNewNote: ", isNewNote);
-    console.log("highlightuniqueid: ", highlightuniqueid);
+    console.debug("highlightuniqueid: ", highlightuniqueid);
     if (highlightuniqueid && highlightuniqueid !== "0") {
         // selection text was matched in the document
         // place note next to where the text is highlighted
 
 
-        console.log("calling size_and_place_note_based_on_texthighlight");
+        console.debug("calling size_and_place_note_based_on_texthighlight");
         size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
 
         // set the flag that contral which button are shown
@@ -1737,13 +1737,13 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
         //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
         //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
         // width
-        console.log("setting box:width: " + insertedNode.getAttribute("box_width"));
+        console.debug("setting box:width: " + insertedNode.getAttribute("box_width"));
         insertedNode.querySelector('[name="whole_note_table"]').style.width = insertedNode.getAttribute("box_width");
 
         // height
 
 
-        console.log("setting box_height: " + insertedNode.getAttribute("box_height"));
+        console.debug("setting box_height: " + insertedNode.getAttribute("box_height"));
         // since this is a new note, the height is padded by the control bar
 
         insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
@@ -1758,12 +1758,12 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
         try {
             insertedNode.querySelector('[focus="true"]').focus();
         } catch (e) {
-            console.log(e);
+            console.debug(e);
         }
 
     } else {
         // selection text was not matched in the document, or there is no selection text
-        console.log("selection text was not matched in the document, or there is no selection text");
+        console.debug("selection text was not matched in the document, or there is no selection text");
 
         // move to the default location on the screen if all else fails
         //inserted.setAttribute("posx", 50);
@@ -1816,11 +1816,11 @@ function save_new_note(event) {
         // get the table node that is the root of the note data.
 
         var note_root = getYellowStickyNoteRoot(event.target);
-        console.log(note_root);
+        console.debug(note_root);
 
         // get note type which will determine which fields to read
         const note_type = note_root.getAttribute("note_type");
-        console.log("note_type: " + note_type);
+        console.debug("note_type: " + note_type);
         // var note_table = event.target.parentNode.parentNode.parentNode;
         // console.debug(note_table);
         console.debug(note_root.querySelectorAll('input[name="selection_text"]').length);
@@ -1861,7 +1861,7 @@ function save_new_note(event) {
             var distributionlistid;
             try {
                 distributionlistid = note_root.querySelector('[name="distributionlistdropdown"]').value;
-                console.log('Selected distributionlistid:', distributionlistid);
+                console.debug('Selected distributionlistid:', distributionlistid);
 
                 // update the note object root DOM node with the distribution list id
                 note_root.setAttribute("distributionlistid", distributionlistid);
@@ -1934,7 +1934,7 @@ function save_new_note(event) {
             console.debug("selection_text: " + selection_text);
             console.debug("canvas_uri: " + canvas_uri);
             var base64data = utf8_to_b64(selection_text);
-            //console.log(utf8_to_b64(selection_text));
+            //console.debug(utf8_to_b64(selection_text));
 
             var json_create = {
                 message_display_text: utf8_to_b64(message_display_text),
@@ -1985,8 +1985,8 @@ function save_new_note(event) {
                     "create_details": json_create
                 }
             }
-            console.log("save_new_msg:");
-            console.log(save_new_msg);
+            console.debug("save_new_msg:");
+            console.debug(save_new_msg);
 
             chrome.runtime.sendMessage(save_new_msg, function (response) {
                 console.debug("message sent to backgroup.js with response: ");
@@ -2010,7 +2010,7 @@ function save_new_note(event) {
 
             });
         } else {
-            console.log("browsersolutions noteid has already been set - not creating new note, and potentially a conflict");
+            console.debug("browsersolutions noteid has already been set - not creating new note, and potentially a conflict");
         }
     } catch (e) {
         console.error(e);
@@ -2039,7 +2039,7 @@ function dropdownlist_add_option(node_root, dropdownlist, option_text, option_va
             selectElement.appendChild(option);
 
             response.forEach(item => {
-                console.log(item);
+                console.debug(item);
                 const option = document.createElement('option');
                 option.value = item.distributionlistid;
                 option.textContent = `${item.name} ${item.description}`;
@@ -2088,7 +2088,7 @@ function DELETEplaceYellowNote(newGloveboxNode) {
     //console.debug(doc_root);
 
     const inserted = doc_root.insertBefore(newGloveboxNode, doc_root.firstChild);
-    console.log(inserted);
+    console.debug(inserted);
 
     const table = inserted.querySelector('table[name="whole_note_table"]');
     //    console.debug(table);
@@ -2146,12 +2146,12 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
         textnodelist
     } = getDOMplacement(selection_text);
 
-    console.log("selection_matched_in_document: " + selection_matched_in_document);
+    console.debug("selection_matched_in_document: " + selection_matched_in_document);
     console.debug("browsersolutions: start_range_node: ");
-    console.log(start_range_node);
-    console.log("start_offset: " + start_offset);
-    console.log(end_range_node);
-    console.log("end_offset: " + end_offset);
+    console.debug(start_range_node);
+    console.debug("start_offset: " + start_offset);
+    console.debug(end_range_node);
+    console.debug("end_offset: " + end_offset);
     console.debug(textnodelist);
     //console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
 
@@ -2163,7 +2163,7 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
 
         let seqNum = 1;
         var nodecount = textnodelist.length;
-        console.log("nodecount: " + nodecount);
+        console.debug("nodecount: " + nodecount);
 
         if (nodecount == 0) {
             // also no match. return nothing
@@ -2393,9 +2393,9 @@ function highlightTextOccurrences_old(selection_text, rgbcolor) {
         });
 
         // get the position of the selection text in the document
-        // console.log("calling getSelectionTextDOMPosition: ");
+        // console.debug("calling getSelectionTextDOMPosition: ");
         // const one = getSelectionTextDOMPosition(selection_text);
-        //  console.log(one);
+        //  console.debug(one);
 
         // get a list of nodes that contain the selection text
 
@@ -2566,10 +2566,10 @@ function DELETEhighlightTextOccurrences(text, rgbcolor) {
     }
 
     handleTextSpanningNodes(document.body);
-    console.log(startNode);
-    console.log(startPos);
-    console.log(endNode);
-    console.log(endPos);
+    console.debug(startNode);
+    console.debug(startPos);
+    console.debug(endNode);
+    console.debug(endPos);
     //return { uniqueId, startNode, endNode, startPos, endPos };
     return uniqueId;
 }
@@ -2739,7 +2739,7 @@ function DELETEhighlightTextOccurrences_backup(text, rgbcolor) {
     function highlightNode(node, seqNum = 1) {
         if (node.nodeType === Node.TEXT_NODE) {
             const matches = [...node.nodeValue.matchAll(regex)];
-            //console.log(matches);
+            //console.debug(matches);
             if (matches.length > 0) {
                 const span = document.createElement('span');
                 let lastIdx = 0;
@@ -2854,7 +2854,7 @@ function page_update(request, sender, sendResponse) {
         console.debug("request0: " + request.action);
 
         const position = request.position;
-        console.log("update_notes_on_page, position: " + position);
+        console.debug("update_notes_on_page, position: " + position);
 
         if (position == 1 || position == "1") {
             // close all notes on this page
@@ -2886,7 +2886,7 @@ function page_update(request, sender, sendResponse) {
     });
 
     // noteSelectedHTML(request, sender, sendResponse).then(function (res) {
-    //       console.log(res);
+    //       console.debug(res);
 
     //});
 
@@ -2907,39 +2907,39 @@ function checkValueAndTriggerFunction() {
 
 
         } else {
-            console.log('Value is not set or does not match the regex');
+            console.debug('Value is not set or does not match the regex');
         }
     });
 }
 
 function removeSubscribedNotes() {
-    console.log("removeSubscribedNotes");
+    console.debug("removeSubscribedNotes");
     // remove not not belonging to this user
 
     console.debug(document.querySelectorAll('container[class="yellownotecontainer"] , div[class="yellownotecontainer"]'));
 
     document.querySelectorAll('container[class="yellownotecontainer"] , div[class="yellownotecontainer"]').forEach(function (a) {
         // check if this is user's own note or not
-        console.log("removing a note" + a);
+        console.debug("removing a note" + a);
         remove_note(a);
     });
 
 }
 
 function removeAllNotes() {
-    console.log("removeAllNotes");
+    console.debug("removeAllNotes");
     console.debug(document.querySelectorAll('container[class="yellownotecontainer"] , div[class="yellownotecontainer"]'));
 
     document.querySelectorAll('container[class="yellownotecontainer"] , div[class="yellownotecontainer"]').forEach(function (a) {
         // check if this is user's own note or not
-        console.log("removing a note" + a);
+        console.debug("removing a note" + a);
         remove_note(a);
     });
 
 }
 
 function remove_noteid(noteid) {
-    console.log("# remove_noteid (" + noteid + ")");
+    console.debug("# remove_noteid (" + noteid + ")");
     //    var note_root = document.querySelectorAll('[type="yellownote"]')[0];
 
     // is there any highlighting to clear ?
@@ -2961,15 +2961,15 @@ function remove_note(noteroot) {
     console.debug(noteroot);
     try {
         //console.debug(noteroot.highlightuniqueid);
-        //console.log( noteroot.getAttribute("highlightuniqueid"));
-        //console.log( noteroot.ge);
+        //console.debug( noteroot.getAttribute("highlightuniqueid"));
+        //console.debug( noteroot.ge);
         console.debug(noteroot.getAttribute("note_type"));
         try {
             const highlightuniqueid = noteroot.getAttribute("highlightuniqueid");
             console.debug("clearing hightlight with id: ", highlightuniqueid);
             removeHighlighting(highlightuniqueid);
         } catch (e) {
-            console.log(e);
+            console.debug(e);
         }
         // Usage
         if (noteroot.getAttribute("note_type") == "webframe") {
@@ -3019,24 +3019,24 @@ function remove_note(noteroot) {
 }
 
 function removeAllIframes(noteroot) {
-    console.log("removeAllIframes");
+    console.debug("removeAllIframes");
     try {
         var iframes = noteroot.querySelectorAll('iframe');
-        console.log(iframes);
+        console.debug(iframes);
         iframes.forEach(function (iframe) {
             if (iframe.parentNode) {
                 iframe.parentNode.removeChild(iframe);
             }
         });
 
-        console.log(iframes.length + ' iframes removed');
+        console.debug(iframes.length + ' iframes removed');
     } catch (e) {
         console.error(e);
     }
 }
 
 function getOwnNotes(note_type) {
-    console.log("getOwnNotes.start");
+    console.debug("getOwnNotes.start");
     var notes_found;
     var note_template_html;
     var note_template;
@@ -3053,14 +3053,14 @@ function getOwnNotes(note_type) {
             "note_type": note_type
         }
     }
-    console.log("browsersolutions " + JSON.stringify(msg));
+    console.debug("browsersolutions " + JSON.stringify(msg));
     chrome.runtime.sendMessage(msg).then(function (response) {
         console.debug("browsersolutions" + "message sent to backgroup.js with response: ");
         console.debug(response);
         if (response != null) {
         notes_found = response.notes_found;
-        console.log("notes_found");
-        console.log(notes_found);
+        console.debug("notes_found");
+        console.debug(notes_found);
         creatorDetails = response.creatorDetails;
 
         // how many notes came back ?
@@ -3077,12 +3077,12 @@ function getOwnNotes(note_type) {
             notes_found.forEach(function (note) {
                 i++;
                 console.debug("browsersolutions " + "##### " + i + " ##########################");
-                //console.log("browsersolutions " + note);
+                //console.debug("browsersolutions " + note);
                 //var value = notes_found[key];
                 console.debug(note);
-                //console.log("browsersolutions " + (note.json));
+                //console.debug("browsersolutions " + (note.json));
                 const note_data = JSON.parse(note.json);
-                console.log(note_data);
+                console.debug(note_data);
                 // iteration code
                 // is the note already in place ?
 
@@ -3125,7 +3125,7 @@ function getOwnNotes(note_type) {
                     note_data.note_type = "yellownote";
                     note_type = "yellownote";
                 }
-                console.log(note_data);
+                console.debug(note_data);
                 console.debug("browsersolutions note_type of note: " + note_type);
                 note_data.note_type = note_type;
                 // creatorid of note - this is returned from the database as metadata on the note object.
@@ -3204,14 +3204,14 @@ function getOwnNotes(note_type) {
                                 }).catch(reject);
                             });
 
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                         promiseArray.push(promise);
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                     });
                 }
-                console.log("notes to be placed: " + promiseArray.length);
+                console.debug("notes to be placed: " + promiseArray.length);
             });
-            console.log("notes to be placed: " + promiseArray.length);
+            console.debug("notes to be placed: " + promiseArray.length);
 
             // loop through the list of all notes found, and place them on the page
             Promise.all(promiseArray).then(results => {
@@ -3306,7 +3306,7 @@ function unmark_selection_text(sticky_note_node) {
 }
 
 function getSubscribedNotes(note_type) {
-    console.log("browsersolutions getSubscribedNotes noteAudience: ");
+    console.debug("browsersolutions getSubscribedNotes noteAudience: ");
     var notes_found;
     var note_template_html;
     var note_template;
@@ -3323,7 +3323,7 @@ function getSubscribedNotes(note_type) {
         }
     }
 
-    console.log("browsersolutions " + JSON.stringify(msg));
+    console.debug("browsersolutions " + JSON.stringify(msg));
     chrome.runtime.sendMessage(msg).then(function (response) {
         console.debug("browsersolutions" + "message sent to backgroup.js with response: " );
         console.debug((response));
@@ -3350,7 +3350,7 @@ function getSubscribedNotes(note_type) {
                 console.debug(note);
                 //var value = notes_found[key];
                 //console.debug(note);
-                //console.log("browsersolutions " + (note.json));
+                //console.debug("browsersolutions " + (note.json));
                 const note_data = JSON.parse(note.json);
                 console.debug("note_data:");
                 console.debug(note_data);
@@ -3443,7 +3443,7 @@ if (creatorDetails.hasOwnProperty('displayname')) {
                         note_data.note_type = "yellownote";
                         note_type = "yellownote";
                     }
-                    console.log(note_data);
+                    console.debug(note_data);
                     console.debug("browsersolutions note_type of note: " + note_type);
                 } catch (e) {
                     console.error(e);
@@ -3521,16 +3521,16 @@ if (creatorDetails.hasOwnProperty('displayname')) {
                                 }).catch(reject);
                             });
 
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                         promiseArray.push(promise);
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                     });
 
                 }
-                console.log("notes to be placed: " + promiseArray.length);
+                console.debug("notes to be placed: " + promiseArray.length);
 
             });
-            console.log("notes to be placed: " + promiseArray.length);
+            console.debug("notes to be placed: " + promiseArray.length);
 
             // loop through the list of all notes found, and place them on the page
             Promise.all(promiseArray).then(results => {
@@ -3559,7 +3559,7 @@ if (creatorDetails.hasOwnProperty('displayname')) {
 var page_scanned = false;
 
 function getAllNotes() {
-    console.log("browsersolutions getAllNotes noteAudience: ");
+    console.debug("browsersolutions getAllNotes noteAudience: ");
     var notes_found;
     var note_template_html;
     var note_template;
@@ -3577,7 +3577,7 @@ function getAllNotes() {
         }
     }
 
-    console.log("browsersolutions " + JSON.stringify(msg));
+    console.debug("browsersolutions " + JSON.stringify(msg));
     chrome.runtime.sendMessage(msg).then(function (response) {
         console.debug("browsersolutions" + "message sent to backgroup.js with response: " + JSON.stringify(response));
         notes_found = response.data;
@@ -3596,12 +3596,12 @@ function getAllNotes() {
             notes_found.forEach(function (note) {
                 i++;
                 console.debug("browsersolutions " + "##### " + i + " ##########################");
-                //console.log("browsersolutions " + note);
+                //console.debug("browsersolutions " + note);
                 //var value = notes_found[key];
                 //console.debug(note);
-                //console.log("browsersolutions " + (note.json));
+                //console.debug("browsersolutions " + (note.json));
                 const note_data = JSON.parse(note.json);
-                console.log(note_data);
+                console.debug(note_data);
                 // iteration code
                 // is the note already in place ?
 
@@ -3641,7 +3641,7 @@ function getAllNotes() {
                     note_data.note_type = "yellownote";
                     note_type = "yellownote";
                 }
-                console.log(note_data);
+                console.debug(note_data);
                 console.debug("browsersolutions note_type of note: " + note_type);
 
                 if (isNoteOnPage(note_data.noteid)) {
@@ -3705,16 +3705,16 @@ function getAllNotes() {
                                 }).catch(reject);
                             });
 
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                         promiseArray.push(promise);
-                        console.log("notes to be placed: " + promiseArray.length);
+                        console.debug("notes to be placed: " + promiseArray.length);
                     });
 
                 }
-                console.log("notes to be placed: " + promiseArray.length);
+                console.debug("notes to be placed: " + promiseArray.length);
 
             });
-            console.log("notes to be placed: " + promiseArray.length);
+            console.debug("notes to be placed: " + promiseArray.length);
 
             // loop through the list of all notes found, and place them on the page
             Promise.all(promiseArray).then(results => {
@@ -3789,12 +3789,12 @@ function DELETEgetSelectionTextDOMPosition(selection_text) {
                 textnodelist
             } = getDOMplacement(selection_text);
 
-            console.log("selection_matched_in_document: " + selection_matched_in_document);
+            console.debug("selection_matched_in_document: " + selection_matched_in_document);
             console.debug("browsersolutions: start_range_node");
-            console.log(start_range_node);
-            console.log("start_offset: " + start_offset);
-            console.log(end_range_node);
-            console.log("end_offset: " + end_offset);
+            console.debug(start_range_node);
+            console.debug("start_offset: " + start_offset);
+            console.debug(end_range_node);
+            console.debug("end_offset: " + end_offset);
             console.debug(textnodelist);
             // if the selection text that should be use to anchor the note in the document found, switch to using the coordinates contained in the note
             const out = {
@@ -3987,12 +3987,12 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
                                         //      textnodelist
                                         //  } = getDOMplacement(selection_text, note_obj);
 
-                                        //console.log("selection_matched_in_document: " + selection_matched_in_document);
+                                        //console.debug("selection_matched_in_document: " + selection_matched_in_document);
                                         //console.debug("browsersolutions: start_range_node");
-                                        //console.log(start_range_node);
-                                        //console.log("start_offset: " + start_offset);
-                                        //console.log(end_range_node);
-                                        //console.log("end_offset: " + end_offset);
+                                        //console.debug(start_range_node);
+                                        //console.debug("start_offset: " + start_offset);
+                                        //console.debug(end_range_node);
+                                        //console.debug("end_offset: " + end_offset);
                                         //console.debug(textnodelist  );
                                         //console.debug("browsersolutions: nodesAreIdentical:" + nodesAreIdentical(start_range_node, end_range_node));
                                         //console.debug (findNodesBetween(start_range_node, end_range_node));
@@ -4019,8 +4019,8 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
                                     //console.debug(textnodelist  );
 
                                     highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
-                                    console.log("Highlights added with ID: ", highlightuniqueid);
-                                    console.log(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
+                                    console.debug("Highlights added with ID: ", highlightuniqueid);
+                                    console.debug(document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]'));
 
                                     // only include the highlight id with the note object if it is not null
                                     //if (!isUndefined(highlightuniqueid) && highlightuniqueid != null && highlightuniqueid != '') {
@@ -4091,8 +4091,8 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
                                     console.debug("browsersolutions: selection text not found in doc, using coordinates instead");
                                     try {
 
-                                        console.log("browsersolutions: " + "note posx: " + note_obj.posx);
-                                        console.log("browsersolutions: " + "note posy: " + note_obj.posy);
+                                        console.debug("browsersolutions: " + "note posx: " + note_obj.posx);
+                                        console.debug("browsersolutions: " + "note posy: " + note_obj.posy);
 
                                         // check if note contains position coordinates/parameters. If so, try to use them to place the note
 
@@ -4256,7 +4256,7 @@ function moveFocusToNote(noteid) {
         });
 
     } catch (f) {
-        console.log(f);
+        console.debug(f);
     }
 }
 
@@ -4333,7 +4333,7 @@ function one(note_obj, note_template, isOwner, isNewNote) {
         //console.debug("browsersolutions: start_range_node length=" + start_range_node.length);
         //console.debug(start_range_node);
         //console.debug("browsersolutions: start_range_node start offset " + start_offset);
-        //console.log("browsersolutions: insertedNode at root");
+        //console.debug("browsersolutions: insertedNode at root");
         //const rootElement = document.documentElement; // For <html> as root
         //const insertedNode2 = rootElement.appendChild(newGloveboxNode)
         //     console.debug(insertedNode2);
@@ -4458,7 +4458,7 @@ and the one it ends inside of. As well as the character position of the start an
  */
 function getDOMposition(selection_text) {
 
-    console.log("getDOMposition.start, locate in the body of the document the selection text: \"" + selection_text + "\"");
+    console.debug("getDOMposition.start, locate in the body of the document the selection text: \"" + selection_text + "\"");
     var textnodelist = [];
     try {
 
@@ -4747,13 +4747,13 @@ function load_url(event) {
 
             // start the process of looking up the content
             var content_iframe = note_root.querySelector('[name="contentframe"]');
-            console.log("content_iframe: ");
-            console.log(content_iframe);
+            console.debug("content_iframe: ");
+            console.debug(content_iframe);
             var resp;
             // send message to background serviceworker and it will lookup the URL. This is to bypass any CORS issues
             // Send save request back to background
             // Stickynotes are always enabled when created.
-            console.log("remote url: " + url);
+            console.debug("remote url: " + url);
 
             var msg = {
                 message: {
@@ -4778,7 +4778,7 @@ function load_url(event) {
                 resp = response;
                 console.debug("message sent to backgroup.js with response: " + response);
                 // render content of ifram based on this
-                //console.log(getYellowStickyNoteRoot(event.target));
+                //console.debug(getYellowStickyNoteRoot(event.target));
                 setContentInIframe(content_iframe, response);
 
                 //set scroll position
@@ -4789,7 +4789,7 @@ function load_url(event) {
                         cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
                     }
                 } catch (e) {
-                    console.log(e);
+                    console.debug(e);
                 }
                 var framenote_scroll_y = 0;
                 try {
@@ -4798,9 +4798,9 @@ function load_url(event) {
                         cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
                     }
                 } catch (e) {
-                    console.log(e);
+                    console.debug(e);
                 }
-                console.log("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
+                console.debug("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
 
                 resolve(response);
             });
@@ -4913,7 +4913,7 @@ function getDOMplacement(selection_text) {
         console.debug(one);
         // Now the starting node for the selection is found, as well as the end node (and character offset within the nodes)
         if (one === undefined || one === null) {
-            console.log("browsersolutions: " + "This is undefined");
+            console.debug("browsersolutions: " + "This is undefined");
             // not place to in the page to attach the note to. place it on top of the page
             //start_range_node = document.querySelector(':root');
             //start_offset = 0;
@@ -5067,11 +5067,11 @@ function scan_page_new() {
     // Usage example
     //const rootElement = document.body; // Replace with the desired root element
     const result = extractTextAndNodes(doc.documentElement);
-    console.log(result);
+    console.debug(result);
 
-    console.log('PAGE_TEXT:', result.PAGE_TEXT);
-    console.log('DOC_ARR:', result.DOC_ARR);
-    //console.log(DOC_ARR);
+    console.debug('PAGE_TEXT:', result.PAGE_TEXT);
+    console.debug('DOC_ARR:', result.DOC_ARR);
+    //console.debug(DOC_ARR);
 
 
     // reset the global variables that contain the document structure (for use in other functions)
@@ -5101,9 +5101,9 @@ function extractTextAndNodes(inputNode) {
 
     function traverse(node) {
         // Only process element and text nodes
-        console.log('Node tag:', node.tagName);
-        console.log('Node type:', node.nodeType);
-        console.log('node.childNodes:', node.childNodes);
+        console.debug('Node tag:', node.tagName);
+        console.debug('Node type:', node.nodeType);
+        console.debug('node.childNodes:', node.childNodes);
 
         if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) {
             // Get the text content of the node
@@ -5132,14 +5132,14 @@ function extractTextAndNodes(inputNode) {
 
             // Traverse the shadow DOM if it exists
             if (node.shadowRoot) {
-                console.log('Shadow DOM detected:', node);
+                console.debug('Shadow DOM detected:', node);
                 traverse(node.shadowRoot);
             }
 
             // Traverse the content of iframes if they exist and are accessible
 
             if (node.tagName === 'IFRAME') {
-                console.log('IFRAME detected:', node);
+                console.debug('IFRAME detected:', node);
                 try {
                     const iframeDoc = node.contentDocument || node.contentWindow.document;
                     if (iframeDoc) {
@@ -5194,8 +5194,8 @@ function traverse(elm) {
         }
 
         // elm.nodeValue , here is visible text we need.
-        // console.log(elm.parentNode.tagName);
-        //  console.log(elm.nodeValue);
+        // console.debug(elm.parentNode.tagName);
+        //  console.debug(elm.nodeValue);
         var start_position = whole_page_text.length;
         whole_page_text = whole_page_text + elm.nodeValue.replace(/\s/g, "");
         var end_position = whole_page_text.length;
@@ -5333,7 +5333,7 @@ function createNoteHeaderDELETE(note_object_data, note_root, creatorDetails, isO
         }
 
     } else {
-        console.log("no creator details, consequently no banner image")
+        console.debug("no creator details, consequently no banner image")
         // no creator details, therefore no banner image
         // There is no option for setting image at the level of the feed or the individial note at this time
     }
@@ -5652,7 +5652,7 @@ function safeParseInnerHTML(rawHTML, targetElementName) {
     const unaccep = ["script"];
 
     unaccep.forEach(function (item, index) {
-        console.log(item);
+        console.debug(item);
     });
 
     const container = document.createElement(targetElementName);
@@ -6673,7 +6673,7 @@ function updateClipboard(newClip) {
 /* locate the X-position on the page for element */
 function divOffset_x(el) {
     var rect = el.getBoundingClientRect();
-    //console.log(rect);
+    //console.debug(rect);
     scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     //console.debug(scrollLeft);
     // scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -6684,7 +6684,7 @@ function divOffset_x(el) {
 function divOffset_y(el) {
     console.debug("# divOffset_y");
     var rect = el.getBoundingClientRect();
-    //console.log(rect);
+    //console.debug(rect);
     scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
     scrollTop = window.pageYOffset || document.documentElement.scrollTop;

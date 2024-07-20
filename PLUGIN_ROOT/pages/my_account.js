@@ -6,7 +6,7 @@
 // check if the user is authenticated
 checkSessionJWTValidity()
   .then(isValid => {
-      console.log('JWT is valid:', isValid);
+      console.debug('JWT is valid:', isValid);
 if (isValid){
     console.debug("JWT is valid - show menu accordingly");
     fetchAndDisplayStaticContent("../fragments/en_US/my_account_page_header_authenticated.html", "my_account_page_main_text").then(() => {});

@@ -7,7 +7,7 @@
 // check if the user is authenticated
 checkSessionJWTValidity()
 .then(isValid => {
-    console.log('JWT is valid:', isValid);
+    console.debug('JWT is valid:', isValid);
     if (isValid) {
         console.debug("JWT is valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/view_own_subscribers_page_main_text.html", "view_own_subscribers_page_main_text").then(() => {});
@@ -77,7 +77,7 @@ document.getElementById('toggle-actions').addEventListener('change', function ()
 var not_show_by_default_columns = [];
 
 const pagewidth = window.innerWidth;
-console.log("window.innerWidth: " + pagewidth);
+console.debug("window.innerWidth: " + pagewidth);
 
 if (pagewidth < 300) {
     not_show_by_default_columns = [ "status","subscribetime" ,"status","active"];
@@ -103,7 +103,7 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
 });
 
     function fetchData(distributionlistid, not_show_by_default_columns) {
-        console.log("fetchData for distributionlistid: \"" + distributionlistid, "\" not_show_by_default_columns: " + not_show_by_default_columns);
+        console.debug("fetchData for distributionlistid: \"" + distributionlistid, "\" not_show_by_default_columns: " + not_show_by_default_columns);
 
         return new Promise(
             function (resolve, reject) {
@@ -112,12 +112,12 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
             var xYellownotesSession = "";
 
             chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
-                console.log(result);
-                console.log(ynInstallationUniqueId);
+                console.debug(result);
+                console.debug(ynInstallationUniqueId);
                 ynInstallationUniqueId = result[plugin_uuid_header_name];
                 xYellownotesSession = result[plugin_session_header_name];
-                console.log(ynInstallationUniqueId);
-                console.log(xYellownotesSession);
+                console.debug(ynInstallationUniqueId);
+                console.debug(xYellownotesSession);
                 var msg = { distributionlistid: distributionlistid};
                 if (distributionlistid == null) {
                     msg = {};
@@ -134,13 +134,13 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
                 });
             }).then(response => {
                 if (!response.ok) {
-                    console.log(response);
+                    console.debug(response);
 
                     // if an invalid session token was sent, it should be removed from the local storage
                     if (response.status == 401) {
                         // compare the response body with the string "Invalid session token" to determine if the session token is invalid
                         if (response.headers.get("session") == "DELETE_COOKIE") {
-                            console.log("Session token is invalid, remove it from local storage.");
+                            console.debug("Session token is invalid, remove it from local storage.");
                             chrome.storage.local.remove([plugin_session_header_name]);
                             // redirect to the front page returning the user to unauthenticated status.
                             // unauthenticated functionality will be in effect until the user authenticates
@@ -173,26 +173,26 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
             }).then(function (dist) {
                 distributionListData = dist;
 
-                console.log(distributionListData);
+                console.debug(distributionListData);
 
-                console.log(data);
+                console.debug(data);
 
                 var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
-                console.log(utc);
-                console.log(Date.now());
+                console.debug(utc);
+                console.debug(Date.now());
                 var now = new Date;
                 var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
                         now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-                console.log(utc_timestamp);
-                console.log(new Date().toISOString());
+                console.debug(utc_timestamp);
+                console.debug(new Date().toISOString());
 
                 // Get table body element
                 const tableBody = document.querySelector('table[name="subscribersTable"]').getElementsByTagName('tbody')[0];
                 // Loop through data and populate the table
                 data.forEach(row => {
-                    console.log(row);
-                    console.log(JSON.stringify(row));
-                    console.log(row.subscriptionid);
+                    console.debug(row);
+                    console.debug(JSON.stringify(row));
+                    console.debug(row.subscriptionid);
 
                     // Create new row
                     const newRow = tableBody.insertRow();
@@ -346,20 +346,20 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
 
 // Function to use "fetch" to delete a data row
 async function deleteSubscription(subscriptionid) {
-    console.log("deleteSubscription: " + subscriptionid);
+    console.debug("deleteSubscription: " + subscriptionid);
     try {
 
         const userid = "";
-        console.log("deleting: " + subscriptionid);
+        console.debug("deleting: " + subscriptionid);
         const message_body = '{ "subscriptionid":"' + subscriptionid + '" }';
-        //console.log(message_body);
+        //console.debug(message_body);
         const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         
 
-        console.log(installationUniqueId);
+        console.debug(installationUniqueId);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(server_url + URI_plugin_user_delete_subscription, {
                 method: 'POST',
@@ -370,7 +370,7 @@ async function deleteSubscription(subscriptionid) {
                 },
                 body: message_body // example IDs, replace as necessary
             });
-        console.log(response);
+        console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -396,8 +396,8 @@ setupTableFilteringAndSorting("subscribersTable");
 async function goThere(noteid, url, distributionlistid, datarow) {
     try {
 
-        console.log("go to url: " + url);
-        console.log("go lookup noteid: " + noteid);
+        console.debug("go to url: " + url);
+        console.debug("go lookup noteid: " + noteid);
 
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();
@@ -436,7 +436,7 @@ const sortStates = {
 
 
 function filterTable_a() {
-    //  console.log("filterTable_a " );
+    //  console.debug("filterTable_a " );
 
     filterTable(event.target);
 }
@@ -459,7 +459,7 @@ async function setSubscriptionActiveStatusByUUID(subscriptionid, activestatus) {
                 subscriptionid: subscriptionid,
                 activestatus: activestatus,
             });
-        //console.log(message_body);
+        //console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(
                 server_url + URI_plugin_user_set_subscription_active_status, {
@@ -471,7 +471,7 @@ async function setSubscriptionActiveStatusByUUID(subscriptionid, activestatus) {
                 },
                 body: message_body, // example IDs, replace as necessary
             });
-        //console.log(response);
+        //console.debug(response);
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -486,7 +486,7 @@ async function setSubscriptionActiveStatusByUUID(subscriptionid, activestatus) {
 }
 
 async function fetchSubscribers(distributionlistid) {
-    console.log("fetchSubscribers for distributionlistid: " + distributionlistid);
+    console.debug("fetchSubscribers for distributionlistid: " + distributionlistid);
 
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
@@ -520,25 +520,25 @@ async function fetchSubscribers(distributionlistid) {
         const data = await response.json();
         // Parse JSON data
 
-        console.log(data);
+        console.debug(data);
 
         var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
-        console.log(utc);
-        console.log(Date.now());
+        console.debug(utc);
+        console.debug(Date.now());
         var now = new Date;
         var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
                 now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
-        console.log(utc_timestamp);
-        console.log(new Date().toISOString());
+        console.debug(utc_timestamp);
+        console.debug(new Date().toISOString());
 
         // Get table body element
         const tableBody = document.getElementById('subscribersTable').getElementsByTagName('tbody')[0];
 
         // Loop through data and populate the table
         data.forEach(row => {
-            console.log(row);
-            console.log(JSON.stringify(row));
-            console.log(row.subscriptionid);
+            console.debug(row);
+            console.debug(JSON.stringify(row));
+            console.debug(row.subscriptionid);
 
             // Create new row
             const newRow = tableBody.insertRow();
