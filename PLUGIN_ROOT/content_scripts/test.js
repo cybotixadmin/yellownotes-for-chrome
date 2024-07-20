@@ -21,9 +21,9 @@ function create_yellownote_DOM(html_note_template, html_notetype_template, note_
             // the root of the note object
             //console.debug(html_note_template);
             //console.debug(html_notetype_template);
-            console.debug(note_type);
-            console.debug(isOwner);
-            console.debug(isNewNote);
+            console.debug("note_type: ", note_type);
+            console.debug("isOwner: ",isOwner);
+            console.debug("isNewNote: ", isNewNote);
             var node_root = document.createElement('container');
             //console.debug(node_root.outerHTML);
 
@@ -139,13 +139,16 @@ function mergeHTMLTrees(doc1, selector1, doc2, selector2) {
 /**
  * process the middle part of the note. This is the part where there are diference between the different types of yellownotes
  */
-function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, newNote) {
+function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, isNewNote) {
     console.debug("createNoteMiddleBody.start");
+    console.debug("note_object_data:");
     console.debug(note_object_data);
+    console.debug("cont1:");
     console.debug(cont1);
+    console.debug("creatorDetails:");
     console.debug(creatorDetails);
-    console.debug(isOwner);
-    console.debug(newNote);
+    console.debug("isOwner: ", isOwner);
+    console.debug("isNewNote: ", isNewNote);
 
     const note_type = note_object_data.note_type;
     console.debug("note_type: " + note_type);
@@ -337,8 +340,6 @@ function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, 
 
 
 
-
-
 function createDropdown(optionsArray, selectedDistributionListId) {
     console.debug("createDropdown.start");
     console.debug(optionsArray);
@@ -504,11 +505,14 @@ If the note is one the user is subscribing to, the link goes to the feed in the 
 
 function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, newNote) {
     console.debug("createNoteHeader.start");
+    console.debug("note_object_data:");
     console.debug(note_object_data);
+    console.debug("note_root:");
     console.debug(note_root);
+    console.debug("creatorDetails:");
     console.debug(creatorDetails);
-    console.debug(isOwner);
-    console.debug(newNote);
+    console.debug("isOwner", isOwner);
+    console.debug("isNewNote", newNote);
 
     var headerhtml = "";
 
@@ -1746,25 +1750,29 @@ function isUndefined(variable) {
 
 
 
-function create_stickynote_node(note_object_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote) {
+function create_stickynote_node(note_object_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote) {
     console.log("create_stickynote_node.start");
     return new Promise(function (resolve, reject) {
+        console.debug("note_object_data:");
         console.debug(note_object_data);
+        console.debug("html_note_template.length: ", html_note_template.length);
         //console.debug(html_note_template);
+        console.debug("html_notetype_template.length: ", html_notetype_template.length);
         //console.debug(html_notetype_template);
+        console.debug("creatorDetails:");
         console.debug(creatorDetails);
-        console.debug(isOwner);
-        console.debug(newNote);
+        console.debug("isOwner: ", isOwner);
+        console.debug("isNewNote: ", isNewNote);
         // create the "wrapping" container that hold the DOM-structure of the note
 
         var cont1;
         console.debug("calling create_yellownote_DOM");
-        create_yellownote_DOM(html_note_template, html_notetype_template, note_object_data.note_type, isOwner, newNote).
+        create_yellownote_DOM(html_note_template, html_notetype_template, note_object_data.note_type, isOwner, isNewNote).
         then(function (response) {
             cont1 = response;
-            //console.debug(cont1.outerHTML);
+            console.debug(cont1.outerHTML);
             // if the note is new, there is no noteid yet
-            if (newNote) {
+            if (isNewNote) {
                 console.debug("new note, not yet a noteid");
                 cont1.setAttribute("newNote", "true");
                 // the note is new so the note has status automatically set to active - not that that means anything at that stage
@@ -1793,18 +1801,18 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
 
             // render a plainhtml note
             console.debug("calling createNoteMiddleBody");
-            createNoteMiddleBody(note_object_data, cont1, resolve, creatorDetails, isOwner, newNote).
+            createNoteMiddleBody(note_object_data, cont1, resolve, creatorDetails, isOwner, isNewNote).
             then(function (response) {
                 console.debug("createNoteMiddleBody.complete");
                 console.debug(response);
                 //    resolve(response);
                 // note footer is only for editing and thereofre only for the note owner or a new note (also note owner)
                 console.debug("calling createNoteFooter");
-                return createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newNote);
+                return createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, isNewNote);
             }).then(function (response) {
                 console.debug("createNoteFooter.complete");
                 console.debug("calling createNoteHeader");
-                return createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, newNote);
+                return createNoteHeader(note_object_data, cont1, creatorDetails, isOwner, isNewNote);
             }).then(function (response) {
                 console.debug("createNoteHeader.complete");
 

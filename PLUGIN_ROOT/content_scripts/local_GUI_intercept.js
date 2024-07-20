@@ -201,6 +201,26 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/my_subscriptions.html/
     });
 
 }
+
+
+/**
+ * intercept the view_own_distributionlist page
+ */
+else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/view_own_distributionlist.html/)).test(window.location.href)) {
+    console.log("redirect this link to plugin")
+    // Notify the background script to redirect
+    // Extract query string (everything after the '?' character)
+    const queryString = (window.location.href).split('?')[1] || '';
+
+    const new_uri = "/pages/view_own_distributionlist.html?" + queryString;
+
+    chrome.runtime.sendMessage({
+        action: "local_pages_intercept",
+        redirect: true,
+        uri: new_uri
+    });
+}
+
 /**
  * intercept the view_yellownotes page
  */
@@ -220,7 +240,6 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/view_yellownotes/)).test(wind
 else if ((new RegExp(/\/\/www\.yellownotes\.cloud\/pages\/publicprofile.html/)).test(window.location.href)) {
     console.log("redirect this link to plugin /pages/publicprofile.html")
     // Notify the background script to redirect
-
 
     // Extract query string (everything after the '?' character)
     const queryString = (window.location.href).split('?')[1] || '';

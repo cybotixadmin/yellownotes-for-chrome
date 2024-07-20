@@ -167,7 +167,7 @@ padding: .35em;
     border-radius: 0px;
     line-height: 1; /* Reduce line height */
     height: 21px; /* Ensure the height adjusts to the content */
-    width: 30px; /* Adjust the width to fit the content */
+    width: 50px; /* Adjust the width to fit the content */
             box-sizing: border-box;
 }
 
@@ -177,7 +177,7 @@ option.compact {
   margin: 1px; /* Remove margins */
   line-height: 0.8; /* Reduce line height */
   height: auto; /* Ensure the height adjusts to the content */
-          width: 10px; /* Adjust the width to fit the content */
+          width: 50px; /* Adjust the width to fit the content */
           box-sizing: border-box;
 }
 
@@ -256,7 +256,7 @@ table.notesTable th {
   max-width: 150px;
 }
 .checkbox {
-  max-width: 25px;
+  max-width: 75px;
   margin: 1px;
   padding: unset;
 

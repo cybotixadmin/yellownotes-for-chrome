@@ -45,6 +45,9 @@ const URI_plugin_user_get_an_authorized_note = "/api/v1.0/plugin_user_get_an_aut
 const URI_plugin_user_delete_yellownote = "/api/v1.0/plugin_user_delete_yellownote";
 
 const URI_plugin_user_get_a_subscribed_note = "/api/v1.0/plugin_user_get_a_subscribed_note";
+
+const URI_plugin_user_get_creatorlevel_note_properties = "/api/v1.0/get_creatorlevel_note_properties";
+
 let salt;
 
 // at installation time a unique identifies is ser for this browser extension. Make this available to the server for identification purposes.
@@ -265,9 +268,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         // use embeded as the content type. It captures more data some of which will not be used, but it more likely to be uniquely anchored.
         //create_yellownote(info, tab, 'anchor');
         pinYellowNote(info, tab, 'yellownote', 'default', true, 'plaintext');
-    } else if (info.menuItemId === "pin-content-note") {
-        // pinContentNote(info, tab, 'webframe', 'default');
-        pinYellowNote(info, tab, 'yellownote', 'default', true, 'webframe');
+   // } else if (info.menuItemId === "pin-content-note") {
+   //     pinYellowNote(info, tab, 'yellownote', 'default', true, 'webframe');
     } else if (info.menuItemId === "captureSelection") {
         chrome.tabs.sendMessage(tab.id, {
             action: "initiateSelection",
@@ -314,6 +316,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
+
+/**
+ * 
+ * @param {*} info 
+ * @param {*} tab 
+ * @param {*} note_type 
+ * @param {*} brand 
+ * @param {*} is_selection_text_connected 
+ * @param {*} type 
+ */
 function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected, type) {
     console.debug("pinYellowNote.start (info, note_type: " + type + ") and brand: " + brand);
     try {
@@ -363,12 +375,13 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             console.log(sessionToken);
             uuid = getUuid(sessionToken);
             console.log("uuid: " + uuid);
-            // get a template, even if it is the default one
+            // get the template for the whole yellownote, usually the default one
             return getTemplate(brand, "yellownote");
         }).then(function (result) {
             //console.log(result);
             note_template = result;
             console.log("note_template read");
+            // get the part of the template that pertain to the type of note
             return getNotetypeTemplate(type);
         }).then(function (result) {
             //console.log(result);
@@ -377,8 +390,9 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
 
             // get personal template related informaton
             console.log("uuid" + uuid);
-            console.debug("calling fetchCreatorDataThroughAPI");
-            return fetchCreatorDataThroughAPI(uuid);
+            console.debug("calling cachableCall2API_POST");
+            return cachableCall2API_POST( uuid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: uuid } );
+
 
         }).then(function (result) {
             console.log(result);
@@ -948,7 +962,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 } else {}
                 console.log("session_uuid: " + session_uuid);
 
-                return fetchCreatorDataThroughAPI(session_uuid);
+                console.debug("calling cachableCall2API_POST");
+                return cachableCall2API_POST( session_uuid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: session_uuid } );
+                
             }).then(creatorData => {
                 console.log(creatorData);
                 result_msg.note_properties = creatorData;
@@ -1007,7 +1023,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 } else {}
                 console.log("session_uuid: " + session_uuid);
 
-                return fetchCreatorDataThroughAPI(session_uuid);
+
+                console.debug("calling cachableCall2API_POST");
+                return cachableCall2API_POST( session_uuid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: session_uuid } );
+
             }).then(creatorData => {
                 console.log(creatorData);
                 result_msg.note_properties = creatorData;
@@ -1507,9 +1526,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 use_this_tab = res;
                 console.debug(use_this_tab);
                 console.debug("######## ####### 2 ######### ######## #######");
-                console.debug("calling fetchCreatorDataThroughAPI");
 
-                return fetchCreatorDataThroughAPI(creatorid);
+                console.debug("calling cachableCall2API_POST");
+                return cachableCall2API_POST( creatorid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: creatorid } );
+
             }).then(function (response) {
                 console.debug(response);
                 creatorDetails = response;
@@ -1657,8 +1677,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug(initialData);
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
-                            console.debug("calling fetchCreatorDataThroughAPI");
-                            return fetchCreatorDataThroughAPI(item.creatorid).then(creatorData => {
+                            console.debug("calling cachableCall2API_POST");
+                            return cachableCall2API_POST( item.creatorid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: item.creatorid } ).then(creatorData => {
                                 item.creatorDetails = creatorData;
                                 item.creatorDetails2 = "creatorData2";
                             });
@@ -1722,16 +1742,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 // examine each note and for each note creator lookup the note formating infomation for the creator of the note
                 // this is needed to display the note in the correct format
 
-
                 return response.json();
             }).then(initialData => {
                 console.log(initialData);
                 const promises = initialData.map(item => {
                         if (item.creatorid) {
-                            console.debug("calling fetchCreatorDataThroughAPI");
-                            return fetchCreatorDataThroughAPI(item.creatorid).then(creatorData => {
+                            console.debug("calling cachableCall2API_POST");
+                            return cachableCall2API_POST( item.creatorid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: item.creatorid } ).then(creatorData => {
                                 item.creatorDetails = creatorData;
-
                             });
                         }
                         return Promise.resolve();
@@ -1829,9 +1847,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 return response.json();
             }).then(function (initialData) {
                 notes = initialData;
-                console.log(notes);
-                return fetchCreatorDataThroughAPI(notes[0].creatorid);
+                if (notes.length == undefined || notes.length == 0) {
+                    console.log(notes);
+                    sendResponse(null);
+                    return; // Properly exit the flow
+                } else {
+                    console.log(notes.length);
+                    console.log(notes);
+                    console.debug("calling cachableCall2API_POST");
+                    return cachableCall2API_POST(notes[0].creatorid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: notes[0].creatorid });
+                }
             }).then(function (creatordata) {
+                if (!creatordata) return; // Exit if creatordata is undefined due to previous exit
                 console.log(creatordata);
                 console.log(JSON.stringify(creatordata));
                 var resp = {};
@@ -1842,6 +1869,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.log(resp);
                 console.log(JSON.stringify(resp));
                 sendResponse(resp);
+            }).catch(function (error) {
+                console.error(error);
+                sendResponse(null); // Handle any errors in the promise chain
             });
         }
     } catch (e) {
@@ -2018,15 +2048,16 @@ function getCachedData(key, cachetimeout) {
                 console.log('getCachedData: Cached data:');
                 console.log(result);
                 if (result[key]) {
-                    console.log(`Cached data for key: ${key}`, result[key].timestamp);
-                    console.log("cache entry age (seconds): ", ((new Date().getTime() - result[key].timestamp)) / 1000);
-                    console.log(((new Date().getTime() - result[key].timestamp)) < cachetimeout * 1000);
+                    console.log(`cached data for key: ${key}`, result[key].timestamp);
+                    console.log("cached entry age (seconds): ", ((new Date().getTime() - result[key].timestamp)) / 1000);
+                    console.log(`cached entry age limit: < ${cachetimeout} seconds`);
+                    console.log("cached entry valid? " , ((new Date().getTime() - result[key].timestamp)) < cachetimeout * 1000);
 
                     // only accept data less than 3 hours old
                     //            if (result[key] && (new Date().getTime() - result[key].timestamp) < 3 * 3600 * 1000) {
                     // only accept data less than 10 seconds old
                     if (result[key] && (new Date().getTime() - result[key].timestamp) < cachetimeout * 1000) {
-                        console.log(result[key].data);
+                       // console.log(result[key].data);
                         resolve(result[key].data);
                     } else {
                         console.log("return null");
@@ -2044,33 +2075,86 @@ function getCachedData(key, cachetimeout) {
     });
 }
 
-// Helper to fetch data from API_URL_2
-function fetchCreatorDataThroughAPI(creatorId) {
-    console.log('fetchCreatorDataThroughAPI: Fetching data for creatorId:', creatorId);
 
-    if (!creatorId) {
-        // If no creator ID is supplied, resolve immediately with null
-        return Promise.resolve(null);
-    }
+/*
+protocol: PUT, PATCH or POST
+ */
+function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_body) {
+    console.debug("# cachableCall2API_POST.start");
+    console.debug("cacheKey: " + cacheKey);
+    console.debug("cachetimeout: " + cachetimeout);
+    console.debug("protocol: " + protocol);
+    console.debug("endpoint: " + endpoint);
 
-    const cacheKey = creatorId + "_creator_data";
+    var ynInstallationUniqueId = "";
+    var xYellownotesSession = "";
+    var result_data = null;
+    return new Promise((resolve, reject) => {
+        getCachedData(cacheKey, cachetimeout).then(function (cachedResponse) {
 
-    return getCachedData(cacheKey, CACHE_DURATION)
-    .then(cachedData => {
-        console.log('fetchCreatorDataThroughAPI: data returned from cache:', cachedData);
+            console.debug(cachedResponse);
+            if (cachedResponse) {
+                console.debug("Returning cached response on key: " + cacheKey);
+                // break here
+                resolve(cachedResponse);
+                console.debug(" complete ");
+                // break out of the promise chain
+                return;
+            } else {
+                console.debug("No cached response on key: " + cacheKey);
 
-        if (cachedData) {
-            console.log('Returning cached data for creatorId:', creatorId, "cacheKey:", cacheKey);
-            return cachedData;
-        } else {
-            return fetchNewData(creatorId, cacheKey);
-        }
-    })
-    .catch(error => {
-        console.error("Error during fetchCreatorDataThroughAPI:", error);
-        throw error; // Propagate the error to be handled in the next link of the promise chain
+                // proceed to make the request
+                chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
+                .then(function (result) {
+                    console.debug(result);
+                    ynInstallationUniqueId = result[plugin_uuid_header_name];
+                    xYellownotesSession = result[plugin_session_header_name];
+
+                    console.debug("Cache key: " + cacheKey);
+
+                    console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    console.debug("xYellownotesSession: " + xYellownotesSession);
+
+                    const opts = {
+                        method: protocol,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [plugin_uuid_header_name]: ynInstallationUniqueId,
+                            [plugin_session_header_name]: xYellownotesSession
+                        },
+                        body: JSON.stringify(msg_body)
+                    };
+                    console.debug("make fresh request: ");
+                    return fetch(endpoint, opts);
+                })
+                .then(function (response) {
+                    console.debug(response);
+                    return response.json();
+                })
+                .then(function (data) {
+                    console.debug(data);
+
+                    result_data = data;
+
+                    // insert into the cache
+                    return cacheData(cacheKey, result_data);
+                    // return chrome.storage.local.set({ cacheKey: requestCacheEntry });
+                }).then(function (response) {
+                    console.debug(response);
+                    console.debug("result_data");
+                    console.debug(result_data);
+                    resolve(result_data);
+                })
+                .catch(function (error) {
+                    console.error('Fetch error: ', error);
+                });
+            }
+        });
     });
+
 }
+
+
 
 function fetchNewData(creatorId, cacheKey) {
     console.debug('fetchNewData: Fetching new data for creatorId:', creatorId);
@@ -2222,7 +2306,7 @@ function openUrlAndScrollToElement(tab, url, noteid, datarow, openNewTab, sessio
     var notes = [datarow];
     // lookup creator information needed to render the note
     return new Promise((resolve, reject) => {
-        fetchCreatorDataThroughAPI(creatorid)
+        cachableCall2API_POST( creatorid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: creatorid } )
         .then((creatordata) => {
             console.log(creatordata);
             console.log(JSON.stringify(creatordata));

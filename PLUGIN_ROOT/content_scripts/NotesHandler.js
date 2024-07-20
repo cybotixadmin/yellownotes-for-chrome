@@ -411,7 +411,7 @@ function listener(request, sender, sendResponse) {
             } else if (request.action == "update_notes_on_page") {
                 console.debug("update_notes_on_page");
                 // check if note is on page
-                console.debug(isNoteOnPage(request.noteid));
+                console.debug("isNoteOnPage("+ request.noteid +"): ", isNoteOnPage(request.noteid));
 
                 // chose which function to proceed with
                 var shared_secret_to_identify_background_js_to_content_script_NoteSelectedHTML = "Glbx_marker6";
@@ -482,7 +482,7 @@ function listener(request, sender, sendResponse) {
                 console.log("creatorDetails: ");
                 console.log(creatorDetails);
                 // make sure the note is there
-                const newNote = false;
+                const isNewNote = false;
 
                 var selection_text;
                 console.log("calling: scan_page");
@@ -550,7 +550,7 @@ function listener(request, sender, sendResponse) {
                                     //console.debug("browsersolutions resolve");
                                     //var template = safeParseInnerHTML(note_template, 'div');
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote, true).then(function (res) {
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote, true).then(function (res) {
                                         console.debug(res);
                                     });
                                     resolve({
@@ -1130,7 +1130,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
 
    noteTypeSpecificActions(note_type, insertedNode, info);
     //insertedNode.setAttribute("isOwner: ", isOwner);
-    //insertedNode.setAttribute("newNote: ", isNewNote);
+    //insertedNode.setAttribute("isNewNote: ", isNewNote);
     console.log("highlightuniqueid: ", highlightuniqueid);
     if (highlightuniqueid && highlightuniqueid !== "0") {
         // selection text was matched in the document
@@ -1705,7 +1705,7 @@ function create_newstickynote_node(info, note_type, html, notetype_template, not
     console.log(insertedNode);
 
     //insertedNode.setAttribute("isOwner: ", isOwner);
-    //insertedNode.setAttribute("newNote: ", isNewNote);
+    //insertedNode.setAttribute("isNewNote: ", isNewNote);
     console.log("highlightuniqueid: ", highlightuniqueid);
     if (highlightuniqueid && highlightuniqueid !== "0") {
         // selection text was matched in the document
@@ -3041,7 +3041,7 @@ function getOwnNotes(note_type) {
     var note_template_html;
     var note_template;
     const isOwner = true;
-    const newNote = false;
+    const isNewNote = false;
     var url = window.location.href.trim();
     var msg;
 
@@ -3057,6 +3057,7 @@ function getOwnNotes(note_type) {
     chrome.runtime.sendMessage(msg).then(function (response) {
         console.debug("browsersolutions" + "message sent to backgroup.js with response: ");
         console.debug(response);
+        if (response != null) {
         notes_found = response.notes_found;
         console.log("notes_found");
         console.log(notes_found);
@@ -3193,7 +3194,7 @@ function getOwnNotes(note_type) {
                                     html_notetype_template = response;
 
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
                                         console.debug(res);
                                     });
                                     resolve({
@@ -3219,7 +3220,7 @@ function getOwnNotes(note_type) {
                     // var note_template = safeParseInnerHTML(result.note_template, 'div');
 
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
                         console.debug(res);
                     });
                 });
@@ -3230,6 +3231,10 @@ function getOwnNotes(note_type) {
             console.debug("browsersolutions no notes found");
             // terminate here
         }
+    } else {
+        console.debug("browsersolutions no notes found");
+        // terminate here
+    }
     });
 }
 
@@ -3306,7 +3311,7 @@ function getSubscribedNotes(note_type) {
     var note_template_html;
     var note_template;
     const isOwner = false;
-    const newNote = false;
+    const isNewNote = false;
     var url = window.location.href.trim();
 
     // check for own notes pertaining to this URL
@@ -3320,7 +3325,8 @@ function getSubscribedNotes(note_type) {
 
     console.log("browsersolutions " + JSON.stringify(msg));
     chrome.runtime.sendMessage(msg).then(function (response) {
-        console.debug("browsersolutions" + "message sent to backgroup.js with response: " + JSON.stringify(response));
+        console.debug("browsersolutions" + "message sent to backgroup.js with response: " );
+        console.debug((response));
         notes_found = response;
 
         var brand = "";
@@ -3329,7 +3335,7 @@ function getSubscribedNotes(note_type) {
 
         // how many notes came back ?
         //console.debug("browsersolutions, notes found: " + notes_found.length);
-        console.debug(response);
+
         if (Object.keys(response).length > 0) {
 
             console.debug("browsersolutions notes found: " + Object.keys(response).length);
@@ -3341,12 +3347,13 @@ function getSubscribedNotes(note_type) {
             notes_found.forEach(function (note) {
                 i++;
                 console.debug("browsersolutions " + "##### " + i + " ##########################");
-                console.log("browsersolutions " + note);
+                console.debug(note);
                 //var value = notes_found[key];
                 //console.debug(note);
                 //console.log("browsersolutions " + (note.json));
                 const note_data = JSON.parse(note.json);
-                console.log(note_data);
+                console.debug("note_data:");
+                console.debug(note_data);
                 // iteration code
                 // is the note already in place ?
                 try {
@@ -3371,7 +3378,15 @@ function getSubscribedNotes(note_type) {
 
                             console.debug(creatorDetails);
                             console.debug(creatorDetails.displayname);
-                            displayname = creatorDetails.displayname;
+if (creatorDetails.hasOwnProperty('displayname')) {
+                                note_data.displayname = creatorDetails.displayname;
+                                //displayname = creatorDetails.displayname;
+}else{
+    //note_data.displayname = creatorDetails.displayname;
+
+}
+                            
+
                         }
 
                         if (note.hasOwnProperty('creatordisplayname')) {
@@ -3465,29 +3480,38 @@ function getSubscribedNotes(note_type) {
                                 var html_note_template;
                                 var html_notetype_template;
 
-                                chrome.runtime.sendMessage({
+                                const get_template_msg = {
                                     action: "get_template",
                                     brand: brand,
                                     note_type: note_type
-
-                                }).then(function (response) {
+                                }
+                                console.debug("get_template_msg: ", JSON.stringify(get_template_msg));
+                                chrome.runtime.sendMessage(get_template_msg).then(function (response) {
                                     html_note_template = response;
+                                    console.debug("html_note_template.length: ", html_note_template.length);
+                                    console.debug("html_note_template: ");
+                                    console.debug(html_note_template);
                                     console.debug("calling getNotetypeTemplate");
 
+                                    const msg = {
+                                        action: "get_notetype_template",
+                                        brand: brand,
+                                        note_type: note_type
+    
+                                    }
+                                    console.debug("msg: ", JSON.stringify(msg));
 
-                                    return chrome.runtime.sendMessage({
-                                    action: "get_notetype_template",
-                                    brand: brand,
-                                    note_type: note_type
-
-                                });
+                                    return chrome.runtime.sendMessage(msg);
 
                                 }).then(function (response) {
                                     html_notetype_template = response;
+                                    console.debug("html_notetype_template.length: ", html_notetype_template.length);
+                                    console.debug("html_notetype_template: ");
+                                    console.debug(html_notetype_template);
                                     //console.debug("browsersolutions resolve");
                                     //var template = safeParseInnerHTML(html_note_template, 'div');
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, html_notetype_template, html_notetype_template, note.creatorDetails, isOwner, newNote, false).then(function (res) {
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, note.creatorDetails, isOwner, isNewNote, false).then(function (res) {
                                         console.debug(res);
                                     });
                                     resolve({
@@ -3511,12 +3535,12 @@ function getSubscribedNotes(note_type) {
             // loop through the list of all notes found, and place them on the page
             Promise.all(promiseArray).then(results => {
                 results.forEach(result => {
-                    //console.debug(result.note_template);
+                    console.debug(result);
                     // var note_template = safeParseInnerHTML(result.note_template, 'div');
                     // Call procedure that places the notes in thep age with the isOwner flag set to false, since these notes belong to others.
                     // The practical effect of this is to remove all buttons to perform edit-actions on the note, such as edit, delete, etc.
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, note.creatorDetails, isOwner, newNote, false).then(function (res) {
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, note.creatorDetails, isOwner, isNewNote, false).then(function (res) {
                         console.debug(res);
                     });
                 });
@@ -3541,7 +3565,7 @@ function getAllNotes() {
     var note_template;
 
     const isOwner = false;
-    const newNote = false;
+    const isNewNote = false;
 
     var url = window.location.href.trim();
 
@@ -3671,7 +3695,7 @@ function getAllNotes() {
                                     // console.debug("browsersolutions resolve");
                                     // var template = safeParseInnerHTML(html_note_template, 'div');
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
                                         console.debug(res);
                                     });
                                     resolve({
@@ -3698,7 +3722,7 @@ function getAllNotes() {
                     //console.debug(result.note_template);
                     //var note_template = safeParseInnerHTML(result.note_template, 'div');
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, newNote, false).then(function (res) {
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
                         console.debug(res);
                     });
                 });
@@ -3825,7 +3849,7 @@ note_obj
 note_template
 creatorDetails
 isOwner         boolean
-newNote         boolean
+isNewNote       boolean
 moveFocus       boolean     If set to true, move the focus to this note
  * */
 
@@ -3833,14 +3857,20 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
     console.debug("placeStickyNote.start");
     // contenttype
     // permitted values: text, html, embeded, linked
+    console.debug("note_obj:");
     console.debug(note_obj);
+    console.debug("html_note_template.length: ", html_note_template.length);
+
     //console.debug(html_note_template);
+    console.debug("html_notetype_template.length: ", html_notetype_template.length);
+
     //console.debug(html_notetype_template);
 
+    console.debug("creatorDetails:");
     console.debug(creatorDetails);
-    console.debug(isOwner);
-    console.debug(isNewNote);
-    console.debug(moveFocus);
+    console.debug("isOwner: ", isOwner);
+    console.debug("isNewNote: ", isNewNote);
+    console.debug("moveFocus: ", moveFocus);
 
     return new Promise(function (resolve, reject) {
         // first , check if the note is already on the page
@@ -4231,7 +4261,7 @@ function moveFocusToNote(noteid) {
 }
 
 // hold onto some code that spans multiple text nodes
-function one(note_obj, note_template, isOwner, newNote) {
+function one(note_obj, note_template, isOwner, isNewNote) {
 
     if (nodesAreIdentical(start_range_node, end_range_node)) {
         console.debug("browsersolutions: " + "start_range_node and end_range_node are identical");
@@ -6732,7 +6762,7 @@ function processBoxParameterInput(input, fallback, lowerLimit, upperLimit) {
 
 var valid_stickynote_position_coordinate_regexp = new RegExp(/^[0-9][0-9]*[a-z][a-z]$/);
 
-function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, isOwner, newNote) {
+function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, isOwner, isNewNote) {
     console.debug("size_and_place_note_based_on_texthighlight.start");
     console.debug(newGloveboxNode);
     // the text the note is connected to has been located in the text of the page
@@ -6740,7 +6770,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
 
     console.debug(note_obj);
     console.debug(isOwner);
-    console.debug(newNote);
+    console.debug(isNewNote);
 
     var posx = note_obj.posx;
     var posy = note_obj.posy;
@@ -6820,7 +6850,7 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
     insertedNode.querySelector('[name="whole_note_table"]').style.width = box_width;
     insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = (parseInt(box_height) - note_internal_height_padding) + 'px';
 
-    if (isOwner || newNote) {
+    if (isOwner || isNewNote) {
         // the note much be expanded to show the edit bar at the bottom
 
         insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(box_height) + note_owners_control_bar_height) + 'px';
@@ -6972,12 +7002,12 @@ const note_default_placement_y_offset = "150px";
  *  inside the page the location where the note should be placed. If this does not success, place it on top of the page.
  */
 
-function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, newNote) {
+function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, isNewNote) {
     console.debug("size_and_place_note_based_on_coordinates.start");
     console.debug(newGloveboxNode);
     console.debug(note_obj);
     console.debug(isOwner);
-    console.debug("newNote: ", newNote);
+    console.debug("isNewNote: ", isNewNote);
     // final placement
     // check if note contains position coordinates/parameters. If so, try to use them to place the note
 
@@ -6985,7 +7015,7 @@ function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isO
     var posx;
     var posy;
     // new note have no coordinates, so they will be placed at the top of the page
-    if(newNote){
+    if(isNewNote){
         console.debug("new note, placing at top of page (adjusted for scrolling)");
     console.debug("scrollX: ", window.scrollX);
     console.debug("scrollY: ", window.scrollY);
@@ -7072,7 +7102,7 @@ posy = (window.scrollY + parseInt(note_default_placement_y_offset))+ "px";
         insertedNode.querySelector('[name="whole_note_table"]').style.width = box_width;
         insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = (parseInt(box_height) - note_internal_height_padding) + 'px';
 
-        if (isOwner || newNote) {
+        if (isOwner || isNewNote) {
             // the note much be expanded to show the edit bar at the bottom
 
             insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(box_height) + note_owners_control_bar_height) + 'px';

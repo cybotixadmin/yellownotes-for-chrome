@@ -372,9 +372,7 @@ try {
         var xYellownotesSession = "";
         var distributionlists;
         var data;
-        //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
-
-
+     
         chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
             console.log(result);
             console.log(ynInstallationUniqueId);
@@ -619,7 +617,6 @@ try {
                     cell_message.setAttribute('name', 'content_url');
                 } else {
 
-                 
                     cell_message.innerHTML = b64_to_utf8(obj.message_display_text);
                     console.debug(cell_message);
 
@@ -633,6 +630,7 @@ try {
 
 
                 // Create the dropdown list for the distribution list
+                console.log("calling createDropdown");
                 const dropdown = createDropdown(distributionListData, row.distributionlistid);
                 console.log(dropdown);
                 cell_distributionlist.appendChild(dropdown);
@@ -957,6 +955,7 @@ console.debug(msg);
     }
 }
 
+
 async function setNoteDistributionlistId(noteid, distributionlistid) {
     console.debug("setNoteDistributionlistId: noteid: " + noteid + ", distributionlistid: " + distributionlistid);
     try {
@@ -996,8 +995,6 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
 function delete_note_by_noteid(noteid) {
     console.debug("delete_note_by_noteid.start");
     
-
-
     chrome.runtime.sendMessage({
         message: {
             "action": "single_note_delete",
@@ -1048,7 +1045,6 @@ function enable_note_with_noteid(noteid) {
             }
         }, function (response) {
             console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-
         });
     }
 }
