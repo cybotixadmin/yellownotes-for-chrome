@@ -11,7 +11,7 @@ updateFilterRow(table_name);
 function updateFilterRow(tableName) {
     console.debug("updateFilterRow.start");
     var table = document.querySelector('table[name="' + tableName + '"]');
-    var filtersCols = table.querySelector('tr[name="filter_row"]').querySelectorAll('input, select');
+    var filtersCols = table.querySelector('tr[name="filter_row"]').querySelectorAll('input, select, textarea');
     //console.debug(filtersCols);
     var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
     filters = JSON.parse(localStorage.getItem(filterStorageKey)) || [];
@@ -24,7 +24,7 @@ function updateFilterRow(tableName) {
         if (filters[i].filterValue) {
             //console.debug(filters[i].filterValue);
             // set the filter value in the columnIndex column of the filter row in the input of select element
-            table.querySelector('tr[name="filter_row"]').querySelectorAll('th')[filters[i].columnIndex].querySelector('input, select').value = filters[i].filterValue; 
+            table.querySelector('tr[name="filter_row"]').querySelectorAll('th')[filters[i].columnIndex].querySelector('input, select, textarea').value = filters[i].filterValue; 
     //        filtersCols[filters[i].columnIndex].value = filters[i].filterValue;
         }else{
            // console.debug("no filter value");
@@ -34,248 +34,36 @@ function updateFilterRow(tableName) {
     }
 }
 
-/// start handle lastmodified date filter
+try{
 
-const inputField = document.getElementById('lastmodified-datetime-input');
-const dialog = document.getElementById('dialog');
-const closeIcon = dialog.querySelector('.close');
-const okButton = dialog.querySelector('#ok-button');
-const fromSpecificTimeRadio = document.getElementById('from-specific-time-radio');
-const fromLengthOfTimeRadio = document.getElementById('from-length-of-time-radio');
-const toSpecificTimeRadio = document.getElementById('to-specific-time-radio');
-const toLengthOfTimeRadio = document.getElementById('to-length-of-time-radio');
-const fromSpecificTime = document.getElementById('from-specific-time');
-const fromLengthOfTime = document.getElementById('from-length-of-time');
-const toSpecificTime = document.getElementById('to-specific-time');
-const toLengthOfTime = document.getElementById('to-length-of-time');
-const fromDatetime = document.getElementById('from-datetime');
-const toDatetime = document.getElementById('to-datetime');
-const fromHour = document.getElementById('from-hour');
-const fromMinute = document.getElementById('from-minute');
-const fromIntervalNumber = document.getElementById('from-interval-number');
-const fromIntervalUnit = document.getElementById('from-interval-unit');
-const toHour = document.getElementById('to-hour');
-const toMinute = document.getElementById('to-minute');
-const toIntervalNumber = document.getElementById('to-interval-number');
-const toIntervalUnit = document.getElementById('to-interval-unit');
+// setup special handling for creating correctly fomated filter for the filter boxes for columns contianing dates
+//console.debug("calling setTimeRangeFilterDialog");
+//setTimeRangeFilterDialog("lastmodified-datetime-input");
+console.debug("calling setTimeRangeFilterDialog");
+setTimeRangeFilterDialog("createtime-datetime-input");
 
-const getCurrentDatetime = () => {
-    const now = new Date();
-    return now.toISOString().slice(0, -1);
-};
+// expand the textarea in the search filters
+document.getElementById('createtime-datetime-input').addEventListener('input', function () {
+    console.debug("createtime-datetime-input input modify");
+    this.style.height = 'auto'; // Reset height to auto to calculate the new height
+    this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+});
 
-const parseInputValue = (value) => {
-    if (value.includes(' - ')) {
-        const [fromValue, toValue] = value.split(' - ');
-        return {
-            from: fromValue.trim() || '',
-            to: toValue.trim() || ''
-        };
-    }
-    return { from: '', to: '' };
-};
+document.getElementById('createtime-datetime-input').addEventListener('change', function () {
+    console.debug("createtime-datetime-input input modify");
+    this.style.height = 'auto'; // Reset height to auto to calculate the new height
+    this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+});
 
-const formatDatetimeForInput = (datetime) => {
-    return new Date(datetime).toISOString().slice(0, 16).replace('T', ' ');
-};
 
-const showDialog = () => {
-    console.debug('showDialog');
-    const currentValue = inputField.value;
-    console.debug('Current value:', currentValue);
-    const parsedValues = parseInputValue(currentValue);
-// a switch to set which of the duration selection or timestamp selection should be displayed when the dialog opens
-    var displayFromDuration = false;
-    var displayToDuration = false;
-    console.debug(/ *ago/.test(currentValue) );
-    if (/ *ago/.test(currentValue)) {
-        displayFromDuration = true;
-    }
-    console.debug(/ *for/.test(currentValue) );
-    if (parsedValues.to.includes('for')) {
-        displayToDuration = true;
-    }
-// check of the current values matches a from time duration.
-if (parsedValues.from.includes('ago')) {
-    const [interval, unit] = parsedValues.from.split(' ');
-    fromIntervalNumber.value = parseInt(interval, 10);  
-    console.debug("interval: " + interval + " unit: " + unit);
+}catch(e){
+    console.error(e);
 }
 
+// Initialize the height to fit the initial content
+// document.getElementById('lastmodified-datetime-input').style.height = textarea.scrollHeight + 'px';
+//textarea.style.height = textarea.scrollHeight + 'px';
 
-    // Default values for when the input field is empty
-    fromDatetime.value = getCurrentDatetime();
-    toDatetime.value = '';
-    fromHour.value = '';
-    fromMinute.value = '';
-    fromIntervalNumber.value = '3';
-    toHour.value = '';
-    toMinute.value = '';
-    toIntervalNumber.value = '';
-
-console.debug('Parsed values:', parsedValues);
-
-    // Determine if "from" is a duration or a specific time
-    if (/ *ago/.test(currentValue)) {
-        fromLengthOfTimeRadio.checked = true;
-        //const [interval, unit] = parsedValues.from.split(' ');
-        console.debug("currentValue.split('ago'): " + currentValue.split('ago'));
-        fromIntervalNumber.value = parseInt(currentValue.split('ago')[0], 10);
-        console.debug("fromIntervalNumber.value: " + fromIntervalNumber.value);
-
-        
-        fromIntervalNumber.value = parseInt(currentValue.match(/(.*)ago.*/)[1], 10);
-        fromIntervalUnit.value = currentValue.match(/(.*)ago.*/)[1].match(/[^0-9]*([0-9]*)(.*)/)[2].trim();
-        fromSpecificTimeRadio.checked = false;
-    } else {
-        fromSpecificTimeRadio.checked = true;
-        fromDatetime.value = parsedValues.from ? new Date(parsedValues.from).toISOString().slice(0, -1) : getCurrentDatetime();
-    }
-
-    // Determine if "to" is a duration or a specific time
-    if (/ *for/.test(currentValue)) {
-        toLengthOfTimeRadio.checked = true;
-        const [_, interval, unit] = parsedValues.to.split(' ');
-        toIntervalNumber.value = parseInt(interval, 10);
-        toIntervalUnit.value = unit.trim();
-    } else {
-        toSpecificTimeRadio.checked = true;
-        toDatetime.value = parsedValues.to ? new Date(parsedValues.to).toISOString().slice(0, -1) : '';
-    }
-
-    updateFromMode();
-    updateToMode();
-
-    dialog.style.display = 'block';
-};
-
-const closeDialog = () => {
-    dialog.style.display = 'none';
-};
-
-// close the dialog if the user clicks outside of it
-const handleOk = () => {
-    let fromValue = fromDatetime.value;
-    let toValue = toDatetime.value;
-    const fromHourValue = fromHour.value;
-    const fromMinuteValue = fromMinute.value;
-    const fromIntervalValue = fromIntervalNumber.value;
-    const fromIntervalUnitValue = fromIntervalUnit.value;
-    const toHourValue = toHour.value;
-    const toMinuteValue = toMinute.value;
-    const toIntervalValue = toIntervalNumber.value;
-    const toIntervalUnitValue = toIntervalUnit.value;
-
-    let result = '';
-
-    if (fromSpecificTimeRadio.checked) {
-        fromValue = adjustDatetimeWithTime(fromValue, fromHourValue, fromMinuteValue);
-        if (fromValue) {
-            result += "between " + formatDatetimeForInput(fromValue);
-        }
-    } else if (fromIntervalValue) {
-        console.debug("fromIntervalValue: " + fromIntervalValue);
-if (fromIntervalValue == 1) {
-        result += "between " + `${fromIntervalValue} ${fromIntervalUnitValue} ago`;
-}else{
-        result += "between " + `${fromIntervalValue} ${fromIntervalUnitValue}s ago`;
-}
-    }else {
-        console.debug("no 'from' value set")
-    }
-
-    if (toSpecificTimeRadio.checked) {
-        console.debug("toSpecificTimeRadio.checked");
-        toValue = adjustDatetimeWithTime(toValue, toHourValue, toMinuteValue);
-        if (toValue) {
-            result += (result ? ' - ' : '') + formatDatetimeForInput(toValue);
-        }else {
-            console.debug("no 'to' value set")
-            result += " and Now";
-        }
-    } else if (toIntervalValue) {
-        console.debug("toIntervalValue: " + toIntervalValue);
-        result += ` and ${toIntervalValue} ${toIntervalUnitValue}`;
-    }else {
-        console.debug("no 'to' value set")
-    }
-
-    console.debug('Result:', result);
-    inputField.value = result;
-
-    // Dispatch a custom event to indicate the input field has been updated
-    const event = new Event('inputUpdated');
-    inputField.dispatchEvent(event);
-
-    closeDialog();
-};
-
-const adjustDatetimeWithTime = (datetime, hours, minutes) => {
-    if (datetime) {
-        const date = new Date(datetime);
-        if (hours !== '' && minutes !== '') {
-            date.setHours(hours);
-            date.setMinutes(minutes);
-            return date.toISOString().slice(0, -1);
-        }
-    }
-    return datetime;
-};
-
-const updateFromMode = () => {
-    console.debug('updateFromMode.start');
-    if (fromSpecificTimeRadio.checked) {
-        fromSpecificTime.style.display = 'block';
-        fromLengthOfTime.style.display = 'none';
-    } else {
-        fromSpecificTime.style.display = 'none';
-        fromLengthOfTime.style.display = 'block';
-    }
-};
-
-const updateToMode = () => {
-    if (toSpecificTimeRadio.checked) {
-        toSpecificTime.style.display = 'block';
-        toLengthOfTime.style.display = 'none';
-    } else {
-        toSpecificTime.style.display = 'none';
-        toLengthOfTime.style.display = 'block';
-    }
-};
-
-fromSpecificTimeRadio.addEventListener('change', updateFromMode);
-fromLengthOfTimeRadio.addEventListener('change', updateFromMode);
-toSpecificTimeRadio.addEventListener('change', updateToMode);
-toLengthOfTimeRadio.addEventListener('change', updateToMode);
-inputField.addEventListener('click', showDialog);
-inputField.addEventListener('touchend', showDialog);
-closeIcon.addEventListener('click', closeDialog);
-closeIcon.addEventListener('touchend', closeDialog);
-okButton.addEventListener('click', handleOk);
-okButton.addEventListener('touchend', handleOk);
-
-// Close the dialog if clicking outside of it
-window.addEventListener('click', (event) => {
-    if (event.target == dialog) {
-        closeDialog();
-    }
-});
-
-window.addEventListener('touchend', (event) => {
-    if (event.target == dialog) {
-        closeDialog();
-    }
-});
-
-// Add an event listener for the custom 'inputUpdated' event
-inputField.addEventListener('inputUpdated', () => {
-    console.log('Input field updated:', inputField.value);
-    // Handle the event as needed
-});
-
-
-
-/// end handle lastmodified date filter
 
 // check if the user is authenticated
 checkSessionJWTValidity()
@@ -313,52 +101,17 @@ checkSessionJWTValidity()
 // The users can decide which columns to display
 
 
-const table_columns_to_not_display_keyname = "subscribed_notes_hide_columns1";
+const table_columns_to_not_display_keyname = table_name+"_hide_columns1";
 
 // store in local the sorting and columns that the user has selected to sort on
-const table_columns_sort_array_keyname = "subscribed_notes_sort_columns";
+const table_columns_sort_array_keyname = table_name+"_sort_columns";
 
 // store in local the filters and columns that the user has selected to filter on
-const table_columns_filter_array_keyname = "subscribed_notes_filer_columns";
+const table_columns_filter_array_keyname = table_name+"_filer_columns";
 
-document.getElementById('toggle-createtime').addEventListener('change', function () {
-    toggleColumn('createtime', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
 
-document.getElementById('toggle-lastmodifiedtime').addEventListener('change', function () {
-    toggleColumn('lastmodifiedtime', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
+addEventColumnToggleListeners(['createtime','lastmodifiedtime','type','feed','location', 'selection_text','message','status','action','yellownote'], table_name);
 
-document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
-document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-selection_text').addEventListener('change', function () {
-    toggleColumn('selection_text', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-status').addEventListener('change', function () {
-    toggleColumn('status', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-yellownote').addEventListener('change', function () {
-    toggleColumn('yellownote', this.checked, "subscribedNotesTable", table_columns_to_not_display_keyname);
-});
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
@@ -380,7 +133,7 @@ if (pagewidth < 300) {
     not_show_by_default_columns = [];
 }
 
-//
+// refresh the list of do-not-display columns from local storage
 getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
     console.debug(not_show_by_default_columns);
@@ -415,36 +168,6 @@ fetchData(not_show_by_default_columns).then(() => {
 
 
 
-function DELETEtoggleColumn(columnName, isChecked) {
-    console.debug("toggleColumn: " + columnName + " isChecked: " + isChecked);
-    // var table = document.getElementById("subscribedNotesTable");
-    var table = document.querySelector('table[name="subscribedNotesTable"]');
-    // find out which column has the name columnName
-    //console.debug(table);
-    var col = table.querySelector('[name = "' + columnName + '"]');
-    console.debug(col);
-    const columnIndex = getElementPosition(col);
-    console.debug(getElementPosition(col));
-
-    if (!isChecked) {
-        table.querySelectorAll('tr').forEach(row => {
-            // console.debug(row);
-            // console.debug(row.cells[columnIndex].classList);
-
-            row.cells[columnIndex].classList.add("hidden");
-        });
-
-    } else {
-        table.querySelectorAll('tr').forEach(row => {
-
-            // console.debug(row);
-            // console.debug(row.cells[columnIndex].classList);
-            row.cells[columnIndex].classList.remove("hidden");
-        });
-
-    }
-
-}
 
 //const browser_id = chrome.runtime.id;
 
@@ -636,6 +359,7 @@ const sortStates = {
     0: 'none', // None -> Ascending -> Descending -> None -> ...
     1: 'none'
 };
+
 
 // Fetch data on page load
 

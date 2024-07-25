@@ -32,13 +32,13 @@ table.subscribedNotesTable th {
 
     
     table.subscribedNotesTable tr th:nth-child(1){
-        display: none;
+      max-width: 200px;
     
      }
   
 
     table.subscribedNotesTable tr th:nth-child(2){
-      display: none;
+      max-width: 200px;
   
    }
   
@@ -98,18 +98,20 @@ table.subscribedNotesTable th {
     padding-left: 2px;
     border: 1px solid black;
     text-align: center;
-    display: table-cell;
+    
     vertical-align: inherit;
     word-break: break-all;
   
   }
   
   table.subscribedNotesTable tr td:nth-child(1){
-    display: none;
+    max-width: 100px;
+    
   
   }
   table.subscribedNotesTable tr td:nth-child(2){
-    display: none;
+    max-width: 100px;
+    
   
   }
   

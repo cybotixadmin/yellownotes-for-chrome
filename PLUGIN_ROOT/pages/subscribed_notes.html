@@ -45,9 +45,9 @@
 <div class="scrollable-table">
   
     <!-- dialog to select a time range on which to filter the notes on their lastmodified timestamps.
-     make this visible only when selected -->
+     make this visible only when selected 
      <input type="text" id="datetime-input" placeholder="Select date and time range">
-
+-->
     <div id="dialog" class="dialog">
         <div class="dialog-content">
             <span class="close">&times;</span>
@@ -59,8 +59,10 @@
                 </div>
                 <div id="from-specific-time">
                     <input type="datetime-local" id="from-datetime">
+                    <!--
                     <input type="number" id="from-hour" placeholder="Hour" min="0" max="23">
                     <input type="number" id="from-minute" placeholder="Minute" min="0" max="59">
+                    -->
                 </div>
                 <div id="from-length-of-time">
                     <input type="number" id="from-interval-number" value="3">
@@ -79,8 +81,10 @@
                 </div>
                 <div id="to-specific-time">
                     <input type="datetime-local" id="to-datetime">
+                    <!--
                     <input type="number" id="to-hour" placeholder="Hour" min="0" max="23">
                     <input type="number" id="to-minute" placeholder="Minute" min="0" max="59">
+                  -->
                 </div>
                 <div id="to-length-of-time">
                     <input type="number" id="to-interval-number">
@@ -115,9 +119,9 @@
     <!-- Add a filter row -->
     <tr name="filter_row" class="fixed-header" selectablecol="true">
       <th ></th>
-      <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
-      <th class="filterableCol" filter_type="datetimeRange"><input id="lastmodified-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
-      <th class="filterableCol" filter_type="stringCaseExact"><select filterContent="1" class="compact"><option class="compact"</option><option class="compact">webframe</option><option class="compact">yellownote</option></select></th>
+      <th class="filterableCol" filter_type="datetimeRange"><textarea id="createtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
+      <th class="filterableCol" ><textarea filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
+      <th class="filterableCol" filter_type="stringCaseExact"><select filterContent="1" class="compact"><option class="compact"</option><option class="compact">webframe</option><option class="compact">plaintext</option></select></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
       <th class="filterableCol" filter_type="stringCaseIgnore"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>

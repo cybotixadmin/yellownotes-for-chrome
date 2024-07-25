@@ -30,30 +30,39 @@ Display the user's account information.
     </div>
 
     <div class="scrollable-table">
-      <table id="subcribedDistributionlistNotesTable" class="subscribedNotesTable">
+      <table name="subcribedDistributionlistNotesTable" class="subscribedNotesTable">
         <thead>
-          <tr class="fixed-header">
-            <th>ID</th>
-            <th class="sortableCol" >last modified <span class="sort-icon">&#9650;</span></th>
-            <th class="sortableCol" >created <span class="sort-icon">&#9650;</span></th>
-            <th class="sortableCol" >type<span class="sort-icon" ">&#9650;</span></th>
-            <th class="sortableCol" >feed </th>
-            <th class="sortableCol" >location(URL)<span class="sort-icon">&#9650;</span></th>
-            <th class="sortableCol" >text<span class="sort-icon">&#9650;</span></th>
-            <th>action</th>
-            
+          <tr class="fixed-header" selectablecol="true">
+            <th name="yellownote">Yellow notes</th>
+            <th class="sortableCol" name="createtime" sort_type="stringCaseExact">created<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+            <th class="sortableCol" name="lastmodifiedtime" sort_type="stringCaseExact">modified<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+            <th class="sortableCol" name="note_type" sort_type="stringCaseExact">type<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+            <th class="sortableCol" name="feed" sort_type="stringCaseExact">feed <span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+            <th class="sortableCol" name="url" sort_type="stringCaseExact">location(URL)<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+            <th class="sortableCol" name="selected_text" sort_type="stringCaseExact">selected text<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+            <th class="sortableCol" name="message_text" sort_type="stringCaseExact">message<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+      
+            <th name="action" class="action-2" >actions</th>
           </tr>
           
           <!-- Add a filter row -->
-          <tr class="fixed-header">
+          <tr name="filter_row" class="fixed-header" selectablecol="true">
             <th ></th>
-            <th filterableCol="wildcardmatch" ><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-            <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"></option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
-            <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
-            <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
-            <th class="filterableCol"><input type="text" id="filterContent" placeholder="Filter Content" ></th>
+
+      
+           
+            <th filterableCol="wildcardmatch"  filter_type="stringCaseExact"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol" filter_type="datetimeRange"><input id="lastmodified-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol" filter_type="stringCaseExact"><select filterContent="1" class="compact"><option class="compact"</option><option class="compact">webframe</option><option class="compact">plaintext</option></select></th>
+            <th class="filterableCol" filter_type="stringCaseExact"><input type="text" class="filterContent" placeholder="Filter " ></th>
+            <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
+            <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
+            <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
             <th ></th>
+
+
+
+
           </tr>
       
         </thead>
@@ -65,11 +74,65 @@ Display the user's account information.
   
 
 
+     
+which columns to show
+<!-- start of list of column selectors-->
+<div class="toggle-container">
+  <div class="toggle-button">
+    <label for="toggle-yellownote">YellowNote</label>
+    <input type="checkbox" id="toggle-yellownote" checked>
+  </div>
+    <div class="toggle-button">
+      <label for="toggle-createtime">Created</label>
+      <input type="checkbox" id="toggle-createtime" checked>
+  </div><br/>
+  <div class="toggle-button">
+      <label for="toggle-lastmodifiedtime">Modified time</label>
+      <input type="checkbox" id="toggle-lastmodifiedtime" checked>
+  </div><br/>
+  <div class="toggle-button">
+      <label for="toggle-note_type">Type</label>
+      <input type="checkbox" id="toggle-note_type" checked>
+  </div>
+  <div class="toggle-button">
+    <label for="toggle-feed">Feed</label>
+    <input type="checkbox" id="toggle-feed" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-selected_text">Selected text</label>
+  <input type="checkbox" id="toggle-selected_text" checked>
+</div>
+
+<div class="toggle-button">
+  <label for="toggle-message_text">Message</label>
+  <input type="checkbox" id="toggle-message_text" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-action">Actions</label>
+  <input type="checkbox" id="toggle-action" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-url">Location</label>
+  <input type="checkbox" id="toggle-url" checked>
+</div>
+</div><!-- end of list of column selectors-->
+
     </div>
 
 <!-- main page end -->
 
 <script  src="on_page_common.js"></script>
+<script src="../content_scripts/NotesHandler.js"></script>
+
+<script src="../content_scripts/Canvas_handler.js"></script>
+
+
+<!-- reference functions needed to render a yellownote from serlialized form-->
+<script src="../content_scripts/RenderEmbeddedYelloNotes_libraries.js"></script>
+<script src="../content_scripts/test.js"></script>
+
+<script src="./common_cache_functions.js"></script>
 <script src="view_distributionlist.js"></script>
 
 

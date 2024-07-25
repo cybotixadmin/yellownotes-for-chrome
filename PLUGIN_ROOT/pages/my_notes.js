@@ -127,7 +127,7 @@ fetchData(not_show_by_default_columns).then(function (d) {
     console.debug("read notes complete");
     console.debug(d);
 
-    // update the list of colmes and check/uncheck according to the list of columns to not display
+    // update the list of columns and check/uncheck according to the list of columns to not display
 not_show_by_default_columns.forEach(column => {
     console.debug("hide column: ", column);
     toggleColumn(column, false,table_name, table_columns_to_not_display_keyname);
