@@ -6,51 +6,43 @@ const filterStorageKey = table_name + "_rowFilters";
 // update the filter in the filter row on the table. Loop through all the filters and update the filter row
 
 console.debug("calling updateFilterRow");
-updateFilterRow(table_name);
+updateFilterRow(table_name, filterStorageKey);
 
-function updateFilterRow(tableName) {
-    console.debug("updateFilterRow.start");
-    var table = document.querySelector('table[name="' + tableName + '"]');
-    var filtersCols = table.querySelector('tr[name="filter_row"]').querySelectorAll('input, select, textarea');
-    //console.debug(filtersCols);
-    var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-    filters = JSON.parse(localStorage.getItem(filterStorageKey)) || [];
-    //console.debug(filters);
-    // Loop through each filter and place any value found, in the corresponding filter cell
-    for (var i = 0; i < filters.length; i++) {
-        //console.debug(filters[i]);
-        if (filters[i]) {
-        
-        if (filters[i].filterValue) {
-            //console.debug(filters[i].filterValue);
-            // set the filter value in the columnIndex column of the filter row in the input of select element
-            table.querySelector('tr[name="filter_row"]').querySelectorAll('th')[filters[i].columnIndex].querySelector('input, select, textarea').value = filters[i].filterValue; 
-    //        filtersCols[filters[i].columnIndex].value = filters[i].filterValue;
-        }else{
-           // console.debug("no filter value");
-        
-        }
-        }
-    }
-}
 
 try{
 
-// setup special handling for creating correctly fomated filter for the filter boxes for columns contianing dates
+// setup special handling for creating correctly fomated filter for the filter boxes for columns containing dates
 //console.debug("calling setTimeRangeFilterDialog");
 //setTimeRangeFilterDialog("lastmodified-datetime-input");
 console.debug("calling setTimeRangeFilterDialog");
-setTimeRangeFilterDialog("createtime-datetime-input");
+
+setTimeRangeFilterDialog("createtime-datetime-input", "createtime-filter-dialog");
+
+setTimeRangeFilterDialog("lastmodifiedtime-datetime-input", "lastmodifiedtime-filter-dialog");
+
 
 // expand the textarea in the search filters
-document.getElementById('createtime-datetime-input').addEventListener('input', function () {
-    console.debug("createtime-datetime-input input modify");
+//document.getElementById('createtime-datetime-input').addEventListener('input', function () {
+//    console.debug("createtime-datetime-input input modify");
+//    this.style.height = 'auto'; // Reset height to auto to calculate the new height
+//    this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+//});
+
+//document.getElementById('createtime-datetime-input').addEventListener('change', function () {
+//    console.debug("createtime-datetime-input input modify");
+//    this.style.height = 'auto'; // Reset height to auto to calculate the new height
+//    this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+//});
+
+// expand the textarea in the search filters
+document.getElementById('lastmodifiedtime-datetime-input').addEventListener('input', function () {
+    console.debug("lastmodifiedtime-datetime-input input modify");
     this.style.height = 'auto'; // Reset height to auto to calculate the new height
     this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
 });
 
-document.getElementById('createtime-datetime-input').addEventListener('change', function () {
-    console.debug("createtime-datetime-input input modify");
+document.getElementById('lastmodifiedtime-datetime-input').addEventListener('change', function () {
+    console.debug("lastmodifiedtime-datetime-input change modify");
     this.style.height = 'auto'; // Reset height to auto to calculate the new height
     this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
 });
@@ -59,6 +51,7 @@ document.getElementById('createtime-datetime-input').addEventListener('change', 
 }catch(e){
     console.error(e);
 }
+
 
 // Initialize the height to fit the initial content
 // document.getElementById('lastmodified-datetime-input').style.height = textarea.scrollHeight + 'px';
@@ -91,7 +84,6 @@ checkSessionJWTValidity()
 
         page_display_login_status();
     }
-
 })
 .catch(error => {
     console.error('Error:', error.message);
@@ -110,7 +102,7 @@ const table_columns_sort_array_keyname = table_name+"_sort_columns";
 const table_columns_filter_array_keyname = table_name+"_filer_columns";
 
 
-addEventColumnToggleListeners(['createtime','lastmodifiedtime','type','feed','location', 'selection_text','message','status','action','yellownote'], table_name);
+addEventColumnToggleListeners(['createtime', 'lastmodifiedtime', 'type','feed', 'location', 'selection_text', 'message', 'status', 'action', 'yellownote'], table_name);
 
 
 // set table visibility defaults
@@ -133,7 +125,9 @@ if (pagewidth < 300) {
     not_show_by_default_columns = [];
 }
 
+
 // refresh the list of do-not-display columns from local storage
+console.debug("calling: getNotShowByDefaultColumns" );
 getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
     console.debug(not_show_by_default_columns);
@@ -155,17 +149,15 @@ fetchData(not_show_by_default_columns).then(() => {
         console.debug("calling applyExistingSortTable");
         applyExistingSortTable(table_name, sortStates);
      
-        console.debug("filterStorageKey: " + filterStorageKey);
-        applyFilters(table_name, JSON.parse( localStorage.getItem(filterStorageKey)));
+        
+        console.debug("calling applyFilters");
+        applyFilters(table_name);
    
     } catch (e) {
         console.error(e);
     }
 
 });
-
-
-
 
 
 
@@ -229,6 +221,7 @@ async function unPause(datarow) {
     }
 }
 
+
 /**
  * Navigate to the page where the note is attached
  * @param {*} url
@@ -236,10 +229,8 @@ async function unPause(datarow) {
 
 async function goThere(datarow) {
     try {
-
         const userid = "";
         console.debug("go to url: " + datarow.url);
-
         console.debug("go lookup creatorid: " + datarow.creatorid);
         const noteid = datarow.noteid;
 
@@ -251,7 +242,6 @@ async function goThere(datarow) {
         console.debug(document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim());
 
         // lookup the target url in the table (the user may have changed it !)
-
 
         // issue a http redirect to open the URL in another browser tab
         //window.open(url, '_blank').focus();

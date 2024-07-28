@@ -48,65 +48,105 @@
      make this visible only when selected 
      <input type="text" id="datetime-input" placeholder="Select date and time range">
 -->
-    <div id="dialog" class="dialog">
+    <div id="lastmodifiedtime-filter-dialog" class="dialog">
         <div class="dialog-content">
             <span class="close">&times;</span>
             <div>
                 <label>From:</label>
                 <div class="radio-container">
-                    <label><input type="radio" name="from-mode" value="specific-time" id="from-specific-time-radio">Point in Time</label>
-                    <label><input type="radio" name="from-mode" value="length-of-time" id="from-length-of-time-radio">Duration</label>
+                    <label><input type="radio" name="from-mode" value="specific-time" id_name="from-specific-time-radio">Point in Time</label>
+                    <label><input type="radio" name="from-mode" value="length-of-time" id_name="from-length-of-time-radio">Duration</label>
                 </div>
-                <div id="from-specific-time">
-                    <input type="datetime-local" id="from-datetime">
-                    <!--
-                    <input type="number" id="from-hour" placeholder="Hour" min="0" max="23">
-                    <input type="number" id="from-minute" placeholder="Minute" min="0" max="59">
-                    -->
+                <div name="from-specific-time">
+                    <input type="datetime-local" name="from-datetime">
                 </div>
-                <div id="from-length-of-time">
-                    <input type="number" id="from-interval-number" value="3">
-                    <select id="from-interval-unit">
-                        <option value="hr">hr</option>
-                        <option value="day" selected>day</option>
-                        <option value="month">month</option>
-                    </select>
-                </div>
-            </div>
-            <div>
-                <label>To:</label>leave empty to indicate Now
-                <div class="radio-container">
-                    <label><input type="radio" name="to-mode" value="specific-time" id="to-specific-time-radio">Point in Time</label>
-                    <label><input type="radio" name="to-mode" value="length-of-time" id="to-length-of-time-radio">Duration</label>
-                </div>
-                <div id="to-specific-time">
-                    <input type="datetime-local" id="to-datetime">
-                    <!--
-                    <input type="number" id="to-hour" placeholder="Hour" min="0" max="23">
-                    <input type="number" id="to-minute" placeholder="Minute" min="0" max="59">
-                  -->
-                </div>
-                <div id="to-length-of-time">
-                    <input type="number" id="to-interval-number">
-                    <select id="to-interval-unit">
+                <div name="from-length-of-time">
+                    <input type="number" name="from-interval-number" >
+                    <select name="from-interval-unit">
                         <option value="hr">hr</option>
                         <option value="day">day</option>
                         <option value="month">month</option>
                     </select>
                 </div>
             </div>
-            <button id="ok-button">OK</button>
+            <div>
+                <label>To:</label>
+                <div class="radio-container">
+                    <label><input type="radio" name="to-mode" value="specific-time" id_name="to-specific-time-radio">Point in Time</label>
+                    <label><input type="radio" name="to-mode" value="length-of-time" id_name="to-length-of-time-radio">Duration</label>
+                    <label><input type="radio" name="to-mode" value="to-now" id_name="to-now-radio">Now</label>
+                </div>
+                <div name="to-specific-time">
+                    <input type="datetime-local" name="to-datetime">
+                </div>
+                <div name="to-length-of-time">
+                    <input type="number" name="to-interval-number">
+                    <select name="to-interval-unit">
+                        <option value="hr">hr</option>
+                        <option value="day">day</option>
+                        <option value="month">month</option>
+                    </select>
+                </div>
+            </div>
+            <button name="ok-button">OK</button>
         </div>
     </div>
 
-  <!-- end of lastmodified timestamp filter dialog -->
+<!-- end of lastmodified timestamp filter dialog -->
+<!-- start of createtime timestamp filter dialog -->
+
+<div id="createtime-filter-dialog" class="dialog">
+  <div class="dialog-content">
+    <span class="close">&times;</span>
+    <div>
+        <label>From:</label>
+        <div class="radio-container">
+            <label><input type="radio" name="from-mode" value="specific-time" id_name="from-specific-time-radio">Point in Time</label>
+            <label><input type="radio" name="from-mode" value="length-of-time" id_name="from-length-of-time-radio">Duration</label>
+        </div>
+        <div name="from-specific-time">
+            <input type="datetime-local" name="from-datetime">
+        </div>
+        <div name="from-length-of-time">
+            <input type="number" name="from-interval-number" >
+            <select name="from-interval-unit">
+                <option value="hr">hr</option>
+                <option value="day">day</option>
+                <option value="month">month</option>
+            </select>
+        </div>
+    </div>
+    <div>
+        <label>To:</label>
+        <div class="radio-container">
+            <label><input type="radio" name="to-mode" value="specific-time" id_name="to-specific-time-radio">Point in Time</label>
+            <label><input type="radio" name="to-mode" value="length-of-time" id_name="to-length-of-time-radio">Duration</label>
+            <label><input type="radio" name="to-mode" value="to-now" id_name="to-now-radio">Now</label>
+        </div>
+        <div name="to-specific-time">
+            <input type="datetime-local" name="to-datetime">
+        </div>
+        <div name="to-length-of-time">
+            <input type="number" name="to-interval-number">
+            <select name="to-interval-unit">
+                <option value="hr">hr</option>
+                <option value="day">day</option>
+                <option value="month">month</option>
+            </select>
+        </div>
+    </div>
+    <button name="ok-button">OK</button>
+</div>
+</div>
+<!-- end of createtime timestamp filter dialog -->
+
 
 <table name="subscribedNotesTable" class="notesTable">
   <thead>
     <tr class="fixed-header" selectablecol="true">
       <th name="yellownote">notes</th>
-      <th class="sortableCol" name="createtime" sort_type="stringCaseExact">created<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
-      <th class="sortableCol" name="lastmodifiedtime" sort_type="stringCaseExact">modified<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+      <th class="sortableCol datetime" name="createtime" sort_type="stringCaseExact">created<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+      <th class="sortableCol datetime" name="lastmodifiedtime" sort_type="stringCaseExact">modified<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
       <th class="sortableCol" name="type" sort_type="stringCaseExact">type<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
       <th class="sortableCol" name="feed" sort_type="stringCaseExact">feed <span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
       <th class="sortableCol" name="location" sort_type="stringCaseExact">location(URL)<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
@@ -119,8 +159,8 @@
     <!-- Add a filter row -->
     <tr name="filter_row" class="fixed-header" selectablecol="true">
       <th ></th>
-      <th class="filterableCol" filter_type="datetimeRange"><textarea id="createtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
-      <th class="filterableCol" ><textarea filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
+      <th class="filterableCol datetime" filter_type="datetimeRange"><textarea id="createtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
+      <th class="filterableCol datetime" filter_type="datetimeRange"><textarea id="lastmodifiedtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
       <th class="filterableCol" filter_type="stringCaseExact"><select filterContent="1" class="compact"><option class="compact"</option><option class="compact">webframe</option><option class="compact">plaintext</option></select></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
       <th class="filterableCol" filter_type="stringCaseIgnore"><input filterContent="1" type="text" placeholder="Filter Content" ></th>

@@ -159,7 +159,7 @@ padding: .35em;
 
 /* Add styles specific for a most compact drop-down list*/
 
-  select.compact {
+select.compact {
     padding: 0px; /* Reduce padding */
     font-size: 9px; /* Smaller font size */
     margin: 0px; /* Remove margins */
@@ -245,7 +245,8 @@ table.notesTable th {
   }
   
 .datetime {
-  max-width: 100px;
+  max-width: 160px;
+  width: 160px;
 }
 
 
@@ -334,13 +335,13 @@ position: relative;
 
 
 
-  table.notesTable tr th:nth-child(102){
+table.notesTable tr th:nth-child(1002){
     max-width: 100px;
 
- }
+}
 
 
- table.notesTable tr th:nth-child(3) {
+table.notesTable tr th:nth-child(1003) {
   max-width: 100px;
 }
 

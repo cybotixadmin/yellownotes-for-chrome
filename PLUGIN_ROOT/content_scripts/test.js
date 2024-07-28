@@ -1770,7 +1770,7 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
         create_yellownote_DOM(html_note_template, html_notetype_template, note_object_data.note_type, isOwner, isNewNote).
         then(function (response) {
             cont1 = response;
-            console.debug(cont1.outerHTML);
+            //console.debug(cont1.outerHTML);
             // if the note is new, there is no noteid yet
             if (isNewNote) {
                 console.debug("new note, not yet a noteid");

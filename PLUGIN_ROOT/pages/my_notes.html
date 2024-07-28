@@ -5,8 +5,7 @@
     <link rel="stylesheet" href="my_notes.css">
     <link rel="stylesheet" href="on_page_common.css">
     <link rel="stylesheet" href="sidebar.css">
-    
-    
+    <link rel="stylesheet" href="dialog.css"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>my yellow notes</title>
@@ -30,35 +29,129 @@
   
     <!-- Empty table structure -->
 <div class="scrollable-table">
+  
+    <!-- dialog to select a time range on which to filter the notes on their lastmodified timestamps.
+     make this visible only when selected 
+     <input type="text" id="datetime-input" placeholder="Select date and time range">
+-->
+<div id="lastmodifiedtime-filter-dialog" class="dialog">
+  <div class="dialog-content">
+      <span class="close">&times;</span>
+      <div>
+          <label>From:</label>
+          <div class="radio-container">
+              <label><input type="radio" name="from-mode" value="specific-time" id_name="from-specific-time-radio">Point in Time</label>
+              <label><input type="radio" name="from-mode" value="length-of-time" id_name="from-length-of-time-radio">Duration</label>
+          </div>
+          <div name="from-specific-time">
+              <input type="datetime-local" name="from-datetime">
+          </div>
+          <div name="from-length-of-time">
+              <input type="number" name="from-interval-number" >
+              <select name="from-interval-unit">
+                  <option value="hr">hr</option>
+                  <option value="day">day</option>
+                  <option value="month">month</option>
+              </select>
+          </div>
+      </div>
+      <div>
+          <label>To:</label>
+          <div class="radio-container">
+              <label><input type="radio" name="to-mode" value="specific-time" id_name="to-specific-time-radio">Point in Time</label>
+              <label><input type="radio" name="to-mode" value="length-of-time" id_name="to-length-of-time-radio">Duration</label>
+              <label><input type="radio" name="to-mode" value="to-now" id_name="to-now-radio">Now</label>
+          </div>
+          <div name="to-specific-time">
+              <input type="datetime-local" name="to-datetime">
+          </div>
+          <div name="to-length-of-time">
+              <input type="number" name="to-interval-number">
+              <select name="to-interval-unit">
+                  <option value="hr">hr</option>
+                  <option value="day">day</option>
+                  <option value="month">month</option>
+              </select>
+          </div>
+      </div>
+      <button name="ok-button">OK</button>
+  </div>
+</div>
+
+<!-- end of lastmodified timestamp filter dialog -->
+<!-- start of createtime timestamp filter dialog -->
+
+<div id="createtime-filter-dialog" class="dialog">
+<div class="dialog-content">
+<span class="close">&times;</span>
+<div>
+  <label>From:</label>
+  <div class="radio-container">
+      <label><input type="radio" name="from-mode" value="specific-time" id_name="from-specific-time-radio">Point in Time</label>
+      <label><input type="radio" name="from-mode" value="length-of-time" id_name="from-length-of-time-radio">Duration</label>
+  </div>
+  <div name="from-specific-time">
+      <input type="datetime-local" name="from-datetime">
+  </div>
+  <div name="from-length-of-time">
+      <input type="number" name="from-interval-number" >
+      <select name="from-interval-unit">
+          <option value="hr">hr</option>
+          <option value="day">day</option>
+          <option value="month">month</option>
+      </select>
+  </div>
+</div>
+<div>
+  <label>To:</label>
+  <div class="radio-container">
+      <label><input type="radio" name="to-mode" value="specific-time" id_name="to-specific-time-radio">Point in Time</label>
+      <label><input type="radio" name="to-mode" value="length-of-time" id_name="to-length-of-time-radio">Duration</label>
+      <label><input type="radio" name="to-mode" value="to-now" id_name="to-now-radio">Now</label>
+  </div>
+  <div name="to-specific-time">
+      <input type="datetime-local" name="to-datetime">
+  </div>
+  <div name="to-length-of-time">
+      <input type="number" name="to-interval-number">
+      <select name="to-interval-unit">
+          <option value="hr">hr</option>
+          <option value="day">day</option>
+          <option value="month">month</option>
+      </select>
+  </div>
+</div>
+<button name="ok-button">OK</button>
+</div>
+</div>
+<!-- end of createtime timestamp filter dialog -->
+
 <table name="myYellowNotesDataTable" class="notesTable">
   <thead>
     <tr class="fixed-header" selectablecol="true">
-      <th class="sortableCol datetime" name="created" sort_type="stringCaseExact" >created<span class="sort-icon url">&#9650;</span></th>
-      <th class="sortableCol datetime" name="modified" sort_type="stringCaseExact" >last hanged<span class="sort-icon url">&#9650;</span></th>
-      <th class="sortableCol" name="type" sort_type="stringCaseExact"  >type<span class="sort-icon">&#9650;</span></th>
-      <th name="enabled_status" class="checkbox" >enabled</th>
-      <th class="sortableCol url" name="location" sort_type="stringCaseIgnore" >location<span class="sort-icon url">&#9650;</span></th>
-      <th class="sortableCol text"  name="selected"  sort_type="stringCaseExact" >attached to text<span class="sort-icon">&#9650;</span></th>
-      <th class="sortableCol text"  name="message" sort_type="stringCaseExact" >message<span class="sort-icon">&#9650;</span></th>
-      <th name="action" class="action-5" >actions</th>
-      <th class="sortableCol" name="feed" sort_type="selectCaseExact" >feed<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol datetime" name="createtime" sort_type="stringCaseExact">created<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+      <th class="sortableCol datetime" name="lastmodifiedtime" sort_type="stringCaseExact">modified<span class="sort-icon" style="padding-left: 5px">&#9655;</span></th>
+      <th class="sortableCol" name="type" sort_type="stringCaseExact">type<span class="sort-icon">&#9650;</span></th>
+      <th name="enabled_status" class="checkbox">enabled</th>
+      <th class="sortableCol url" name="url" sort_type="stringCaseIgnore">location<span class="sort-icon url">&#9650;</span></th>
+      <th class="sortableCol text"  name="selection_text"  sort_type="stringCaseExact">attached to text<span class="sort-icon">&#9650;</span></th>
+      <th class="sortableCol text"  name="message_display_text" sort_type="stringCaseExact">message<span class="sort-icon">&#9650;</span></th>
+      <th name="action" class="action-5">actions</th>
+      <th class="sortableCol" name="feed" sort_type="selectCaseExact">feed<span class="sort-icon url">&#9650;</span></th>
       <th name="yellownote"  >Yellow notes</th>
-      <!--
-      <th class="sortableCol" sort_type="stringCaseExact">note<span class="sort-icon">&#9650;</span></th>
-      -->
     </tr>
 
     <!-- Add a filter row -->
     <tr name="filter_row" class="fixed-header" selectablecol="true">
      
-      <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
-      <th class="filterableCol" filter_type="datetimeRange"><input id="lastmodified-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " ></th>
+      <th class="filterableCol datetime" filter_type="datetimeRange"><textarea id="createtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
+      <th class="filterableCol datetime" filter_type="datetimeRange"><textarea id="lastmodifiedtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th filterableCol="checkedmatch" class="checkbox" ><select filterContent="1" class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
-       <th class="action-5" ></th>
+      <th class="action-5" ></th>
       <th filterableCol="selectmatch" class="text" ><input filterContent="1" type="text" class="filterContent" placeholder="Filter "></th>
       <th ></th>
       
@@ -74,12 +167,12 @@
 which columns to show
 <div class="toggle-container">
   <div class="toggle-button">
-      <label for="toggle-created">Created</label>
-      <input type="checkbox" id="toggle-created" checked>
+      <label for="toggle-createtime">Created</label>
+      <input type="checkbox" id="toggle-createtime" checked>
   </div><br/>
   <div class="toggle-button">
-      <label for="toggle-modified">Modified</label>
-      <input type="checkbox" id="toggle-modified" checked>
+      <label for="toggle-lastmodifiedtime">Modified</label>
+      <input type="checkbox" id="toggle-lastmodifiedtime" checked>
   </div><br/>
   <div class="toggle-button">
       <label for="toggle-type">Type</label>
@@ -91,8 +184,8 @@ which columns to show
 </div>
 
 <div class="toggle-button">
-  <label for="toggle-selected">Selected text</label>
-  <input type="checkbox" id="toggle-selected" checked>
+  <label for="toggle-selection_text">Selected text</label>
+  <input type="checkbox" id="toggle-selection_text" checked>
 </div>
 
 <div class="toggle-button">
@@ -101,8 +194,8 @@ which columns to show
 </div>
 
 <div class="toggle-button">
-  <label for="toggle-message">Message</label>
-  <input type="checkbox" id="toggle-message" checked>
+  <label for="toggle-message_display_text">Message</label>
+  <input type="checkbox" id="toggle-message_display_text" checked>
 </div>
 <div class="toggle-button">
   <label for="toggle-action">Actions</label>

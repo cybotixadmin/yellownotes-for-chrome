@@ -43,53 +43,76 @@ console.error('Error:', error.message);
  */
 
 
-
-const table_columns_to_not_display_keyname = "my_notes_hide_columns";
-
 const table_name ="myYellowNotesDataTable" ;
+const filterStorageKey = table_name + "_rowFilters";
+
+// update the filter in the filter row on the table. Loop through all the filters and update the filter row
+
+console.debug("calling updateFilterRow");
+updateFilterRow(table_name, filterStorageKey);
 
 
+
+try{
+
+    // setup special handling for creating correctly fomated filter for the filter boxes for columns containing dates
+    //console.debug("calling setTimeRangeFilterDialog");
+    //setTimeRangeFilterDialog("lastmodified-datetime-input");
+    console.debug("calling setTimeRangeFilterDialog");
+    
+    setTimeRangeFilterDialog("createtime-datetime-input", "createtime-filter-dialog");
+    
+    setTimeRangeFilterDialog("lastmodifiedtime-datetime-input", "lastmodifiedtime-filter-dialog");
+    
+    
+    // expand the textarea in the search filters
+    //document.getElementById('createtime-datetime-input').addEventListener('input', function () {
+    //    console.debug("createtime-datetime-input input modify");
+    //    this.style.height = 'auto'; // Reset height to auto to calculate the new height
+    //    this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+    //});
+    
+    //document.getElementById('createtime-datetime-input').addEventListener('change', function () {
+    //    console.debug("createtime-datetime-input input modify");
+    //    this.style.height = 'auto'; // Reset height to auto to calculate the new height
+    //    this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+    //});
+    
+    // expand the textarea in the search filters
+    document.getElementById('lastmodifiedtime-datetime-input').addEventListener('input', function () {
+        console.debug("lastmodifiedtime-datetime-input input modify");
+        this.style.height = 'auto'; // Reset height to auto to calculate the new height
+        this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+    });
+    
+    document.getElementById('lastmodifiedtime-datetime-input').addEventListener('change', function () {
+        console.debug("lastmodifiedtime-datetime-input change modify");
+        this.style.height = 'auto'; // Reset height to auto to calculate the new height
+        this.style.height = this.scrollHeight + 'px'; // Set height to scrollHeight to expand the textarea
+    });
+    
+    
+    }catch(e){
+        console.error(e);
+    }
+    
 // which columns to display
 // The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
 
-document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked,table_name, table_columns_to_not_display_keyname);
-});
 
-document.getElementById('toggle-modified').addEventListener('change', function () {
-    toggleColumn('modified', this.checked,table_name, table_columns_to_not_display_keyname );
-});
 
-document.getElementById('toggle-type').addEventListener('change', function () {
-    toggleColumn('type', this.checked,table_name, table_columns_to_not_display_keyname );
-});
+const table_columns_to_not_display_keyname = table_name+"_hide_columns";
 
-document.getElementById('toggle-feed').addEventListener('change', function () {
-    toggleColumn('feed', this.checked,table_name, table_columns_to_not_display_keyname );
-});
-document.getElementById('toggle-message').addEventListener('change', function () {
-    toggleColumn('message', this.checked,table_name, table_columns_to_not_display_keyname );
-});
+// store in local the sorting and columns that the user has selected to sort on
+const table_columns_sort_array_keyname = table_name+"_sort_columns";
 
-document.getElementById('toggle-selected').addEventListener('change', function () {
-    toggleColumn('selected', this.checked,table_name, table_columns_to_not_display_keyname );
-});
+// store in local the filters and columns that the user has selected to filter on
+const table_columns_filter_array_keyname = table_name+"_filer_columns";
 
-document.getElementById('toggle-enabled_status').addEventListener('change', function () {
-    toggleColumn('enabled_status', this.checked,table_name, table_columns_to_not_display_keyname );
-});
 
-document.getElementById('toggle-action').addEventListener('change', function () {
-    toggleColumn('action', this.checked,table_name, table_columns_to_not_display_keyname );
-});
+addEventColumnToggleListeners(['createtime', 'lastmodifiedtime', 'type','feed', 'location', 'enabled_status', 'selection_text', 'message_display_text',  'action', 'yellownote'], table_name);
 
-document.getElementById('toggle-location').addEventListener('change', function () {
-    toggleColumn('location', this.checked,table_name, table_columns_to_not_display_keyname );
-});
 
-document.getElementById('toggle-yellownote').addEventListener('change', function () {
-    toggleColumn('yellownote', this.checked,table_name, table_columns_to_not_display_keyname );
-});
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
@@ -101,12 +124,12 @@ const pagewidth = window.innerWidth;
 console.debug("window.innerWidth: " + pagewidth);
 
 if (pagewidth < 300) { 
-    not_show_by_default_columns = ["created", "modified", "type", "feed", "selected", "active", "action" ];
+    not_show_by_default_columns = ["createtime", "lastmodifiedtime", "type", "feed", "selection_text", "enabled_status", "action" ];
 }else if (pagewidth < 600) {
-    not_show_by_default_columns = ["created", "type", "selected", "active", "action"];
+    not_show_by_default_columns = ["createtime", "type", "selection_text", "enabled_status", "action"];
 
 }else if (pagewidth < 1000) {
-    not_show_by_default_columns = ["created",  "type", "selected", "active", "action"];
+    not_show_by_default_columns = ["createtime",  "type", "selection_text", "enabled_status", "action"];
 } else if (pagewidth < 1200) {
     not_show_by_default_columns = [];
 }
@@ -114,6 +137,7 @@ if (pagewidth < 300) {
 
 
 // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
+console.debug("calling: getNotShowByDefaultColumns" );
 getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
     console.debug(not_show_by_default_columns);
@@ -147,33 +171,8 @@ console.debug("calling updateTableColumn");
     console.error('Error processing table cells:', error);
 });
 
-
 });
 
-    // kick of the process of rendering the yellow sticky notes in the graphic form
-
-  //  var doc = window.document;
-
-   // var root_node = doc.documentElement;
-  //  console.debug(root_node);
-
-    // start analyzing the DOM (the page/document)
-
-  //  var note_template = null;
- //   // collect the template, for later use
- //   fetch(chrome.runtime.getURL('./templates/default_yellownote_template.html')).
- //   then((response) => response.text())
- //   .then((html) => {
-        //console.debug(html);
-        //note_template_html = html;
-        //const note_template = document.createElement('div');
-        // container.innerHTML = html;
-//        note_template = safeParseInnerHTML(html, 'div');
-//        console.debug("browsersolutions " + note_template);
-//        console.debug(note_template);
-
-  //  });
-  //  console.debug(note_template);
 });
 
 // Function to use "fetch" to delete a data row
@@ -213,6 +212,7 @@ async function deleteSubscription(noteid) {
         console.error(error);
     }
 }
+
 
 async function goThere(datarow) {
     try {
@@ -496,6 +496,7 @@ try {
                         cell_createtime.setAttribute('class', 'datetime');
 
                     }
+                    cell_createtime.setAttribute('name', 'createtime');
                     // Adding data-label for mobile responsive
                     cell_createtime.setAttribute('data-label', 'createtime');
              
@@ -514,7 +515,8 @@ try {
                         cell_lastmodified.textContent = integerstring2timestamp(row.lastmodifiedtime);
                         cell_lastmodified.setAttribute('class', 'datetime');
                     }
-                            // Adding data-label for mobile responsive
+                    cell_lastmodified.setAttribute('name', 'lastmodifiedtime');
+                    // Adding data-label for mobile responsive
                             cell_lastmodified.setAttribute('data-label', 'lastmodified');
             
                 } catch (e) {

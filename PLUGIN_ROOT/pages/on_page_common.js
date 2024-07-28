@@ -2,7 +2,7 @@ const server_url = "https://api.yellownotes.cloud";
 
 const plugin_uuid_header_name = "ynInstallationUniqueId";
 // name of header containing session token
-const plugin_session_header_name = "xyellownotessessionjwt";
+//const plugin_session_header_name = "xyellownotessessionjwt";
 
 const plugin_remove_banner_uri = "/api/v1.0/delete_note_banner";
 
@@ -838,89 +838,34 @@ function applyExistingSortTable(table_name, new_sortStates) {
 
 }
 
-// Initialize sort states in local storage if not already present
-//if (!localStorage.getItem(table_name+'_sortStates')) {
-//    localStorage.setItem(table_name+'_sortStates', JSON.stringify([]));
-//}
 
 
-// Function to sort the table
-function BACKUPsortTable(table_name, columnIndex) {
-    console.debug("sortTable.start");
-    console.debug("columnIndex: " + columnIndex)
-    console.debug("sortTabl: " + table_name)
-    const table = document.querySelector('table[name="' + table_name + '"]');
-    console.debug(table);
-    let rows = Array.from(table.rows).slice(2); // Ignore the header rows
-    let sortedRows;
-    const row_count = table.rows.length - 2;
-    console.debug("row count: " + row_count);
-
-    // Toggle sort state for the column (asceding or decending sort)
-    try {
-        console.debug(table.rows[0].cells[columnIndex]);
-        console.debug(table.rows[0].cells[columnIndex].querySelector("span").textContent);
-        console.debug(table.rows[1].cells[columnIndex]);
-    } catch (e) {
-        console.debug(e);
-    }
-    if (sortStates[columnIndex] === 'none' || sortStates[columnIndex] === 'desc') {
-        sortStates[columnIndex] = 'asc';
-        table.rows[0].cells[columnIndex].querySelector("span").textContent = "▲";
-    } else {
-        sortStates[columnIndex] = 'desc';
-        table.rows[0].cells[columnIndex].querySelector("span").textContent = "▼";
-    }
-    var sortOrder = sortStates[columnIndex];
-    console.debug("sortOrder: " + sortOrder);
-
-    // type of sort - default is case-sensitive alphabetical
-    var sort_type = "stringCaseExact";
-    try {
-        if (table.rows[0].cells[columnIndex].hasAttribute("sort_type")) {
-            sort_type = table.rows[0].cells[columnIndex].getAttribute("sort_type");
+// read the sotred filter from local memory ond place them in the filter row of the table
+function updateFilterRow(tableName, filterStorageKey) {
+    console.debug("updateFilterRow.start");
+    var table = document.querySelector('table[name="' + tableName + '"]');
+    var filtersCols = table.querySelector('tr[name="filter_row"]').querySelectorAll('input, select, textarea');
+    console.debug(filtersCols);
+    var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+    filters = JSON.parse(localStorage.getItem(filterStorageKey)) || [];
+    console.debug(JSON.stringify(filters));
+    // Loop through each filter and place any value found, in the corresponding filter cell
+    for (var i = 0; i < filters.length; i++) {
+        //console.debug(filters[i]);
+        if (filters[i]) {
+        
+        if (filters[i].filterValue) {
+            console.debug("filterValue ("+i+")", filters[i].filterValue);
+            // set the filter value in the columnIndex column of the filter row in the input of select element
+            console.debug(table.querySelector('tr[name="filter_row"]').querySelectorAll('th')[filters[i].columnIndex].querySelector('input, select, textarea'));
+            table.querySelector('tr[name="filter_row"]').querySelectorAll('th')[filters[i].columnIndex].querySelector('input, select, textarea').value = filters[i].filterValue; 
+    //        filtersCols[filters[i].columnIndex].value = filters[i].filterValue;
+        }else{
+           // console.debug("no filter value");
+        
         }
-    } catch (e) {
-        console.debug(e);
+        }
     }
-    // Sort based on the selected column and sort state
-    // Consider options for different types of sorting here.
-
-    if (sort_type == "stringCaseExact") {
-
-        sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
-    } else if (sort_type == "stringCaseIgnore") {
-
-        sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.toLowerCase().localeCompare(b.cells[columnIndex].innerText.toLowerCase()));
-
-    } else if (sort_type == "selectCaseExact") {
-        // console.debug("selectCaseExact");
-
-
-        sortedRows = rows.sort((rowA, rowB) => {
-                const cellA = rowA.cells[columnIndex].querySelector('select').value;
-                const cellB = rowB.cells[columnIndex].querySelector('select').value;
-
-                return cellA.localeCompare(cellB);
-            });
-
-    } else {
-        console.debug("default sort");
-        sortedRows = rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
-    }
-
-    if (sortOrder === 'desc') {
-        sortedRows.reverse();
-    }
-
-    // Remove existing rows (excluding the two header rows)
-    while (table.rows.length > 3) {
-        table.deleteRow(3);
-    }
-
-    // Append sorted rows
-    const tbody = table.getElementsByTagName('tbody')[0];
-    sortedRows.forEach(row => tbody.appendChild(row));
 }
 
 /*
@@ -934,46 +879,55 @@ function triggerFilters(table_name) {
     console.debug("triggerFilters.start");
     console.debug("table_name: " + table_name);
     try {
-        const table = document.querySelector('table[name="' + table_name + '"]');
-        //    const filterRow = table.rows[1]; // Second row for filters
-        const filterRow = table.querySelector('tr[name="filter_row"]'); ; // Second row for filters
-        const filters = [];
 
         const filterStorageKey = table_name + "_rowFilters";
         console.debug("filterStorageKey: " + filterStorageKey);
-
-        console.debug(filterRow);
-
-        // Read filters from the second row
-        for (let i = 0; i < filterRow.cells.length; i++) {
-            const cell = filterRow.cells[i];
-            //console.debug(cell);
-            if (cell.classList.contains("filterableCol")) {
-                const filterValue = cell.querySelector("input, textarea") ? cell.querySelector("input, textarea").value : "";
-                console.debug("filterValue: ");
-                console.debug(filterValue);
-                const filterType = cell.getAttribute("filter_type") || "stringCaseExact";
-                filters.push({
-                    columnIndex: i,
-                    filterValue,
-                    filterType
-                });
-            } else {
-                filters.push(null); // No filter for this column
-            }
-        }
+      
+        console.debug("calling readFiltersFromTable");
+        const filters = readFiltersFromTable(table_name);
 
         // Store the filter settings in local storage
-        console.debug(JSON.stringify(filters));
+        console.debug("store filters in local storage");
+        console.debug("filters: ", JSON.stringify(filters));
         localStorage.setItem(filterStorageKey, JSON.stringify(filters));
-
-        console.debug(localStorage.getItem(filterStorageKey));
+        //console.debug(localStorage.getItem(filterStorageKey));
         console.debug("calling applyFilters");
-        applyFilters(table_name, filters);
+        applyFilters(table_name);
 
     } catch (e) {
         console.error(e);
     }
+}
+
+
+
+
+function readFiltersFromTable(table_name) {
+    console.debug("readFiltersFromTable.start");
+    const table = document.querySelector('table[name="' + table_name + '"]');
+    //    const filterRow = table.rows[1]; // Second row for filters
+    const filterRow = table.querySelector('tr[name="filter_row"]');; // Second row for filters
+    console.debug(filterRow);
+    const filters = [];
+    // Read filters from the second row
+    for (let i = 0; i < filterRow.cells.length; i++) {
+        const cell = filterRow.cells[i];
+        //console.debug(cell);
+        if (cell.classList.contains("filterableCol")) {
+            const filterValue = cell.querySelector("input, textarea") ? cell.querySelector("input, textarea").value : "";
+            console.debug("filterValue: ");
+            console.debug(filterValue);
+            const filterType = cell.getAttribute("filter_type") || "stringCaseExact";
+            filters.push({
+                columnIndex: i,
+                filterValue,
+                filterType
+            });
+        } else {
+            filters.push(null);
+        }
+    }
+    return filters;
 }
 
 // Function to check if a row matches a filter
@@ -1082,7 +1036,7 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
     //  pick the correct processing based on the structure of the filter value
 
     if (/after  *2.* and  *before  *2/.test(filterValue)) {
-        console.debug("Alt 1:  after 2024-05-20 08:42 and before 2024-06-20 20:40");
+        console.debug("Filter alternative 1:  after 2024-05-20 08:42 and before 2024-06-20 20:40");
         console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/));
         console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[1].trim());
         console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[3].trim());
@@ -1093,7 +1047,7 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
 
         return tsDate >= startDate && tsDate <= endDate;
     } else if (/after *and  *before  *[Nn]ow/.test(filterValue)) {
-        console.debug("Alt 2: after 2024-05-20 20:42 and before Now");
+        console.debug("Filter alternative 2: after 2024-05-20 20:42 and before Now");
         console.debug(filterValue.match(/after  *(2.*)  *and  *before/));
         const startDate = new Date(filterValue.match(/after  *(2.*)  *and  *before/)[1].trim());
         const tsDate = new Date(cellValue);
@@ -1102,7 +1056,7 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
 
     } else if (/after  *2.* and  *for/.test(filterValue)) {
 
-        console.debug("Alt 3: after 2024-06-20 20:42 and for 3 days");
+        console.debug("Filter alternative 3: after 2024-06-20 20:42 and for 3 days");
 
         function parseDate(dateString) {
             return new Date(dateString.replace(" ", "T"));
@@ -1171,10 +1125,10 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
         console.debug(isTimestampInRange(filterValue, cellValue));
         return isTimestampInRange(filterValue, cellValue);
 
-    } else if (/from  *.*before .*to [Nn]ow/.test(filterValue)) {
-        console.debug("Alt 4: from 3 days before and until Now");
+    } else if (/from  *.*before .*(to|until)  *[Nn]ow/.test(filterValue)) {
+        console.debug("Filter alternative 4: from 3 days before and (to|until) Now");
         function parseRelativeDate(relativeString) {
-            const regex = /(\d+)\s(days|day|months|month|hrs|hr|hours|hour)\sbefore/i;
+            const regex = /(\d+)\s(days|day|months|month|hrs|hr|hours|hour)\s(before|to)/i;
             const match = relativeString.match(regex);
 
             if (match) {
@@ -1206,7 +1160,7 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
         }
 
         function extractDates(filter) {
-            const regex = /from\s(.+)\sand\suntil\s(Now)/i;
+            const regex = /from\s(.+)\sand\s(until|to)\s(now)/i;
             const match = filter.match(regex);
 
             if (match) {
@@ -1233,11 +1187,11 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
             return tsDate >= startDate && tsDate <= endDate;
         }
 
-        console.debug(`Filter: ${filterValue}, Timestamp: ${cellValue}, Result: ${isTimestampInRange(filterValue, cellValue)}`);
-        return isTimestampInRange(filterValue, cellValue);
+        console.debug(`Filter: ${filterValue.toLowerCase()}, Timestamp: ${cellValue.toLowerCase()}, Result: ${isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase())}`);
+        return isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase());
 
-    } else if (/from  *.* before  *to/.test(filterValue)) {
-        console.debug("Alt 5: from 3 days before to 2024-06-20 20:42");
+    } else if (/from  *.* before  *(and  *to|to)/.test(filterValue)) {
+        console.debug("Filter alternative 5: from 3 days before to 2024-06-20 20:42");
 
         function parseRelativeDate(relativeString, endDate) {
             const regex = /(\d+)\s(days|day|months|month|hrs|hr|hours|hour)\sbefore/i;
@@ -1298,11 +1252,11 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
             return tsDate >= startDate && tsDate <= endDate;
         }
 
-        console.log(`Filter: ${filterValue}, Timestamp: ${cellValue}, Result: ${isTimestampInRange(filterValue, cellValue)}`);
-        return isTimestampInRange(filterValue, cellValue);
+        console.log(`Filter: ${filterValue.toLowerCase()}, Timestamp: ${cellValue.toLowerCase()}, Result: ${isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase())}`);
+        return isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase());
 
     } else if (/after  *2/.test(filterValue)) {
-        console.debug("Alt 6: after 2024-06-20 20:42");
+        console.debug("Filter alternative 6: after 2024-06-20 20:42");
         function parseDate(dateString) {
             return new Date(dateString.replace(" ", "T"));
         }
@@ -1331,12 +1285,12 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
             return tsDate >= startDate;
         }
 
-        console.log(`Filter: ${filterValue}, Timestamp: ${cellValue}, Result: ${isTimestampInRange(filterValue, cellValue)}`);
+        console.log(`Filter: ${filterValue}, Timestamp: ${cellValue}, Result: ${isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase())}`);
 
-        return isTimestampInRange(filterValue, cellValue);
+        return isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase());
 
-    } else if (/before  *2/.test(filterValue)) {
-        console.debug("Alt 7: before 2024-06-20 20:42");
+    } else if (/before  *2/.test(filterValue.toLowerCase())) {
+        console.debug("Filter alternative 7: before 2024-06-20 20:42");
         function parseDate(dateString) {
             return new Date(dateString.replace(" ", "T"));
         }
@@ -1369,19 +1323,26 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
 
         return isTimestampInRange(filterValue, cellValue);
     } else if (/before  *[Nn]ow/.test(filterValue)) {
-        console.debug("Alt 8: before Now");
-
+        console.debug("Filter alternative 8: before Now");
+        // Note: this alternative is meaningless
         return true;
 
+    } else{
+        console.debug("no filter alternative match, accept the data by default");
+        return true;
+    
     }
 
 }
 
-function applyFilters(table_name, filters) {
+function applyFilters(table_name) {
     console.debug("applyFilters.start");
     console.debug("table_name: " + table_name);
-    console.debug("filters: " + JSON.stringify(filters));
     try {
+
+        console.debug("calling readFiltersFromTable");
+        const filters = readFiltersFromTable(table_name);
+        console.debug("filters: " + JSON.stringify(filters));
         const table = document.querySelector('table[name="' + table_name + '"]');
 
         // Filter the table rows
@@ -1966,35 +1927,49 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
  * @param {
  * } input_field_id
  */
-function setTimeRangeFilterDialog(input_field_id) {
-    console.debug("setTimeRangeFilterDialog.start (" + input_field_id + ")");
+function setTimeRangeFilterDialog(input_field_id, dialog_id) {
+    console.debug("setTimeRangeFilterDialog.start (" + input_field_id + ", " + dialog_id + ")");
     const inputField = document.getElementById(input_field_id);
-    const dialog = document.getElementById('dialog');
+    const dialog = document.getElementById(dialog_id);
+    console.debug(dialog);
+    //console.debug(dialog.outerHTML);
     const closeIcon = dialog.querySelector('.close');
-    const okButton = dialog.querySelector('#ok-button');
-    const fromSpecificTimeRadio = document.getElementById('from-specific-time-radio');
-    const fromLengthOfTimeRadio = document.getElementById('from-length-of-time-radio');
-    const toSpecificTimeRadio = document.getElementById('to-specific-time-radio');
-    const toLengthOfTimeRadio = document.getElementById('to-length-of-time-radio');
-    const fromSpecificTime = document.getElementById('from-specific-time');
-    var fromLengthOfTime = document.getElementById('from-length-of-time');
-    var toSpecificTime = document.getElementById('to-specific-time');
-    var toLengthOfTime = document.getElementById('to-length-of-time');
-    var fromDatetime = document.getElementById('from-datetime');
-    var toDatetime = document.getElementById('to-datetime');
-    var fromHour = document.getElementById('from-hour');
-    var fromMinute = document.getElementById('from-minute');
-    var fromIntervalNumber = document.getElementById('from-interval-number');
-    var fromIntervalUnit = document.getElementById('from-interval-unit');
-    var toHour = document.getElementById('to-hour');
-    var toMinute = document.getElementById('to-minute');
-    var toIntervalNumber = document.getElementById('to-interval-number');
-    var toIntervalUnit = document.getElementById('to-interval-unit');
+    console.debug(closeIcon);
+    const okButton = dialog.querySelector('[name="ok-button"]');
+    console.debug(okButton);
+    const fromSpecificTimeRadio = dialog.querySelector('[id_name="from-specific-time-radio"]');
+    console.debug(fromSpecificTimeRadio);
+    const fromLengthOfTimeRadio = dialog.querySelector('[id_name="from-length-of-time-radio"]');
+    const toSpecificTimeRadio = dialog.querySelector('[id_name="to-specific-time-radio"]');
+    const toLengthOfTimeRadio = dialog.querySelector('[id_name="to-length-of-time-radio"]');
+    const toNowRadio = dialog.querySelector('[id_name="to-now-radio"]');
+    const fromSpecificTime = dialog.querySelector('[name="from-specific-time"]');
+    var fromLengthOfTime = dialog.querySelector('[name="from-length-of-time"]');
+    var toSpecificTime = dialog.querySelector('[name="to-specific-time"]');
+    var toLengthOfTime = dialog.querySelector('[name="to-length-of-time"]');
+    var fromDatetime = dialog.querySelector('[name="from-datetime"]');
+    var toDatetime = dialog.querySelector('[name="to-datetime"]');
+    var fromHour = dialog.querySelector('[name="from-hour"]');
+    var fromMinute = dialog.querySelector('[name="from-minute"]');
+    var fromIntervalNumber = dialog.querySelector('[name="from-interval-number"]');
+    var fromIntervalUnit = dialog.querySelector('[name="from-interval-unit"]');
+    var toHour = dialog.querySelector('[name="to-hour"]');
+    var toMinute = dialog.querySelector('[name="to-minute"]');
+    var toIntervalNumber = dialog.querySelector('[name="to-interval-number"]');
+    var toIntervalUnit = dialog.querySelector('[name="to-interval-unit"]');
 
     const getCurrentDatetime = () => {
         const now = new Date();
         return now.toISOString().slice(0, -1);
     };
+
+    // pre-clear all fields
+
+    //toLengthOfTime = "";
+    //toIntervalNumber = "";
+    toIntervalUnit = "";
+    //fromIntervalNumber = "";
+    //fromIntervalUnit = "";
 
     /* parse the input value and map to the various fields of the dialog
 
@@ -2026,8 +2001,9 @@ function setTimeRangeFilterDialog(input_field_id) {
 
      */
     const parseInputValue = (value) => {
+        console.debug("parseInputValue.start");
         //if (value.includes(' and ')) {
-       
+
         console.debug("value: " + value);
         // divide into from and to values
         var[fromValue, toValue] = value.split(' and ');
@@ -2053,86 +2029,100 @@ function setTimeRangeFilterDialog(input_field_id) {
         // if it begins with "after" it is a timetamp
 
         if (value.includes('from ')) {
+            console.debug("fromValue: " + fromValue);
             // is a time span
             // alt 4, alt 5
-            try{
-            // does it end in a timestamp or in "Now"
-            if (fromValue.includes('before')) {
-                [fromValue, toValue] = value.split(' before ');
-                console.debug("fromValue: " + fromValue + " toValue: " + toValue);
-                // from duration
+            try {
+                // does it end in a timestamp or in "Now"
+                if (fromValue.includes('before')) {
+                    [fromValue, toValue] = value.split(' before ');
+                    console.debug("fromValue: " + fromValue + " toValue: " + toValue);
+                    // from duration
 
-                //toLengthOfTimeRadio.checked = true;
-                toSpecificTimeRadio.checked = true;
-                // does the to-part of the filter end in a timestamp or in a "Now"
+                    fromSpecificTimeRadio.checked = false;
+                    fromLengthOfTimeRadio.checked = true;
 
-                if (toValue.toLowerCase().includes(' now')) {
-                    // timeinterval to now
-                    // now simply means having no ending timestamp
-                    // populate the form with the values
-                    //fromDatetime.value = fromValue;
-                    //toDatetime.value = '';
-                    fromDatetime.value = fromValue;
-                    toDatetime.value = '';
+                    //toLengthOfTimeRadio.checked = true;
+                    // does the to-part of the filter end in a timestamp or in a "Now"
 
-                    fromDurationNumeric = parseInt(fromValue.match(/from (.*)(hr|day|month)[s]*/)[1].trim(), 10);
-                    fromDurationUnit = fromValue.match(/from (.*)(hr|day|month)[s]*/)[2].trim();
+                    if (toValue.toLowerCase().includes(' now')) {
+                        // timeinterval to now
+                        // now simply means having no ending timestamp
+                        // populate the form with the values
+                        //fromDatetime.value = fromValue;
+                        //toDatetime.value = '';
+                        fromDatetime.value = fromValue;
+                        toDatetime.value = '';
+
+                        fromDurationNumeric = parseInt(fromValue.match(/from (.*)(hr|day|month)[s]*/)[1].trim(), 10);
+                        fromDurationUnit = fromValue.match(/from (.*)(hr|day|month)[s]*/)[2].trim();
+                        // place the values in to the dialog form
+                        console.debug(dialog);
+                        dialog.querySelector('[name="from-interval-unit"]').querySelector('option[value="' + fromDurationUnit + '"]').selected = true;
+                        dialog.querySelector('[name="from-interval-number"]').value = fromDurationNumeric;
+
+                        toSpecificTimeRadio.checked = false;
+                        toLengthOfTimeRadio.checked = false;
+                        toNowRadio.checked = true;
+    
+
+                    } else {
+                        // time-interval to actual timestamp
+                        fromDurationNumeric = parseInt(fromValue.match(/from (.*)(hr|day|month)[s]*/)[1].trim(), 10);
+                        fromDurationUnit = fromValue.match(/from (.*)(hr|day|month)[s]*/)[2].trim();
+                        // place the values in to the dialog form
+                        dialog.querySelector('[name="from-interval-unit"]').querySelector('option[value="' + fromDurationUnit + '"]').selected = true;
+                        dialog.querySelector('[name="from-interval-number"]').value = fromDurationNumeric;
+
+                        const toTimestamp = toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+                        console.debug(toTimestamp);
+                        toYear = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
+                        toMonth = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
+                        toDay = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
+                        toHour = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
+                        toMinute = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
+                        console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
+
+                        const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
+                        console.debug(t);
+                        toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
+
+                        toSpecificTimeRadio.checked = true;
+                        toLengthOfTimeRadio.checked = false;
+                        toNowRadio.checked = false;
+
+                    }
+
+                    //console.debug(fromValue.match(/from (.*)(hr|day|month)[s]* before.*/));
+                    //fromDurationNumeric = parseInt(fromValue.match(/from (.*)(hr|day|month)[s]* before.*/)[1].trim(), 10);
+                    //fromDurationUnit = fromValue.match(/from (.*)(hr|day|month)[s]* before.*/)[2].trim();
                     // place the values in to the dialog form
-                    document.getElementById("from-interval-unit").querySelector('option[value="' + fromDurationUnit + '"]').selected = true;
-                    document.getElementById("from-interval-number").value = fromDurationNumeric;
+                    //fromHour.value = fromDurationNumeric;
+                    //console.debug("fromDurationNumeric: " + fromDurationNumeric + " fromDurationUnit: " + fromDurationUnit);
+                    //document.getElementById("from-interval-unit").querySelector('option[value="' + fromDurationUnit + '"]').selected = true;
+                    //document.getElementById("from-interval-number").value = fromDurationNumeric;
+                    //console.debug(fromIntervalNumber);
+                    //console.debug(fromDurationNumeric);
+                    //fromIntervalNumber.value = fromDurationNumeric;
 
                 } else {
-                    // time-interval to actual timestamp
-                    fromDurationNumeric = parseInt(fromValue.match(/from (.*)(hr|day|month)[s]*/)[1].trim(), 10);
-                    fromDurationUnit = fromValue.match(/from (.*)(hr|day|month)[s]*/)[2].trim();
-                    // place the values in to the dialog form
-                    document.getElementById("from-interval-unit").querySelector('option[value="' + fromDurationUnit + '"]').selected = true;
-                    document.getElementById("from-interval-number").value = fromDurationNumeric;
-
-                    const toTimestamp = toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                    console.debug(toTimestamp);
-                    toYear = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
-                    toMonth = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
-                    toDay = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
-                    toHour = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
-                    toMinute = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                    console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
-
-                    const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
-                    console.debug(t);
-                    toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
-
+                    // error: all "from" contanining values should also contain "before"
+                    console.error("Error: all 'from' contanining values should also contain 'before'");
+                    // from timestamp
+                    fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
+                    fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
+                    fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
+                    fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
+                    fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
+                    fromValue = fromValue.replace('from ', '');
                 }
-
-                //console.debug(fromValue.match(/from (.*)(hr|day|month)[s]* before.*/));
-                //fromDurationNumeric = parseInt(fromValue.match(/from (.*)(hr|day|month)[s]* before.*/)[1].trim(), 10);
-                //fromDurationUnit = fromValue.match(/from (.*)(hr|day|month)[s]* before.*/)[2].trim();
-                // place the values in to the dialog form
-                //fromHour.value = fromDurationNumeric;
-                //console.debug("fromDurationNumeric: " + fromDurationNumeric + " fromDurationUnit: " + fromDurationUnit);
-                //document.getElementById("from-interval-unit").querySelector('option[value="' + fromDurationUnit + '"]').selected = true;
-                //document.getElementById("from-interval-number").value = fromDurationNumeric;
-                //console.debug(fromIntervalNumber);
-                //console.debug(fromDurationNumeric);
-                //fromIntervalNumber.value = fromDurationNumeric;
-
-            } else {
-                // error: all "from" contanining values should also contain "before"
-                console.error("Error: all 'from' contanining values should also contain 'before'");
-                // from timestamp
-                fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
-                fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
-                fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
-                fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
-                fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                fromValue = fromValue.replace('from ', '');
+            } catch (e) {
+                console.error(e);
             }
-        }catch(e){
-            console.error(e);
-        }
         } else if (value.includes('after ')) {
             // from timestamp
             fromSpecificTimeRadio.checked = true;
+            fromLengthOfTimeRadio.checked = false;
 
             [fromValue, toValue] = value.split(' and ');
             console.debug("fromValue: " + fromValue + " toValue: " + toValue);
@@ -2153,119 +2143,118 @@ function setTimeRangeFilterDialog(input_field_id) {
             after 2024-07-20 20:42
              */
             console.debug("1.4.2");
-try{
-            // alt 1:  after 2024-05-20 08:42 and before 2024-07-20 20:40
-            if (/before  *\d{4}-\d{2}-\d{2}/.test(toValue)) {
-                console.debug("alt 1:  after 2024-05-20 08:42 and before 2024-07-20 20:40");
-                const toTimestamp = toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                console.debug(toTimestamp);
-                toYear = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
-                toMonth = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
-                toDay = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
-                toHour = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
-                toMinute = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
+            try {
+                console.debug(" input_field_ide: " + input_field_id);
+                // alt 1:  after 2024-05-20 08:42 and before 2024-07-20 20:40
+                if (/before  *\d{4}-\d{2}-\d{2}/.test(toValue)) {
+                    console.debug("alt 1:  after 2024-05-20 08:42 and before 2024-07-20 20:40");
+                    const toTimestamp = toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+                    console.debug(toTimestamp);
+                    toYear = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
+                    toMonth = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
+                    toDay = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
+                    toHour = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
+                    toMinute = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
+                    console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
 
-                toSpecificTimeRadio.checked = true;
+                    toSpecificTimeRadio.checked = true;
 
-                const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
-                console.debug(t);
-                toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
+                    const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
+                    console.debug(t);
+                    toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
 
-                const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                console.debug(fromTimestamp);
-                fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
-                fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
-                fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
-                fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
-                fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
-                const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                console.debug(t2);
-                //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
-                fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
+                    const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+                    console.debug(fromTimestamp);
+                    fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
+                    fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
+                    fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
+                    fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
+                    fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
+                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
+                    console.debug(t2);
+                    //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
+                    fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
-                // alt 2 after 2024-05-20 20:42 and before Now
-            } else if (/before  *[Nn][Oo][Ww]/.test(toValue)) {
-                console.debug("alt 2: after 2024-05-20 20:42 and before Now");
+                    // alt 2 after 2024-05-20 20:42 and before Now
+                } else if (/before  *[Nn][Oo][Ww]/.test(toValue)) {
+                    console.debug("alt 2: after 2024-05-20 20:42 and before Now");
 
-                toSpecificTimeRadio.checked = true;
-                const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                console.debug(fromTimestamp);
-                fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
-                fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
-                fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
-                fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
-                fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
-                const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                console.debug(t2);
-                //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
-                fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
+                    toSpecificTimeRadio.checked = true;
+                    const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+                    console.debug(fromTimestamp);
+                    fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
+                    fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
+                    fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
+                    fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
+                    fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
+                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
+                    console.debug(t2);
+                    //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
+                    fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
-                // alt 3 after 2024-06-20 20:42 and for 3 days
-            } else if (/for /.test(toValue)) {
-                console.debug("alt 3: after 2024-06-20 20:42 and for 5 days");
+                    // alt 3 after 2024-06-20 20:42 and for 3 days
+                } else if (/for /.test(toValue)) {
+                    console.debug("alt 3: after 2024-06-20 20:42 and for 5 days");
 
-                toSpecificTimeRadio.checked = false;
-                toLengthOfTimeRadio.checked = true;
+                    toSpecificTimeRadio.checked = false;
+                    toLengthOfTimeRadio.checked = true;
 
-                const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                console.debug(fromTimestamp);
-                fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
-                fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
-                fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
-                fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
-                fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
-                const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                console.debug(t2);
-                //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
-                fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
+                    const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+                    console.debug(fromTimestamp);
+                    fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
+                    fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
+                    fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
+                    fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
+                    fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
+                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
+                    console.debug(t2);
+                    //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
+                    fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
-                // compute the end date pased on the length of the interval added to thet starting timestamp
-                toDurationNumeric = parseInt(toValue.match(/for ([0-9 ]*)(hr|day|month)[s]*/)[1].trim(), 10);
-                toDurationUnit = toValue.match(/for ([0-9 ]*)(hr|day|month)[s]*/)[2].trim();
-                // place the values in to the dialog form
-                //fromHour.value = fromDurationNumeric;
-                console.debug("toDurationNumeric: " + toDurationNumeric + " toDurationUnit: " + toDurationUnit);
-                console.debug(document.getElementById("to-interval-unit").querySelector('option[value="' + toDurationUnit + '"]'));
+                    // compute the end date pased on the length of the interval added to thet starting timestamp
+                    toDurationNumeric = parseInt(toValue.match(/for ([0-9 ]*)(hr|day|month)[s]*/)[1].trim(), 10);
+                    toDurationUnit = toValue.match(/for ([0-9 ]*)(hr|day|month)[s]*/)[2].trim();
+                    // place the values in to the dialog form
+                    //fromHour.value = fromDurationNumeric;
+                    console.debug("toDurationNumeric: " + toDurationNumeric + " toDurationUnit: " + toDurationUnit);
+                    console.debug(document.getElementById("to-interval-unit").querySelector('option[value="' + toDurationUnit + '"]'));
 
-                document.getElementById("to-interval-unit").querySelector('option[value="' + toDurationUnit + '"]').selected = true;
-                document.getElementById("to-interval-number").value = toDurationNumeric;
+                    document.getElementById("to-interval-unit").querySelector('option[value="' + toDurationUnit + '"]').selected = true;
+                    document.getElementById("to-interval-number").value = toDurationNumeric;
 
+                    // alt 6: after 2024-07-20 20:42
+                } else if (/after *2/.test(fromValue)) {
+                    console.debug("alt 6, after 2024-07-20 20:42");
+                    console.debug("after a timestamp");
 
-                // alt 6: after 2024-07-20 20:42
-            } else if (/after *2/.test(fromValue)) {
-                console.debug("alt 6, after 2024-07-20 20:42");
-                console.debug("after a timestamp");
+                    toSpecificTimeRadio.checked = false;
+                    toLengthOfTimeRadio.checked = false;
 
-                toSpecificTimeRadio.checked = false;
-                toLengthOfTimeRadio.checked = false;
+                    const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+                    console.debug(fromTimestamp);
+                    fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
+                    fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
+                    fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
+                    fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
+                    fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
+                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
+                    console.debug(t2);
+                    //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
+                    fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
-                const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                console.debug(fromTimestamp);
-                fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
-                fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
-                fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
-                fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
-                fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
-                const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                console.debug(t2);
-                //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
-                fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
+                } else {
+                    console.debug("Error: unknown format of the filter");
 
-            }else{
-                console.debug("Error: unknown format of the filter");
-            
+                }
+            } catch (e) {
+                console.error(e);
             }
-        }catch(e){
-            console.error(e);
-        }
 
-        }
-        else if (fromValue.includes("before ")){
+        } else if (fromValue.includes("before ")) {
             console.debug("alt 7, before 2024-07-20 20:42");
             console.debug("after a timestamp");
 
@@ -2274,7 +2263,7 @@ try{
 
             toSpecificTimeRadio.checked = true;
             toLengthOfTimeRadio.checked = false;
-
+            toNowRadio.checked = false;
             const toTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
             console.debug(toTimestamp);
             toYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
@@ -2284,15 +2273,11 @@ try{
             toMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
             console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
 
-           
             const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
             console.debug(t);
             toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
 
-
-
-    
-            }
+        }
 
         return {
             from: fromValue.trim() || '',
@@ -2309,108 +2294,137 @@ try{
     const formatDatetimeForInput = (datetime) => {
         return new Date(datetime).toISOString().slice(0, 16).replace('T', ' ');
     };
+    console.debug(" input_field_ide: " + input_field_id);
 
     const showDialog = () => {
-        console.debug('showDialog');
-        const currentValue = inputField.value;
-        console.debug('Current value:', currentValue);
-        const parsedValues = parseInputValue(currentValue);
-        console.debug('Parsed values:', JSON.stringify(parsedValues));
+        console.debug('showDialog.start');
+        try {
+            const currentValue = document.getElementById(input_field_id).value;
+            console.debug(" input_field_ide: " + input_field_id);
+            console.debug('Current value:', currentValue);
+            // read the current values in the input field, and place those, if any, in the form.
+            console.debug("calling parseInputValue");
+            const parsedValues = parseInputValue(currentValue);
+            console.debug('Parsed values:', JSON.stringify(parsedValues));
 
-        // Extract the values from the parsed values
-        const {
-            fromDurationNumeric,
-            fromDurationUnit,
-            toDurationNumeric,
-            toDurationUnit
-        } = parsedValues;
-        const {
-            fromYear,
-            fromMonth,
-            fromDay,
-            fromHour,
-            fromMinute,
-            toYear,
-            toMonth,
-            toDay,
-            toHour,
-            toMinute
-        } = parsedValues;
+            // Extract the values from the parsed values
+            const {
+                fromDurationNumeric,
+                fromDurationUnit,
+                toDurationNumeric,
+                toDurationUnit
+            } = parsedValues;
+            const {
+                fromYear,
+                fromMonth,
+                fromDay,
+                fromHour,
+                fromMinute,
+                toYear,
+                toMonth,
+                toDay,
+                toHour,
+                toMinute
+            } = parsedValues;
 
-       
-       
+            updateFromMode();
+            updateToMode();
 
-        updateFromMode();
-        updateToMode();
-
-        dialog.style.display = 'block';
+            dialog.style.display = 'block';
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     const closeDialog = () => {
         dialog.style.display = 'none';
+        // remove event handler from the ok button
+        //console.debug("remove event handler from okButton");
+        //okButton.removeEventListener('click', handleOk);
+        //okButton.removeEventListener('touchend', handleOk);
     };
 
     // close the dialog if the user clicks outside of it
 
     // NOTE: make some adjustments here to account for time zones
 
-    const handleOk = () => {
-        let fromValue = fromDatetime.value;
-        let toValue = toDatetime.value;
-        //const fromHourValue = fromHour.value;
-        //const fromMinuteValue = fromMinute.value;
-        const fromIntervalValue = fromIntervalNumber.value;
-        const fromIntervalUnitValue = fromIntervalUnit.value;
-        //const toHourValue = toHour.value;
-        //const toMinuteValue = toMinute.value;
-        const toIntervalValue = toIntervalNumber.value;
-        const toIntervalUnitValue = toIntervalUnit.value;
-
-        let result = '';
-        // starting at a specified timestamp
-        if (fromSpecificTimeRadio.checked) {
-            //fromValue = adjustDatetimeWithTime(fromValue, fromHourValue, fromMinuteValue);
-            if (fromValue) {
-                result += "from " + formatDatetimeForInput(fromValue);
-            }
-        } else if (fromIntervalValue) {
-            // an interval of time into the past
-            console.debug("fromIntervalValue: " + fromIntervalValue);
-            if (fromIntervalValue == 1) {
-                result += "from " + `${fromIntervalValue} ${fromIntervalUnitValue} before`;
+    function handleOk(cellnodeid) {
+        console.debug('handleOk.start');
+        try {
+            let fromValue = fromDatetime.value;
+            let toValue = toDatetime.value;
+            console.debug(cellnodeid);
+            console.debug(input_field_id);
+            //const fromHourValue = fromHour.value;
+            //const fromMinuteValue = fromMinute.value;
+            const fromIntervalValue = fromIntervalNumber.value;
+            const fromIntervalUnitValue = fromIntervalUnit.value;
+            //const toHourValue = toHour.value;
+            //const toMinuteValue = toMinute.value;
+            const toIntervalValue = toIntervalNumber.value;
+            const toIntervalUnitValue = toIntervalUnit.value;
+            // assemble the new filter string
+            let result = '';
+            // starting at a specified timestamp
+            if (fromSpecificTimeRadio.checked) {
+                //fromValue = adjustDatetimeWithTime(fromValue, fromHourValue, fromMinuteValue);
+                if (fromValue) {
+                    result += "from " + formatDatetimeForInput(fromValue);
+                }
+            } else if (fromIntervalValue) {
+                // an interval of time into the past
+                console.debug("fromIntervalValue: " + fromIntervalValue);
+                if (fromIntervalValue == 1) {
+                    result += "from " + `${fromIntervalValue} ${fromIntervalUnitValue} before`;
+                } else {
+                    result += "from " + `${fromIntervalValue} ${fromIntervalUnitValue}s before`;
+                }
             } else {
-                result += "from " + `${fromIntervalValue} ${fromIntervalUnitValue}s before`;
+                console.debug("no 'from' value set");
             }
-        } else {
-            console.debug("no 'from' value set");
-        }
 
-        if (toSpecificTimeRadio.checked) {
-            console.debug("toSpecificTimeRadio.checked");
-            //toValue = adjustDatetimeWithTime(toValue, toHourValue, toMinuteValue);
-            if (toValue) {
-                result += (result ? ' and until ' : '') + formatDatetimeForInput(toValue);
+            if (toNowRadio.checked) {
+                // to Now
+                result += " and to Now";
+
+            }else if (toSpecificTimeRadio.checked) {
+                console.debug("toSpecificTimeRadio.checked");
+                //toValue = adjustDatetimeWithTime(toValue, toHourValue, toMinuteValue);
+                if (toValue) {
+                    result += (result ? ' and to ' : '') + formatDatetimeForInput(toValue);
+                } else {
+                    console.debug("no 'to' value set");
+                    result += " and to Now";
+                }
+            } else if (toIntervalValue) {
+                console.debug("toIntervalValue: " + toIntervalValue);
+                result += ` and ${toIntervalValue} ${toIntervalUnitValue}`;
             } else {
                 console.debug("no 'to' value set");
-                result += " and until Now";
             }
-        } else if (toIntervalValue) {
-            console.debug("toIntervalValue: " + toIntervalValue);
-            result += ` and ${toIntervalValue} ${toIntervalUnitValue}`;
-        } else {
-            console.debug("no 'to' value set");
+
+            console.debug('Result:', result);
+            // write the result to the input field
+            console.debug("input_field_id: " + input_field_id);
+            console.debug("previous: " + document.getElementById(input_field_id).value);
+            document.getElementById(input_field_id).value = result;
+            console.debug("new: " + document.getElementById(input_field_id).value);
+            
+            // Dispatch a custom event to indicate the input field has been updated
+            //const event = new Event('inputUpdated');
+            //document.getElementById(input_field_id).dispatchEvent(event);
+            console.debug("calling closeDialog");
+            closeDialog();
+            // trigger the filtering process (and save changes to the filter to local storage)
+            //console.debug("calling applyFilters");
+            //applyFilters(table_name);
+            
+            console.debug("calling triggerFilters");
+            triggerFilters(table_name);
+
+        } catch (e) {
+            console.error(e);
         }
-
-        console.debug('Result:', result);
-        inputField.value = result;
-
-        // Dispatch a custom event to indicate the input field has been updated
-        const event = new Event('inputUpdated');
-        inputField.dispatchEvent(event);
-
-        closeDialog();
-        // trigger the filtering process
-        triggerFilters(table_name);
 
     };
 
@@ -2428,36 +2442,69 @@ try{
 
     const updateFromMode = () => {
         console.debug('updateFromMode.start');
-        if (fromSpecificTimeRadio.checked) {
-            fromSpecificTime.style.display = 'block';
-            fromLengthOfTime.style.display = 'none';
-        } else {
-            fromSpecificTime.style.display = 'none';
-            fromLengthOfTime.style.display = 'block';
+        try {
+            if (fromSpecificTimeRadio.checked) {
+                fromSpecificTime.style.display = 'block';
+                fromLengthOfTime.style.display = 'none';
+            } else {
+                fromSpecificTime.style.display = 'none';
+                fromLengthOfTime.style.display = 'block';
+            }
+        } catch (e) {
+            console.error(e);
         }
     };
 
     const updateToMode = () => {
         console.debug('updateToMode.start');
-        if (toSpecificTimeRadio.checked) {
-            toSpecificTime.style.display = 'block';
-            toLengthOfTime.style.display = 'none';
-        } else {
-            toSpecificTime.style.display = 'none';
-            toLengthOfTime.style.display = 'block';
+        try {
+            if (toSpecificTimeRadio.checked) {
+                toSpecificTime.style.display = 'block';
+                toLengthOfTime.style.display = 'none';
+            } else if (toLengthOfTimeRadio.checked) {
+                toSpecificTime.style.display = 'none';
+                toLengthOfTime.style.display = 'block';
+            }else{
+                // "Now" is checked
+                toSpecificTime.style.display = 'none';
+                toLengthOfTime.style.display = 'none';
+
+            }
+        } catch (e) {
+            console.error(e);
         }
     };
 
+    console.debug("calling fromSpecificTimeRadio");
+    console.debug(fromSpecificTimeRadio);
     fromSpecificTimeRadio.addEventListener('change', updateFromMode);
+    console.debug("calling updateFromMode");
     fromLengthOfTimeRadio.addEventListener('change', updateFromMode);
+    console.debug("calling updateToMode");
     toSpecificTimeRadio.addEventListener('change', updateToMode);
+    console.debug("calling updateToMode");
     toLengthOfTimeRadio.addEventListener('change', updateToMode);
-    inputField.addEventListener('click', showDialog);
-    inputField.addEventListener('touchend', showDialog);
+    toNowRadio.addEventListener('change', updateToMode);
+    console.debug(document.getElementById(input_field_id));
+    document.getElementById(input_field_id).addEventListener('click', showDialog);
+    document.getElementById(input_field_id).addEventListener('touchend', showDialog);
+    console.debug("calling addEventlistener closeDialog");
     closeIcon.addEventListener('click', closeDialog);
     closeIcon.addEventListener('touchend', closeDialog);
-    okButton.addEventListener('click', handleOk);
-    okButton.addEventListener('touchend', handleOk);
+    console.debug("calling addEventlistener handleOk");
+    console.debug(okButton);
+
+    okButton.addEventListener('click', function () {
+        console.debug("click event, calling handleOk");
+        handleOk(input_field_id);
+    });
+
+    okButton.addEventListener('touchend', function () {
+        console.debug("touchend event, calling handleOk");
+        handleOk(input_field_id);
+    });
+    //okButton.addEventListener('touchend', handleOk());
+
 
     // Close the dialog if clicking outside of it
     window.addEventListener('click', (event) => {
@@ -2473,13 +2520,18 @@ try{
     });
 
     // Add an event listener for the custom 'inputUpdated' event
-    inputField.addEventListener('inputUpdated', () => {
-        console.log('Input field updated:', inputField.value);
+    document.getElementById(input_field_id).addEventListener('inputUpdated', () => {
+        console.log('Input field updated:', document.getElementById(input_field_id).value);
     });
+
 }
 
 function addEventColumnToggleListeners(wordList, tableName) {
+    console.debug("addEventColumnToggleListeners.start");
+    console.debug(wordList);
+    console.debug(tableName);
     wordList.forEach(word => {
+        console.debug(word);
         document.getElementById(`toggle-${word}`).addEventListener('change', function () {
             toggleColumn(word, this.checked, tableName, table_columns_to_not_display_keyname);
         });
@@ -2521,9 +2573,7 @@ function setupTableFilteringAndSorting(table_name) {
             console.debug("calling triggerFilters");
             triggerFilters(table_name);
         }, false);
-
     }
-
 }
 
 /*
