@@ -1,116 +1,126 @@
-//
-console.debug("running script in my_subscriptions.js");
 
-
-try {
-    // check if the user is authenticated
-    checkSessionJWTValidity()
-    .then(isValid => {
-        console.debug('JWT is valid:', isValid);
-        if (isValid) {
-            console.debug("JWT is valid - show menu accordingly");
-            fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_header_authenticated.html", "my_subscriptions_page_main_text").then(() => {});
-            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {});
-            //page_display_login_status();
-        } else {
-            console.debug("JWT is not valid - show menu accordingly");
-            fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_header_unauthenticated.html", "my_subscriptions_page_main_text").then(() => {});
-
-            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {});
-
-            //page_display_login_status();
-        }
-
-    })
-    .catch(error => {
-        console.error('Error:', error.message);
-    });
-} catch (e) {
-    console.error(e);
-}
+const browser_id = chrome.runtime.id;
 
 
 
-const table_columns_to_not_display_keyname = "mysubscriptions_hide_columns";
+// check if the user is authenticated 
+checkSessionJWTValidity()
+  .then(isValid => {
+      console.log('session JWT is valid:', isValid);
+if (isValid){
+    console.debug("JWT is valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_header_authenticated.html", "my_subscriptions_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+       // login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+
+}else{
+    console.debug("JWT is not valid - show menu accordingly");
+    fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_header_unauthenticated.html", "my_subscriptions_page_main_text").then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+        //page_display_login_status();
+        //login_logout_action();
+      
+      });
+      
+      page_display_login_status();
+    }
+
+  })
+  .catch(error => {
+      console.error('Error:', error.message);
+  });
 
 
 
-// which columns to display
-// The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
-
-document.getElementById('toggle-name').addEventListener('change', function () {
-    toggleColumn('name', this.checked,"subscriptionTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-description').addEventListener('change', function () {
-    toggleColumn('description', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
-});
 
 
-document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
-});
-document.getElementById('toggle-subscribedate').addEventListener('change', function () {
-    toggleColumn('subscribedate', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
-});
-
-document.getElementById('toggle-creatordisplayname').addEventListener('change', function () {
-    toggleColumn('creatordisplayname', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
-});
+  const table_columns_to_not_display_keyname = "mysubscriptions_hide_columns";
 
 
+
+  // which columns to display
+  // The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
+  
+  document.getElementById('toggle-name').addEventListener('change', function () {
+      toggleColumn('name', this.checked,"subscriptionTable", table_columns_to_not_display_keyname);
+  });
+  
+  document.getElementById('toggle-description').addEventListener('change', function () {
+      toggleColumn('description', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
+  });
+  
+
+  document.getElementById('toggle-active').addEventListener('change', function () {
+      toggleColumn('active', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
+  });
+  document.getElementById('toggle-subscribedate').addEventListener('change', function () {
+      toggleColumn('subscribedate', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
+  });
+  
+  document.getElementById('toggle-creatordisplayname').addEventListener('change', function () {
+      toggleColumn('creatordisplayname', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
+  });
+  
+ 
 document.getElementById('toggle-postcount').addEventListener('change', function () {
-  toggleColumn('postcount', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
+    toggleColumn('postcount', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
 });
 document.getElementById('toggle-status').addEventListener('change', function () {
-  toggleColumn('status', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
+    toggleColumn('status', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
 });
 
 document.getElementById('toggle-actions').addEventListener('change', function () {
-  toggleColumn('actions', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
+    toggleColumn('actions', this.checked,"subscriptionTable", table_columns_to_not_display_keyname );
 });
-
+  
 
 // setup table items for sorting and filtering
 setupTableFilteringAndSorting("subscriptionTable");
 
 
-// set table visibility defaults
-// make this sensitive to the size screen the user is using
-
-var not_show_by_default_columns = [];
-
-// check if not_show_by_default_columns has been set 
-const pagewidth = window.innerWidth;
-console.log("window.innerWidth: " + pagewidth);
-
-
-if (pagewidth < 200) { 
-  not_show_by_default_columns = ["name", "description",  "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
-}else if (pagewidth < 300) { 
-  not_show_by_default_columns = ["name", "description", "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
-}else if (pagewidth < 600) {
-  not_show_by_default_columns = ["name", "description",  "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
-
-}else if (pagewidth < 1000) {
-  not_show_by_default_columns = ["name", "description", "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
-} else if (pagewidth < 1200) {
-    not_show_by_default_columns = [];
-}
+  // set table visibility defaults
+  // make this sensitive to the size screen the user is using
+  
+  var not_show_by_default_columns = [];
+  
+  // check if not_show_by_default_columns has been set 
+  const pagewidth = window.innerWidth;
+  console.log("window.innerWidth: " + pagewidth);
 
 
+  if (pagewidth < 200) { 
+    not_show_by_default_columns = ["name", "description",  "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
+  }else if (pagewidth < 300) { 
+    not_show_by_default_columns = ["name", "description", "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
+  }else if (pagewidth < 600) {
+    not_show_by_default_columns = ["name", "description",  "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
 
-
+  }else if (pagewidth < 1000) {
+    not_show_by_default_columns = ["name", "description", "subscribedate", "creatordisplayname", "active", "postcount", "status", "actions" ];
+  } else if (pagewidth < 1200) {
+      not_show_by_default_columns = [];
+  }
+  
+  
+  
+  
+  
+  
   
   // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
-  getNotShowByDefaultColumns_asynch(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
-    not_show_by_default_columns = columns;
-    console.log(not_show_by_default_columns);
-}).catch(error => {
-    console.error('Error:', error);
-});
-
-
+  getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+      not_show_by_default_columns = columns;
+      console.log(not_show_by_default_columns);
+  }).catch(error => {
+      console.error('Error:', error);
+  });
+  
+  
 
 //const url = window.location.href.trim();
 //console.log(url);
@@ -118,88 +128,88 @@ if (pagewidth < 200) {
 // accept the submitted value for the distribution list id
 // the API has security mechanism in place the screen the value for undesirable content
 try {
-  if (getQueryStringParameter("add_distributionlistid")) {
-      console.debug("add_distributionlistid parameter found ");
+    if (getQueryStringParameter("add_distributionlistid")) {
+        console.debug("add_distributionlistid parameter found ");
 
-      addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid")).then(function (data) {
+        addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid")).then(function (data) {
 
-          // it a post action URL has been prescribed using the querystring parameter "redirecturi", then redirect to that URL now
-          uri = getQueryStringParameter("redirecturi");
-          console.debug("redirect to ", uri);
-          if (uri) {
-              // Redirect to a new URL - do not present a page
-              window.location.href = uri;
-          } else {
-              // no redirect URL has been prescribed, so present the page
-              render_page();
-          }
-      }).catch(function (error) {
-          console.error(error);
-      }
-      );
-  }else{
-      uri = getQueryStringParameter("redirecturi");
-      console.debug("redirect to ", uri);
-      if (uri) {
-          // Redirect to a new URL - do not present a page
-          window.location.href = uri;
-      } else {
-          // no redirect URL has been prescribed, so present the page
-          render_page();
-      }
-  }
+            // it a post action URL has been prescribed using the querystring parameter "redirecturi", then redirect to that URL now
+            uri = getQueryStringParameter("redirecturi");
+            console.debug("redirect to ", uri);
+            if (uri) {
+                // Redirect to a new URL - do not present a page
+                window.location.href = uri;
+            } else {
+                // no redirect URL has been prescribed, so present the page
+                render_page();
+            }
+        }).catch(function (error) {
+            console.error(error);
+        }
+        );
+    }else{
+        uri = getQueryStringParameter("redirecturi");
+        console.debug("redirect to ", uri);
+        if (uri) {
+            // Redirect to a new URL - do not present a page
+            window.location.href = uri;
+        } else {
+            // no redirect URL has been prescribed, so present the page
+            render_page();
+        }
+    }
 } catch (e) {
-  console.error(e);
+    console.error(e);
 }
 
 
 
-
 function render_page() {
-    // Fetch data on current subscriptions on page-load
-    fetchData(not_show_by_default_columns).then(function (d) {
-       console.debug("read notes complete");
-       console.debug(not_show_by_default_columns);
-   
-       // update the list of columns and check/uncheck according to the list of columns to not display
-   not_show_by_default_columns.forEach(column => {
-       toggleColumn(column, false,"subscriptionTable", table_columns_to_not_display_keyname);
-       document.getElementById(`toggle-${column}`).checked = false;
-   });
-    });
-   
-          // attach event listeners to the buttons     
-    try {
-        document
-        .getElementById("subscriptionsActivateAllButton")
-        .addEventListener("click", async function () {
-            activateAllSubscriptions();
-        });
-    } catch (e) {
-        console.error(e);
-    }
-   
-    try {
-        document
-        .getElementById("subscriptionsSuspendAllButton")
-        .addEventListener("click", function () {
-            deactivateAllSubscriptions();
-        });
-    } catch (e) {
-        console.error(e);
-    }
-   
-    try {
-        document
-        .getElementById("subscriptionsAddButton")
-        .addEventListener("click", function () {
-            add_subscription();
-        });
-    } catch (e) {
-        console.error(e);
-    }
-   }
-   
+ // Fetch data on current subscriptions on page-load
+ fetchData(not_show_by_default_columns).then(function (d) {
+    console.debug("read notes complete");
+    console.debug(not_show_by_default_columns);
+
+    // update the list of colmes and check/uncheck according to the list of columns to not display
+not_show_by_default_columns.forEach(column => {
+    toggleColumn(column, false,"subscriptionTable", table_columns_to_not_display_keyname);
+    document.getElementById(`toggle-${column}`).checked = false;
+});
+ });
+
+       // attach event listeners to the buttons     
+ try {
+     document
+     .getElementById("subscriptionsActivateAllButton")
+     .addEventListener("click", async function () {
+         activateAllSubscriptions();
+     });
+ } catch (e) {
+     console.error(e);
+ }
+
+ try {
+     document
+     .getElementById("subscriptionsSuspendAllButton")
+     .addEventListener("click", function () {
+         deactivateAllSubscriptions();
+     });
+ } catch (e) {
+     console.error(e);
+ }
+
+ try {
+     document
+     .getElementById("subscriptionsAddButton")
+     .addEventListener("click", function () {
+         add_subscription();
+     });
+ } catch (e) {
+     console.error(e);
+ }
+}
+
+
 
 
 
@@ -898,7 +908,7 @@ try {
     console.error(error);
 }
 }
-   
+
 
 
 // Locate all elements with the class "my-button"
@@ -1035,7 +1045,98 @@ function addSubscriptionTableRow(tableBody, row) {
     cell8.appendChild(deleteButton);
 }
 
+function DELETEsortTa() {
+    sortTable(event.target);
+}
 
+// Function to sort the table
+function DELETEsortTable(colheader) {
+    const columnIndex = colheader.parentNode.getAttribute("colindex");
+    console.log("sortable: " + columnIndex, colheader);
+
+    const table = document.querySelector('table[name="subscriptionTable"]');
+
+    let rows = Array.from(table.rows).slice(1); // Ignore the header
+    let sortedRows;
+
+    // Toggle sort state for the column
+    if (
+        sortStates[columnIndex] === "none" ||
+        sortStates[columnIndex] === "desc") {
+        sortStates[columnIndex] = "asc";
+    } else {
+        sortStates[columnIndex] = "desc";
+    }
+
+    // Sort based on the selected column and sort state
+    // Consider options for different types of sorting here.
+    if (columnIndex === 0) {
+        sortedRows = rows.sort((a, b) => {
+                return (
+                    Number(a.cells[columnIndex].innerText) -
+                    Number(b.cells[columnIndex].innerText));
+            });
+    } else {
+        sortedRows = rows.sort((a, b) =>
+                a.cells[columnIndex].innerText.localeCompare(
+                    b.cells[columnIndex].innerText));
+    }
+
+    if (sortStates[columnIndex] === "desc") {
+        sortedRows.reverse();
+    }
+
+    console.log(sortedRows);
+    // Remove existing rows
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+
+    // Append sorted rows
+    const tbody = table.getElementsByTagName("tbody")[0];
+    sortedRows.forEach((row) => tbody.appendChild(row));
+}
+
+function removeAllChildNodes(parent) {
+    console.log("removeAllChildNodes");
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
+function filterTable_a() {
+    //  console.log("filterTable_a " );
+
+    filterTable(event.target);
+}
+
+function filterTable(colheader) {
+    const columnIndex = colheader.parentNode.getAttribute("colindex");
+    //console.log(colheader);
+    console.log("filter on col: " + columnIndex);
+    //const input = colheader;
+    const filter = colheader.value.toUpperCase();
+    const table = document.querySelector('table[name="subscriptionTable"]');
+    const rows = table
+        .getElementsByTagName("tbody")[0]
+        .getElementsByTagName("tr");
+    //console.log("filter column:" + columnIndex);
+    //console.log("filter value:" + filter);
+
+    for (let i = 0; i < rows.length; i++) {
+        const cell = rows[i].getElementsByTagName("td")[columnIndex];
+        //console.log(cell);
+        if (cell) {
+            const content = cell.innerText || cell.textContent;
+            if (new RegExp(filter, "i").test(content)) {
+                //        console.log("not sho");
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+}
 
 async function remove_subscriber(subscriptionid, distributionlistid) {
     console.log("remove_subscriber");

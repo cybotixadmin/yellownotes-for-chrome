@@ -9,7 +9,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<title>Yellownote subscriptions</title>
 	</head>
-
 	<body>
 
 		<!-- side bar start here-->
@@ -19,8 +18,8 @@
 		<!-- main page start-->
 		<div class="pageBody">
 
-			<div name="login_status"/>
-
+			<b><div name="login_status"/></b>
+            
 			<div id="my_subscriptions_page_main_text"/>
 			<!-- action buttons -->
 			<div>
@@ -31,130 +30,106 @@
 				<button id="subscriptionsSuspendAllButton" class="suspendAllBtn">Suspend All</button>
 				<button id="subscriptionsActivateAllButton" class="activateAllBtn">Activate All</button>
 			</div>
-			<!-- Empty table structure -->
-			<div class="tabContent scrollable-table">
-				<div class="tableResponsive">
-					<table name="subscriptionTable">
-						<thead>
-							<tr class="fixed-header">
-								<th name="name" class="sortableCol displayname" sort_type="stringCaseExact">name<span class="sort-icon url">&#9650;</span></th>
-								<th name="description" class="sortableCol displayname" sort_type="stringCaseExact">description<span class="sort-icon url">&#9650;</span></th>
-								<th name="active">active<span class="sort-icon url">&#9650;</span></th>
-								<th name="subscribedate" class="sortableCol">since<span class="sort-icon url">&#9650;</span></th>
-								<th name="creatordisplayname">crea<span class="sort-icon url">&#9650;</span></th>
-								<th name="postcount">posts<span class="sort-icon url">&#9650;</span></th>
-								<th name="status">status<span class="sort-icon url">&#9650;</span></th>
-								<th name="actions">actions</th>
-							</tr>
-							<!-- populate the table with the distribution list owned by this user  
+<!-- Empty table structure -->
+<div class="tabContent scrollable-table">
+	<div class="tableResponsive">
+		<table name="subscriptionTable">
+			<thead>
+				<tr class="fixed-header">
+					<th name="name" class="sortableCol displayname" sort_type="stringCaseExact">name<span class="sort-icon url">&#9650;</span></th>
+					<th name="description" class="sortableCol displayname" sort_type="stringCaseExact">description<span class="sort-icon url">&#9650;</span></th>
+					<th name="active">active<span class="sort-icon url">&#9650;</span></th>
+					<th name="subscribedate" class="sortableCol">since<span class="sort-icon url">&#9650;</span></th>
+					<th name="creatordisplayname">crea<span class="sort-icon url">&#9650;</span></th>
+					<th name="postcount">posts<span class="sort-icon url">&#9650;</span></th>
+					<th name="status">status<span class="sort-icon url">&#9650;</span></th>
+					<th name="actions">actions</th>
+				</tr>
+				<!-- populate the table with the distribution list owned by this user  
 
 The lists are returned by calling to the background script.
 -->
-							<!-- Add a filter row -->
-							<tr class="fixed-header">
-								<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
-								<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
-								<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
+				<!-- Add a filter row -->
+				<tr class="fixed-header">
+					<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
+					<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
+					<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
 
-								<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
-								<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
-								<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
-								<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
-								<th class="displayname"/>
-							</tr>
-						</thead>
-						<tbody>
-							<!-- Rows will be added here -->
-						</tbody>
-					</table>
-				</div>
-
-
-
-      which columns to show
-				<div class="toggle-container">
-					<div class="toggle-button">
-						<label for="toggle-name">Name</label>
-						<input type="checkbox" id="toggle-name" checked>
-					</div><br/>
-					<div class="toggle-button">
-						<label for="toggle-description">Description</label>
-						<input type="checkbox" id="toggle-description" checked>
-					</div><br/>
-       
-       
-      
-					<div class="toggle-button">
-						<label for="toggle-active">active</label>
-						<input type="checkbox" id="toggle-active" checked>
-					</div>
-      
-					<div class="toggle-button">
-						<label for="toggle-subscribedate">subscribedate</label>
-						<input type="checkbox" id="toggle-subscribedate" checked>
-					</div>
-      
-					<div class="toggle-button">
-						<label for="toggle-creatordisplayname">creatordisplayname</label>
-						<input type="checkbox" id="toggle-creatordisplayname" checked>
-					</div>
-					<div class="toggle-button">
-						<label for="toggle-postcount">postcount</label>
-						<input type="checkbox" id="toggle-postcount" checked>
-					</div>
-					<div class="toggle-button">
-						<label for="toggle-status">status</label>
-						<input type="checkbox" id="toggle-status" checked>
-					</div>
-					<div class="toggle-button">
-						<label for="toggle-actions">Actions</label>
-						<input type="checkbox" id="toggle-actions" checked>
-					</div>
-				</div>
-
-				<!-- use this node to anchor -->
-				<div id="add_form">
-				</div>
-			</div>
+					<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
+					<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
+					<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
+					<th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "/></th>
+					<th class="displayname"/>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Rows will be added here -->
+			</tbody>
+		</table>
+	</div>
 
 
 
+	which columns to show
+	<div class="toggle-container">
+		<div class="toggle-button">
+			<label for="toggle-name">Name</label>
+			<input type="checkbox" id="toggle-name" checked>
+		</div><br/>
+		<div class="toggle-button">
+			<label for="toggle-description">Description</label>
+			<input type="checkbox" id="toggle-description" checked>
+		</div><br/>
 
-  
-			<!-- Empty table structure to contain a list of available distributions -->
-			<!--
-       available subscriptions
-  <div class="tabContent scrollable-table">
-    <div class="tableResponsive">
-      <table id="distributionsTable">
-        <thead>
-          <tr class="fixed-header">
-            <th>ID</th>
-            <th class="sortableCol">name</th>
-            <th>description</th>
-            <th>restrictions</th>
-            <th></th>
-          </tr>
 
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  -->
 
-			<div id="add_subscription_form">
-			</div>
+		<div class="toggle-button">
+			<label for="toggle-active">active</label>
+			<input type="checkbox" id="toggle-active" checked>
 		</div>
+
+		<div class="toggle-button">
+			<label for="toggle-subscribedate">subscribedate</label>
+			<input type="checkbox" id="toggle-subscribedate" checked>
+		</div>
+
+		<div class="toggle-button">
+			<label for="toggle-creatordisplayname">creatordisplayname</label>
+			<input type="checkbox" id="toggle-creatordisplayname" checked>
+		</div>
+		<div class="toggle-button">
+			<label for="toggle-postcount">postcount</label>
+			<input type="checkbox" id="toggle-postcount" checked>
+		</div>
+		<div class="toggle-button">
+			<label for="toggle-status">status</label>
+			<input type="checkbox" id="toggle-status" checked>
+		</div>
+		<div class="toggle-button">
+			<label for="toggle-actions">Actions</label>
+			<input type="checkbox" id="toggle-actions" checked>
+		</div>
+	</div>
+
+	<!-- use this node to anchor -->
+	<div id="add_form">
+	</div>
+</div>
+
+<div id="add_subscription_form">
+</div>
+		</div>
+		
+
 		<!-- main page end -->
-									
-		<script src="../content_scripts/NotesHandler.js"/>
-		<script src="../content_scripts/test.js"/>
+    <script src="./on_page_common.js"></script>
+   <!-- <script src="./on_page_create_note_html.js"></script>-->
+     <!-- reference functions needed to render a yellownote-->
+    <script src="../content_scripts/NotesHandler.js"></script>
+ <script src="../content_scripts/test.js"></script>
 
-		<script src="on_page_common.js"/>
-		<script src="my_subscriptions.js"/>
-
-					
+	  <script src="./my_subscriptions.js"></script>
+	
+	
 	</body>
 </html>

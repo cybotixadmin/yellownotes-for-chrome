@@ -1,0 +1,19 @@
+console.debug('my_account.js loaded');
+// check if the user is authenticated
+checkSessionJWTValidity()
+.then(isValid => {
+    console.debug('JWT is valid:', isValid);
+    if (isValid) {
+        console.debug("JWT is valid - show menu accordingly");
+        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+        
+    } else {
+        console.debug("JWT is not valid - show menu accordingly");
+        fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_unauthenticated.html", "my_notes_page_main_text").then(() => {});
+       
+    }
+
+})
+.catch(error => {
+    console.error('Error:', error.message);
+});

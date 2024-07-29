@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="on_page_common.css">
+		<link rel="stylesheet" href="sidebar.css">
+		<link rel="stylesheet" href="my_account.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>my account</title>
+	</head>
+	<body>
+		<!-- side bar start here-->
+		<div id="sidebar"/>
+		<!-- side bar end here -->
+		<!-- main page start-->
+		<div class="pageBody">Page body
+			<!-- depending on the login status of the user, display dfferent content
+If the user IS NOT authenticated:
+Display a message to the user to login or register.
+Followed by the front page of the app.
+If the user IS authenticated:
+Display the user's account information.
+
+-->
+			<b>
+				<div name="login_status"/>
+			</b>
+			<div id="front_page"/>
+			<div id="my_account_page_main_text"/>
+			<div id="account_information"/>
+		</div>
+		<!-- main page end -->
+		
+		<script src="./my_notes.js"/>
+	</body>
+</html>

@@ -1,56 +1,79 @@
-  /* General Styling */
-  body {
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-  }
-  
-  h1 {
-    text-align: center;
-    font-size: 14px;
-  }
-  
-  /* Add styles for scrollable table */
-  .scrollable-table {
-    height: 450px; /* Adjust height as needed */
-    overflow-y: auto;
-    display: block;
-  }
-
-  /* Table Styling */
-  table {
-    border: 1px solid #4CAF50;
-    border-collapse: collapse;
-    margin: 15px 0;
-    padding: 0;
-  
-    table-layout: fixed;
-  }
-  /* the first colum contains the data row ID. This information means nothing to the user, so do not display it*/
-  #dataTable th:first-child,
-  #dataTable td:first-child {
-    display: none;
-  }
-
-.fixed-header {
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 1;
+.banner {
+    background-color: #ffff00;
+    width: 300px;
+    height: 300px;
+    position: relative;
+    resize: both;
+    overflow: auto;
+    border: 3px solid black;
+    margin-bottom: 10px;
 }
 
-  table tr {
-    background: #f2f4f3;
-    border: 1px solid #c1e0c9;
-    padding: .35em;
-  }
-
-
-  table td {
-    padding: .625em;
+#drop_zone {
+    border: 2px dashed #0087F7;
+    background: #F3F4F6;
+    padding: 20px;
     text-align: center;
-  }
+    color: #BBBBBB;
+    width: 200px;
+    margin: 10px auto;
+    cursor: pointer;
+}
+
+input[type="color"] {
+    margin: 10px 0;
+}
+
+.box {
+    width: 50%; /* Each box takes up half of the container's width */
+   
+    display: flex;
+    align-items: center; /* Centers content vertically */
+    justify-content: center; /* Centers content horizontally */
+    border: 1px solid #000; /* Adds a border around each box */
+}
+
+/* move the body of the page away from the left side to provide space for the sidebar menu */ 
+.colorPicker{
+    background-color: white;
+    float: left;
+    height: 33.33%;
+    width: 50%;
+    }
+
+.noteEditor{
+    float: right;
+        background-color: lightred;
+        height: 100%; /* This box takes up the full height of the container */
+        display: flex;
+        width: 50%;
+        align-items: center; /* Centers content vertically */
+        justify-content: center; /* Centers content horizontally */
+        }
+    
+        .information{
+            background-color: lightyellow;
+            height: 33.33%;
+            width: 50%;
+            float: left;
+        }
+        
+.actionbuttons{
+    height: 33.33%;
+    width: 50%;
+        background-color: white;
+        float: left;
+        }
 
 
-
-
-
+        .remove-icon {
+            position: absolute;
+            top: 15px;
+            right: 40px;
+            cursor: pointer;
+            background: white;
+            color: black;
+            padding: 2px 5px;
+            font-size: 12px;
+            z-index: 150000;
+          }

@@ -1850,9 +1850,7 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
     console.debug("toggleColumn.start: " + columnName + " isChecked: " + isChecked, " in table name=" + tableName + " with local storage keyname: " + table_columns_to_not_display_keyname);
     //var table = document.getElementById("dataTable");
     var table = document.querySelector('table[name="' + tableName + '"]');
-    // find out which column has the name columnName
-    //console.debug(table);
-    // thead tr:nth-child(2)
+    // find out which column (and index) that has the name columnName
     var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
     console.debug(col);
     const columnIndex = getElementPosition(col);
@@ -1863,7 +1861,18 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
         }).catch(error => {
             console.error('Error:', error);
         });
-        hideColumn(columnName, true, tableName);
+        // carryout the hiding of the column, based on the column index value using the "hidden" class
+        table.querySelectorAll(':scope > * > tr').forEach(row => {
+            console.debug(row);
+            try {
+                console.debug(row.cells[columnIndex].classList);
+                row.cells[columnIndex].classList.add("hidden");
+            } catch (e) {
+                row.cells[columnIndex].class = "hidden";
+                console.error(e);
+            }
+        });
+        //hideColumn(columnName, true, tableName);
 
     } else {
         // To remove a value from the supression list
@@ -1872,8 +1881,17 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
         }).catch(error => {
             console.error('Error:', error);
         });
-       
-        hideColumn(columnName, false, tableName);
+       // carryout the un-hiding of the column, based on the column index value removing the "hidden" class
+       table.querySelectorAll(':scope > * > tr').forEach(row => {
+        console.debug(row);
+        try {
+            console.debug(row.cells[columnIndex].classList);
+            row.cells[columnIndex].classList.remove("hidden");
+        } catch (e) {
+            //row.cells[columnIndex].class = "hidden";
+            console.error(e);
+        }
+    });
     }
 
 }
