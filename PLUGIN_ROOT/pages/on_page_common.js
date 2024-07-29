@@ -58,14 +58,13 @@ const URI_plugin_user_get_active_feed_notes = "/api/v1.0/plugin_user_get_active_
 const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_abstracts_of_all_yellownotes";
 
 async function page_display_login_status() {
-    console.debug("display_login_status()");
+    console.debug("page_display_login_status()");
     //con
     try {
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         console.debug(session);
         console.debug(session[plugin_session_header_name]);
         var userid = null;
-
         userid = await get_username_from_sessiontoken(session[plugin_session_header_name]);
     } catch (e) {
         console.error(e);
@@ -405,6 +404,7 @@ function fetchAndDisplayStaticContent(url, dom_id) {
                     console.debug(doc.body.querySelector('div'));
                     // Append the content to the DOM node with ID 'form'
                     const formElement = document.getElementById(dom_id);
+                    console.debug(formElement);
                     if (formElement) {
                         formElement.appendChild(doc.body.querySelector('div'));
                         resolve(); // Resolve the promise here
@@ -634,9 +634,9 @@ function sortTable(table_name, columnIndex) {
     // if the current sort column is updates to asc or desc add it to the list of current sort columns.
     // if it is not on the list already, and if it is already on the list, remove the previous entry
 
-    console.debug("sortStates: ", sortStates);
-    console.debug("new_sortStates: ", new_sortStates);
-    console.debug("is current column index present in sortStates: ", new_sortStates.some(sortState => sortState.columnIndex === columnIndex));
+    //console.debug("sortStates: ", sortStates);
+    //console.debug("new_sortStates: ", new_sortStates);
+    //console.debug("is current column index present in sortStates: ", new_sortStates.some(sortState => sortState.columnIndex === columnIndex));
     // if current column is present in the sortStates array, remove it
     // this is the way to remove all sorting - by setting the sort order to none on any column that has it set to asc or desc
     if (new_sortStates.some(sortState => sortState.columnIndex === columnIndex)) {
@@ -658,7 +658,7 @@ function sortTable(table_name, columnIndex) {
 
     // refresh the sort icons across all columns to fit with the values in the new_sortStates array, and setting any columns not mention to the detault value of "▶" no sorting
     for (let i = 0; i < table.rows[0].cells.length; i++) {
-        console.debug("setting sort icon for column: ", i);
+        //console.debug("setting sort icon for column: ", i);
         const cell = table.rows[0].cells[i];
         const span = cell.querySelector("span");
         if (span) {
@@ -666,7 +666,7 @@ function sortTable(table_name, columnIndex) {
             if (sortState) {
                 span.textContent = sortState.sortOrder === 'asc' ? "▲" : "▼";
             } else {
-                console.debug("setting default sort icon for column: ", i);
+               // console.debug("setting default sort icon for column: ", i);
                 span.textContent = "▶";
             }
         }
@@ -1752,6 +1752,30 @@ function getClaimsFromJwt(token, claimNames) {
 }
 
 function getNotShowByDefaultColumns(key, defaultValue) {
+    console.debug("getNotShowByDefaultColumns: " + key  );
+    console.debug(defaultValue);
+  try{
+    let value = localStorage.getItem(key);
+            console.debug("reading (from key " + key + "): " + value);
+            console.debug(value);
+            if (value === null) {
+                console.debug("setting the default value of which columns should be hidden.");
+                // Apply the default value if nothing have been set
+                localStorage.setItem(key, JSON.stringify(defaultValue));
+
+                value = JSON.stringify(defaultValue);
+                console.debug("setting: " + value);
+            }
+            console.debug("returning: " + value);
+            // Parse the value to return as an array
+            return JSON.parse(value);
+        } catch (error) {
+            return defaultValue;
+        }
+}
+
+
+function getNotShowByDefaultColumns_asynch(key, defaultValue) {
     console.debug("getNotShowByDefaultColumns: " + key + " " + defaultValue);
     return new Promise((resolve, reject) => {
         try {
@@ -1775,6 +1799,7 @@ function getNotShowByDefaultColumns(key, defaultValue) {
         }
     });
 }
+
 
 /*
  * use by the procedure that persis which columns are to be display in tables
@@ -1838,6 +1863,34 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
         }).catch(error => {
             console.error('Error:', error);
         });
+        hideColumn(columnName, true, tableName);
+
+    } else {
+        // To remove a value from the supression list
+        modifyNotShowByDefaultColumns(columnName, 'unset', table_columns_to_not_display_keyname).then(updatedArray => {
+            console.debug(updatedArray);
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+       
+        hideColumn(columnName, false, tableName);
+    }
+
+}
+
+
+function hideColumn(columnName, hide, tableName) {
+    console.debug("hideColumn.start: " + columnName + " isChecked: " + hide, " in table name=" + tableName  );
+    //var table = document.getElementById("dataTable");
+    var table = document.querySelector('table[name="' + tableName + '"]');
+    // find out which column has the name columnName
+
+    var col = table.querySelector('thead tr:nth-child(1)').querySelector('[name = "' + columnName + '"]');
+    console.debug(col);
+    const columnIndex = getElementPosition(col);
+    console.debug("column to hide:", columnIndex);
+    if (hide) {
+            //console.debug(updatedArray);
         // loop over all rows and hide this column
         table.querySelectorAll('tr[selectablecol="true"]').forEach(row => {
             console.debug(row);
@@ -1855,12 +1908,6 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
         });
 
     } else {
-        // To remove a value from the supression list
-        modifyNotShowByDefaultColumns(columnName, 'unset', table_columns_to_not_display_keyname).then(updatedArray => {
-            console.debug(updatedArray);
-        }).catch(error => {
-            console.error('Error:', error);
-        });
         table.querySelectorAll('tr[selectablecol="true"]').forEach(row => {
 
             //  console.debug(row);
@@ -1872,6 +1919,8 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
     }
 
 }
+
+
 
 /**
  *  setup special handling for creating correctly fomated filter for the filter boxes for columns contianing dates
@@ -2538,6 +2587,37 @@ function addEventColumnToggleListeners(wordList, tableName) {
     });
 }
 
+
+function setColumnToggleMarks(wordList, tableName, unchecked) {
+    console.debug("setColumnToggleMarks.start");
+    console.debug(wordList);
+    console.debug(tableName);
+    wordList.forEach(word => {
+        console.debug(word);
+        const node = document.getElementById(`toggle-${word}`);
+        console.debug(node);
+    
+// set this node as checked if the node is not in the list of columns to not display
+if (unchecked.includes(word)) {
+    console.debug("unchecked " + word);
+
+    node.removeAttribute('checked');
+    }else{
+
+    console.debug("checked " + word);
+
+        //node.checked = !unchecked.includes(word);
+        node.setAttribute('checked', 'checked');
+        //node.removeAttribute('checked');
+
+    //node.setAttribute('checked', 'checked');
+}
+        //document.getElementById(`toggle-${word}`).addEventListener('change', function () {
+       //     toggleColumn(word, this.checked, tableName, table_columns_to_not_display_keyname);
+       // });
+    });
+}
+
 function setupTableFilteringAndSorting(table_name) {
     console.debug("setupTableFilteringAndSorting.start (" + table_name + ")");
 
@@ -2556,16 +2636,16 @@ function setupTableFilteringAndSorting(table_name) {
 
     // Locate all cells that are used for filtering of search results
     const f_cells = document.querySelector('table[name="' + table_name + '"]').querySelectorAll("thead tr:nth-child(2) th");
-    console.debug(f_cells);
+    //console.debug(f_cells);
     len = f_cells.length;
     for (var i = 0; i < f_cells.length; i++) {
         //work with regexp in cell
-        console.debug(f_cells[i]);
+        //console.debug(f_cells[i]);
         // set column index number for each column
         // f_cells[i].setAttribute("colindex", i);
         f_cells[i].addEventListener('input', function (event) {
             //filterTableAllCols(table_name);
-            console.debug("calling triggerFilters");
+          //  console.debug("calling triggerFilters");
             triggerFilters(table_name);
         }, false);
         f_cells[i].addEventListener('change', function (event) {

@@ -140,7 +140,7 @@ fetchData(not_show_by_default_columns).then(() => {
     console.debug(not_show_by_default_columns);
 
     not_show_by_default_columns.forEach(column => {
-        toggleColumn(column, false, "subscribedNotesTable", table_columns_to_not_display_keyname);
+        toggleColumn(column, false, table_name, table_columns_to_not_display_keyname);
         document.getElementById(`toggle-${column}`).checked = false;
     });
     console.debug("apply sorting");

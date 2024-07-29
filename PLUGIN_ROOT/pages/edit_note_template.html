@@ -1,54 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8"></meta>
-        <title>edit yellownote template</title>
-        <link rel="stylesheet" href="edit_note_template.css"></link>
-        <link rel="stylesheet" href="on_page_common.css"></link>
-        <link rel="stylesheet" href="sidebar.css"></link>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
-    </head>
-    <body>
+	<head>
+	 <meta charset="UTF-8">
+		<title>edit yellownote template</title>
+		<link rel="stylesheet" href="edit_note_template.css">
+		<link rel="stylesheet" href="on_page_common.css">
+		<link rel="stylesheet" href="sidebar.css">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	</head>
+	<body>
 
-        <!-- side bar start here-->
-        <div id="sidebar"></div>
-        <!-- side bar end here -->
+	
 
-        <div class="pageBody">
+
+		<!-- side bar start here-->
+		<div id="sidebar"/>
+		<!-- side bar end here -->
+
+		<!-- main page start-->
+		<div class="pageBody">
 
     
-        <b><div name="login_status"></div></b>
+			<b><div name="login_status"/></b>
             
-        <div id="edit_note_creator_default_template_top_text"></div>
+			<div id="edit_note_creator_default_template_top_text"/>
 
-            <div class="information" id="editnotetemplate_information">
-            </div>
+			<div class="information" id="editnotetemplate_information">
+			</div>
 
-            <div class="noteEditor" >
-                <div id="bannerContainer" class="banner">
-                    <div id="drop_zone" style="z-index: 1400; position: relative;">
+			<div class="noteEditor">
+				<div id="bannerContainer" class="banner">
+					<div id="drop_zone" style="z-index: 1400; position: relative;">
                        
                        
-                        <span class="remove-icon">[remove]</span>
-            Drag-n-drop to upload your banner here</div>
-                </div>
-                <input type="file" id="file_input" style="display: none;"/>
-            </div>
-            <div class="box colorPicker" >
-                <p/>Select color
-                <input type="color" id="colorPicker" value="#ffff00"/>
-            </div>
-            <div class="box " style="right: 40px;" >
+						<span class="remove-icon">[remove]</span>
+            Drag-n-drop to upload your banner here					</div>
+				</div>
+				<input type="file" id="file_input" style="display: none;"/>
+			</div>
+			<div class="box colorPicker">
+				<p/>Select color
+				<input type="color" id="colorPicker" value="#ffff00"/>
+			</div>
+			<div class="box " style="right: 40px;">
                 Edit your public display name
-                <input id="displayName"></input>
+				<input id="displayName"/>
                 
-                </div>
-            <div class="box actionbuttons">
-                <button id="saveButton" >Save changes</button>
-            </div> 
-        </div> 
-        <script src="on_page_common.js"></script>
-        <script src="edit_note_template_script.js"></script>
-    </body>
+			</div>
+			<div class="box actionbuttons">
+				<button id="saveButton">Save changes</button>
+			</div>
+		</div>
+		
+
+		<!-- main page end -->
+    <script src="./on_page_common.js"></script>
+   <!-- <script src="./on_page_create_note_html.js"></script>-->
+     <!-- reference functions needed to render a yellownote-->
+    <script src="../content_scripts/NotesHandler.js"></script>
+ <script src="../content_scripts/test.js"></script>
+
+	  <script src="./edit_note_template_script.js"></script>
+	
+	
+	</body>
 </html>

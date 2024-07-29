@@ -1,38 +1,37 @@
+//
+console.debug("running script in edit_note_template_script.js");
 
 
-// check if the user is authenticated
-checkSessionJWTValidity()
-  .then(isValid => {
-      console.debug('JWT is valid:', isValid);
-if (isValid){
-    console.debug("JWT is valid - show menu accordingly");
-    fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
-    fetchAndDisplayStaticContent("../fragments/en_US/edit_note_creator_default_template_top_text.html", "edit_note_creator_default_template_top_text").then(() => {});
-    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
-        //page_display_login_status();
-       // login_logout_action();
-      });
-    
-      page_display_login_status();
-}else{
-    console.debug("JWT is not valid - show menu accordingly");
-   
-      
-      page_display_login_status();
-    }
+try {
+    // check if the user is authenticated
+    checkSessionJWTValidity()
+    .then(isValid => {
+        console.debug('JWT is valid:', isValid);
+        if (isValid) {
+            console.debug("JWT is valid - show menu accordingly");
+            //fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
+            //fetchAndDisplayStaticContent("../fragments/en_US/edit_note_creator_default_template_top_text.html", "edit_note_creator_default_template_top_text").then(() => {});
+            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {});
+            //page_display_login_status();
+        } else {
+            console.debug("JWT is not valid - show menu accordingly");
+            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {});
 
-  })
-  .catch(error => {
-      console.error('Error:', error.message);
-  });
+            //page_display_login_status();
+        }
 
-
+    })
+    .catch(error => {
+        console.error('Error:', error.message);
+    });
+} catch (e) {
+    console.error(e);
+}
 
 document.getElementById('drop_zone').addEventListener('click', function () {
     console.debug("drop_zone clicked");
     document.getElementById('file_input').click();
 });
-
 
 var note_properties = {
     note_color: "#FFFF00",
@@ -42,30 +41,30 @@ var note_properties = {
 
 };
 
+
 document.getElementById('file_input').addEventListener('change', handleFileSelect, false);
 document.getElementById('colorPicker').addEventListener('input', changeBannerColor, false);
 document.getElementById('saveButton').addEventListener('click', saveData, false);
 document.getElementById('drop_zone').addEventListener('dragover', handleDragOver, false);
 document.getElementById('drop_zone').addEventListener('drop', handleFileDrop, false);
 
-
-document.querySelector('.remove-icon').addEventListener('click', function(event) {
+document.querySelector('.remove-icon').addEventListener('click', function (event) {
     // Prevent the event from bubbling up to parent elements
     event.stopPropagation();
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
-    
+
     // First, retrieve the plugin UUID
     chrome.storage.local.get([plugin_uuid_header_name])
-      .then(function(result) {
+    .then(function (result) {
         ynInstallationUniqueId = result[plugin_uuid_header_name];
-    
+
         // After successfully retrieving the UUID, retrieve the session
         return chrome.storage.local.get([plugin_session_header_name]);
-      })
-      .then(function(result) {
+    })
+    .then(function (result) {
         xYellownotesSession = result[plugin_session_header_name];
-    
+
         // remove the banner image from the page
 
 
@@ -77,46 +76,42 @@ document.querySelector('.remove-icon').addEventListener('click', function(event)
             console.debug('Banner image data not found on page');
         }
 
-
-
         console.debug("Installation Unique ID:", ynInstallationUniqueId);
         console.debug("Session:", xYellownotesSession);
-      })
-      .catch(function(error) {
+    })
+    .catch(function (error) {
         console.error("Error fetching data from chrome storage:", error);
-      }).then(function(result) {
+    }).then(function (result) {
         // After fetching the values, perform the fetch call
-     console.debug("make API call to remove banner");
-    
-     // Perform the fetch call in the background
-        return fetch(server_url+ plugin_remove_banner_uri, { 
+        console.debug("make API call to remove banner");
+
+        // Perform the fetch call in the background
+        return fetch(server_url + plugin_remove_banner_uri, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 [plugin_uuid_header_name]: ynInstallationUniqueId,
                 [plugin_session_header_name]: xYellownotesSession,
             },
-        
+
         });
-      }) 
-      .then(response => {
+    })
+    .then(response => {
         // Check if the response is ok (status 200-299)
         if (!response.ok) {
-          throw new Error('Network response was not ok: ' + response.statusText);
+            throw new Error('Network response was not ok: ' + response.statusText);
         }
         return response.json(); // Parse JSON response
-      })
-      .then(data => {
+    })
+    .then(data => {
         // Log the success data to console
         console.debug('Success:', data);
-      })
-      .catch(error => {
+    })
+    .catch(error => {
         // Log any errors to the console
         console.error('Error:', error);
-      });
-  });
-  
-
+    });
+});
 
 function handleFileSelect(evt) {
     console.debug("handleFileSelect()");
@@ -168,42 +163,38 @@ function processFile(file) {
 
         // update the banner image on screen
 
-// delete any image already present
-const exitingBannerImgElement = document.getElementById('bannerImage');
-if (exitingBannerImgElement) {
-    exitingBannerImgElement.remove();
-}
+        // delete any image already present
+        const exitingBannerImgElement = document.getElementById('bannerImage');
+        if (exitingBannerImgElement) {
+            exitingBannerImgElement.remove();
+        }
 
         // <img id="bannerImage" style="z-index: 1400; position: relative;" alt="Banner Image"/>
-//        const bannerImgElement = document.getElementById('bannerImage');
+        //        const bannerImgElement = document.getElementById('bannerImage');
         const bannerImgElement = document.createElement('img');
-        bannerImgElement.setAttribute( "id", "bannerImage");
-        bannerImgElement.setAttribute( "style", "z-index: 1400; position: relative;");
-        bannerImgElement.setAttribute( "alt", "Banner Image");
-        bannerImgElement.setAttribute( "src", base64Image);
+        bannerImgElement.setAttribute("id", "bannerImage");
+        bannerImgElement.setAttribute("style", "z-index: 1400; position: relative;");
+        bannerImgElement.setAttribute("alt", "Banner Image");
+        bannerImgElement.setAttribute("src", base64Image);
 
         console.debug(bannerImgElement);
         const contElem = document.getElementById('drop_zone');
-        try{
-      // Insert the new node as the first child of the parent node
-if (contElem.firstChild) {
-    // If the parent already has a first child, insert before it
-    contElem.insertBefore(bannerImgElement, contElem.firstChild);
-} else {
-    // If the parent has no children, simply append the new node
-    contElem.appendChild(bannerImgElement);
-}
-   }catch(e){
+        try {
+            // Insert the new node as the first child of the parent node
+            if (contElem.firstChild) {
+                // If the parent already has a first child, insert before it
+                contElem.insertBefore(bannerImgElement, contElem.firstChild);
+            } else {
+                // If the parent has no children, simply append the new node
+                contElem.appendChild(bannerImgElement);
+            }
+        } catch (e) {}
 
-        }
-
-
-
-     //   if (bannerImgElement) {
-     //       bannerImgElement.src = base64Image;
-     //   } else {
-     //       console.debug('Banner image data not found in response');
-     //   }
+        //   if (bannerImgElement) {
+        //       bannerImgElement.src = base64Image;
+        //   } else {
+        //       console.debug('Banner image data not found in response');
+        //   }
     };
     reader.readAsDataURL(file);
 }
@@ -225,37 +216,31 @@ async function saveData() {
 
     const displayName = document.getElementById('displayName').value;
 
-
     const bannerImgElement = document.getElementById('bannerImage');
-        if (bannerImgElement) {
-            
-            var img = "";
-    
-            img = bannerImgElement.src;
-    
-    newdata = {
-        banner_image: img,
-        note_display_name: displayName,
-        note_color: color,
-        box_width: width + "px",
-        box_height: height + "px"
-    };
-}else{
-    newdata = {
-        note_color: color,
-        note_display_name: displayName,
-        box_width: width + "px",
-        box_height: height + "px",
-        banner_image: ""
-        
-    };
+    if (bannerImgElement) {
 
+        var img = "";
 
-}
+        img = bannerImgElement.src;
 
+        newdata = {
+            banner_image: img,
+            note_display_name: displayName,
+            note_color: color,
+            box_width: width + "px",
+            box_height: height + "px"
+        };
+    } else {
+        newdata = {
+            note_color: color,
+            note_display_name: displayName,
+            box_width: width + "px",
+            box_height: height + "px",
+            banner_image: ""
 
+        };
 
-
+    }
 
     let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
     let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -322,18 +307,17 @@ async function fetchAndUpdateBannerImage() {
         console.debug(data);
 
         var bannerImgElement; // = document.getElementById('bannerImage');
-console.debug(bannerImgElement);
         console.debug(bannerImgElement);
+        //console.debug(bannerImgElement);
 
-        
         if (data.banner_image) {
             // image was returned from the storeprofile
             bannerImgElement = document.createElement("img");
             bannerImgElement.src = data.banner_image;
             bannerImgElement.id = "bannerImage";
-            bannerImgElement.setAttribute( "style", "z-index: 1400; position: relative;");
-            bannerImgElement.setAttribute( "alt", "Banner Image");
-            
+            bannerImgElement.setAttribute("style", "z-index: 1400; position: relative;");
+            bannerImgElement.setAttribute("alt", "Banner Image");
+
         } else {
             console.debug('Banner image data not found in response');
         }
@@ -342,8 +326,8 @@ console.debug(bannerImgElement);
             document.getElementById('bannerContainer').querySelector('#drop_zone').appendChild(bannerImgElement);
             const n = document.getElementById('bannerContainer').querySelector('#drop_zone');
             n.insertBefore(bannerImgElement, n.firstChild);
- 
-         }
+
+        }
         const colorElement = document.getElementById('colorPicker');
         if (data.note_color) {
             colorElement.value = data.note_color;
@@ -362,11 +346,15 @@ console.debug(bannerImgElement);
             document.getElementById('bannerContainer').style.height = data.box_height;
         } else {
             console.debug('Banner height data not found in response');
-        }       
+        }
 
     })
     .catch(error => console.error('Fetch error:', error));
 }
 
 // Call the function to update the banner image
-fetchAndUpdateBannerImage();
+try {
+    fetchAndUpdateBannerImage();
+} catch (e) {
+    
+}

@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="on_page_common.css">
-    <link rel="stylesheet" href="sidebar.css">
-    <link rel="stylesheet" href="my_account.css">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>my account</title>
-</head>
-<body>
- <!-- side bar start here-->
- <div id="sidebar"></div>
-<!-- side bar end here -->
-
-<!-- main page start-->
-<div class="pageBody">
-<!-- depending on the login status of the user, display dfferent content
+	<head>
+		<meta charset="UTF-8"/>
+		<link rel="stylesheet" href="on_page_common.css"/>
+		<link rel="stylesheet" href="sidebar.css"/>
+		<link rel="stylesheet" href="my_account.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>my account</title>
+	</head>
+	<body>
+		<!-- side bar start here-->
+		<div id="sidebar"/>
+		<!-- side bar end here -->
+		<!-- main page start-->
+		<div class="pageBody">
+			<!-- depending on the login status of the user, display dfferent content
 If the user IS NOT authenticated:
 Display a message to the user to login or register.
 Followed by the front page of the app.
@@ -24,25 +23,19 @@ If the user IS authenticated:
 Display the user's account information.
 
 -->
+			<b>
+				<div name="login_status"/>
+			</b>
+			<div id="front_page"/>
+			<div id="my_account_page_main_text"/>
+			<div id="account_information"/>
+		</div>
+		<!-- main page end -->
+		
+		    <script src="../content_scripts/NotesHandler.js"></script>
+    <script src="../content_scripts/test.js"></script>
 
-<b><div name="login_status"></div></b>
-
-<div id="front_page"></div>
-
-
-<div id="my_account_page_main_text"></div>
-  
-
-<div id="account_information"></div>
-
-</div>
-
-<!-- main page end -->
-
-<script  src="on_page_common.js"></script>
-<script src="my_account.js"></script>
-
-
-</body>
+		<script src="on_page_common.js"/>
+		<script src="my_account.js"/>
+	</body>
 </html>
-    

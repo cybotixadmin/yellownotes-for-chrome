@@ -107,7 +107,11 @@ var pageFullyLoaded = false;
 // set a listener for when the page is completely loaded, and then call the function to scan the page
 // and call for any yellownotes that may be applicable to the page
  */
-window.addEventListener('load', function () {
+// only attach this event listeners to pages where the url has protocol http, https or file
+if (window.location.protocol == "http:" || window.location.protocol == "https:" || window.location.protocol == "file:") {
+    console.debug("attaching event listener for page fully loaded");
+  
+    window.addEventListener('load', function () {
     console.debug('###########################');
     console.debug('Page fully loaded');
     console.debug('###########################');
@@ -154,7 +158,7 @@ window.addEventListener('load', function () {
     });
 
 });
-
+}
 
 /*
 this function carried out the updates to which notes are shown on the page.

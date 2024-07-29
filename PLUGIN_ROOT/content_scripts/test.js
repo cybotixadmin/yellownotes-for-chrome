@@ -227,8 +227,11 @@ function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, 
                         cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
                     }
                     console.debug("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
+                    try{
                     content_iframe.contentWindow.scrollTo(scrollPosition.x, framenote_scroll_y);
-
+                    }catch(e){
+                        console.error(e);
+                    }
                     resolve(cont1);
                 });
 
@@ -341,9 +344,9 @@ function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, 
 
 
 function createDropdown(optionsArray, selectedDistributionListId) {
-    console.debug("createDropdown.start");
-    console.debug(optionsArray);
-    console.debug(selectedDistributionListId);
+    //console.debug("createDropdown.start");
+    //console.debug(optionsArray);
+    //console.debug(selectedDistributionListId);
     // Create a select element
     const selectElement = document.createElement('select');
 
@@ -368,19 +371,19 @@ function createDropdown(optionsArray, selectedDistributionListId) {
     // Add an event listener for the 'change' event
     selectElement.addEventListener('change', (event) => {
         const selectedId = event.target.value;
-        console.debug(event.target.parentNode);
-        console.debug(event.target.parentNode.parentNode);
-        console.debug(event.target.parentNode.parentNode.firstChild.textContent);
+        //console.debug(event.target.parentNode);
+        //console.debug(event.target.parentNode.parentNode);
+        //console.debug(event.target.parentNode.parentNode.firstChild.textContent);
         noteid = event.target.parentNode.parentNode.firstChild.textContent;
 
         // Only trigger fetch call if the selected value is not empty
         if (selectedId) {
-            console.debug("update the note with this distrubtionlistid: " + selectedId);
+            //console.debug("update the note with this distrubtionlistid: " + selectedId);
 
             setNoteDistributionlistId(noteid, selectedId);
 
         } else {
-            console.debug("no distributionlist selected");
+            //console.debug("no distributionlist selected");
             // remove distributionlist from note
 
             setNoteDistributionlistId(noteid, "");
