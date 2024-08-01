@@ -7,8 +7,10 @@ checkSessionJWTValidity()
     if (isValid) {
         console.debug("JWT is valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/publicprofile_main_text.html", "publicprofile_main_text").then(() => {});
-        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
-            //page_display_login_status();
+        const uuid = localStorage.getItem("creatorid");
+        const replacements = {creatorid: uuid};
+        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
+        //page_display_login_status();
             // login_logout_action();
         });
 

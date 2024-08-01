@@ -10,7 +10,10 @@ try {
         if (isValid) {
             console.debug("JWT is valid - show menu accordingly");
             fetchAndDisplayStaticContent("../fragments/en_US/my_account_page_header_authenticated.html", "my_account_page_main_text").then(() => {});
-            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {});
+
+            const uuid = localStorage.getItem("creatorid");
+            const replacements = {creatorid: uuid};
+            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {});
             //page_display_login_status();
         } else {
             console.debug("JWT is not valid - show menu accordingly");

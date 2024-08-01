@@ -7,10 +7,13 @@ checkSessionJWTValidity()
         console.debug("JWT is valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
         fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_explanation.html", "my_notes_page_footer_text").then(() => {});
-        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        const uuid = localStorage.getItem("creatorid");
+        const replacements = {creatorid: uuid};
+        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
             //page_display_login_status();
-            // login_logout_action();
-        });
+                // login_logout_action();
+            });
+    
 
         page_display_login_status();
     } else {
@@ -108,6 +111,14 @@ const column_list = ['createtime', 'lastmodifiedtime', 'type', 'feed', 'location
 // attach event listeners to the column toggle checkboxes
 addEventColumnToggleListeners(column_list, table_name);
 
+
+
+
+// setup table items for sorting and filtering
+setupTableFilteringAndSorting(table_name);
+
+
+
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
 
@@ -131,9 +142,24 @@ if (pagewidth < 300) {
 console.debug("not_show_by_default_columns: " + not_show_by_default_columns);
 console.debug("not_show_by_default_columns.length: " + not_show_by_default_columns.length);
 
+
+
+  // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
+  getNotShowByDefaultColumns_asynch(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+    not_show_by_default_columns = columns;
+    console.log(not_show_by_default_columns);
+}).catch(error => {
+    console.error('Error:', error);
+});
+
+
+
+
 // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
-console.debug("calling: getNotShowByDefaultColumns");
-not_show_by_default_columns = getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns);
+//console.debug("calling: getNotShowByDefaultColumns");
+//not_show_by_default_columns = getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns);
+
+
 
 console.debug("not_show_by_default_columns: " + not_show_by_default_columns);
 console.debug("not_show_by_default_columns.length: " + not_show_by_default_columns.length);
@@ -143,16 +169,16 @@ console.debug("not_show_by_default_columns.length: " + not_show_by_default_colum
 //setColumnToggleMarks(column_list, table_name, not_show_by_default_columns);
 
 // hid the column headers that should not be shown
-console.debug("calling: hideColumns");
+//console.debug("calling: hideColumns");
 //not_show_by_default_columns.forEach(column => { hideColumn(column, false, table_name); });
      // update the list of columns and check/uncheck according to the list of columns to not display
-     not_show_by_default_columns.forEach(column => {
-        toggleColumn(column, false,table_name, table_columns_to_not_display_keyname);
-        document.getElementById(`toggle-${column}`).checked = false;
-    });
+     //not_show_by_default_columns.forEach(column => {
+     //   toggleColumn(column, false,table_name, table_columns_to_not_display_keyname);
+     //   document.getElementById(`toggle-${column}`).checked = false;
+   // });
+
 
 // create event listeners for the column toggle checkboxes
-
 addEventColumnToggleListeners(column_list, table_name);
 
 
@@ -172,27 +198,20 @@ fetchData(not_show_by_default_columns).then(function (d) {
     });
 
     // update the list of columns and check/uncheck according to the list of columns to not display
-    not_show_by_default_columns.forEach(column => {
-        console.debug("hide column: ", column);
-        console.debug("calling: hideColumn");
+    //not_show_by_default_columns.forEach(column => {
+     //   console.debug("hide column: ", column);
+     //   console.debug("calling: hideColumn");
         //toggleColumn(column, false, table_name, table_columns_to_not_display_keyname);
-        hideColumn(column, false, table_name);
-        document.getElementById(`toggle-${column}`).checked = false;
+      //  hideColumn(column, false, table_name);
+      //  document.getElementById(`toggle-${column}`).checked = false;
 
         // itterate through all entries in the yellownote column and reder as graphical yellow notes their contents
 
-        const querySelector = 'tr td:nth-child(2)';
+    //    const querySelector = 'tr td:nth-child(2)';
 
-        console.debug("calling updateTableColumn");
-        // Call the updateTableColumn function
-        //updateTableColumn(querySelector, processCellValue).then((note_root) => {
-        //    console.debug('All table cells have been processed and updated.');
-        //    console.debug(note_root);
-        //}).catch(error => {
-        ///    console.error('Error processing table cells:', error);
-        //});
-
-    });
+  //      console.debug("calling updateTableColumn");
+   
+   // });
 
 });
 
@@ -366,14 +385,12 @@ async function editNote(noteid) {
     }
 }
 
-// setup table items for sorting and filtering
-setupTableFilteringAndSorting(table_name);
 
 // Sort states for each column
-const sortStates = {
-    0: 'none', // None -> Ascending -> Descending -> None -> ...
-    1: 'none'
-};
+//const sortStates = {
+//    0: 'none', // None -> Ascending -> Descending -> None -> ...
+//    1: 'none'
+//};
 
 // Fetch data on page load
 

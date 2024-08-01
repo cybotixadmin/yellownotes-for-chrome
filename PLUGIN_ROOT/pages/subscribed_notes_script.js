@@ -68,11 +68,13 @@ checkSessionJWTValidity()
 
         fetchAndDisplayStaticContent("../fragments/en_US/subscribed_notes_page_explanation.html", "subscribed_notes_page_footer_text").then(() => {});
 
-        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+        const uuid = localStorage.getItem("creatorid");
+        const replacements = {creatorid: uuid};
+        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
             //page_display_login_status();
-            // login_logout_action();
-
-        });
+                // login_logout_action();
+            });
+    
         page_display_login_status();
     } else {
         console.debug("JWT is not valid - show menu accordingly");

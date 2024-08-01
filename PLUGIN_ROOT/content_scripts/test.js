@@ -581,7 +581,6 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
             // Create a new img element
             creator_banner_image = creatorDetails.banner_image;
         }
-
     } else {
         console.debug("no creator details, consequently no banner image")
         // no creator details, therefore no banner image
@@ -662,7 +661,7 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
 /**
  *
 
- * create bottom bar of the note. This bar is only visible/accessible to those wit hediting priviliges on the note (owner/creator)
+ * create bottom bar of the note. This bar is only visible/accessible to those with editing priviliges on the note (typically the owner/creator)
 
  * @param {*} cont1
  * @param {*} creatorDetails
@@ -679,8 +678,8 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
 
         // expand the note downwards by the height of the bottom bar
       
-        // the enable checkbox should be set(or unset) according to the note object data
-        if (note_object_data.hasOwnProperty("enabled")) {
+        // the enable checkbox should be set(or unset) according to the value of "enabled_status" in the note object data 
+        if (note_object_data.hasOwnProperty("enabled_status")) {
             console.debug(note_object_data.enabled);
             const enablecheckbox = cont1.querySelector('input[type="checkbox"][name="enabled_status"]');
             console.debug(enablecheckbox);

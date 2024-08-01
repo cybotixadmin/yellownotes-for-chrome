@@ -1022,11 +1022,13 @@ const sortStates = {
         if (isValid) {
             console.debug("JWT is valid - show menu accordingly");
             fetchAndDisplayStaticContent("../fragments/en_US/my_notes_page_header_authenticated.html", "my_notes_page_main_text").then(() => {});
-            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+            const uuid = localStorage.getItem("creatorid");
+            const replacements = {creatorid: uuid};
+            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
                 //page_display_login_status();
-                // login_logout_action();
-
-            });
+                    // login_logout_action();
+                });
+        
 
             //page_display_login_status();
 

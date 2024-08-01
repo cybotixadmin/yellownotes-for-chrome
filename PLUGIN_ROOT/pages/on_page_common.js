@@ -335,7 +335,13 @@ function checkSessionJWTValidity() {
             } else {
                 try {
                     const displayName = extractClaimFromJWT(jwt, 'displayname');
+                    const creatorid = extractClaimFromJWT(jwt, 'uuid');
+                    
+                    localStorage.setItem("creatorid", creatorid);
+                    localStorage.setItem("displayName", displayName);
+
                     console.debug("displayname: " + displayName);
+                    console.debug("creatorid: " + creatorid);
                     if (typeof displayName === 'string' && displayName.length > 4 && displayName.length < 100) {
                         resolve(true); // Valid display name found
                     } else {
@@ -374,9 +380,9 @@ async function get_displayname_from_sessiontoken(token) {
     }
 }
 
-// call for a html faile and inserts the content of this html fil into the DOM at the location of the element with the id dom_id
+// call for a html file and inserts the content of this html fil into the DOM at the location of the element with the id dom_id
 
-function fetchAndDisplayStaticContent(url, dom_id) {
+function DELETEfetchAndDisplayStaticContent(url, dom_id) {
     return new Promise((resolve, reject) => {
         console.debug("fetchAndDisplayStaticContent()");
         console.debug("place ", url);
@@ -427,6 +433,83 @@ function fetchAndDisplayStaticContent(url, dom_id) {
 
     });
 }
+
+
+// call for a html file and inserts the content of this html fil into the DOM at the location of the element with the id dom_id
+
+function fetchAndDisplayStaticContent(url, dom_id, replacements) {
+    return new Promise((resolve, reject) => {
+        console.debug("fetchAndDisplayStaticContent()");
+        console.debug("place ", url);
+        console.debug("on ", dom_id);
+        console.debug("wih replacements ", replacements);
+
+        try {
+            // Security measure 1
+            // only accept URLs matching a specific pattern - URLs pointing to a subset of local files
+            const notespage = new RegExp(/^\.\.\/fragments\//);
+            console.debug(notespage.test(url));
+            if (notespage.test(url)) {
+                fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    var new_text = html;
+                    if (replacements != null && replacements != undefined){ 
+                        new_text = replacePatterns(html, replacements);
+                        console.debug(new_text);
+     
+                    }else{
+     
+                    }
+
+                    const doc = parser.parseFromString(new_text, 'text/html');
+
+                    console.debug(doc.body);
+
+                    // Security measure 2
+                    // Remove script tags
+                    const scripts = doc.querySelectorAll('script');
+                    scripts.forEach(script => script.remove());
+
+                    console.debug(doc.body.querySelector('div'));
+                    // Append the content to the DOM node with ID 'form'
+                    const formElement = document.getElementById(dom_id);
+                    console.debug(formElement);
+                    if (formElement) {
+                        formElement.appendChild(doc.body.querySelector('div'));
+                        resolve(); // Resolve the promise here
+                    } else {
+                        console.error('Element with ID "' + dom_id + '" not found.');
+                        reject('Element with ID "form" not found.'); // Reject the promise here
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching and parsing content:', error);
+                    reject(error); // Reject the promise on fetch error
+                });
+            } else {
+                reject('Invalid URL'); // Reject the promise if URL does not match
+            }
+        } catch (e) {
+            console.error(e);
+            reject(e);
+        }
+
+    });
+}
+
+
+function replacePatterns(text, replacements) {
+    // Loop through each key-value pair in the replacements object
+    for (const [key, value] of Object.entries(replacements)) {
+      // Create a regex pattern to match $$key$
+      const pattern = new RegExp(`\\$\\$${key}\\$`, 'g');
+      // Replace all occurrences of the pattern with the value
+      text = text.replace(pattern, value);
+    }
+    return text;
+  }
 
 async function login_logout_action() {
     console.debug("login_logout_action()");
@@ -1633,7 +1716,7 @@ function getStatusValue(url, header1, value1, header2, value2) {
 }
 
 // the session token is not completed as yet
-function get_username_from_sessiontoken(token) {
+function DELETEget_username_from_sessiontoken(token) {
 
     console.debug("get_username_from_sessiontoken()");
     console.debug(token);
@@ -1877,15 +1960,15 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
     } else {
         // To remove a value from the supression list
         modifyNotShowByDefaultColumns(columnName, 'unset', table_columns_to_not_display_keyname).then(updatedArray => {
-            console.debug(updatedArray);
+           // console.debug(updatedArray);
         }).catch(error => {
             console.error('Error:', error);
         });
        // carryout the un-hiding of the column, based on the column index value removing the "hidden" class
        table.querySelectorAll(':scope > * > tr').forEach(row => {
-        console.debug(row);
+        //console.debug(row);
         try {
-            console.debug(row.cells[columnIndex].classList);
+            //console.debug(row.cells[columnIndex].classList);
             row.cells[columnIndex].classList.remove("hidden");
         } catch (e) {
             //row.cells[columnIndex].class = "hidden";

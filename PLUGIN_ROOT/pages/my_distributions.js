@@ -18,10 +18,13 @@ if (isValid){
     fetchAndDisplayStaticContent("../fragments/en_US/my_distributions_field_explanation.html", "my_distributions_field_explanations").then(() => {});
 
 
-    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar").then(() => {
+    const uuid = localStorage.getItem("creatorid");
+    const replacements = {creatorid: uuid};
+    fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
         //page_display_login_status();
-       // login_logout_action();
-      });
+            // login_logout_action();
+        });
+
     
       page_display_login_status();
 }else{
