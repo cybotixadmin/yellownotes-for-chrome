@@ -243,7 +243,7 @@ function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
                     return cacheData(nodeid, node_root);
                 }).then(function () {
                     console.debug('Cached data for', nodeid);
-                    console.debug(node_root.outerHTML);
+                    //console.debug(node_root.outerHTML);
                     resolve(node_root);
                 });
 

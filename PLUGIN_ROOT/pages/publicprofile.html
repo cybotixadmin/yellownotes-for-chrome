@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8"></meta>
     <link rel="stylesheet" href="on_page_common.css"></link>
+    <link rel="stylesheet" href="publicprofile.css"></link>
     <link rel="stylesheet" href="sidebar.css"></link>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
@@ -22,7 +23,9 @@
   <div name="login_status"></div>
 
   <!-- data items on this page are populated from database lookups-->
-  <div id="publicprofile_main_text"></div><b><yn_dbfield yn_dbfield="fullname,div"></b>
+  <div id="publicprofile_main_text"></div>
+  <b><yn_dbfield yn_dbfield="fullname,div"></yn_dbfield></b>
+  <p><yn_dbfield yn_dbfield="userid,div"></yn_dbfield></p>
 
 <p>YellowNote profile icon</p>
 <img yn_dbfield="banner_image,src" src="" alt="profile picture" style="width:100px">
@@ -32,9 +35,13 @@
       <table name="creatorsPublicDistributionlistsTable" class="notesTable">
         <thead>
           <tr class="fixed-header" selectablecol="true">
-            <th class="sortableCol url" name="location" sort_type="stringCaseIgnore" >name of yellowNotes feed<span class="sort-icon url">&#9650;</span></th>
-            <th class="sortableCol text"  name="selected"  sort_type="stringCaseExact" >description<span class="sort-icon">&#9650;</span></th>
-
+            <th name="name" class="sortableCol url" sort_type="stringCaseIgnore" >name of yellowNotes feed<span class="sort-icon url">&#9650;</span></th>
+            <th name="description" class="sortableCol text" sort_type="stringCaseExact" >description<span class="sort-icon">&#9650;</span></th>
+            <th name="postcount" class="sortableCol compact" sort_type="stringCaseExact">posts<span class="sort-icon url">&#9650;</span></th>
+            <th name="subscriberscount" class="sortableCol compact" sort_type="stringCaseExact">subscribers<span class="sort-icon url">&#9650;</span></th>
+            <th name="created" class="sortableCol datetime" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
+            <th name="anonymous_allowed" class="sortableCol checkbox" sort_type="stringCaseExact">anonymous allowed<span class="sort-icon url">&#9650;</span></th>
+            <th name="actions" class="action-5"></th>
           </tr>
       
           <!-- Add a filter row -->
@@ -53,7 +60,8 @@
       </table>
       <hr/>
       </div>
-
+      <script src="../content_scripts/NotesHandler.js"></script>
+      <script src="../content_scripts/test.js"></script>
     <script src="on_page_common.js"></script>
     <script src="publicprofile.js"></script>
         

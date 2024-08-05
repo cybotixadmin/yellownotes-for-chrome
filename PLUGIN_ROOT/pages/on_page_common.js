@@ -12,6 +12,8 @@ const URI_plugin_user_get_my_feed_subscribers = '/api/v1.0/plugin_user_get_my_fe
 
 const URI_plugin_user_setdistributionlist_yellownote = '/api/v1.0/plugin_user_setdistributionlist_yellownote';
 
+const URI_plugin_user_get_distributionlists_by_creatorid = '/api/v1.0/plugin_user_get_distributionlists_by_creatorid';
+
 const URI_plugin_user_savechanges_yellownote = '/api/v1.0/plugin_user_savechanges_yellownote';
 
 const URI_plugin_user_delete_subscription = "/api/v1.0/plugin_user_delete_subscription";
@@ -60,14 +62,23 @@ const URI_plugin_user_get_abstracts_of_all_yellownotes = "/api/plugin_user_get_a
 async function page_display_login_status() {
     console.debug("page_display_login_status()");
     //con
+    var jwt = null;
     try {
         let session = await chrome.storage.local.get([plugin_session_header_name]);
         console.debug(session);
-        console.debug(session[plugin_session_header_name]);
+        jwt = session[plugin_session_header_name];
+        console.debug(jwt);
         var userid = null;
-        userid = await get_username_from_sessiontoken(session[plugin_session_header_name]);
+        userid = await get_username_from_sessiontoken(jwt);
     } catch (e) {
-        console.error(e);
+        console.debug(e);
+ // assume the jwt is still valid
+ const claimNames = ['userid'];
+        const claims = getClaimsFromJwt(jwt, claimNames);
+
+        console.debug(claims);
+        userid = claims.userid;
+
     }
 
     console.debug("userid: " + userid);
@@ -438,8 +449,8 @@ function DELETEfetchAndDisplayStaticContent(url, dom_id) {
 // call for a html file and inserts the content of this html fil into the DOM at the location of the element with the id dom_id
 
 function fetchAndDisplayStaticContent(url, dom_id, replacements) {
+    console.debug("fetchAndDisplayStaticContent().start");
     return new Promise((resolve, reject) => {
-        console.debug("fetchAndDisplayStaticContent()");
         console.debug("place ", url);
         console.debug("on ", dom_id);
         console.debug("wih replacements ", replacements);
@@ -457,7 +468,7 @@ function fetchAndDisplayStaticContent(url, dom_id, replacements) {
                     var new_text = html;
                     if (replacements != null && replacements != undefined){ 
                         new_text = replacePatterns(html, replacements);
-                        console.debug(new_text);
+                        //console.debug(new_text);
      
                     }else{
      
@@ -987,6 +998,7 @@ function triggerFilters(table_name) {
 
 function readFiltersFromTable(table_name) {
     console.debug("readFiltersFromTable.start");
+    console.debug("table_name: " + table_name);
     const table = document.querySelector('table[name="' + table_name + '"]');
     //    const filterRow = table.rows[1]; // Second row for filters
     const filterRow = table.querySelector('tr[name="filter_row"]');; // Second row for filters
@@ -1946,9 +1958,9 @@ function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_dis
         });
         // carryout the hiding of the column, based on the column index value using the "hidden" class
         table.querySelectorAll(':scope > * > tr').forEach(row => {
-            console.debug(row);
+            //console.debug(row);
             try {
-                console.debug(row.cells[columnIndex].classList);
+              //  console.debug(row.cells[columnIndex].classList);
                 row.cells[columnIndex].classList.add("hidden");
             } catch (e) {
                 row.cells[columnIndex].class = "hidden";

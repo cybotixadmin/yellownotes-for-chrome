@@ -191,32 +191,31 @@ fetchData(not_show_by_default_columns).then(function (d) {
     console.debug("not_show_by_default_columns: " + not_show_by_default_columns);
     console.debug(not_show_by_default_columns.length);
 
+    // apply sorting and filtering to the table
 
     not_show_by_default_columns.forEach(column => {
         toggleColumn(column, false, table_name, table_columns_to_not_display_keyname);
         document.getElementById(`toggle-${column}`).checked = false;
     });
 
-    // update the list of columns and check/uncheck according to the list of columns to not display
-    //not_show_by_default_columns.forEach(column => {
-     //   console.debug("hide column: ", column);
-     //   console.debug("calling: hideColumn");
-        //toggleColumn(column, false, table_name, table_columns_to_not_display_keyname);
-      //  hideColumn(column, false, table_name);
-      //  document.getElementById(`toggle-${column}`).checked = false;
-
-        // itterate through all entries in the yellownote column and reder as graphical yellow notes their contents
-
-    //    const querySelector = 'tr td:nth-child(2)';
-
-  //      console.debug("calling updateTableColumn");
+    console.debug("apply sorting");
+    try {
+        var sortStates = JSON.parse(localStorage.getItem(table_name + '_new_sortStates')) || [];
+        console.debug("calling applyExistingSortTable");
+        applyExistingSortTable(table_name, sortStates);
+     
+        
+        console.debug("calling applyFilters");
+        applyFilters(table_name);
    
-   // });
+    } catch (e) {
+        console.error(e);
+    }
 
 });
 
 // Function to use "fetch" to delete a data row
-async function deleteSubscription(noteid) {
+async function DELETEdeleteSubscription(noteid) {
     try {
 
         const userid = "";

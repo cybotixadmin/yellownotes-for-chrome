@@ -48,7 +48,7 @@
             <!-- <th class="sortableCol">universaltime</th> -->
             <th name="name" class="sortableCol displayname" sort_type="stringCaseExact">name<span class="sort-icon url">&#9650;</span></th>
             <th name="description" class="sortableCol displayname" sort_type="stringCaseExact">description<span class="sort-icon url">&#9650;</span></th>
-            <th name="visibility" class="compact sortableCol" sort_type="selectCaseExact">visibility<span class="sort-icon url">&#9650;</span></th>
+            <th name="visibility" class="sortableCol compact" sort_type="selectCaseExact">visibility<span class="sort-icon url">&#9650;</span></th>
             <th name="restrictions" class="sortableCol displayname" sort_type="stringCaseExact">restrictions<span class="sort-icon url">&#9650;</span></th>
             <th name="postcount" class="sortableCol compact" sort_type="stringCaseExact">posts<span class="sort-icon url">&#9650;</span></th>
             <th name="subscriberscount" class="sortableCol compact" sort_type="stringCaseExact">subscribers<span class="sort-icon url">&#9650;</span></th>
@@ -68,10 +68,10 @@ The lists are returned by calling to the background script.
           <!-- Add a filter row -->
           <tr class="fixed-header">
      
-            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th>
-            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" placeholder="Filter "></th> 
+            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" class="displayname" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" class="displayname" placeholder="Filter "></th> 
             <th filterableCol="wildcardmatch" class="compact"><select filterContent="1" class="filterContent"><option class=""></option><option class="">public</option><option class="">private</option></select></th>
-            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text" class="displayname" placeholder="Filter "></th>
             <th filterableCol="wildcardmatch" class="compact"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
             <th filterableCol="wildcardmatch" class="compact"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
             <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
@@ -167,14 +167,14 @@ which columns to show
 <div id="my_distributions_field_explanations"></div>
 
     </div>
-<!-- body of document end -->
+    <!-- body of document end -->
 
-		    <script src="../content_scripts/NotesHandler.js"></script>
+		<script src="../content_scripts/NotesHandler.js"></script>
     <script src="../content_scripts/test.js"></script>
 
-<script  src="on_page_common.js"></script>
-<script src="./common_cache_functions.js"></script>
-  <script src="my_distributions.js"></script>
+    <script  src="on_page_common.js"></script>
+    <script src="./common_cache_functions.js"></script>
+    <script src="my_distributions.js"></script>
 					
-</body>
+  </body>
 </html>

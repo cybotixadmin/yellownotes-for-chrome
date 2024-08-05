@@ -99,6 +99,7 @@ table.distributionlistsTable tr td:nth-child(10) {
     word-break: break-all;
     min-height: 1.0em;
     margin: 0px;
+    width: 78px;
   }
 
   option {
@@ -108,4 +109,9 @@ table.distributionlistsTable tr td:nth-child(10) {
     text-align: left;
     word-break: break-all;
     min-height: 1.0em;
+  }
+
+
+  .input-class {
+    text-align: left;
   }

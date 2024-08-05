@@ -167,7 +167,7 @@ select.compact {
     border-radius: 0px;
     line-height: 1; /* Reduce line height */
     height: 21px; /* Ensure the height adjusts to the content */
-    width: 50px; /* Adjust the width to fit the content */
+    width: 60px; /* Adjust the width to fit the content */
             box-sizing: border-box;
 }
 
@@ -177,11 +177,36 @@ option.compact {
   margin: 1px; /* Remove margins */
   line-height: 0.8; /* Reduce line height */
   height: auto; /* Ensure the height adjusts to the content */
-          width: 50px; /* Adjust the width to fit the content */
+          width: 60px; /* Adjust the width to fit the content */
           box-sizing: border-box;
 }
 
+th.compact {
+  padding: 0; /* Reduce padding */
+          width: 80px; /* Adjust the width to fit the content */
+}
 
+td.compact {
+  padding: 0; /* Reduce padding */
+  font-size: 1em; /* Smaller font size */
+  margin: 1px; /* Remove margins */
+  line-height: 0.8; /* Reduce line height */
+  height: auto; /* Ensure the height adjusts to the content */
+          width: 80px; /* Adjust the width to fit the content */
+          box-sizing: border-box;
+}
+
+input.displayname {
+          width: 148px; 
+          max-width: 148px; 
+          
+}
+
+
+td.number {
+	
+text-align: right;
+}
 
 .filterableCol {
   font-size: .8em;
@@ -447,8 +472,11 @@ width: 30px; /* Fixed width for columns 5, 6, and 8 */
 width: 40px; /* Fixed width for column 9 */
 }
 
+td.checkbox {
 
-
+ vertical-align: middle;
+    align-items: center;
+}
 
 .toggle {
 position: relative;

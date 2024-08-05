@@ -371,15 +371,15 @@ function createDropdown(optionsArray, selectedDistributionListId) {
     // Add an event listener for the 'change' event
     selectElement.addEventListener('change', (event) => {
         const selectedId = event.target.value;
-        //console.debug(event.target.parentNode);
-        //console.debug(event.target.parentNode.parentNode);
-        //console.debug(event.target.parentNode.parentNode.firstChild.textContent);
-        noteid = event.target.parentNode.parentNode.firstChild.textContent;
+        console.debug(event.target.parentNode);
+        console.debug(event.target.parentNode.parentNode);
+        console.debug(event.target.parentNode.parentNode.getAttribute("noteid"));
+        noteid = event.target.parentNode.parentNode.getAttribute("noteid");
 
         // Only trigger fetch call if the selected value is not empty
         if (selectedId) {
             //console.debug("update the note with this distrubtionlistid: " + selectedId);
-
+console.debug("calling setNoteDistributionlistId");
             setNoteDistributionlistId(noteid, selectedId);
 
         } else {
@@ -689,7 +689,6 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
 
                 enablecheckbox.removeAttribute("checked");
             }
-
         }
 
         // if the note has a distributionlist assigned, pre-select this on the selection list
@@ -737,6 +736,14 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
                         option0.textContent = 'do not share';
                         dl_container.appendChild(option0);
 
+                        if (note_object_data.hasOwnProperty("distributionlistid")) {
+                            dl_container.value = note_object_data.distributionlistid;
+    
+                        }else{
+                            // if no distributionlistid is set, set the value to the first option (the "do not share")
+                            console.debug("no distributionlistid set, set the value to the last option (the 'do not share')");
+                            dl_container.value = "";
+                        }
                         resolve(null);
                     } catch (e) {
                         console.error(e);
@@ -746,8 +753,11 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
             } else {
                 console.debug("calling: get_distributionlist");
                 get_distributionlist().then(function (response) {
-                    console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                    //console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                     // at the top of the list add the option of not sharing the note with any distribution list/feeds
+
+                    
+
                     const option0 = document.createElement('option');
                     option0.value = '';
                     option0.textContent = 'do not share';
@@ -764,9 +774,23 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
                     });
                     //      console.debug(dl_container.outerHTML );
                     //      console.debug(dl_container.innerHTML );
+// set the existing distributionlistid as selected on the dropdown list
+
+
+                    if (note_object_data.hasOwnProperty("distributionlistid")) {
+                        dl_container.value = note_object_data.distributionlistid;
+
+                    }else{
+                        // if no distributionlistid is set, set the value to the first option (the "do not share")
+                        console.debug("no distributionlistid set, set the value to the first option (the 'do not share')");
+                        dl_container.value = "";
+                    }
+
                     resolve(null);
                 });
             }
+
+
         });
     } else {
         // if the user is not the owner of the note, do not show the footer
@@ -1901,12 +1925,85 @@ if (isOwner){
                 console.debug(cont1);
                 console.debug("calling update_note_internal_size");
                 update_note_internal_size(cont1);
-                console.debug(cont1.outerHTML);
+                //console.debug(cont1.outerHTML);
 
                 resolve(cont1);
             });
         });
     });
+}
+
+function DELETEscaleElementAndSubtree(element, scaleFactor) {
+    console.debug("scaleElementAndSubtree.start");
+    console.debug(element);
+    console.debug(scaleFactor);
+    // Apply the scale factor to the current element
+    element.style.transform = `scale(${scaleFactor})`;
+
+    // Adjust the width and height of the current element to maintain layout
+
+    // check of the element has a width set
+    console.debug(element.offsetWidth);
+    if (element.style.width){
+        const w = parseInt(element.style.width, 10);
+        console.debug(w);
+console.debug( "setting new width to: "+   w * scaleFactor);
+        element.style.width = `${w * scaleFactor}px`;
+
+
+  //      element.style.height = `${element.offsetHeight * scaleFactor}px`;
+    
+    }
+    console.debug(element.style.width);
+    console.debug(element.offsetHeight);
+
+   
+    // Recursively scale child elements
+    //const children = element.children;
+    //for (let i = 0; i < children.length; i++) {
+    //    scaleElementAndSubtree(children[i], scaleFactor);
+    //}
+}
+
+
+function scaleGraphicalElement(element, maxWidth) {
+    console.debug("scaleGraphicalElement.start");
+    console.debug(element);
+    //const container = document.getElementById(containerId);
+    //const element = document.getElementById(elementId);
+
+    const originalDisplay = element.style.display;
+    console.debug("originalDisplay: ", originalDisplay);
+    // Ensure the element is visible to get correct measurements
+  element.style.display = 'block';
+
+  // Get the original dimensions of the graphical element
+  const originalWidth = element.offsetWidth;
+  const originalHeight = element.offsetHeight;
+
+  // Calculate the scale factor
+  const scaleFactor = maxWidth / originalWidth;
+
+  // Apply the scale factor to the graphical element
+  element.style.transform = `scale(${scaleFactor})`;
+
+  // Adjust the container height to fit the scaled element
+  //container.style.height = `${originalHeight * scaleFactor}px`;
+
+// make adjustments to offset the way the scaling will move the x-y position of the element
+    element.style.transformOrigin = '0 0';
+    if (originalDisplay === '') {
+        console.debug("display was orignaly unset");
+  // unset the display style to revert to the default
+    element.style.display = '';
+    }else{
+        console.debug("display was orignaly set to: ", originalDisplay);
+    // restore the original display style
+    element.style.display = originalDisplay;
+    }
+    // Hide the element again
+    //element.style.display = 'none';
+
 }
 
 

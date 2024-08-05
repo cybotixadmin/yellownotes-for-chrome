@@ -62,6 +62,42 @@ const table_name = "subcribedDistributionlistNotesTable";
 
 
 
+// populate dynamix text content
+// check if the user is authenticated
+checkSessionJWTValidity()
+.then(isValid => {
+    console.log('JWT is valid:', isValid);
+    if (isValid) {
+        console.debug("JWT is valid - show menu accordingly");
+        fetchAndDisplayStaticContent("../fragments/en_US/view_distributionlist_main_text.html", "view_distributionlist_main_text").then(() => {});
+        const uuid = localStorage.getItem("creatorid");
+        const replacements = {creatorid: uuid};
+        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
+            //page_display_login_status();
+                // login_logout_action();
+            });
+    
+
+        page_display_login_status();
+
+    } else {
+        console.debug("JWT is not valid - show menu accordingly");
+        fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {
+            //page_display_login_status();
+            //login_logout_action();
+
+        });
+
+        page_display_login_status();
+    }
+
+})
+.catch(error => {
+    console.error('Error:', error.message);
+});
+
+
+
 // which columns to display
 // The users can decide which columns to display
 
@@ -103,7 +139,7 @@ console.debug("not_show_by_default_columns");
 console.debug(not_show_by_default_columns);
 
 // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
-getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+getNotShowByDefaultColumns_asynch(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
     console.debug(not_show_by_default_columns);
 }).catch(error => {
@@ -205,7 +241,7 @@ function fetchData(distributionlistid, not_show_by_default_columns) {
 
                         // Create cells and populate them with data
 
-                        const cell_note = newRow.insertCell(0);
+                        const cell_yellownote = newRow.insertCell(0);
                         const cell_createtime = newRow.insertCell(1);
                         const cell_lastmodified = newRow.insertCell(2);
                         const type_cell = newRow.insertCell(3);
@@ -449,9 +485,9 @@ function fetchData(distributionlistid, not_show_by_default_columns) {
                          */
 
                         //cell_note.textContent =  row.json;
-                        cell_note.setAttribute('name', 'yellownote');
+                        cell_yellownote.setAttribute('name', 'yellownote');
                         //cell_note.setAttribute('rendering', 'json');
-                        cell_note.setAttribute('class', 'yellownote');
+                        cell_yellownote.setAttribute('class', 'yellownote');
 
                         console.debug("calling createYellowNoteFromNoteDataObject");
                         createYellowNoteFromNoteDataObject(note_obj, true, false).then(function (note_root) {
@@ -465,12 +501,15 @@ function fetchData(distributionlistid, not_show_by_default_columns) {
                             note_root.setAttribute("style", "position: absolute; top: 0px; left: 0px");
 
                             // add the completed graphical yellownote to the table cell
-                            const inserted = cell_note.appendChild(note_root);
+                            const inserted = cell_yellownote.appendChild(note_root);
                             //console.debug(inserted.outerHTML);
                             // make the cell size large enough to contain the note
-                            cell_note.setAttribute("style", "height: " + (parseInt(note_root.getAttribute("box_height")) + parseInt(note_owners_control_bar_height)) + "px" + "; width: 250px;");
+                            cell_yellownote.setAttribute("style", "height: " + (parseInt(note_root.getAttribute("box_height")) + parseInt(note_owners_control_bar_height)) + "px" + "; width: 250px;");
                             console.debug("calling attachEventlistenersToYellowStickynote");
                             attachEventlistenersToYellowStickynote(inserted, true, false);
+                            // scale the yellownote to fit inside the table cell
+                            scaleGraphicalElement( inserted , 250 );
+
                         });
 
                     });

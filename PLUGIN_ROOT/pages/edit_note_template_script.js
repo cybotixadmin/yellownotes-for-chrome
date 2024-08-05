@@ -114,6 +114,33 @@ document.querySelector('.remove-icon').addEventListener('click', function (event
     });
 });
 
+// start track resizing of the note
+
+const graphicalElement = document.getElementById("bannerContainer");
+    const heightDisplay = document.getElementById("height-display");
+    const widthDisplay = document.getElementById("width-display");
+
+    function updateDimensions() {
+        const height = Math.floor(graphicalElement.offsetHeight);
+        const width = Math.floor(graphicalElement.offsetWidth);
+
+        heightDisplay.textContent = `Height: ${height} px`;
+        widthDisplay.textContent = `Width: ${width} px`;
+    }
+
+ // Initial display update
+ updateDimensions();
+
+ // Event listener for resizing the graphical element
+ const resizeObserver = new ResizeObserver(() => {
+     updateDimensions();
+ });
+
+ resizeObserver.observe(graphicalElement);
+
+
+// end tracking of resizing of note
+
 function handleFileSelect(evt) {
     console.debug("handleFileSelect()");
     processFile(evt.target.files[0]);

@@ -8,9 +8,11 @@ checkSessionJWTValidity()
         console.debug("JWT is valid - show menu accordingly");
         fetchAndDisplayStaticContent("../fragments/en_US/publicprofile_main_text.html", "publicprofile_main_text").then(() => {});
         const uuid = localStorage.getItem("creatorid");
-        const replacements = {creatorid: uuid};
+        const replacements = {
+            creatorid: uuid
+        };
         fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
-        //page_display_login_status();
+            //page_display_login_status();
             // login_logout_action();
         });
 
@@ -47,7 +49,7 @@ try {
 
 const table_name = "creatorsPublicDistributionlistsTable";
 
-const table_columns_to_not_display_keyname = "creator_distributionlists_hide_columns2";
+const table_columns_to_not_display_keyname = table_name + "_hide_columns";
 
 // which columns to display
 // The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
@@ -91,22 +93,13 @@ fetchFeeds(getQueryStringParameter('creatorid'), table_name, not_show_by_default
 
 });
 
-
-
 // Fetch data on page load
 console.debug("calling fetchCreatorInfo");
 fetchCreatorInfo(getQueryStringParameter('creatorid'))
 .then(function (d) {
     console.debug(".....");
-    
-    
-    
+
 });
-
-
-
-
-
 
 function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
     console.debug("fetchFeeds.start");
@@ -119,6 +112,7 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
             var ynInstallationUniqueId = "";
             var xYellownotesSession = "";
             var distributionlists;
+            var current_subscriptions;
             var data;
             //const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
 
@@ -130,7 +124,8 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                 xYellownotesSession = result[plugin_session_header_name];
                 console.debug(ynInstallationUniqueId);
                 console.debug(xYellownotesSession);
-                return fetch(server_url + "/api/v1.0/plugin_user_get_distributionlists_by_creatorid", {
+                // get distribution lists made by the profile
+                return fetch(server_url + URI_plugin_user_get_distributionlists_by_creatorid, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -169,6 +164,43 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                 data = resp;
                 console.debug(data);
 
+                // get subscriptions by current user
+                return fetch(server_url + URI_plugin_user_get_my_subscriptions, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession,
+                    },
+                });
+            }).then(response => {
+                if (!response.ok) {
+                    console.debug(response);
+
+                    // if an invalid session token was sent, it should be removed from the local storage
+                    if (response.status == 401) {
+                        // compare the response body with the string "Invalid session token" to determine if the session token is invalid
+                        if (response.headers.get("session") == "DELETE_COOKIE") {
+                            console.debug("Session token is invalid, remove it from local storage.");
+                            chrome.storage.local.remove([plugin_session_header_name]);
+                            // redirect to the front page returning the user to unauthenticated status.
+                            // unauthenticated functionality will be in effect until the user authenticates
+                            window.location.href = "/pages/my_account.html";
+                            reject('logout');
+                        } else {
+                            reject('Network response was not ok');
+                        }
+                    } else {
+                        reject('Network response was not ok');
+                    }
+                } else {
+                    return response.json();
+                }
+
+            }).then(function (resp) {
+                current_subscriptions = resp;
+                console.debug(current_subscriptions);
+
                 var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
                 console.debug(utc);
                 console.debug(Date.now());
@@ -192,7 +224,11 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
 
                     const cell_distributionlist_name = newRow.insertCell(0);
                     const cell_distributionlist_description = newRow.insertCell(1);
-                    const cell_actions = newRow.insertCell(2);
+                    const cell_postcount = newRow.insertCell(2);
+                    const cell_subscriberscount = newRow.insertCell(3);
+                    const cell_createdtime = newRow.insertCell(4);
+                    const cell_anonymous_allowed = newRow.insertCell(5);
+                    const cell_actions = newRow.insertCell(6);
 
                     // make cell contatns link to chrome-extension://icamjmkjpboaampbflplghamhbfhfnia/pages/view_distributionlist.html?distributionlistid=30c175f0-3c40-7e70-ad59-e4fac4d394b6
 
@@ -214,124 +250,427 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                         console.debug(e);
                     }
 
+                    try {
+                        cell_postcount.textContent = row.postcount;
+                        cell_postcount.setAttribute('data-label', 'postcount');
+                        cell_postcount.setAttribute('name', 'postcount');
+                        cell_postcount.setAttribute('class', 'url');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+                    try {
+                        cell_subscriberscount.textContent = row.subscriberscount;
+                        cell_subscriberscount.setAttribute('data-label', 'subscriberscount');
+                        cell_subscriberscount.setAttribute('name', 'subscriberscount');
+                        cell_subscriberscount.setAttribute('class', 'url');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
+                    // allow anonymous subscribers
+
+                    try {
+                        if (row.anonymous_allowed == "1" || row.anonymous_allowed == 1) {
+                            cell_anonymous_allowed.textContent = "yes";
+                        } else {
+                            cell_anonymous_allowed.textContent = "no";
+                        }
+
+                        cell_anonymous_allowed.setAttribute('data-label', 'anonymous_allowed');
+                        cell_anonymous_allowed.setAttribute('name', 'anonymous_allowed');
+                        cell_anonymous_allowed.setAttribute('class', 'url');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
+                    // time the feed was created
+
+                    try {
+                        cell_createdtime.textContent = row.createdtime;
+                        cell_createdtime.setAttribute('data-label', 'createdtime');
+                        cell_createdtime.setAttribute('name', 'createdtime');
+                        cell_createdtime.setAttribute('class', 'timestamp');
+                    } catch (e) {
+                        console.debug(e);
+                    }
+
                     // create small table to contain the action buttons
+// create buttons for all possible action, and then select which ones are to be made visible depending on circumstances
+
+
 
                     // Add button container
                     const actionButtonContainer = document.createElement('div');
                     actionButtonContainer.setAttribute('class', 'button-container');
 
+                    // add all buttons
                     // Add subscribe button
+                    console.debug("Add subscribe button");
+
                     const subscribeButtonContainer = document.createElement('div');
                     subscribeButtonContainer.setAttribute('class', 'go_to_location_button');
-                    const subscribe_link = document.createElement('a');
+                    subscribeButtonContainer.setAttribute('name', 'subscribe');
+                    // button
+                    const subscribeButton = document.createElement('img');
+                    subscribeButton.src = "../icons/unpause.40.png";
+                    subscribeButton.alt = 'subscribe';
+                    subscribeButton.setAttribute('class', 'activate_button');
+                    subscribeButton.onclick = function () {
+                        addSubscription(row.distributionlistid);
+                    };
+                    subscribeButtonContainer.appendChild(subscribeButton);
 
-                    subscribe_link.href = "/pages/subscribe.html?subscribe=" + row.distributionlistid;
-                    subscribe_link.target = "_blank";
-                    subscribe_link.name = "subscribe_distributionlistid";
-                    subscribe_link.textContent = 'subscribe';
+                    // text
+                    // create text node an append it to the button
+                    const subscribeButtonText = document.createTextNode("subscribe");
+                    subscribeButtonText.onclick = function () {
+                        addSubscription(row.distributionlistid);
+                    };
+                    subscribeButtonContainer.appendChild(subscribeButtonText);
 
-                    //const subscribeButton = document.createElement('img');
-                    //subscribeButton.src = "../icons/goto.icon.transparent.40x40.png";
-                    //subscribeButton.alt = 'go there';
-                    //subscribeButton.setAttribute('class', 'go_to_location_button');
-                    //goThereButton.onclick = function () {
-                    //    goThere(row);
-                    //};
-                    //subscribe_link.appendChild(subscribeButton);
-                    subscribeButtonContainer.appendChild(subscribe_link);
                     actionButtonContainer.appendChild(subscribeButtonContainer);
-
-                    // Add unsubscribe button
-                    const unsubscribeButtonContainer = document.createElement('div');
-                    unsubscribeButtonContainer.setAttribute('class', 'go_to_location_button');
-                    const unsubscribe_link = document.createElement('a');
-
-                    unsubscribe_link.href = "/pages/subscribe.html?unsubscribe=" + row.distributionlistid;
-                    unsubscribe_link.target = "_blank";
-                    unsubscribe_link.name = "unsubscribe_distributionlistid";
-                    unsubscribe_link.textContent = 'unsubscribe';
-                    // const unsubscribeButton = document.createElement('img');
-                    // unsubscribeButton.src = "../icons/NOT_FOUND.40x40.png";
-                    // unsubscribeButton.alt = 'unsubscribe';
-                    // unsubscribeButton.setAttribute('class', 'go_to_location_button');
-                    //goThereButton.onclick = function () {
-                    //    goThere(row);
-                    //};
-                    // unsubscribe_link.appendChild(unsubscribeButton);
-                    unsubscribeButtonContainer.appendChild(unsubscribe_link);
-                    actionButtonContainer.appendChild(unsubscribeButtonContainer);
-
-                    // Add suspend button
-
-
-                    const suspendButtonContainer = document.createElement('div');
-                    suspendButtonContainer.setAttribute('class', 'go_to_location_button');
-                    const suspend_link = document.createElement('a');
-
-                    suspend_link.href = "/pages/subscribe.html?suspend=" + row.distributionlistid;
-                    suspend_link.target = "_blank";
-                    suspend_link.name = "suspend_distributionlistid";
-
-                    const suspendButton = document.createElement('img');
-                    suspendButton.src = "../icons/pause.40.png";
-                    suspendButton.alt = 'go there';
-                    suspendButton.setAttribute('class', 'go_to_location_button');
-                    //goThereButton.onclick = function () {
-                    //    goThere(row);
-                    //};
-                    suspend_link.appendChild(suspendButton);
-                    suspendButtonContainer.appendChild(suspend_link);
-                    actionButtonContainer.appendChild(suspendButtonContainer);
-
-                    // Add activate button
-
-
+                    // activate
+                    console.debug("Add activate button");
                     const activateButtonContainer = document.createElement('div');
                     activateButtonContainer.setAttribute('class', 'go_to_location_button');
-                    const activate_link = document.createElement('a');
-
-                    activate_link.href = "/pages/subscribe.html?activate=" + row.distributionlistid;
-                    activate_link.target = "_blank";
-                    activate_link.name = "activate_distributionlistid";
-
+                    activateButtonContainer.setAttribute('name', 'resume');
+                    // button
                     const activateButton = document.createElement('img');
                     activateButton.src = "../icons/unpause.40.png";
-                    activateButton.alt = 'go there';
+                    activateButton.alt = 'resume';
                     activateButton.setAttribute('class', 'activate_button');
-                    //goThereButton.onclick = function () {
-                    //    goThere(row);
-                    //};
-                    activate_link.appendChild(activateButton);
-                    activateButtonContainer.appendChild(activate_link);
+                    activateButton.onclick = function () {
+                        activateSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid );
+                    };
+                    activateButtonContainer.appendChild(activateButton);
+
+                    // text
+                    // create text node an append it to the button
+                    const activateButtonText = document.createTextNode("resume");
+                    activateButtonText.onclick = function () {
+                        console.debug("activateSubscription: " + subscription_status_for_this_distributionlist.subscriptionid);
+                        activateSubscription(subscription_status_for_this_distributionlist.subscriptionid,row.distributionlistid );
+                    };
+                    activateButtonContainer.appendChild(activateButtonText);
+
                     actionButtonContainer.appendChild(activateButtonContainer);
 
-                    // add enable/disable this subscription button (if user is a subscriber)
-                    const ableButton = document.createElement('button');
+                    // Add unsubscribe button
+                    console.debug("Add unsubscribe button");
 
-                    if (row.status == "1" || row.status == 1) {
-                        ableButton.setAttribute('name', 'disable');
-                        ableButton.textContent = 'disable';
-                        ableButton.onclick = function () {
-                            // call to API to delete row from data base
-                            disable_note_with_noteid(obj.noteid);
+                    const unsubscribeButtonContainer = document.createElement('div');
+                    unsubscribeButtonContainer.setAttribute('class', 'go_to_location_button');
+                    unsubscribeButtonContainer.setAttribute('name', 'unsubscribe');
+
+                    // unsubscribe button
+                    const unsubscribeButton = document.createElement('img');
+                    unsubscribeButton.src = "../icons/stop.40.png";
+                    unsubscribeButton.alt = 'unsubscribe';
+                    unsubscribeButton.setAttribute('class', 'activate_button');
+                    unsubscribeButton.onclick = function () {
+                        deleteSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid);
+                    };
+                    unsubscribeButtonContainer.appendChild(unsubscribeButton);
+                    // text
+                    // create text node an append it to the button
+                    const unsubscribeButtonText = document.createTextNode("Unsubscribe");
+                    unsubscribeButtonText.onclick = function () {
+                        deleteSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid);
+                    };
+                    unsubscribeButtonContainer.appendChild(unsubscribeButtonText);
+
+                    actionButtonContainer.appendChild(unsubscribeButtonContainer);
+
+
+                        // Add deactivate button
+                        console.debug("Add deactivate button");
+                        const deactivateButtonContainer = document.createElement('div');
+                        deactivateButtonContainer.setAttribute('class', 'go_to_location_button');
+                        deactivateButtonContainer.setAttribute('name', 'suspend');
+                        // button
+                        const deactivateButton = document.createElement('img');
+                        deactivateButton.src = "../icons/pause.40.png";
+                        deactivateButton.alt = 'suspend';
+                        deactivateButton.setAttribute('class', 'activate_button');
+                        deactivateButton.onclick = function () {
+                            deactivateSubscription(subscription_status_for_this_distributionlist.subscriptionid,row.distributionlistid );
                         };
-                    } else {
-                        ableButton.setAttribute('name', 'enable');
-                        ableButton.textContent = 'enable';
-                        ableButton.onclick = function () {
-                            // call to API to delete row from data base
-                            enable_note_with_noteid(obj.noteid);
+                        deactivateButtonContainer.appendChild(deactivateButton);
+                        // text
+                        // create text node an append it to the button
+                        const deactivateButtonText = document.createTextNode("suspend");
+                        deactivateButtonText.onclick = function () {
+                            deactivateSubscription(subscription_status_for_this_distributionlist.subscriptionid,row.distributionlistid );
                         };
+                        deactivateButtonContainer.appendChild(deactivateButtonText);
+
+                        actionButtonContainer.appendChild(deactivateButtonContainer);
+
+
+                    // check if user is a subscriber to this distribution list
+                    //if not, add subscribe button
+                    function findActiveByDistributionListId(subscriptions, distributionListId) {
+                        console.debug("findActiveByDistributionListId, find " + distributionListId);
+                        for (const subscription of subscriptions) {
+                            if (subscription.distributionlistid === distributionListId) {
+                                return {
+                                    active: subscription.active,
+                                    subscriptionid: subscription.subscriptionid
+                                };
+                            }
+                        }
+                        return null;
                     }
+                    const subscription_status_for_this_distributionlist = findActiveByDistributionListId(current_subscriptions, row.distributionlistid);
+                    console.debug("subscription_status_for_this_distributionlist: " + subscription_status_for_this_distributionlist);
+                    console.debug("subscription_status_for_this_distributionlist: " + JSON.stringify(subscription_status_for_this_distributionlist));
+
                     cell_actions.appendChild(actionButtonContainer);
                     cell_actions.setAttribute('name', 'action');
                     cell_actions.setAttribute('class', 'action-5');
                     cell_actions.setAttribute('data-label', 'text');
 
+                    if (subscription_status_for_this_distributionlist == null) {
+                        // The user has no subscription for this distribution list
+                        // make "subscribe" button visible
+                        console.debug("3.3.4");
+                        console.debug(actionButtonContainer.querySelector('[name="subscribe"]'));
+                        console.debug(actionButtonContainer.querySelector('[name="subscribe"]').style);
+                        actionButtonContainer.querySelector('[name="subscribe"]').style.display = 'block';
+                        actionButtonContainer.querySelector('[name="unsubscribe"]').style.display = 'none';
+                        actionButtonContainer.querySelector('[name="suspend"]').style.display = 'none';
+                        actionButtonContainer.querySelector('[name="resume"]').style.display = 'none';
+
+                       
+                    } else if (subscription_status_for_this_distributionlist.active == 0 || subscription_status_for_this_distributionlist.active == "0") {
+                        // The user has a subscription for this distribution list, but it is suspended
+                        console.debug("3.3.5");
+                        
+                        // record the subscriptionid in the row 
+                        newRow.setAttribute('subscriptionid', subscription_status_for_this_distributionlist.subscriptionid);
+
+                        // Add unsubscribe button
+                        console.debug("Add unsubscribe button");
+
+                        // Add activate button
+                        actionButtonContainer.querySelector('[name="subscribe"]').style.display = 'none';
+                        actionButtonContainer.querySelector('[name="unsubscribe"]').style.display = 'block';
+                        actionButtonContainer.querySelector('[name="suspend"]').style.display = 'none';
+                        actionButtonContainer.querySelector('[name="resume"]').style.display = 'block';
+                       
+
+                    } else {
+                        // The user has a subscription for this distribution list, and it is active
+                        console.debug("3.3.46");
+                       // record the subscriptionid in the row 
+                       newRow.setAttribute('subscriptionid', subscription_status_for_this_distributionlist.subscriptionid);
+
+                        // Add unsubscribe button
+                        actionButtonContainer.querySelector('[name="subscribe"]').style.display = 'none';
+                        actionButtonContainer.querySelector('[name="unsubscribe"]').style.display = 'block';
+                        actionButtonContainer.querySelector('[name="suspend"]').style.display = 'block';
+                        actionButtonContainer.querySelector('[name="resume"]').style.display = 'none';
+                
+
+                    }
+
+                   
+
                 });
                 resolve('Data saved OK');
             });
         });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Function to use "fetch" to delete a data row
+async function deactivateSubscription(subscriptionid, distributionlistid) {
+    try {
+
+        const userid = "";
+        console.debug("deactivateSubscription: " + subscriptionid);
+        const message_body = '{ "subscriptionid":"' + subscriptionid + '", "activestatus": 0 }';
+        //console.debug(message_body);
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+        console.debug(installationUniqueId);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(server_url + '/api/v1.0/plugin_user_set_subscription_active_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body // example IDs, replace as necessary
+            });
+        console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }else{
+
+        }
+        const row = document.querySelector('tr[distributionlistid="'+distributionlistid+'"]');
+
+        row.querySelector('[name="subscribe"]').style.display = 'none';
+        row.querySelector('[name="unsubscribe"]').style.display = 'block';
+        row.querySelector('[name="suspend"]').style.display = 'none';
+        row.querySelector('[name="resume"]').style.display = 'block';
+
+
+
+        // Parse JSON data
+        const data = await response.json();
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Function to use "fetch" to delete a data row
+async function activateSubscription(subscriptionid, distributionlistid) {
+    try {
+
+        const userid = "";
+        console.debug("activateSubscription: " + subscriptionid);
+        const message_body = '{ "subscriptionid":"' + subscriptionid + '", "activestatus": 1 }';
+        //console.debug(message_body);
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+        console.debug(installationUniqueId);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(server_url + '/api/v1.0/plugin_user_set_subscription_active_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body // example IDs, replace as necessary
+            });
+        console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }else{
+            const row = document.querySelector('tr[distributionlistid="'+distributionlistid+'"]');
+console.debug(row);
+            row.querySelector('[name="subscribe"]').style.display = 'none';
+            row.querySelector('[name="unsubscribe"]').style.display = 'block';
+            row.querySelector('[name="suspend"]').style.display = 'block';
+            row.querySelector('[name="resume"]').style.display = 'none';
+    
+        }
+
+        // Parse JSON data
+        const data = await response.json();
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Function to use "fetch" to delete a data row
+async function deleteSubscription(subscriptionid, distributionlistid) {
+    try {
+
+        const userid = "";
+        console.debug("deleteSubscription: " + subscriptionid);
+        console.debug("distributionlistid: " + distributionlistid);
+        const message_body = '{ "subscriptionid":"' + subscriptionid + '"}';
+        //console.debug(message_body);
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+        console.debug(installationUniqueId);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(server_url + '/api/v1.0/plugin_user_delete_subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body // example IDs, replace as necessary
+            });
+        console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }else{
+            const row = document.querySelector('tr[distributionlistid="'+distributionlistid +'"]');
+            console.debug(row);
+            row.querySelector('[name="subscribe"]').style.display = 'block';
+            row.querySelector('[name="unsubscribe"]').style.display = 'none';
+            row.querySelector('[name="suspend"]').style.display = 'none';
+            row.querySelector('[name="resume"]').style.display = 'none';
+    
+              // remove the subscriptionid from the row 
+              row.removeAttribute('subscriptionid');
+
+
+        }
+
+        // Parse JSON data
+        const data = await response.json();
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Function to use "fetch" to delete a data row
+async function addSubscription(distributionlistid) {
+    try {
+
+        const userid = "";
+        console.debug("addSubscription: " + distributionlistid);
+        const message_body = '{ "distributionlistid":"' + distributionlistid + '"}';
+        //console.debug(message_body);
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+        console.debug(installationUniqueId);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(server_url + '/api/v1.0/plugin_user_add_subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body // example IDs, replace as necessary
+            });
+        console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }else{
+            const row = document.querySelector('tr[distributionlistid="'+distributionlistid+'"]');
+console.debug(row);
+            row.querySelector('[name="subscribe"]').style.display = 'none';
+            row.querySelector('[name="unsubscribe"]').style.display = 'block';
+            row.querySelector('[name="suspend"]').style.display = 'block';
+            row.querySelector('[name="resume"]').style.display = 'none';
+    
+        }
+
+        // Parse JSON data
+        const data = await response.json();
+
     } catch (error) {
         console.error(error);
     }
@@ -369,12 +708,12 @@ async function fetchCreatorInfo(creatorid) {
     const data = await response.json();
     console.debug(data);
     /* Parse JSON data
-// search through the DOM tree for all elements with the attribute "yn_dbfield"
-// It contains two words, separated by a comma. 
-The first is the name of the field in the JSON data, the second is the name of the attribute in the found DOM node where the data should be placed.  
+    // search through the DOM tree for all elements with the attribute "yn_dbfield"
+    // It contains two words, separated by a comma.
+    The first is the name of the field in the JSON data, the second is the name of the attribute in the found DOM node where the data should be placed.
 
-*/
-const att_yn_dbfield = document.querySelectorAll('[yn_dbfield]');
+     */
+    const att_yn_dbfield = document.querySelectorAll('[yn_dbfield]');
     console.debug(att_yn_dbfield);
     att_yn_dbfield.forEach(element => {
         const field = element.getAttribute('yn_dbfield');
@@ -383,12 +722,12 @@ const att_yn_dbfield = document.querySelectorAll('[yn_dbfield]');
         element.setAttribute(attribute_name, data[json_field_name]);
     });
     /* Parse JSON data
-// search through the DOM tree for all elements with the attribute "yn_dbfield"
-// It contains two words, separated by a comma. 
-The first is the name of the field in the JSON data,
--- consider adding options for cerating complete DOM elements here  
+    // search through the DOM tree for all elements with the attribute "yn_dbfield"
+    // It contains two words, separated by a comma.
+    The first is the name of the field in the JSON data,
+    -- consider adding options for cerating complete DOM elements here
 
-*/
+     */
 
     const elem_yn_dbfields = document.querySelectorAll('yn_dbfield');
     console.debug(elem_yn_dbfields);
@@ -402,11 +741,7 @@ The first is the name of the field in the JSON data,
         //element.replaceWith(new_element);
         element.parentNode.replaceChildren(document.createTextNode(data[json_field_name]));
         //var insertedNode = element.parentNode.insertBefore(new_element, element);
-//        element.textContent(data[json_field_name]);
+        //        element.textContent(data[json_field_name]);
     });
-
-
-
-    
 
 }
