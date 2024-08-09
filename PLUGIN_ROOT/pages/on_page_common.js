@@ -445,6 +445,9 @@ function DELETEfetchAndDisplayStaticContent(url, dom_id) {
     });
 }
 
+
+
+
 function in_html_macro_replace(distributionlists) {
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";

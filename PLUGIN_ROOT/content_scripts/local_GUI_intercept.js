@@ -54,9 +54,9 @@ else if ((new RegExp(/\/\/www\.yellownotes\.cloudDISABLED\/subscribe/)).test(win
     console.debug("inviteregexp.test(window.location.href)");
     var uri;
     if (redirecturi) {
-        uri = "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + encodeURIComponent(redirecturi);
+        uri = "/pages/my_subscriptions.html?add_feedid=" + distributionlistid + "&redirecturi=" + encodeURIComponent(redirecturi);
     } else {
-        uri = "/pages/my_subscriptions.html?add_distributionlistid=" + distributionlistid;
+        uri = "/pages/my_subscriptions.html?add_feedid=" + distributionlistid;
     }
     console.debug("intercept to ", uri);
     console.debug("send subscripition request to plugin");

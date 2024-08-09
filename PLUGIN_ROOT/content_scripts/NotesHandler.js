@@ -2015,7 +2015,7 @@ function save_new_note(event) {
                 distributionlistid = note_root.getAttribute("distributionlistid");
                 // update the goto-link (can be done since the noteID is now known  )
                 var goto_link = note_root.querySelector('[name="goto_notetarget_link"]');
-                goto_link.setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
+                goto_link.setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
 
                 // call the function that will set which part of the note will be displayed
                 setComponentVisibility(note_root, ",rw,.*normalsized,");

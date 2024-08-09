@@ -3,14 +3,14 @@
 const browser_id = chrome.runtime.id;
 
 console.debug("browser_id: ", browser_id);
-//console.log(url.replace(/.*add_distributionlistid=/, ""));
+//console.log(url.replace(/.*add_feedid=/, ""));
 // accept the submitted value for the distribution list id
 // the API has security mechanism in place the screen the value for undesirable content
 try {
-    if (getQueryStringParameter("add_distributionlistid")) {
-        console.debug("add_distributionlistid parameter found ");
+    if (getQueryStringParameter("add_feedid")) {
+        console.debug("add_feedid parameter found ");
 
-        addSubscriptionByUUIDinBackground(getQueryStringParameter("add_distributionlistid")).then(function (data) {
+        addSubscriptionByUUIDinBackground(getQueryStringParameter("add_feedid")).then(function (data) {
 
             // it a post action URL has been prescribed using the quertstring parameter "redirecturi", then redirect to that URL now
             uri = getQueryStringParameter("redirecturi");

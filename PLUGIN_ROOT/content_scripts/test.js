@@ -416,7 +416,7 @@ console.debug("calling setNoteDistributionlistId");
             } else {
 
                 const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
-                textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
+                textToCopy = "https://www.yellownotes.cloud/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=" + redirectUri;
 
                 link_obj.href = textToCopy;
             }
@@ -602,6 +602,7 @@ console.debug(note_object_data.distributionlistname);
         // There is no option for setting image at the level of the feed or the individial note at this time
     }
 
+    try{
     if (creatorDetails.note_display_name != undefined) {
         const topbarcreatordisplayname = note_root.querySelector('[name="creator_note_display_name"]');
         console.debug(topbarcreatordisplayname);
@@ -610,6 +611,9 @@ console.debug(note_object_data.distributionlistname);
         topbarcreatordisplayname.setAttribute("href", creator_link_target);
 
     }
+}catch(e){
+    console.error(e);
+}
     // if there is abannerimage defined for this user, put it in the creator icon field
     if (creator_banner_image != "") {
 
@@ -627,6 +631,7 @@ console.debug(note_object_data.distributionlistname);
         console.debug(topbar_feed_link_target);
         topbar_feed_link_target.replaceChildren(document.createTextNode("" + note_object_data.distributionlistname));
         topbar_feed_link_target.setAttribute("href", feed_link_target);
+        topbar_feed_link_target.setAttribute("tb", "feed_link_target");
          }
     } catch (e) {
         console.error(e);
@@ -788,7 +793,7 @@ bottombar_position = box_height - 0;
 setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height  )+"px");
 
 // set the height of the middle bar to the height of the note minus the height of the top 
-setCSSAttributeOnNamedElement(cont1, 'whole_note_middlebar', 'height', (box_height  - frame_note_url_bar_height )+"px");
+setCSSAttributeOnNamedElement(cont1, 'whole_note_middlebar', 'height', (box_height  - parseInt(frame_note_url_bar_height, 10) )+"px");
 console.debug(cont1);
 console.debug(cont1.querySelector('[name="whole_note_middlebar"]').style.height);
 
@@ -1255,6 +1260,56 @@ function setComponentVisibility(note, visibility) {
 
 }
 
+
+
+/**
+ * 
+ * @param {*} distributionlists 
+ */
+function createQRCode(url) {
+    // Create the QR code container
+    const qrContainer = document.createElement('div');
+    qrContainer.style.position = 'fixed';
+    qrContainer.style.top = '50%';
+    qrContainer.style.left = '50%';
+    qrContainer.style.transform = 'translate(-50%, -50%)';
+    qrContainer.style.padding = '20px';
+    qrContainer.style.backgroundColor = 'white';
+    qrContainer.style.border = '2px solid black';
+    qrContainer.style.zIndex = '300000';
+    qrContainer.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+    
+    // Create the close button
+    const closeButton = document.createElement('span');
+    closeButton.textContent = '✖';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '5px';
+    closeButton.style.left = '5px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.fontSize = '20px';
+    closeButton.style.color = 'red';
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(qrContainer);
+    });
+
+    // Create the QR code element
+    const qrCodeElement = document.createElement('div');
+    new QRCode(qrCodeElement, {
+        text: url,
+        width: 200,
+        height: 200,
+    });
+
+    // Append the close button and QR code to the container
+    qrContainer.appendChild(closeButton);
+    qrContainer.appendChild(qrCodeElement);
+
+    // Append the QR code container to the body
+    document.body.appendChild(qrContainer);
+}
+
+
+
 function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
     console.debug("attachEventlistenersToYellowStickynote.start");
 
@@ -1417,8 +1472,8 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         console.error(e);
     }
 
-    try {
 
+    try {
         const mydelete_note = (event) => {
             delete_note(event);
             event.stopPropagation();
@@ -1433,8 +1488,8 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         console.error(e);
     }
 
-    try {
 
+    try {
         const mydismiss_note = (event) => {
             dismiss_note(event);
             event.stopPropagation();
@@ -1443,6 +1498,44 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         for (var i = 0; i < allGoTo18.length; i++) {
             allGoTo18[i].removeEventListener("click", mydismiss_note);
             allGoTo18[i].addEventListener("click", mydismiss_note);
+        }
+
+    } catch (e) {
+        console.debug(e);
+    }
+
+
+    
+// QR-code
+    try {
+
+        const qr_code_note = (event) => {
+            
+  // for button going to note location
+  const noteid = note_root.getAttribute("noteid");
+  const distributionlistid = note_root.getAttribute("distributionlistid");
+
+  console.debug("noteid: " + noteid);
+  console.debug("distributionlistid: " + distributionlistid);
+var link ="";
+  if (distributionlistid != null && distributionlistid != "" && distributionlistid != undefined) {
+          console.debug("goto_notetarget_link");
+          link = "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid;
+  } else {
+          console.debug("goto_notetarget_link");
+          link =  "https://www.yellownotes.cloud/pages/subscribe.html?gothere.html?noteid=" + noteid;
+  }
+
+  createQRCode(link);
+            event.stopPropagation();
+        };
+        var allGoTo28 = note_root.querySelectorAll('[js_action="qr_code"]');
+        console.debug(allGoTo28);
+        for (var i = 0; i < allGoTo28.length; i++) {
+            console.debug("qr_core");
+            console.debug(allGoTo28[i]);
+            allGoTo28[i].removeEventListener("click", qr_code_note);
+            allGoTo28[i].addEventListener("click", qr_code_note);
 
         }
 
@@ -1489,7 +1582,7 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         if (distributionlistid != null && distributionlistid != "" && distributionlistid != undefined) {
             for (var i = 0; i < allGoTo112.length; i++) {
                 console.debug("goto_notetarget_link");
-                allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
+                allGoTo112[i].setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
             }
         } else {
             for (var i = 0; i < allGoTo112.length; i++) {
@@ -2253,7 +2346,7 @@ function update_note(event) {
 
             // update the goto-link
             var goto_link = note_root.querySelector('[name="goto_notetarget_link"]');
-            goto_link.setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
+            goto_link.setAttribute("href", "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid);
             console.debug("browsersolutions: goto_link update to ", goto_link.getAttribute("href"));
         } catch (e) {
             console.error(e);

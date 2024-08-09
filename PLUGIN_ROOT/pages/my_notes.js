@@ -1,4 +1,15 @@
 
+//var qrcode = new QRCode("qrcode", "https://www.geeksforgeeks.org");
+
+//console.debug("qrcode: " + qrcode);
+
+//createQRCode('https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=7de551c1-d903-34cd-c9bf-a4451de99fc5&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D13ae5d44-c37b-46ee-b386-f1294fe5e67e');
+
+//createQRCode('https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=7de551c1-d903-34cd-c9bf-a4451de99fc5&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D13ae5d44-c37b-46ee-b386-f1294fe5e');
+
+
+
+
 // check if the user is authenticated
 checkSessionJWTValidity()
 .then(isValid => {
@@ -336,7 +347,7 @@ function createNoteShareLink(datarow) {
         distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
         console.debug(distributionlistid);
         const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
-        textToCopy = "https://www.yellownotes.cloud/pages/subscribe.html?add_distributionlistid=" + distributionlistid + "&redirecturi=" + redirectUri;
+        textToCopy = "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=" + redirectUri;
     } catch (e) {
         console.debug(e);
         textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
