@@ -445,6 +445,74 @@ function DELETEfetchAndDisplayStaticContent(url, dom_id) {
     });
 }
 
+function in_html_macro_replace(distributionlists) {
+    var ynInstallationUniqueId = "";
+    var xYellownotesSession = "";
+   // var distributionlists;
+    var data;
+
+    chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+        console.log(result);
+        console.log(ynInstallationUniqueId);
+        ynInstallationUniqueId = result[plugin_uuid_header_name];
+        xYellownotesSession = result[plugin_session_header_name];
+        console.log(ynInstallationUniqueId);
+        console.log(xYellownotesSession);
+        return fetch(server_url + '/api/v1.0/plugin_user_get_public_distribution_list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [plugin_uuid_header_name]: ynInstallationUniqueId,
+                [plugin_session_header_name]: xYellownotesSession,
+            },
+            body: JSON.stringify({
+                distributionlistid: distributionlistid
+            })
+        });
+    }).then(response => {
+        if (!response.ok) {
+            console.log(response);
+
+            // if an invalid session token was sent, it should be removed from the local storage
+            if (response.status == 401) {
+            } else {
+                reject('Network response was not ok');
+            }
+        } else {
+            return response.json();
+        }
+    }).then(function (resp) {
+        data = resp;
+        console.debug(data[0]);
+        console.debug("calling substituteAttributes");
+        substituteAttributes(data[0]);
+
+    });
+}
+
+
+function substituteAttributes(data) {
+    console.debug("substituteAttributes().start");
+    console.debug(data);
+    // Get the HTML content as a string
+    let htmlContent = document.documentElement.innerHTML;
+console.debug(htmlContent);
+    // Loop through each key-value pair in the data object
+    for (const [key, value] of Object.entries(data)) {
+        console.debug(key);
+        // Create a placeholder string in the form of $$attribute$
+        const placeholder = `\\$\\$${key}\\$`;
+
+        console.debug(placeholder);
+        // Replace all occurrences of the placeholder with the value
+        const regex = new RegExp(placeholder, 'g');
+        htmlContent = htmlContent.replace(regex, value);
+    }
+
+    // Update the HTML content with the substituted values
+    document.documentElement.innerHTML = htmlContent;
+}
+
 
 // call for a html file and inserts the content of this html fil into the DOM at the location of the element with the id dom_id
 
@@ -510,7 +578,9 @@ function fetchAndDisplayStaticContent(url, dom_id, replacements) {
     });
 }
 
-
+// use this to substitute values in a text string
+// the text string is searched for the pattern $$key$ and replaced with the value of the key in the replacements object
+// the replacements object is a key-value pair object
 function replacePatterns(text, replacements) {
     // Loop through each key-value pair in the replacements object
     for (const [key, value] of Object.entries(replacements)) {
@@ -945,7 +1015,7 @@ function updateFilterRow(tableName, filterStorageKey) {
     console.debug(JSON.stringify(filters));
     // Loop through each filter and place any value found, in the corresponding filter cell
     for (var i = 0; i < filters.length; i++) {
-        //console.debug(filters[i]);
+        console.debug(filters[i]);
         if (filters[i]) {
         
         if (filters[i].filterValue) {
@@ -956,7 +1026,6 @@ function updateFilterRow(tableName, filterStorageKey) {
     //        filtersCols[filters[i].columnIndex].value = filters[i].filterValue;
         }else{
            // console.debug("no filter value");
-        
         }
         }
     }

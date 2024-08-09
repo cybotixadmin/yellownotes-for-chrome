@@ -406,7 +406,7 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
                 // use default for note properties
                 note_properties = {
                     "box_height": "250px",
-                    "box_width": "250px",
+                    "box_width": "350px",
                     "note_color": "#ffff00"
                 };
             }
@@ -1477,7 +1477,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             var note_obj;
             var notetype_template = null;
             // Is this note owned by the current user?
-            // Assume so, buth check against the sessiontoken further down
+            // Assume so, buth check against the sessiontoken further down and oweverwrite this value if required
             var isOwner = true;
 
             const creatorid = message.go_to_note_details.datarow.creatorid;
@@ -1528,11 +1528,17 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug("######## ####### 2 ######### ######## #######");
 
                 console.debug("calling cachableCall2API_POST");
-                return cachableCall2API_POST( creatorid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: creatorid } );
+                return cachableCall2API_POST( creatorid + "_creator_data", 1, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: creatorid } );
 
             }).then(function (response) {
                 console.debug(response);
                 creatorDetails = response;
+                console.debug("session_uuid: " + session_uuid);
+                console.debug("note creatorid: " + creatorDetails.uuid);
+                console.debug("creatorid: " + creatorid);
+                if (creatorid != session_uuid) {
+                    isOwner = false;
+                }
                 console.debug("######## ####### 3 ######### ######## #######");
                 console.debug("calling getTemplate");
                 return getTemplate(brand, "yellownote");
@@ -1544,6 +1550,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 //console.debug(result);
                 notetype_template = result;
                 console.debug("notetype_template");
+
+                //get current user id from the session token
+                //const session_uuid = getUuid(xYellownotesSession);
 
                 const note_data = JSON.parse(datarow.json)
                     // place the note on the page
@@ -1587,6 +1596,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug(response);
                 console.debug("######## ####### 6 ######### ######## #######");
                 sendResponse(response);
+            }).catch(function (error) {
+                console.debug(error);
+                sendResponse(null);
             });
             return true;
         } else if (action == 'scroll_to_note') {
@@ -2245,8 +2257,6 @@ function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid) {
 
     const tab_id = tab.id;
 
-    //chrome.tabs.sendMessage(tab.id, { action: "placeYellowNoteOnPage", sharedsecret: "secret1234", });
-
     const msg = {
         action: "placeYellowNoteOnPage",
         sharedsecret: "secret1234",
@@ -2254,6 +2264,9 @@ function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid) {
         noteid: noteid,
         session_uuid: session_uuid
     }
+
+    console.debug("Sending message to tab: " );
+    console.debug(msg);
 
     return new Promise((resolve, reject) => {
         // Send the message and handle the promise

@@ -54,7 +54,7 @@
 The list is returned by a call to the API.
 -->
 			<!-- Add a filter row -->
-      <tr name="filter_row" class="fixed-header" selectablecol="true">
+      			<tr name="filter_row" class="fixed-header" selectablecol="true">
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
@@ -74,8 +74,13 @@ The list is returned by a call to the API.
 			</tbody>
 		</table>
 	</div>
+</div>
 
 
+    <!-- Form to search for available feeds. Make this form visible when needed. -->
+	<div id="add_subscription_form" name="add_subscription_form">
+	
+	</div>
 
 which columns to show
 	<div class="toggle-container">
@@ -118,26 +123,26 @@ which columns to show
 		</div>
 	</div>
 
-	<!-- use this node to anchor -->
+	<!-- use this node to anchor 
 	<div id="add_form">
-	</div>
-</div>
+	</div>-->
 
-<div id="add_subscription_form">
-</div>
+
 
 
   
 
-
-    
     
 
     </div>
+	
+
 <!-- body of document end -->
 
     <script src="../content_scripts/NotesHandler.js"></script>
     <script src="../content_scripts/test.js"></script>
+	
+
     <script  src="on_page_common.js"></script>
     <script src="./common_cache_functions.js"></script>
     <script src="my_subscriptions.js"></script>

@@ -129,13 +129,21 @@ if (pagewidth < 300) {
 
 
 // refresh the list of do-not-display columns from local storage
-console.debug("calling: getNotShowByDefaultColumns" );
-getNotShowByDefaultColumns(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+console.debug("calling: getNotShowByDefaultColumns_asynch" );
+
+
+
+
+
+
+  // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
+  getNotShowByDefaultColumns_asynch(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
-    console.debug(not_show_by_default_columns);
+    console.log(not_show_by_default_columns);
 }).catch(error => {
     console.error('Error:', error);
 });
+
 
 fetchData(not_show_by_default_columns).then(() => {
     console.debug("toggle columns off by default");

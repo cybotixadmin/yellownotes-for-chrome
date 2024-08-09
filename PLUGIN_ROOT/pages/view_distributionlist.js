@@ -3,6 +3,13 @@
 
 //const browser_id = chrome.runtime.id;
 
+// if there is a querystring parameter, lokk up distribution list spiecified by that parameter
+var distributionlistid = getQueryStringParameter('distributionlistid');
+if (distributionlistid) {
+    console.debug(distributionlistid);
+
+}
+
 
 /**
  * this page takes parameters
@@ -95,6 +102,18 @@ checkSessionJWTValidity()
 .catch(error => {
     console.error('Error:', error.message);
 });
+
+// being page customization
+
+// get data about the distribution list and populate the page with it
+
+
+in_html_macro_replace(distributionlistid);
+
+            
+
+
+// end page customization
 
 
 
@@ -490,7 +509,8 @@ function fetchData(distributionlistid, not_show_by_default_columns) {
                         cell_yellownote.setAttribute('class', 'yellownote');
 
                         console.debug("calling createYellowNoteFromNoteDataObject");
-                        createYellowNoteFromNoteDataObject(note_obj, true, false).then(function (note_root) {
+                        // call the not creation with isOwner=false since these note will not owned by the current user
+                        createYellowNoteFromNoteDataObject(note_obj, false, false).then(function (note_root) {
                             console.debug(note_root);
                             // make certain redaction from the note that should not be shown in feed-mode
                             const note_table = note_root.querySelector('table[name="whole_note_table"]');

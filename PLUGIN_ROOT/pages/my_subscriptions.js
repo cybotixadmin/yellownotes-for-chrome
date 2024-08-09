@@ -13,6 +13,7 @@ checkSessionJWTValidity()
 if (isValid){
     console.debug("JWT is valid - show menu accordingly");
     fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_header_authenticated.html", "my_subscriptions_page_main_text", {}).then(() => {});
+    fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_new_subscription.html", "add_subscription_form", {}).then(() => {});
 
 
     const uuid = localStorage.getItem("creatorid");
@@ -21,6 +22,7 @@ if (isValid){
         //page_display_login_status();
             // login_logout_action();
         });
+        fetchAndDisplayStaticContent("../fragments/en_US/my_subscriptions_new_subscription.html", "add_subscription_form", {}).then(() => {});
 
     
       page_display_login_status();
@@ -41,6 +43,9 @@ if (isValid){
   .catch(error => {
       console.error('Error:', error.message);
   });
+
+// hide the form to add more subscriptions (unhide when the user requests it)
+document.getElementById("add_subscription_form").style.display = "none";
 
 
   const table_columns_to_not_display_keyname = table_name+"_hide_columns";
@@ -238,7 +243,7 @@ async function updateDataRowByUUID(distributionlistid) {
 }
 
 // Function to use "fetch" to suspend a subscription
-async function deleteSubscriptionByUUID(subscriptionid) {
+async function deleteSubscriptionBySubscriptionid(subscriptionid) {
     console.debug("deleteSubscriptionByUUID (" + subscriptionid + ")");
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
@@ -390,7 +395,7 @@ async function viewDistributionlist(distributionlistid) {
                 // Remove the row from the table
                 newRow.remove();
                 // call to API to delete row from data base
-                deleteSubscriptionByUUID(row.subscriptionid);
+                deleteSubscriptionBySubscriptionid(row.subscriptionid);
             };
 
             const cell5 = newRow.insertCell(4);
@@ -528,6 +533,85 @@ async function setAnonymousByUUID(distributionlistid, anonymous_allowed) {
 
         // Parse JSON data
         const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+
+// Function to use "fetch" to suspend a data agreement
+async function addSubscriptionByUUID(distributionlistid, feed_data) {
+    console.debug("addSubscriptionByUUID.start");
+    console.debug(distributionlistid);
+    console.debug(feed_data);
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+        const userid = "";
+        const message_body = JSON.stringify({
+                distributionlistid: distributionlistid
+            });
+        //console.log(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_add_subscription_v10, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.log(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table of current subscriptions
+        // Parse JSON data
+        const data = await response.json();
+        console.log(data);
+        // Get table body element
+        const tableBody = document
+            .getElementById("dataTable")
+            .getElementsByTagName("tbody")[0];
+
+        console.log(tableBody);
+        // add new row to table in the GUI to make the update appear immediate to the user
+        // Create new row
+        console.log("addSubscriptionTableRow");
+        console.log(tableBody);
+        console.log(feed_data);
+        console.log(data);
+        // copy a value that generated at the server and returned in the response to the API call that create the subscription
+        feed_data.subscriptionid = data.subscriptionid;
+        feed_data.subscribedate = data.subscribedate;
+        // update the table of subscriptions
+        addSubscriptionTableRow(tableBody, feed_data)
+
+        // Start process to update all open tabs with new subscription
+        //
+        try {
+            var message = {
+                action: "activeateSubscriptionOnAllTabs",
+                subscription_details: feed_data,
+            };
+
+            console.debug(message);
+            // send save request back to background
+            chrome.runtime.sendMessage(message, function (response) {
+                console.debug(
+                    "message sent to backgroup.js with response: " +
+                    JSON.stringify(response));
+                // finally, call "close" on the note
+            });
+        } catch (e) {
+            console.error(e);
+        }
+
     } catch (error) {
         console.error(error);
     }
@@ -844,8 +928,8 @@ try {
                 deleteButton.onclick = function () {
                     // Remove the row from the table
                     newRow.remove();
-                    // call to API to delete row from data base
-                    deleteSubscription(row.noteid);
+                    // call to API to delete subscription from data base
+                    deleteSubscriptionBySubscriptionid(row.subscriptionid);
                 };
                 deleteButtonContainer.appendChild(deleteButton);
                 actionButtonContainer.appendChild(deleteButtonContainer);
@@ -2240,3 +2324,287 @@ function extractAgreementIds() {
     return agreementIds;
 }
 
+
+
+async function add_subscription() {
+    console.log("add_subscription");
+    document.getElementById("add_subscription_form").style.display = "block";
+
+    // create a small window/form to add a new subscription
+
+
+    /**
+     * Users select from a list of available subscrptions
+     *
+     * This will required much modification in future.
+     * For the moment a complete list of all possible distrbiution lists is returned, to select from.
+     *
+     */
+
+
+    // get all available distributions lists
+    var available_count = 0;
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+        // Fetch data from web service (replace with your actual API endpoint)
+
+        const headers = {
+            "Content-Type": "application/json",
+            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+            [plugin_session_header_name]: session[plugin_session_header_name],
+        };
+        //const body = JSON.stringify(payload);
+        console.debug("fetching available distribution lists");
+        console.debug(headers);
+        const response = await fetch(
+                server_url + "/api/v1.0/plugin_user_get_available_distributionlists", {
+                method: "GET",
+                headers,
+            });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        var utc = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
+        console.log(utc);
+        console.log(Date.now());
+        var now = new Date();
+        var utc_timestamp = Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate(),
+                now.getUTCHours(),
+                now.getUTCMinutes(),
+                now.getUTCSeconds(),
+                now.getUTCMilliseconds());
+        console.log(utc_timestamp);
+        console.log(new Date().toISOString());
+
+        // Parse JSON data when the results are back
+        const data = await response.json();
+        console.log(data);
+        available_count = data.length;
+        // Get table body element
+        const tableBody = document
+            .getElementById("distributionsTable")
+            .getElementsByTagName("tbody")[0];
+
+        console.log(tableBody);
+        // loop through the existing table and delete all rows matching
+        console.log(tableBody.rows);
+        console.log(tableBody.rows.length);
+        console.log(tableBody.rows.size);
+        //available_count = tableBody.rows.length;
+        console.log("available_count: " + available_count);
+        var list = tableBody.rows;
+        try {
+            if (tableBody.rows.length) {
+                for (var li = list.length - 1; li >= 0; li--) {
+                    list[li].remove();
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        // Loop through data and (re-)populate the table with the results returned from the API
+        data.forEach((row) => {
+            // Create new row
+            console.debug(row);
+            const newRow = tableBody.insertRow();
+            // Create cells and populate them with data
+            const cell1 = newRow.insertCell(0);
+            const cell2 = newRow.insertCell(1);
+            const cell3 = newRow.insertCell(2);
+            const cell4 = newRow.insertCell(3);
+            const cell5 = newRow.insertCell(4);
+            const cell6 = newRow.insertCell(5);
+            //cell1.textContent = row.distributionlistid;
+            cell2.textContent = row.name;
+            cell3.textContent = row.description;
+            cell4.textContent = row.creatordisplayname;
+            cell5.textContent = row.postcount;
+            cell6.textContent = row.restrictions;
+
+            // Add subscribe button
+            const subscribeButton = document.createElement("button");
+            subscribeButton.textContent = "Subscribe";
+            subscribeButton.classList.add("deleteBtn");
+            subscribeButton.onclick = function () {
+                // Remove the row from the table
+                newRow.remove();
+                // call to API to add a subscription to distributionlist,
+                //this function will also update the list of current subscriptions
+                console.debug("call addSubscriptionByUUID");
+                console.debug(row);
+                addSubscriptionByUUID(row.distributionlistid, row);
+            };
+
+            // Add View button
+            const viewButton = document.createElement("button");
+            viewButton.textContent = "View";
+            viewButton.classList.add("viewBtn");
+
+            viewButton.onclick = function () {
+
+                // call to API to delete row from data base
+                viewDistributionlist(row.distributionlistid);
+            };
+
+            // action buttons
+            const cell7 = newRow.insertCell(6);
+            cell7.appendChild(subscribeButton);
+
+        });
+
+        if (available_count > 0) {
+            // create button to send data to API
+            const button = document.createElement('button');
+            button.id = 'new-subscriber';
+            button.textContent = 'add';
+            const container = document.getElementById('add_subscription_form');
+            container.appendChild(button);
+            console.log(container);
+
+            // Find the button and add an event listener
+            const sendDataButton = document.getElementById('new-subscriber');
+
+            sendDataButton.addEventListener('click', function () {
+                console.log("sendDataButton");
+                // Extract data from table
+                const email = table.rows[0].cells[1].textContent; // Get text from second cell of the first row
+                var ynInstallationUniqueId = "";
+                var xYellownotesSession = "";
+                const msg = {
+                    "email": email,
+                    "distributionlistid": distributionlistid
+                }
+                console.log(msg);
+                chrome.storage.local.get([plugin_uuid_header_name]).then(
+                    function (result) {
+                    ynInstallationUniqueId = result[plugin_uuid_header_name];
+                    console.log("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    return chrome.storage.local.get([plugin_session_header_name]);
+                }).then(function (result) {
+                    xYellownotesSession = result[plugin_session_header_name];
+                    console.log("xYellownotesSession: " + xYellownotesSession);
+                    return fetch('https://api.yellownotes.cloud/api/v1.0/plugin_user_add_distribution_list_subscriber', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [plugin_uuid_header_name]: ynInstallationUniqueId,
+                            [plugin_session_header_name]: xYellownotesSession,
+                        },
+                        body: JSON.stringify(msg)
+                    });
+                })
+                .then(response => response.json())
+                .then(function (data) {
+                    console.log('Success:', data);
+                    // Usage: Pass the ID of the parent element to cleanup
+                    removeAllChildren('add_subscription_form');
+
+                }).catch((error) => console.error('Error:', error));
+            });
+        } else {
+            console.log("no available distribution lists to can be subscribed to");
+            const msg = document.createElement('p');
+            msg.textContent = 'no feeds available for subscription';
+            msg.setAttribute('class', 'message_to_user');
+            const container = document.getElementById('add_subscription_form');
+            container.appendChild(msg);
+            console.log(container);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+function removeAllChildNodes(parent) {
+    console.log("removeAllChildNodes");
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
+
+async function activateAllSubscriptions() {
+    console.debug("activateAllSubscriptions.start");
+    try {
+
+        // update the form to show the new state of the subscriptions
+
+        const checkboxes = document.querySelector('table[name="' + table_name + '"]').querySelectorAll('input[type="checkbox"]');
+        console.log(checkboxes);
+        // Iterate over the checkboxes and uncheck them
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+
+        // call the API that activates all supscriptions of the user
+
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+        const headers = {
+            "Content-Type": "application/json",
+            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+            [plugin_session_header_name]: session[plugin_session_header_name],
+        };
+        const body = '{"activestatus":1}';
+
+        const response = await fetch(
+                server_url + URI_plugin_user_set_all_subscriptions_active_status, {
+                method: "POST",
+                headers,
+                body,
+            });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// deactive all the user's subscriptions
+async function deactivateAllSubscriptions() {
+    console.debug("deactivateAllSubscriptions.start");
+    try {
+        // update the form to show the new state of the subscriptions
+
+        const checkboxes = document.querySelector('table[name="' + table_name + '"]').querySelectorAll('input[type="checkbox"]');
+        console.log(checkboxes);
+        // Iterate over the checkboxes and uncheck them
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // call the API that suspeds all supscriptions of the user
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+        const headers = {
+            "Content-Type": "application/json",
+            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+            [plugin_session_header_name]: session[plugin_session_header_name],
+        };
+        const body = '{"activestatus":0}';
+
+        const response = await fetch(
+                server_url + URI_plugin_user_set_all_subscriptions_active_status, {
+                method: "POST",
+                headers,
+                body,
+            });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}

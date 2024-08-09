@@ -4,11 +4,12 @@ const table_name ="ownDistributionlistNotesTable";
 
 
 // if there is a querystring parameter, lokk up distribution list spiecified by that parameter
-var distValue = getQueryStringParameter('distributionlistid');
-if (distValue) {
-    console.debug(distValue);
+var distributionlistid = getQueryStringParameter('distributionlistid');
+if (distributionlistid) {
+    console.debug(distributionlistid);
 
 }
+
 
 // check if the user is authenticated
 checkSessionJWTValidity()
@@ -44,6 +45,17 @@ checkSessionJWTValidity()
 });
 
 
+// being page customization
+
+// get data about the distribution list and populate the page with it
+
+
+in_html_macro_replace(distributionlistid);
+
+            
+
+
+// end page customization
 
 // start populating data tables
 console.debug("calling fetchData");
@@ -55,6 +67,8 @@ fetchData( table_name, getQueryStringParameter('distributionlistid')).then(() =>
 
 //traverse_text(document.documentElement);
 console.debug("################################################");
+
+
 //console.debug(all_page_text);
 //console.debug(textnode_map);
 

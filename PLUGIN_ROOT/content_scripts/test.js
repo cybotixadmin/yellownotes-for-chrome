@@ -10,6 +10,19 @@ This is height is added to the heigh the note will ordinarily have and is substr
 
 const note_owners_control_bar_height = 23;
 
+
+
+const default_box_width = "350px";
+const default_box_height = "250px";
+
+
+const frame_note_url_bar_height = 50;
+
+const note_internal_height_padding = 25;
+
+const note_internal_width_padding = 2;
+
+
 function test() {
     console.debug("test");
 }
@@ -529,12 +542,15 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
     //    } else {
     //        creator_link_target = 'https://www.yellownotes.cloud/pages/my_subscriptions.html?distributionlistid=' + note_object_data.distributionlistid;
     //    }
-    creator_link_target = 'https://www.yellownotes.cloud/pages/publicprofile.html?creatorid=' + note_object_data.creatorid;
+    creator_link_target = 'https://www.yellownotes.cloud/pages/publicprofile.html?creatorid=' + creatorDetails.uuid + "&distributionlistid=" + note_object_data.distributionlistid + "&noteid=" + note_object_data.noteid;  
 
     console.debug("creator_link_target: " + creator_link_target);
 
-    try {
+console.debug(note_object_data.distributionlistid);
+console.debug(note_object_data.distributionlistname);
 
+
+    try {
         console.debug(note_root.querySelector('[name="creator_link_target"]'));
         note_root.querySelector('[name="creator_link_target"]').setAttribute("href", creator_link_target);
     } catch (e) {
@@ -545,13 +561,12 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
         feed_link_target = 'https://www.yellownotes.cloud/pages/view_own_distributionlist.html?distributionlistid=' + note_object_data.distributionlistid;
     } else {
         feed_link_target = 'https://www.yellownotes.cloud/pages/view_distributionlist.html?distributionlistid=' + note_object_data.distributionlistid;
-
     }
     console.debug("feed_link_target: " + feed_link_target);
 
     // check if there is a brand (with a possible logo) associated with the note
     if (isOwner) {
-        if (note_object_data.distributionlistname != undefined) {
+        if (note_object_data.distributionlistname != undefined && note_object_data.distributionlistname != null) {
             display_text = 'source: ' + note_object_data.distributionlistid;
         } else if (note_object_data.displayname != undefined) {
             display_text = 'source: ' + note_object_data.displayname;
@@ -604,14 +619,15 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
         // leave default icon in place
     }
 
-    // set the link to the feed page
+    // set the link to the feed/distributionlist page - if any
+  
     try {
-        // if (note_object_data.distributionlistname != undefined) {
+         if (note_object_data.distributionlistid != undefined && note_object_data.distributionlistname != undefined && note_object_data.distributionlistname != null) {
         const topbar_feed_link_target = note_root.querySelector('[name="feed_link_target"]');
         console.debug(topbar_feed_link_target);
-        topbar_feed_link_target.replaceChildren(document.createTextNode("feed: " + note_object_data.distributionlistname));
+        topbar_feed_link_target.replaceChildren(document.createTextNode("" + note_object_data.distributionlistname));
         topbar_feed_link_target.setAttribute("href", feed_link_target);
-        // }
+         }
     } catch (e) {
         console.error(e);
     }
@@ -658,10 +674,36 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
 
 }
 
+
+
+function setCSSAttributeOnNamedElement(search_root, elementName, cssAttribute, value) {
+    console.debug("setCSSAttributeOnNamedElement.start:" + elementName + " " + cssAttribute + " " + value);
+    // Check if the elementName is an ID or a class
+    let element;
+    if (search_root.querySelector('[name="'+elementName+'"]') ) {
+        // It's an ID
+        element = search_root.querySelector('[name="'+elementName+'"]') ;
+    } else {
+        console.error("Element not found");
+        return;
+    }
+//console.debug(element);
+//console.debug(cssAttribute);
+//console.debug(value);
+
+    // Set the CSS attribute
+    element.style[cssAttribute] = value;
+}
+
 /**
  *
 
  * create bottom bar of the note. This bar is only visible/accessible to those with editing priviliges on the note (typically the owner/creator)
+The height of the bottom bar is not included in the note height when the note is saved to the database. 
+The idea being that the note is generally seen by those without editing priviliges and the sizing should conform to the general case. 
+A user may have a grea many note visible and the screen "realestate" should not be used up by the bottom bar unless it is needed.
+
+NOTE: later feature is that the bottom bar is available on demand by clicking a small icon in the lower corner of the note. This is not yet implemented
 
  * @param {*} cont1
  * @param {*} creatorDetails
@@ -676,8 +718,89 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
         console.debug(note_object_data);
         console.debug(cont1);
 
-        // expand the note downwards by the height of the bottom bar
-      
+        // set the width of the distributionlist dropdown list
+        // dynamically size this list to fit the width of the yellownote
+var distributionlist_dropdownlist_width = 98;
+
+console.debug(note_object_data.box_height);
+console.debug(parseInt(note_object_data.box_height, 10));
+
+console.debug(creatorDetails.box_height);
+console.debug(parseInt(creatorDetails.box_height, 10));
+
+console.debug(note_object_data.box_width);
+console.debug(parseInt(note_object_data.box_width, 10));
+
+console.debug(creatorDetails.box_width);
+console.debug(parseInt(creatorDetails.box_width, 10));
+
+
+var box_width = parseInt(note_object_data.box_width, 10);
+if (box_width > 0 ) {
+    console.debug("use note-specific box_width: " + box_width);
+}else{
+    box_width = parseInt(creatorDetails.box_width, 10);
+    if (box_width > 0 ) {
+        console.debug("use creator-specific box_width: " + box_width);
+    }else{
+        console.debug("use default box_width: " + default_box_width);
+        box_width = default_box_width;
+    }    
+}
+
+if (box_width > 0 ) {
+    if (box_width < 600) {
+        distributionlist_dropdownlist_width = box_width - 160;
+    }else{
+        distributionlist_dropdownlist_width = 440;
+    }
+}
+
+
+//console.debug("setting "+distributionlist_dropdownlist_width);
+setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'width', distributionlist_dropdownlist_width+"px");
+setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'width', distributionlist_dropdownlist_width+"px");
+setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'max-width', distributionlist_dropdownlist_width+"px");
+setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'max-width', distributionlist_dropdownlist_width+"px");
+
+var bottombar_position;
+// prefer the note-specific value, but if none is found user the one from the creator profile, or as a last resort , the default
+
+var  box_height = default_box_height;
+
+var box_height = parseInt(note_object_data.box_height, 10);
+console.debug("use note-specific box_height: " + box_width);
+if (box_height > 0 ) {
+}else{
+    box_height = parseInt(creatorDetails.box_height, 10);
+    console.debug("use creator-specific box_height: " + box_width);
+    if (box_height > 0 ) {
+    }else{
+        console.debug("use default box_height: " + default_box_height);
+
+    }    
+}
+bottombar_position = box_height - 0;
+
+
+// expand the note downwards by the height of the bottom bar - the bottom bar does not count towards the maximum note size (height)
+
+setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height  )+"px");
+
+// set the height of the middle bar to the height of the note minus the height of the top 
+setCSSAttributeOnNamedElement(cont1, 'whole_note_middlebar', 'height', (box_height  - frame_note_url_bar_height )+"px");
+console.debug(cont1);
+console.debug(cont1.querySelector('[name="whole_note_middlebar"]').style.height);
+
+
+
+console.debug("setting bottombar_position: " + bottombar_position);
+// place the bottom bar at the bottom of the note
+setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_position+"px");
+
+
+
+
         // the enable checkbox should be set(or unset) according to the value of "enabled_status" in the note object data 
         if (note_object_data.hasOwnProperty("enabled_status")) {
             console.debug(note_object_data.enabled);
@@ -1039,10 +1162,6 @@ function prepareCanvasNoteForDrawing(node_root) {
     drawSampleLine(ctx, 'solid', drawColorPicker.value, lineWidthSelect.value);
 
 }
-
-const default_box_width = "250px";
-const default_box_height = "250px";
-
 function hexToRGB(hex) {
     console.debug("hexToRGB.start (" + hex + ")");
     try {
@@ -1810,7 +1929,6 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
                 if (!isUndefined(note_object_data.status) && note_object_data.status != undefined) {
                     cont1.setAttribute("note_active_status", note_object_data.status);
                 }
-
             }
 
             if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
@@ -1867,32 +1985,42 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
                 // then replace those values with more specific ones if they are available/applicable
 
                 // set defaults
-                var box_width = default_box_width ;
+                
                 var box_height = default_box_height ;
+
+
+                var box_width = parseInt(note_object_data.box_width, 10);
+                if (box_width > 0 ) {
+                    console.debug("use note-specific box_width: " + box_width);
+                }else{
+                    box_width = parseInt(creatorDetails.box_width, 10);
+                    if (box_width > 0 ) {
+                        console.debug("use creator-specific box_width: " + box_width);
+                    }else{
+                        console.debug("use default box_width: " + default_box_width);
+                        box_width = default_box_width;
+                    }    
+                }
+
+                var box_height = parseInt(note_object_data.box_height, 10);
+                if (box_height > 0 ) {
+                    console.debug("use note-specific box_height: " + box_height);
+                }else{
+                    box_height = parseInt(creatorDetails.box_height, 10);
+                    if (box_height > 0 ) {
+                        console.debug("use creator-specific box_height: " + box_height);
+                    }else{
+                        console.debug("use default box_width: " + default_box_height);
+                        box_width = default_box_height;
+                    }    
+                }
 
                 // check for template-specific values - not implemented yet
 
 
                 // check for brand/organization-specific values - not implemented yet
 
-                try {
-                    // check for creator specific values
-                    if (creatorDetails.box_width) {
-                        box_width = creatorDetails.box_width;
-                        console.debug("creator's note_properties has box_width, use it " + box_width);
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
-
-                try {
-                    if (creatorDetails.box_height) {
-                        box_height = creatorDetails.box_height;
-                        console.debug("creator's note_properties has box_height, use it " + box_height);
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
+              
                 // check for feed-specific values - not implemented yet
 
 
@@ -1900,24 +2028,31 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
 
                 // 
                 // set the established note dimensions to the note root object
-                cont1.setAttribute("box_height", box_height);
-                cont1.setAttribute("box_width", box_width);
+                cont1.setAttribute("box_height", box_height+"px");
+                cont1.setAttribute("box_width", box_width+"px");
 //                // as well as to the graphical elements of the note
                 var whole_note_table = cont1.querySelector('table[name="whole_note_table"]');
                 console.debug(whole_note_table);
-                whole_note_table.style.width = box_width;
+                //whole_note_table.style.width = box_width;
+                setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'width', box_width +"px");
 if (isOwner){
     // expand the note downwards to make room for the note owner's control bar
     console.debug("isOwner=true expand note downwards");
-    console.debug(parseInt(box_height));
-    console.debug(parseInt( note_owners_control_bar_height));
-    console.debug((parseInt(box_height) + parseInt( note_owners_control_bar_height)) + "px");
 
-    whole_note_table.style.height = (parseInt(box_height) + parseInt( note_owners_control_bar_height)) + "px";
-    // note.querySelector('table[name="whole_note_table"]').style.height = (parseInt(note.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
+
+    setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height  )+"px");
+
+
 
 }else{
-                whole_note_table.style.height = box_height;
+// remove the bottom bar
+const bottom_bar = cont1.querySelector('tr[name="whole_note_bottombar"]');
+console.debug(bottom_bar);
+bottom_bar.style.display = 'none';
+
+                //whole_note_table.style.height = box_height;
+                setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', box_height +"px");
+
             }
 //console.debug(whole_note_table.innerHTML);
 //console.debug(whole_note_table.outerHTML);
@@ -2213,12 +2348,6 @@ function update_note(event) {
         console.error(e);
     }
 }
-
-const frame_note_url_bar_height = 30;
-
-const note_internal_height_padding = 25;
-
-const note_internal_width_padding = 2;
 
 
 

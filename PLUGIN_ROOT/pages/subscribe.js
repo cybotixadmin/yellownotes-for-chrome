@@ -35,7 +35,7 @@ try {
             window.location.href = uri;
         } else {
             // no redirect URL has been prescribed, so just proceed with presenting the page
-            render_page();
+            //render_page();
         }
     }
 } catch (e) {

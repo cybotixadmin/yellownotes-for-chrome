@@ -295,9 +295,7 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                     }
 
                     // create small table to contain the action buttons
-// create buttons for all possible action, and then select which ones are to be made visible depending on circumstances
-
-
+                    // create buttons for all possible action, and then select which ones are to be made visible depending on circumstances
 
                     // Add button container
                     const actionButtonContainer = document.createElement('div');
@@ -327,8 +325,8 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                         addSubscription(row.distributionlistid);
                     };
                     subscribeButtonContainer.appendChild(subscribeButtonText);
-
                     actionButtonContainer.appendChild(subscribeButtonContainer);
+
                     // activate
                     console.debug("Add activate button");
                     const activateButtonContainer = document.createElement('div');
@@ -340,7 +338,7 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                     activateButton.alt = 'resume';
                     activateButton.setAttribute('class', 'activate_button');
                     activateButton.onclick = function () {
-                        activateSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid );
+                        activateSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid);
                     };
                     activateButtonContainer.appendChild(activateButton);
 
@@ -349,10 +347,9 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                     const activateButtonText = document.createTextNode("resume");
                     activateButtonText.onclick = function () {
                         console.debug("activateSubscription: " + subscription_status_for_this_distributionlist.subscriptionid);
-                        activateSubscription(subscription_status_for_this_distributionlist.subscriptionid,row.distributionlistid );
+                        activateSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid);
                     };
                     activateButtonContainer.appendChild(activateButtonText);
-
                     actionButtonContainer.appendChild(activateButtonContainer);
 
                     // Add unsubscribe button
@@ -378,34 +375,30 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                         deleteSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid);
                     };
                     unsubscribeButtonContainer.appendChild(unsubscribeButtonText);
-
                     actionButtonContainer.appendChild(unsubscribeButtonContainer);
 
-
-                        // Add deactivate button
-                        console.debug("Add deactivate button");
-                        const deactivateButtonContainer = document.createElement('div');
-                        deactivateButtonContainer.setAttribute('class', 'go_to_location_button');
-                        deactivateButtonContainer.setAttribute('name', 'suspend');
-                        // button
-                        const deactivateButton = document.createElement('img');
-                        deactivateButton.src = "../icons/pause.40.png";
-                        deactivateButton.alt = 'suspend';
-                        deactivateButton.setAttribute('class', 'activate_button');
-                        deactivateButton.onclick = function () {
-                            deactivateSubscription(subscription_status_for_this_distributionlist.subscriptionid,row.distributionlistid );
-                        };
-                        deactivateButtonContainer.appendChild(deactivateButton);
-                        // text
-                        // create text node an append it to the button
-                        const deactivateButtonText = document.createTextNode("suspend");
-                        deactivateButtonText.onclick = function () {
-                            deactivateSubscription(subscription_status_for_this_distributionlist.subscriptionid,row.distributionlistid );
-                        };
-                        deactivateButtonContainer.appendChild(deactivateButtonText);
-
-                        actionButtonContainer.appendChild(deactivateButtonContainer);
-
+                    // Add deactivate button
+                    console.debug("Add deactivate button");
+                    const deactivateButtonContainer = document.createElement('div');
+                    deactivateButtonContainer.setAttribute('class', 'go_to_location_button');
+                    deactivateButtonContainer.setAttribute('name', 'suspend');
+                    // button
+                    const deactivateButton = document.createElement('img');
+                    deactivateButton.src = "../icons/pause.40.png";
+                    deactivateButton.alt = 'suspend';
+                    deactivateButton.setAttribute('class', 'activate_button');
+                    deactivateButton.onclick = function () {
+                        deactivateSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid);
+                    };
+                    deactivateButtonContainer.appendChild(deactivateButton);
+                    // text
+                    // create text node an append it to the button
+                    const deactivateButtonText = document.createTextNode("suspend");
+                    deactivateButtonText.onclick = function () {
+                        deactivateSubscription(subscription_status_for_this_distributionlist.subscriptionid, row.distributionlistid);
+                    };
+                    deactivateButtonContainer.appendChild(deactivateButtonText);
+                    actionButtonContainer.appendChild(deactivateButtonContainer);
 
                     // check if user is a subscriber to this distribution list
                     //if not, add subscribe button
@@ -441,12 +434,11 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                         actionButtonContainer.querySelector('[name="suspend"]').style.display = 'none';
                         actionButtonContainer.querySelector('[name="resume"]').style.display = 'none';
 
-                       
                     } else if (subscription_status_for_this_distributionlist.active == 0 || subscription_status_for_this_distributionlist.active == "0") {
                         // The user has a subscription for this distribution list, but it is suspended
                         console.debug("3.3.5");
-                        
-                        // record the subscriptionid in the row 
+
+                        // record the subscriptionid in the row
                         newRow.setAttribute('subscriptionid', subscription_status_for_this_distributionlist.subscriptionid);
 
                         // Add unsubscribe button
@@ -457,24 +449,20 @@ function fetchFeeds(creatorid, table_name, not_show_by_default_columns) {
                         actionButtonContainer.querySelector('[name="unsubscribe"]').style.display = 'block';
                         actionButtonContainer.querySelector('[name="suspend"]').style.display = 'none';
                         actionButtonContainer.querySelector('[name="resume"]').style.display = 'block';
-                       
 
                     } else {
                         // The user has a subscription for this distribution list, and it is active
                         console.debug("3.3.46");
-                       // record the subscriptionid in the row 
-                       newRow.setAttribute('subscriptionid', subscription_status_for_this_distributionlist.subscriptionid);
+                        // record the subscriptionid in the row
+                        newRow.setAttribute('subscriptionid', subscription_status_for_this_distributionlist.subscriptionid);
 
                         // Add unsubscribe button
                         actionButtonContainer.querySelector('[name="subscribe"]').style.display = 'none';
                         actionButtonContainer.querySelector('[name="unsubscribe"]').style.display = 'block';
                         actionButtonContainer.querySelector('[name="suspend"]').style.display = 'block';
                         actionButtonContainer.querySelector('[name="resume"]').style.display = 'none';
-                
 
                     }
-
-                   
 
                 });
                 resolve('Data saved OK');
@@ -513,17 +501,13 @@ async function deactivateSubscription(subscriptionid, distributionlistid) {
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }else{
-
-        }
-        const row = document.querySelector('tr[distributionlistid="'+distributionlistid+'"]');
+        } else {}
+        const row = document.querySelector('tr[distributionlistid="' + distributionlistid + '"]');
 
         row.querySelector('[name="subscribe"]').style.display = 'none';
         row.querySelector('[name="unsubscribe"]').style.display = 'block';
         row.querySelector('[name="suspend"]').style.display = 'none';
         row.querySelector('[name="resume"]').style.display = 'block';
-
-
 
         // Parse JSON data
         const data = await response.json();
@@ -561,14 +545,14 @@ async function activateSubscription(subscriptionid, distributionlistid) {
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }else{
-            const row = document.querySelector('tr[distributionlistid="'+distributionlistid+'"]');
-console.debug(row);
+        } else {
+            const row = document.querySelector('tr[distributionlistid="' + distributionlistid + '"]');
+            console.debug(row);
             row.querySelector('[name="subscribe"]').style.display = 'none';
             row.querySelector('[name="unsubscribe"]').style.display = 'block';
             row.querySelector('[name="suspend"]').style.display = 'block';
             row.querySelector('[name="resume"]').style.display = 'none';
-    
+
         }
 
         // Parse JSON data
@@ -608,17 +592,16 @@ async function deleteSubscription(subscriptionid, distributionlistid) {
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }else{
-            const row = document.querySelector('tr[distributionlistid="'+distributionlistid +'"]');
+        } else {
+            const row = document.querySelector('tr[distributionlistid="' + distributionlistid + '"]');
             console.debug(row);
             row.querySelector('[name="subscribe"]').style.display = 'block';
             row.querySelector('[name="unsubscribe"]').style.display = 'none';
             row.querySelector('[name="suspend"]').style.display = 'none';
             row.querySelector('[name="resume"]').style.display = 'none';
-    
-              // remove the subscriptionid from the row 
-              row.removeAttribute('subscriptionid');
 
+            // remove the subscriptionid from the row
+            row.removeAttribute('subscriptionid');
 
         }
 
@@ -658,14 +641,14 @@ async function addSubscription(distributionlistid) {
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }else{
-            const row = document.querySelector('tr[distributionlistid="'+distributionlistid+'"]');
-console.debug(row);
+        } else {
+            const row = document.querySelector('tr[distributionlistid="' + distributionlistid + '"]');
+            console.debug(row);
             row.querySelector('[name="subscribe"]').style.display = 'none';
             row.querySelector('[name="unsubscribe"]').style.display = 'block';
             row.querySelector('[name="suspend"]').style.display = 'block';
             row.querySelector('[name="resume"]').style.display = 'none';
-    
+
         }
 
         // Parse JSON data

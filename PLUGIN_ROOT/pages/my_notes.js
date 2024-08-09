@@ -453,14 +453,14 @@ function fetchData(not_show_by_default_columns) {
                 const currentTime = Date.now();
 
                 console.debug("currentTime: " + currentTime);
-                const cachetimeout = 5;
+                const ownnotes_cachetimeout = 5;
                 const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
                 const protocol = "GET";
 
                 // Accept data from cache if it is less than 60 seconds old
                 // Make changes to this timeout when there is a procedure to empty the cache if the value has been updated.
                 console.debug("calling cachableCall2API_GET");
-                return cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint);
+                return cachableCall2API_GET(cacheKey, ownnotes_cachetimeout , protocol, endpoint);
             }).then(function (dist) {
                 distributionListData = dist;
 
@@ -487,8 +487,11 @@ function fetchData(not_show_by_default_columns) {
                     console.debug(JSON.stringify(row));
                     console.debug(row.noteid);
                     note_obj.creatorid = row.creatorid;
-                    console.debug(note_obj);
+                   
 
+                    // read distribution list details from the row record, rather than the JSON object
+                    note_obj.distributionlistname = row.distributionlistname;
+                    console.debug(note_obj);
                     // Create new row
                     const newRow = tableBody.insertRow();
                     newRow.setAttribute('noteid', row.noteid);

@@ -374,6 +374,16 @@ function listener(request, sender, sendResponse) {
                 console.debug("placeYellowNoteOnPage");
                 console.debug(request);
 
+                console.debug("request.session_uuid: " + request.session_uuid);
+                console.debug("request.creatorDetails.uuid: " + request.creatorDetails.uuid);
+// if the session id is different fro mthe uuid of the note creator, then the note is not the user's own
+                var isOwner = true;
+if (request.session_uuid == request.creatorDetails.uuid) {
+    isOwner = true;
+} else {
+    isOwner = false;
+}
+request.isOwner = isOwner;
                 //var cont1 = create_yellownote_DOM(request.note_template, request.notetype_template , "canvas", true, true)
                 //console.debug(cont1);
 
@@ -704,7 +714,7 @@ function initiateScreenSelection() {
                     console.debug(res);
                     //
                     console.debug("calling: size_and_place_note_based_on_coordinates");
-                    const newGloveboxNode = size_and_place_note_based_on_coordinates(res, note_obj, true, true);
+                    const newGloveboxNode = size_and_place_note_based_on_coordinates(res, note_obj, creatorDetails, true, true);
 
                     newGloveboxNode.linkedContentUniqueid = linkedContentUniqueid;
                     // newGloveboxNode.setAttribute("linkedContentUniqueid", linkedContentUniqueid);
@@ -1148,7 +1158,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
         insertedNode.setAttribute("highlightuniqueid", highlightuniqueid);
         console.debug(insertedNode);
 console.debug("calling size_and_place_note_based_on_texthighlight");
-        size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
+        size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, creatorDetails, isOwner, isNewNote);
         
     } else {
         // selection text was not matched in the document, or there is no selection text
@@ -1160,7 +1170,7 @@ console.debug("calling size_and_place_note_based_on_texthighlight");
         //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
         //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
         console.debug("calling size_and_place_note_based_on_coordinates");
-        size_and_place_note_based_on_coordinates(insertedNode, note_object_data,isOwner, isNewNote);
+        size_and_place_note_based_on_coordinates(insertedNode, note_object_data, creatorDetails, isOwner, isNewNote);
 
     }
       // set the flag that contral which button are shown
@@ -2813,13 +2823,18 @@ function removeHighlighting_DELETE(uniqueId) {
 // the session token is not completed as yet
 function get_username_from_sessiontoken(token) {
 
-    return (JSON.parse(token)).userid;
+//    return (JSON.parse(token)).userid;
+
+   const userid = extractClaimFromJWT(token, "userid");
+  
+return  userid;
 
 }
 
 function get_displayname_from_sessiontoken(token) {
 
-    return (JSON.parse(token)).displayname;
+    return extractClaimFromJWT(token, "displayname");
+//    return (JSON.parse(token)).displayname;
 
 }
 
@@ -4115,7 +4130,7 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
                                             create_stickynote_node(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote).then(function (newGloveboxNode) {
                                                 console.debug(newGloveboxNode);
                                                 console.debug("calling size_and_place_note_based_on_coordinates");
-                                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, isNewNote);
+                                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj,creatorDetails, isOwner, isNewNote);
 
                                                 console.debug("calling setComponentVisibility");
                                                 if (isOwner) {
@@ -4176,7 +4191,7 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
 
                                 console.debug(newGloveboxNode);
                                 console.debug("calling: size_and_place_note_based_on_coordinates");
-                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, isNewNote);
+                                size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, creatorDetails, isOwner, isNewNote);
                                 console.debug("calling: attachEventlistenersToYellowStickynote");
                                 attachEventlistenersToYellowStickynote(newGloveboxNode);
                                 // make some parts visible and other not visible
@@ -5011,14 +5026,13 @@ function findNodesBetween(startNode, endNode) {
 
 // the session token is not completed as yet
 function get_brand_from_sessiontoken(token) {
-
     try {
         return (JSON.parse(token)).brand;
     } catch (error) {
         return "default";
     }
-
 }
+
 
 // scan all the text on the page, with a view to later making a pattern match with the selected text contained in the note
 function scan_page() {
@@ -5045,7 +5059,7 @@ function scan_page() {
 
     console.debug("whole_page_text length: ", whole_page_text.length);
     //
-    console.debug(whole_page_text);
+    //console.debug(whole_page_text);
 
     // contain node object and the position within overall text (white space removed)
 
@@ -7006,10 +7020,11 @@ const note_default_placement_y_offset = "150px";
  *  inside the page the location where the note should be placed. If this does not success, place it on top of the page.
  */
 
-function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, isOwner, isNewNote) {
+function size_and_place_note_based_on_coordinates(newGloveboxNode, note_obj, creatorDetails, isOwner, isNewNote) {
     console.debug("size_and_place_note_based_on_coordinates.start");
     console.debug(newGloveboxNode);
     console.debug(note_obj);
+    console.debug(creatorDetails);
     console.debug(isOwner);
     console.debug("isNewNote: ", isNewNote);
     // final placement
@@ -7103,7 +7118,7 @@ posy = (window.scrollY + parseInt(note_default_placement_y_offset))+ "px";
         // Set overall size of the note
         // adjust if the note is owned by the current user or is new. In both cases the bottom controll bar will be appended
         insertedNode.style.width = box_width;
-        insertedNode.querySelector('[name="whole_note_table"]').style.width = box_width;
+        //insertedNode.querySelector('[name="whole_note_table"]').style.width = box_width;
         insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = (parseInt(box_height) - note_internal_height_padding) + 'px';
 
         if (isOwner || isNewNote) {
@@ -7118,7 +7133,7 @@ posy = (window.scrollY + parseInt(note_default_placement_y_offset))+ "px";
 
             insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height + 'px';
         }
-        insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height;
+        //insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height;
         insertedNode.querySelector('[name="whole_note_table"]').style.position = "absolute";
 
         // update the size of some other fields in the note object
