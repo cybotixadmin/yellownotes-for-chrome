@@ -392,8 +392,6 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             console.debug("uuid" + uuid);
             console.debug("calling cachableCall2API_POST");
             return cachableCall2API_POST( uuid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: uuid } );
-
-
         }).then(function (result) {
             console.debug(result);
 

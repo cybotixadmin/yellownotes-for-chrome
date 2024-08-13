@@ -122,13 +122,8 @@ const column_list = ['createtime', 'lastmodifiedtime', 'type', 'feed', 'location
 // attach event listeners to the column toggle checkboxes
 addEventColumnToggleListeners(column_list, table_name);
 
-
-
-
 // setup table items for sorting and filtering
 setupTableFilteringAndSorting(table_name);
-
-
 
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
@@ -176,17 +171,6 @@ console.debug("not_show_by_default_columns: " + not_show_by_default_columns);
 console.debug("not_show_by_default_columns.length: " + not_show_by_default_columns.length);
 
 // setut checkmarks for which columns to display and which to hide
-//console.debug("calling: setColumnToggleMarks");
-//setColumnToggleMarks(column_list, table_name, not_show_by_default_columns);
-
-// hid the column headers that should not be shown
-//console.debug("calling: hideColumns");
-//not_show_by_default_columns.forEach(column => { hideColumn(column, false, table_name); });
-     // update the list of columns and check/uncheck according to the list of columns to not display
-     //not_show_by_default_columns.forEach(column => {
-     //   toggleColumn(column, false,table_name, table_columns_to_not_display_keyname);
-     //   document.getElementById(`toggle-${column}`).checked = false;
-   // });
 
 
 // create event listeners for the column toggle checkboxes

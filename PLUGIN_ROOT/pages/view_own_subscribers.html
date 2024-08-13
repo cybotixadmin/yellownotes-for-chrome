@@ -25,25 +25,39 @@
     <div class="scrollable-table">
       <table name="subscribersTable" class="notesTable">
         <thead>
-          <tr class="fixed-header">
+          <tr class="fixed-header" selectablecol="true">
             <!-- the names asigned to the columns here are used in the javascript later-->
-            <th name="name" class="displayname">name<span class="sort-icon" ">&#9650;</span></th>
-            <th name="email" class="email">email<span class="sort-icon email" ">&#9650;</span></th>
-            <th name="distributionlistname" class="displayname" >feed<span class="sort-icon" ">&#9650;</span></th>
-            <th name="active" class="checkbox">active<span class="sort-icon" ">&#9650;</span></th>
-            <th name="status" class="compact">status<span class="sort-icon" ">&#9650;</span></th>
-				<th name="subscribetime" class="datetime">subscribed since<span class="sort-icon" ">&#9650;</span></th>
+            <th name="name" class="sortableCol displayname" sort_type="stringCaseExact">name<span class="sort-icon">&#9650;</span></th>
+            <th name="email" class="sortableCol email" sort_type="stringCaseExact">email<span class="sort-icon email">&#9650;</span></th>
+            <th name="distributionlistname" class="sortableCol  displayname" sort_type="stringCaseExact">feed<span class="sort-icon" ">&#9650;</span></th>
+            <th name="active_status" class="sortableCol checkbox" sort_type="stringCaseExact">active<span class="sort-icon" ">&#9650;</span></th>
+            <th name="application_status" class="compact" sort_type="stringCaseExact">status<span class="sort-icon" ">&#9650;</span></th>
+				<th name="subscribetime" class="sortableCol datetime" sort_type="stringCaseExact">subscribed since<span class="sort-icon" ">&#9650;</span></th>
             <th name="actions" class="action-5">actions</th>
           </tr>
           
           <!-- Add a filter row -->
-          <tr class="fixed-header">
-            <th filterableCol="wildcardmatch" class="displayname"><input filterContent="1" type="text"  placeholder="Filter "></th>
-            <th filterableCol="wildcardmatch" class="email"><input filterContent="1" type="text"  placeholder="Filter "></th>
-            <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="filterableCol datetime" placeholder="Filter "></th>
-            <th filterableCol="checkedmatch" class="checkbox"><select filterContent="1" class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
-            <th filterableCol="selectmatch" class="status"><select filterContent="1" class="filterableCol checkbox"><option class="filterableCol"></option><option class="filterableCol">AUTOMATICALLY_APPROVED</option><option class="filterableCol">MANUALLY_APPROVED</option><option class="filterableCol">DECLINED</option><option class="filterableCol">INVITATION_SENT</option><option class="filterableCol">PENDING_APPROVAL</option></select></th>
-            <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="filterableCol datetime" placeholder="Filter "></th>
+          <tr name="filter_row" class="fixed-header" selectablecol="true">
+            <th class="filterableCol" filter_type="stringCaseExact" class="filterableCol displayname" ><input filterContent="1" type="text"  placeholder="Filter "></th>
+            <th class="filterableCol" filter_type="stringCaseExact" class="filterableCol email" ><input filterContent="1" type="text"  placeholder="Filter "></th>
+            <th class="filterableCol" filter_type="stringCaseExact" class="filterableCol datetime" ><input filterContent="1" type="text" class="filterableCol datetime" placeholder="Filter "></th>
+            <th class="filterableCol" filter_type="stringCaseExact">
+              <select filterContent="1" class="compact checkbox">
+                <option class="compact"></option>
+                <option class="compact">inactive</option>
+                <option class="compact">active</option>
+              </select>
+            </th>
+            <th filterableCol="selectmatch" class="filterableCol status" filter_type="selectList">
+              <select filterContent="1" class="filterableCol checkbox">
+              <option class="filterableCol"></option>
+              <option class="filterableCol">AUTOMATICALLY_APPROVED</option>
+              <option class="filterableCol">MANUALLY_APPROVED</option>
+              <option class="filterableCol">DECLINED</option>
+              <option class="filterableCol">INVITATION_SENT</option>
+              <option class="filterableCol">PENDING_APPROVAL</option>
+            </select></th>
+            <th class="filterableCol" filter_type="stringCaseExact" class="filterableCol datetime" ><input filterContent="1" type="text" class="filterableCol datetime" placeholder="Filter "></th>
             <th class="action-5"></th>
           </tr>
       
@@ -74,8 +88,8 @@
           <input type="checkbox" id="toggle-distributionlistname" checked>
       </div>
       <div class="toggle-button">
-        <label for="toggle-status">status</label>
-        <input type="checkbox" id="toggle-status" checked>
+        <label for="toggle-application_status">status</label>
+        <input type="checkbox" id="toggle-application_status" checked>
     </div>
     
     <div class="toggle-button">
@@ -84,8 +98,8 @@
     </div>
     
     <div class="toggle-button">
-      <label for="toggle-active">active</label>
-      <input type="checkbox" id="toggle-active" checked>
+      <label for="toggle-active_status">active</label>
+      <input type="checkbox" id="toggle-active_status" checked>
     </div>
     
     <div class="toggle-button">

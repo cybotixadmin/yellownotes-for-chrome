@@ -814,7 +814,7 @@ try {
                 const cell_subscribedate = newRow.insertCell(3);
                 const cell_creatordisplayname = newRow.insertCell(4);
                 const cell_postcount = newRow.insertCell(5);
-                const cell_status = newRow.insertCell(6);
+                const cell_active_status = newRow.insertCell(6);
                 const cell_actions = newRow.insertCell(7);
                
                 // key column - not to be displayed
@@ -859,7 +859,7 @@ try {
 
                 // render a check box to enable/disable the note
                 const suspendActButton = document.createElement("span");
-                if (row.active == 1) {
+                if (row.active_status == 1) {
                     // active
                     suspendActButton.innerHTML =
                         '<label><input type="checkbox" class="checkbox" placeholder="Enter text" checked/><span></span></label>';
@@ -902,10 +902,10 @@ try {
                 cell_postcount.setAttribute('name', 'postcount');
                 cell_postcount.setAttribute('class', 'url');
 
-                cell_status.textContent = row.status;
-                cell_status.setAttribute('data-label', 'text');
-                cell_status.setAttribute('name', 'status');
-                cell_status.setAttribute('class', 'compact');
+                cell_active_status.textContent = row.active_status;
+                cell_active_status.setAttribute('data-label', 'text');
+                cell_active_status.setAttribute('name', 'status');
+                cell_active_status.setAttribute('class', 'compact');
 
                 cell_description.textContent = row.description;
                 cell_description.setAttribute('data-label', 'text');
@@ -1000,6 +1000,41 @@ try {
 }
 
 
+// Function to use "fetch" to re-activate a data agreement
+async function setSubscriptionActiveStatusByUUID(subscriptionid, status) {
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+        
+        const message_body = JSON.stringify({
+                subscriptionid: subscriptionid,
+                active_status: status,
+            });
+        //console.log(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_set_subscription_active_status, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.log(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table
+
+        // Parse JSON data
+        const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 
 function DELETE2fetchData(not_show_by_default_columns) {
@@ -2554,7 +2589,7 @@ async function activateAllSubscriptions() {
             [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
             [plugin_session_header_name]: session[plugin_session_header_name],
         };
-        const body = '{"activestatus":1}';
+        const body = '{"active_status":1}';
 
         const response = await fetch(
                 server_url + URI_plugin_user_set_all_subscriptions_active_status, {
@@ -2592,7 +2627,7 @@ async function deactivateAllSubscriptions() {
             [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
             [plugin_session_header_name]: session[plugin_session_header_name],
         };
-        const body = '{"activestatus":0}';
+        const body = '{"active_status":0}';
 
         const response = await fetch(
                 server_url + URI_plugin_user_set_all_subscriptions_active_status, {

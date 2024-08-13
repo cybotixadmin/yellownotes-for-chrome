@@ -611,9 +611,9 @@ console.debug(note_object_data.distributionlistname);
         topbarcreatordisplayname.setAttribute("href", creator_link_target);
 
     }
-}catch(e){
-    console.error(e);
-}
+    }catch(e){
+        console.error(e);
+    }
     // if there is abannerimage defined for this user, put it in the creator icon field
     if (creator_banner_image != "") {
 
@@ -632,6 +632,8 @@ console.debug(note_object_data.distributionlistname);
         topbar_feed_link_target.replaceChildren(document.createTextNode("" + note_object_data.distributionlistname));
         topbar_feed_link_target.setAttribute("href", feed_link_target);
         topbar_feed_link_target.setAttribute("tb", "feed_link_target");
+         }else{
+            console.debug("no distributionlistid or distributionlistname");
          }
     } catch (e) {
         console.error(e);
@@ -2151,8 +2153,8 @@ bottom_bar.style.display = 'none';
 //console.debug(whole_note_table.outerHTML);
 
                 console.debug(cont1);
-                console.debug("calling update_note_internal_size");
-                update_note_internal_size(cont1);
+                //console.debug("calling update_note_internal_size");
+                //update_note_internal_size(cont1);
                 //console.debug(cont1.outerHTML);
 
                 resolve(cont1);

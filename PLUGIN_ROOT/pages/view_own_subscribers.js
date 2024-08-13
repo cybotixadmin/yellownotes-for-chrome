@@ -41,37 +41,21 @@ checkSessionJWTValidity()
 });
 
 // name of key to be used in db
-const table_columns_to_not_display_keyname = "view_own_sub_hide_columns";
+const table_name = "subscribersTable";
+const filterStorageKey = table_name + "_rowFilters";
+
+const table_columns_to_not_display_keyname = table_name + "_hide_columns";
+
+const column_list = ["name", "email", "distributionlistname", "application_status", "subscribetime", "active_status", "actions"];
+
+// attach event listeners to the column toggle checkboxes
+addEventColumnToggleListeners(column_list, table_name);
+
 
 // which columns to display
 // The users can decide which columns to display
 
-document.getElementById('toggle-name').addEventListener('change', function () {
-    toggleColumn('name', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
-});
 
-document.getElementById('toggle-email').addEventListener('change', function () {
-    toggleColumn('email', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-distributionlistname').addEventListener('change', function () {
-    toggleColumn('distributionlistname', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-status').addEventListener('change', function () {
-    toggleColumn('status', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
-});
-document.getElementById('toggle-subscribetime').addEventListener('change', function () {
-    toggleColumn('subscribetime', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
-});
-
-document.getElementById('toggle-actions').addEventListener('change', function () {
-    toggleColumn('actions', this.checked, "subscribersTable", table_columns_to_not_display_keyname);
-});
 
 
 // set table visibility defaults
@@ -208,8 +192,8 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
                     const cell_displayname = newRow.insertCell(0);
                     const cell_email = newRow.insertCell(1);
                     const cell_distributionlistname = newRow.insertCell(2);
-                    const cell_active = newRow.insertCell(3);
-                    const cell_status = newRow.insertCell(4);
+                    const cell_active_status = newRow.insertCell(3);
+                    const cell_application_status = newRow.insertCell(4);
                     const cell_subscribedate = newRow.insertCell(5);
                     const cell_actions = newRow.insertCell(6);
                     // do not include a option for notes in this release
@@ -248,8 +232,8 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
 
                     // render a check box to enable/disable the note
                     const suspendActButton = document.createElement("span");
-                    if (row.active == 1) {
-                        // active
+                    if (row.enabled_status == 1) {
+                        // active_status
                         suspendActButton.innerHTML =
                             '<label><input type="checkbox" placeholder="Enter text" checked/><span></span></label>';
                     } else {
@@ -281,14 +265,14 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
                             //           await enable_note_with_noteid(row.noteid);
                         }
                     });
-                    cell_active.appendChild(suspendActButton);
-                    cell_active.setAttribute('class', 'checkbox');
-                    cell_active.setAttribute('name', 'active');
+                    cell_active_status.appendChild(suspendActButton);
+                    cell_active_status.setAttribute('class', 'checkbox');
+                    cell_active_status.setAttribute('name', 'active');
 
                     try {
-                        cell_status.textContent = row.status;
-                        cell_status.setAttribute('name', 'status');
-                        cell_status.setAttribute('class', 'status');
+                        cell_application_status.textContent = row.application_status;
+                        cell_application_status.setAttribute('name', 'status');
+                        cell_application_status.setAttribute('class', 'status');
                     } catch (e) {
                         console.debug(e);
                     }
@@ -314,8 +298,38 @@ fetchData(getQueryStringParameter('distributionlistid'), not_show_by_default_col
                 deleteButtonContainer.appendChild(deleteButton);
                 actionButtonContainer.appendChild(deleteButtonContainer);
 
-                // Add save/edit button
+                // Add approve button if the application status is pending
+                if (row.application_status == "PENDING_APPROVAL") {
+                
+   // Add delete button
+   const approveButtonContainer = document.createElement('div');
+   approveButtonContainer.setAttribute('class', 'delete_button');
+   approveButtonContainer.setAttribute('name', 'approveButtonContainer');
+   const approveButton = document.createElement('img');
+   approveButton.src = "../icons/approve.225.png";
+   approveButton.alt = 'approve';
+   approveButton.setAttribute('class', 'delete_button');
+   approveButton.onclick = function () {
+       // update the row in the table
+       //newRow.remove();
+console.debug("approveButton clicked");
+console.debug( document.querySelector( 'tr[subscriptionid="'+row.subscriptionid+'"]').querySelector( 'td[name="status"]').textContent);
+document.querySelector( 'tr[subscriptionid="'+row.subscriptionid+'"]').querySelector( 'td[name="status"]').textContent = "MANUALLY_APPROVED";
 
+// set the active checkbox to checked
+document.querySelector( 'tr[subscriptionid="'+row.subscriptionid+'"]').querySelector( 'td[name="active"]').querySelector("input").checked = true;
+
+// remove the approve button
+console.debug( document.querySelector( 'tr[subscriptionid="'+row.subscriptionid+'"]').querySelector( '[name="approveButtonContainer"]') );
+
+    document.querySelector( 'tr[subscriptionid="'+row.subscriptionid+'"]').querySelector( '[name="approveButtonContainer"]').remove();
+
+       // call to API to delete row from data base
+       approveSubscription(row.subscriptionid);
+   };
+   approveButtonContainer.appendChild(approveButton);
+   actionButtonContainer.appendChild(approveButtonContainer);
+                }
              
                 // add enable/disable button
                 const ableButton = document.createElement('button');
@@ -365,6 +379,48 @@ async function deleteSubscription(subscriptionid) {
         console.debug(installationUniqueId);
         // Fetch data from web service (replace with your actual API endpoint)
         const response = await fetch(server_url + URI_plugin_user_delete_subscription, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body // example IDs, replace as necessary
+            });
+        console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Parse JSON data
+        const data = await response.json();
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+// Function to use "fetch" to delete a data row
+async function approveSubscription(subscriptionid) {
+    console.debug("approveSubscription: " + subscriptionid);
+    try {
+
+        const userid = "";
+        console.debug("deleting: " + subscriptionid);
+        const message_body = '{ "subscriptionid":"' + subscriptionid + '", "application_status": "MANUALLY_APPROVED" }';
+        //console.debug(message_body);
+        const installationUniqueId = (await chrome.storage.local.get([plugin_uuid_header_name]))[plugin_uuid_header_name];
+
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+        
+
+        console.debug(installationUniqueId);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(server_url + URI_plugin_user_set_subscription_application_status, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -447,7 +503,6 @@ function filterTable_a() {
 
 // Fetch data on page load
 
-// Fetch data on page load
 
 var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
@@ -460,7 +515,7 @@ async function setSubscriptionActiveStatusByUUID(subscriptionid, activestatus) {
         const userid = "";
         const message_body = JSON.stringify({
                 subscriptionid: subscriptionid,
-                activestatus: activestatus,
+                active_status: activestatus,
             });
         //console.debug(message_body);
         // Fetch data from web service (replace with your actual API endpoint)
@@ -488,7 +543,8 @@ async function setSubscriptionActiveStatusByUUID(subscriptionid, activestatus) {
     }
 }
 
-async function fetchSubscribers(distributionlistid) {
+
+async function DELETEfetchSubscribers(distributionlistid) {
     console.debug("fetchSubscribers for distributionlistid: " + distributionlistid);
 
     var ynInstallationUniqueId = "";
@@ -655,6 +711,18 @@ async function fetchSubscribers(distributionlistid) {
 
             cell_buttons.appendChild(removeButton);
 
+  // Add approve button
+  const approveButton = document.createElement("button");
+  approveButton.textContent = "approve";
+  approveButton.classList.add("approveBtn");
+  approveButton.onclick = function () {
+      // call to API to save row to data base
+      approveSubscription(row.subscriptionid);
+  };
+
+  cell_buttons.appendChild(approveButton);
+
+
         });
     }
 }
@@ -665,4 +733,3 @@ async function fetchSubscribers(distributionlistid) {
 console.debug("################################################");
 //console.debug(all_page_text);
 //console.debug(textnode_map);
-

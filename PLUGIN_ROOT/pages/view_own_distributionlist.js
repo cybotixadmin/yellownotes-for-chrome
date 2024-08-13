@@ -1,6 +1,12 @@
 
+try{
 
 const table_name ="ownDistributionlistNotesTable";
+
+const filterStorageKey = table_name + "_rowFilters";
+
+console.debug("calling updateFilterRow");
+updateFilterRow(table_name, filterStorageKey);
 
 
 // if there is a querystring parameter, lokk up distribution list spiecified by that parameter
@@ -45,14 +51,65 @@ checkSessionJWTValidity()
 });
 
 
+
+
+const table_columns_to_not_display_keyname = table_name + "_hide_columns";
+
+// store in local the sorting and columns that the user has selected to sort on
+const table_columns_sort_array_keyname = table_name + "_sort_columns";
+
+// store in local the filters and columns that the user has selected to filter on
+const table_columns_filter_array_keyname = table_name + "_filer_columns";
+
+var column_list = ['createtime', 'lastmodifiedtime', 'note_type', 'feed', 'location', 'enabled_status', 'selection_text', 'message_display_text', 'actions'];
+column_list = ['createtime' ];
+
+// attach event listeners to the column toggle checkboxes
+console.debug("calling addEventColumnToggleListeners");
+addEventColumnToggleListeners(column_list, table_name);
+
+//addEventColumnToggleListeners(['createtime', 'lastmodifiedtime', 'note_type','feed', 'location', 'selection_text', 'message_display_text', 'enabled_status', 'actions'], table_name);
+
+// setup table items for sorting and filtering
+setupTableFilteringAndSorting(table_name);
+
+// set table visibility defaults
+// make this sensitive to the size screen the user is using
+var not_show_by_default_columns = [];
+
+// check if not_show_by_default_columns has been set
+const pagewidth = window.innerWidth;
+console.debug("window.innerWidth: " + pagewidth);
+
+if (pagewidth < 300) {
+    not_show_by_default_columns = ["createtime", "lastmodifiedtime", "note_type", "feed", "selection_text", "enabled_status", "actions"];
+} else if (pagewidth < 600) {
+    not_show_by_default_columns = ["createtime", "note_type", "selection_text", "enabled_status", "actions"];
+
+} else if (pagewidth < 1000) {
+    not_show_by_default_columns = ["createtime", "note_type", "selection_text", "enabled_status", "actions"];
+} else if (pagewidth < 1200) {
+    not_show_by_default_columns = [];
+}
+
+console.debug("not_show_by_default_columns: " + not_show_by_default_columns);
+console.debug("not_show_by_default_columns.length: " + not_show_by_default_columns.length);
+
+// check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
+getNotShowByDefaultColumns_asynch(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
+    not_show_by_default_columns = columns;
+    console.log(not_show_by_default_columns);
+}).catch(error => {
+    console.error('Error:', error);
+});
+
+
 // being page customization
 
 // get data about the distribution list and populate the page with it
 
 
 in_html_macro_replace(distributionlistid);
-
-            
 
 
 // end page customization
@@ -62,6 +119,28 @@ console.debug("calling fetchData");
 fetchData( table_name, getQueryStringParameter('distributionlistid')).then(() => {
     console.log("data fetched");
 
+    
+    // apply sorting and filtering to the table
+
+    not_show_by_default_columns.forEach(column => {
+        toggleColumn(column, false, table_name, table_columns_to_not_display_keyname);
+        document.getElementById(`toggle-${column}`).checked = false;
+    });
+
+    console.debug("apply sorting");
+    try {
+        var sortStates = JSON.parse(localStorage.getItem(table_name + '_new_sortStates')) || [];
+        console.debug("calling applyExistingSortTable");
+        applyExistingSortTable(table_name, sortStates);
+     
+        
+        console.debug("calling applyFilters");
+        applyFilters(table_name);
+   
+    } catch (e) {
+        console.error(e);
+    }
+
 });
 //fetchSubscribers(getQueryStringParameter('distributionlistid'));
 
@@ -69,6 +148,9 @@ fetchData( table_name, getQueryStringParameter('distributionlistid')).then(() =>
 console.debug("################################################");
 
 
+}catch(error){
+    console.error(error);
+}
 //console.debug(all_page_text);
 //console.debug(textnode_map);
 
@@ -237,16 +319,17 @@ try{
         newRow.setAttribute('noteid', row.noteid);
 
         // Create cells and populate them with data
-        const cell1 = newRow.insertCell(0);
-        const cell_lastmodifiedtime = newRow.insertCell(1);
-        const cell_createtime = newRow.insertCell(2);
-        const type_cell = newRow.insertCell(3);
-        const cell_name = newRow.insertCell(4);
-        const cell_url = newRow.insertCell(5);
-        const cell_message_text = newRow.insertCell(6);
-        const cell_status = newRow.insertCell(7);
+       
+        const cell_lastmodifiedtime = newRow.insertCell(0);
+        const cell_createtime = newRow.insertCell(1);
+        const cell_note_type = newRow.insertCell(2);
+        const cell_url = newRow.insertCell(3);
+        const cell_selection_text = newRow.insertCell(4);
+        const cell_message_text = newRow.insertCell(5);
+        const cell_enabled_status = newRow.insertCell(6);
+        const cell_distributionlist = newRow.insertCell(7);
         const cell_buttons = newRow.insertCell(8);
-        const cell_distributionlist = newRow.insertCell(9);
+        const cell_distributionlistname = newRow.insertCell(9);
         // do not include a option for notes in this release
         //const cell_notes = newRow.insertCell(7);
 
@@ -255,7 +338,7 @@ try{
         const obj = JSON.parse(row.json);
         console.log(obj);
 
-        cell1.textContent = row.noteid;
+       
         // last create timestamp
         try {
             cell_createtime.textContent = timestampstring2timestamp(row.createtime);
@@ -263,6 +346,7 @@ try{
         } catch (e) {
             console.debug(e);
         }
+        cell_createtime.setAttribute('name', 'createtime');
 
         // last modified timestamp
         try {
@@ -270,25 +354,34 @@ try{
         } catch (e) {
             console.debug(e);
         }
+        cell_lastmodifiedtime.setAttribute('name', 'lastmodifiedtime');
 
         try {
-            type_cell.textContent = obj.note_type;
+            cell_note_type.textContent = obj.note_type;
 
         } catch (e) {
             console.log(e);
         }
-
-        // name
+        cell_note_type.setAttribute('name', 'note_type');
+          
+        // feed name
         try {
-            cell_name.textContent = row.distributionlistname;
+            cell_distributionlistname.textContent = row.distributionlistname;
         } catch (e) {
             console.debug(e);
         }
 
+ // feed name
+ try {
+    cell_selection_text.textContent = obj.selection_text;
+} catch (e) {
+    console.debug(e);
+}
+
 // status
           // render a check box to enable/disable the note
           const suspendActButton = document.createElement("span");
-          if (row.status == 1) {
+          if (row.enabled_status == 1) {
               // active
               suspendActButton.innerHTML =
                   '<label><input type="checkbox" class="checkbox" placeholder="Enter text" checked/><span></span></label>';
@@ -321,17 +414,20 @@ try{
                   //           await enable_note_with_noteid(row.noteid);
               }
           });
-          cell_status.appendChild(suspendActButton);
-          cell_status.setAttribute('class', 'checkbox');
-
+          cell_enabled_status.appendChild(suspendActButton);
+          cell_enabled_status.setAttribute('class', 'checkbox');
+          cell_enabled_status.setAttribute('name', 'enabled_status');
+          
 
         // url where note is attached
         cell_url.textContent = obj.url;
         cell_url.setAttribute('class', 'url');
+        cell_url.setAttribute('name', 'location');
 
         // display/message text
         cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
         cell_message_text.setAttribute('class', 'text');
+        cell_message_text.setAttribute('name', 'message_display_text');
 
 
        try  {
@@ -490,24 +586,25 @@ async function fetchSubscribers(distributionlistid) {
         const newRow = tableBody.insertRow();
         newRow.setAttribute('noteid', row.noteid);
         // Create cells and populate them with data
-        const cell1 = newRow.insertCell(0);
+       
+        const cell_createtime = newRow.insertCell(0);
         const cell_lastmodifiedtime = newRow.insertCell(1);
-        const cell_createtime = newRow.insertCell(2);
-        const type_cell = newRow.insertCell(3);
-        const cell_name = newRow.insertCell(4);
-        const cell_url = newRow.insertCell(5);
-        const cell_message_text = newRow.insertCell(6);
-        const cell_status = newRow.insertCell(7);
-        const cell_buttons = newRow.insertCell(8);
+        const cell_type = newRow.insertCell(2);
+        const cell_name = newRow.insertCell(3);
+        const cell_url = newRow.insertCell(4);
+        const cell_selection_text = newRow.insertCell(5);
+        const cell_message_display_text = newRow.insertCell(5);
+        const cell_enabled_status = newRow.insertCell(6);
+        const cell_feed = newRow.insertCell(7);
+        const cell_actions = newRow.insertCell(8);
         // do not include a option for notes in this release
         //const cell_notes = newRow.insertCell(7);
-
 
         // parse the JSON of the note
         const obj = JSON.parse(row.json);
         console.log(obj);
 
-        cell1.textContent = row.noteid;
+       
         // last create timestamp
         try {
             cell_createtime.textContent = integerstring2timestamp(row.createtime);
@@ -523,8 +620,8 @@ async function fetchSubscribers(distributionlistid) {
         }
 
         try {
-            type_cell.textContent = obj.note_type;
-            type_cell.setAttribute('name', 'note_type');
+            cell_type.textContent = obj.note_type;
+            cell_type.setAttribute('name', 'note_type');
 
         } catch (e) {
             console.log(e);
@@ -566,8 +663,8 @@ async function fetchSubscribers(distributionlistid) {
                    //           await enable_note_with_noteid(row.noteid);
                }
            });
-           cell_status.appendChild(suspendActButton);
-           cell_status.setAttribute('class', 'checkbox');
+           cell_enabled_status.appendChild(suspendActButton);
+           cell_enabled_status.setAttribute('class', 'checkbox');
 
         } catch (e) {
             console.log(e);
@@ -585,7 +682,7 @@ async function fetchSubscribers(distributionlistid) {
         cell_url.textContent = obj.url;
         cell_url.setAttribute('name', 'url');
         // display/message text
-        cell_message_text.textContent = b64_to_utf8(obj.message_display_text);
+        cell_message_display_text.textContent = b64_to_utf8(obj.message_display_text);
 
         // buttons
         // Add delete button
@@ -621,7 +718,7 @@ async function fetchSubscribers(distributionlistid) {
         link.appendChild(goThereButton);
         goThereButtonContainer.appendChild(link);
 
-        cell_buttons.appendChild(goThereButtonContainer);
+        cell_actions.appendChild(goThereButtonContainer);
 
         //cell_buttons.appendChild(goThereButton);
 

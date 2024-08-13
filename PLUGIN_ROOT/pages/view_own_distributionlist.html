@@ -25,23 +25,21 @@
 <div class="scrollable-table">
     <table name="ownDistributionlistNotesTable" class="ownNotesTable">
       <thead>
-        <tr class="fixed-header">
-          <th>ID</th>
-          <th class="sortableCol" >last modified<span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" >created<span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" >type<span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" >feed <span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" >location(URL)<span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" >text<span class="sort-icon" ">&#9650;</span></th>
-          <th class="sortableCol" name="active" class="checkbox">active</th>
-          <th>action</th>
-          <th class="sortableCol" name="feed" sort_type="selectCaseExact">feed<span class="sort-icon url">&#9650;</span></th>
+        <tr class="fixed-header" selectablecol="true">
+          <th class="sortableCol" name="createtime"  sort_type="stringCaseExact">created<span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" name="lastmodifiedtime"  sort_type="stringCaseExact">last modified<span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" name="note_type"  sort_type="stringCaseExact">type<span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" name="location"  sort_type="stringCaseExact">location(URL)<span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" name="selection_text" sort_type="stringCaseExact">text<span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" name="message_display_text" sort_type="stringCaseExact">text<span class="sort-icon" ">&#9650;</span></th>
+          <th class="sortableCol" name="enabled_status" class="checkbox">active</th>
+          <th class="sortableCol" name="feed" sort_type="selectCaseExact" sort_type="stringCaseExact">feed<span class="sort-icon url">&#9650;</span></th>
+          <th name="actions" >actions</th>
         </tr>
         
         <!-- Add a filter row -->
-        <tr class="fixed-header">
-          <th class="filterableCol"></th>
-          <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
+        <tr name="filter_row" class="fixed-header">
+          <th class="filterableCol"  name="createtime" ><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
           <th class="filterableCol"><input filtertype="wildcardmatch" type="text" class="filterContent" placeholder="Filter " ></th>
           <th class="filterableCol"><select filtertype="wildcardmatch" class="filterableCol"><option class="filterableCol"></option><option class="filterableCol">webframe</option><option class="filterableCol">yellownote</option></select></th>
     
@@ -64,16 +62,16 @@
     which columns to show
     <div class="toggle-container">
       <div class="toggle-button">
-          <label for="toggle-created">Created</label>
-          <input type="checkbox" id="toggle-created" checked>
+          <label for="toggle-createtime">Created</label>
+          <input type="checkbox" id="toggle-createtime" checked>
       </div><br/>
       <div class="toggle-button">
-          <label for="toggle-modified">Modified</label>
-          <input type="checkbox" id="toggle-modified" checked>
+          <label for="toggle-lastmodifiedtime">Modified</label>
+          <input type="checkbox" id="toggle-lastmodifiedtime" checked>
       </div><br/>
       <div class="toggle-button">
-          <label for="toggle-type">Type</label>
-          <input type="checkbox" id="toggle-type" checked>
+          <label for="toggle-note_type">Type</label>
+          <input type="checkbox" id="toggle-note_type" checked>
       </div>
       <div class="toggle-button">
         <label for="toggle-feed">Feed</label>
@@ -81,22 +79,22 @@
     </div>
     
     <div class="toggle-button">
-      <label for="toggle-selected">Selected text</label>
-      <input type="checkbox" id="toggle-selected" checked>
+      <label for="toggle-selection_text">Selected text</label>
+      <input type="checkbox" id="toggle-selection_text" checked>
     </div>
     
     <div class="toggle-button">
-      <label for="toggle-active">active</label>
-      <input type="checkbox" id="toggle-active" checked>
+      <label for="toggle-enabled_status">enabled</label>
+      <input type="checkbox" id="toggle-enabled_status" checked>
     </div>
     
     <div class="toggle-button">
-      <label for="toggle-message">Message</label>
-      <input type="checkbox" id="toggle-message" checked>
+      <label for="toggle-message_display_text">Message</label>
+      <input type="checkbox" id="toggle-message_display_text" checked>
     </div>
     <div class="toggle-button">
-      <label for="toggle-action">Actions</label>
-      <input type="checkbox" id="toggle-action" checked>
+      <label for="toggle-actions">Actions</label>
+      <input type="checkbox" id="toggle-actions" checked>
     </div>
     <div class="toggle-button">
       <label for="toggle-location">Location</label>
@@ -108,15 +106,21 @@
     </div>
    
 
-<!-- main page end -->
+  <!-- main page end -->
+  <script  src="on_page_common.js"></script>
 
-<script src="../content_scripts/NotesHandler.js"></script>
-<script src="../content_scripts/test.js"></script>
-<script  src="on_page_common.js"></script>
-<script src="./common_cache_functions.js"></script>
-<script src="view_own_distributionlist.js"></script>
+  <script src="../content_scripts/NotesHandler.js"></script>
+
+  <!-- reference functions needed to render a yellownote from serlialized form-->
+  <script src="../content_scripts/RenderEmbeddedYelloNotes_libraries.js"></script>
+  <script src="../content_scripts/test.js"></script>
 
 
-</body>
+  <script src="./common_cache_functions.js"></script>
+
+  <script src="view_own_distributionlist.js"></script>
+
+
+  </body>
 </html>
     

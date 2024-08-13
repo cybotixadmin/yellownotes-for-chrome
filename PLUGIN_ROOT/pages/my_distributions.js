@@ -42,6 +42,10 @@ checkSessionJWTValidity()
 
 const table_columns_to_not_display_keyname = "mydistributionlists_hide_columns2";
 
+
+const column_list =  ["name", "description",  "visibility", "restrictions",  "postcount", "subscriberscount", "createtime", "active_status","anonymous_allowed", "automatic_enrolment" , "actions" ];
+
+
 // which columns to display
 // The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
 
@@ -69,12 +73,12 @@ document.getElementById('toggle-subscriberscount').addEventListener('change', fu
     toggleColumn('subscriberscount', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
 });
 
-document.getElementById('toggle-created').addEventListener('change', function () {
-    toggleColumn('created', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-createtime').addEventListener('change', function () {
+    toggleColumn('createtime', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
 });
 
-document.getElementById('toggle-active').addEventListener('change', function () {
-    toggleColumn('active', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+document.getElementById('toggle-active_status').addEventListener('change', function () {
+    toggleColumn('active_status', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-anonymous_allowed').addEventListener('change', function () {
@@ -99,17 +103,17 @@ const pagewidth = window.innerWidth;
 console.log("window.innerWidth: " + pagewidth);
 
 if (pagewidth < 300) {
-    not_show_by_default_columns = ["created", "restrictions", "actions"];
-    console.debug("created", "restrictions", "actions");
+    not_show_by_default_columns = ["createtime", "restrictions", "actions"];
+    console.debug("createtime", "restrictions", "actions");
 } else if (pagewidth < 600) {
-    not_show_by_default_columns = ["created", "restrictions"];
-    console.debug("created", "restrictions");
+    not_show_by_default_columns = ["createtime", "restrictions"];
+    console.debug("createtime", "restrictions");
 } else if (pagewidth < 1000) {
-    console.debug("created", "restrictions");
-    not_show_by_default_columns = ["created", "restrictions"];
+    console.debug("createtime", "restrictions");
+    not_show_by_default_columns = ["createtime", "restrictions"];
 } else if (pagewidth < 1200) {
 
-    not_show_by_default_columns = ["created", "restrictions"];
+    not_show_by_default_columns = ["createtime", "restrictions"];
 }
 
 //
@@ -683,15 +687,15 @@ function fetchData(not_show_by_default_columns) {
                 newRow.setAttribute('selectablecol', "true");
                 // Create cells and populate them with data
                 const cell_name = newRow.insertCell(0);
-                const cell_desc = newRow.insertCell(1);
+                const cell_description = newRow.insertCell(1);
                 const cell_visibility = newRow.insertCell(2);
                 const cell_restrictions = newRow.insertCell(3);
                 const cell_postcount = newRow.insertCell(4);
                 const cell_subscribercount = newRow.insertCell(5);
                 const cell_createtime = newRow.insertCell(6);
-                const cell_status = newRow.insertCell(7);
-                const cell_anonymous = newRow.insertCell(8);
-                const cell_automatic = newRow.insertCell(9);
+                const cell_active_status = newRow.insertCell(7);
+                const cell_anonymous_allowed = newRow.insertCell(8);
+                const cell_automatic_enrolment = newRow.insertCell(9);
                 const cell_actions = newRow.insertCell(10);
 
                 // name
@@ -705,10 +709,10 @@ function fetchData(not_show_by_default_columns) {
                 }
 
                 // description
-                cell_desc.textContent = rowData.description;
-                cell_desc.setAttribute("name", "description");
-                cell_desc.setAttribute("contenteditable", "true");
-                cell_desc.setAttribute("class", "displayname");
+                cell_description.textContent = rowData.description;
+                cell_description.setAttribute("name", "description");
+                cell_description.setAttribute("contenteditable", "true");
+                cell_description.setAttribute("class", "displayname");
                 if (not_show_by_default_columns.includes("description")) {
                     cell_visibility.classList.add('hidden');
                 }
@@ -778,6 +782,7 @@ function fetchData(not_show_by_default_columns) {
 
                 }
 
+                
                 //Suspend/Active check switch
                 const suspendActButton = document.createElement("span");
                 if (rowData.active == 1) {
@@ -810,15 +815,15 @@ function fetchData(not_show_by_default_columns) {
                         await deactivateByUUID(rowData.distributionlistid);
                     }
                 });
-                cell_status.appendChild(suspendActButton);
-                cell_status.setAttribute("class", "checkbox");
-                cell_status.setAttribute("name", "active");
+                cell_active_status.appendChild(suspendActButton);
+                cell_active_status.setAttribute("class", "checkbox");
+                cell_active_status.setAttribute("name", "active");
                 if (not_show_by_default_columns.includes("active")) {
-                    cell_status.classList.add('hidden');
+                    cell_active_status.classList.add('hidden');
 
                 }
 
-                //anonymous enrolment check switch
+                //anonymous enrolment allowed check switch
                 const anonActButton = document.createElement("span");
                 if (rowData.anonymous_allowed == 1) {
                     // active
@@ -850,15 +855,18 @@ function fetchData(not_show_by_default_columns) {
                         await setAnonymousByUUID(rowData.distributionlistid, 0);
                     }
                 });
-                cell_anonymous.appendChild(anonActButton);
-                cell_anonymous.setAttribute("name", "automatic_enrolment");
-                cell_anonymous.setAttribute("class", "checkbox");
+                cell_anonymous_allowed.appendChild(anonActButton);
+                cell_anonymous_allowed.setAttribute("name", "anonymous_allowed");
+                cell_anonymous_allowed.setAttribute("class", "checkbox");
 
                 //
 
+console.debug("automatic enrolment: " + rowData.automatic_enrolment);
+console.debug(rowData.automatic_enrolment == 1);
+
                 //automatic enrolment check switch
                 const autoActButton = document.createElement("span");
-                if (rowData.automatic_allowed == 1) {
+                if (rowData.automatic_enrolment == 1) {
                     // active
                     autoActButton.innerHTML =
                         '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
@@ -888,9 +896,9 @@ function fetchData(not_show_by_default_columns) {
                         await setAutomaticByUUID(rowData.distributionlistid, 0);
                     }
                 });
-                cell_automatic.appendChild(autoActButton);
-                cell_automatic.setAttribute("class", "checkbox");
-                cell_automatic.setAttribute("name", "anonymous_allowed");
+                cell_automatic_enrolment.appendChild(autoActButton);
+                cell_automatic_enrolment.setAttribute("class", "checkbox");
+                cell_automatic_enrolment.setAttribute("name", "automatic_enrolment");
 
                 //
                 // action buttons

@@ -865,7 +865,7 @@ function capturePageForIframe(url) {
 }
 
 /* creates DOM object of the stick note */
-function create_universal_yellownote(info, note_type, html_note_template, html_notetype_template, note_properties, session, is_selection_text_connected) {
+function create_universal_yellownote(info, note_type, html_note_template, html_notetype_template, creatorDetails, session, is_selection_text_connected) {
 
     console.debug("create_universal_yellownote.start");
     console.debug("info:");
@@ -875,6 +875,9 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     // override
     //note_type= "yellownote";
 
+
+    console.debug("note_properties: " );
+    console.debug(creatorDetails);
 
     const isOwner = true;
     const isNewNote = true;
@@ -922,8 +925,8 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
 
     // create the note object data with suitable initial values for some fields
     var note_object_data = {}
-    console.debug("note_properties: ");
-    console.debug(note_properties);
+    console.debug("creatorDetails: ");
+    console.debug(creatorDetails);
     var userid = "";
     console.debug("session: ");
     console.debug(session);
@@ -1006,9 +1009,9 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     if (note_table.hasAttribute("box_width")) {
         console.debug("note_table has box_width, use it ");
         box_width = note_table.getAttribute("box_width");
-    } else if (note_properties.box_width != undefined) {
-        console.debug("creator's note_properties has box_width, use it " + note_properties.box_width);
-        box_width = note_properties.box_width;
+    } else if (creatorDetails.box_width != undefined) {
+        console.debug("creator's note_properties has box_width, use it " + creatorDetails.box_width);
+        box_width = creatorDetails.box_width;
     } else {
         // brand-level not implemted yet
     }
@@ -1019,9 +1022,9 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     if (note_table.hasAttribute("box_height")) {
         console.debug("note_table has box_height, use it");
         box_height = note_table.getAttribute("box_height");
-    } else if (note_properties.box_height) {
-        console.debug("creator's note_properties has box_height, use it " + note_properties.box_height);
-        box_height = note_properties.box_height;
+    } else if (creatorDetails.box_height) {
+        console.debug("creator's note_properties has box_height, use it " + creatorDetails.box_height);
+        box_height = creatorDetails.box_height;
     } else {
         // brand-level not implemted yet
     }
@@ -1035,8 +1038,8 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     // what color to use for the note
     var note_color = "#ffff00"; // set default value, override with more specific values if available
     // attempt to read size parameters from the note properties of the creator
-    if (note_properties.note_color) {
-        note_color = note_properties.note_color
+    if (creatorDetails.note_color) {
+        note_color = creatorDetails.note_color
             console.debug("creator's note_properties has note_color, use it " + note_color);
 
     } else {
@@ -1107,7 +1110,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
      */
 
     console.debug("calling createNoteHeader");
-    createNoteHeader(note_object_data, note_root, note_properties, isOwner, isNewNote)
+    createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, isNewNote);
 
     try{
         // set the note_type as selected on the note_type drop-down menu
@@ -1157,7 +1160,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
       
         insertedNode.setAttribute("highlightuniqueid", highlightuniqueid);
         console.debug(insertedNode);
-console.debug("calling size_and_place_note_based_on_texthighlight");
+        console.debug("calling size_and_place_note_based_on_texthighlight");
         size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, creatorDetails, isOwner, isNewNote);
         
     } else {
@@ -3123,6 +3126,17 @@ function getOwnNotes(note_type) {
                     // make sure to wipe any distribution list id that may have been set before, inside the note object
                     try {
                         delete note_data.distributionlistid
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+                if (note.hasOwnProperty('distributionlistname')) {
+                    note_data.distributionlistname = note.distributionlistname;
+
+                } else {
+                    // make sure to wipe any distributionlist name that may have been set before, inside the note object
+                    try {
+                        delete note_data.distributionlistname
                     } catch (e) {
                         console.error(e);
                     }

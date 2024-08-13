@@ -29,6 +29,11 @@ const URI_plugin_user_set_agreement_active_status = "/api/v1.0/plugin_user_set_s
 
 const URI_plugin_user_set_all_subscriptions_active_status = "/api/v1.0/plugin_user_set_all_subscriptions_active_status";
 const URI_plugin_user_set_subscription_active_status = "/api/v1.0/plugin_user_set_subscription_active_status";
+const URI_plugin_user_set_self_subscription_active_status = "/api/v1.0/plugin_user_set_self_subscription_active_status";
+
+const URI_plugin_user_set_subscription_application_status = "/api/v1.0/plugin_user_set_subscription_application_status";
+
+
 
 const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subscriptions";
 
@@ -499,7 +504,7 @@ function substituteAttributes(data) {
     console.debug(data);
     // Get the HTML content as a string
     let htmlContent = document.documentElement.innerHTML;
-console.debug(htmlContent);
+//console.debug(htmlContent);
     // Loop through each key-value pair in the data object
     for (const [key, value] of Object.entries(data)) {
         console.debug(key);
@@ -1081,10 +1086,18 @@ function readFiltersFromTable(table_name) {
         const cell = filterRow.cells[i];
         //console.debug(cell);
         if (cell.classList.contains("filterableCol")) {
-            const filterValue = cell.querySelector("input, textarea") ? cell.querySelector("input, textarea").value : "";
+            const filterType = cell.getAttribute("filter_type") || "stringCaseExact";
+            console.debug("filterType: " + filterType);
+            var filterValue = cell.querySelector("input, textarea") ? cell.querySelector("input, textarea").value : "";
+            // use the selected from a select element if it is present, and not null
+            if (cell.querySelector("select")) {
+                filterValue = cell.querySelector("select").value;
+            }
+
             console.debug("filterValue: ");
             console.debug(filterValue);
-            const filterType = cell.getAttribute("filter_type") || "stringCaseExact";
+            
+
             filters.push({
                 columnIndex: i,
                 filterValue,
@@ -1112,6 +1125,9 @@ function matchesFilter(cellValue, filterValue, filterType) {
         case "stringCaseIgnore":
             console.debug("1.0.2");
             return (cellValue.toLowerCase().indexOf(filterValue.toLowerCase()) > -1);
+        case "selectList":
+                console.debug("1.0.5");
+                return (cellValue.toLowerCase().indexOf(filterValue.toLowerCase()) > -1);
         case "wildcardCaseExactMatch":
             console.debug("1.0.2");
             const regexPattern = "^" + filterValue.replace(/\*/g, ".*").replace(/\?/g, ".") + "$";
@@ -1740,8 +1756,7 @@ function filterTableAllColsBACKUP(table_name) {
 
                     // Only process the filter if a value has been entered for it
                     if (filterValue) {
-                        //var comparingCol = filtersCols[j].parentNode.getAttribute("colindex");
-
+                        
                         var cell = rows[i].getElementsByTagName("td")[col];
                         console.debug(cell);
                         if (cell) {
@@ -2012,6 +2027,8 @@ function modifyNotShowByDefaultColumns(value, action, key) {
         }
     });
 }
+
+
 
 function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_display_keyname) {
     console.debug("toggleColumn.start: " + columnName + " isChecked: " + isChecked, " in table name=" + tableName + " with local storage keyname: " + table_columns_to_not_display_keyname);
@@ -2757,20 +2774,26 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
     document.getElementById(input_field_id).addEventListener('inputUpdated', () => {
         console.log('Input field updated:', document.getElementById(input_field_id).value);
     });
-
 }
+
 
 function addEventColumnToggleListeners(wordList, tableName) {
     console.debug("addEventColumnToggleListeners.start");
     console.debug(wordList);
     console.debug(tableName);
+    try{
     wordList.forEach(word => {
         console.debug(word);
+        console.debug(document.getElementById(`toggle-${word}`));
         document.getElementById(`toggle-${word}`).addEventListener('change', function () {
             toggleColumn(word, this.checked, tableName, table_columns_to_not_display_keyname);
         });
     });
+}catch(e){
+    console.error(e);
 }
+}
+
 
 
 function setColumnToggleMarks(wordList, tableName, unchecked) {
