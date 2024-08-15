@@ -441,6 +441,7 @@ function fetchData(not_show_by_default_columns) {
                 // Create new row
                 const newRow = tableBody.insertRow();
                 newRow.setAttribute("noteid", row.noteid);
+                newRow.setAttribute("creatorid", row.creatorid);
                 newRow.setAttribute("distributionlistid", row.distributionlistid);
                 newRow.setAttribute('selectablecol', "true");
                 // Create cells and populate them with data
@@ -458,6 +459,9 @@ function fetchData(not_show_by_default_columns) {
                 // parse the JSON of the note
                 const note_obj = JSON.parse(row.json);
                 console.debug(note_obj);
+                
+                // enforce the creatorid in the note object
+                note_obj.creatorid = row.creatorid;
 
                 // last create timestamp
                 try {

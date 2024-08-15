@@ -57,8 +57,12 @@ The list is returned by a call to the API.
       			<tr name="filter_row" class="fixed-header" selectablecol="true">
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
-					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
-
+					<th filterableCol="checkedmatch" class="filterableCol checkbox"  filter_type="checkBox">
+						<select filterContent="1" class="compact checkbox">
+						  <option class="compact"></option>
+						  <option value="false" class="compact">inactive</option>
+						  <option value="true" class="compact">active</option>
+						</select></th>
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
 					<th class="filterableCol displayname" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter "/></th>
@@ -138,7 +142,7 @@ which columns to show
 	
 
 <!-- body of document end -->
-
+<script src="./parameters.js"></script>
     <script src="../content_scripts/NotesHandler.js"></script>
     <script src="../content_scripts/test.js"></script>
 	

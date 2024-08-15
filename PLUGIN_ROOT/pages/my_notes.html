@@ -147,7 +147,16 @@
       <th class="filterableCol datetime" filter_type="datetimeRange"><textarea id="createtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
       <th class="filterableCol datetime" filter_type="datetimeRange"><textarea id="lastmodifiedtime-datetime-input" filterContent="1" type="text" class="filterContent" placeholder="Filter " style="width: 160px; height: 20px; padding: 0px;  font-size: 12px; box-sizing: border-box;"></textarea></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
-      <th filterableCol="checkedmatch" class="checkbox" ><select filterContent="1" class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+      <th filterableCol="checkedmatch" class="filterableCol checkbox"  filter_type="checkBox">
+        <select filterContent="1" class="compact checkbox">
+          <option class="compact"></option>
+          <option value="false" class="compact">inactive</option>
+          <option value="true" class="compact">active</option>
+        </select></th>
+
+
+       
+
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
       <th class="filterableCol" filter_type="stringCaseExact"><input filterContent="1" type="text" placeholder="Filter Content" ></th>
@@ -214,8 +223,11 @@ which columns to show
 <div id="my_notes_page_footer_text"></div>
 </div>
 <!-- main page end -->
-<script src="./qrcode.min.js"></script>
-<script src="./on_page_common.js"></script>
+  <script src="./qrcode.min.js"></script>
+  <script src="./parameters.js"></script>
+  <script src="./common_cache_functions.js"></script>
+
+  <script src="./on_page_common.js"></script>
    <!-- <script src="./on_page_create_note_html.js"></script>-->
      <!-- reference functions needed to render a yellownote-->
     <script src="../content_scripts/NotesHandler.js"></script>
@@ -228,8 +240,7 @@ which columns to show
     <script src="../content_scripts/test.js"></script>
 
 
-    <script src="./common_cache_functions.js"></script>
-
+ 
     <script src="./my_notes.js"></script>
 
 </body>

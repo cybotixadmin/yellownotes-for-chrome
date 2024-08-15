@@ -41,11 +41,11 @@
             <th class="filterableCol" filter_type="stringCaseExact" class="filterableCol displayname" ><input filterContent="1" type="text"  placeholder="Filter "></th>
             <th class="filterableCol" filter_type="stringCaseExact" class="filterableCol email" ><input filterContent="1" type="text"  placeholder="Filter "></th>
             <th class="filterableCol" filter_type="stringCaseExact" class="filterableCol datetime" ><input filterContent="1" type="text" class="filterableCol datetime" placeholder="Filter "></th>
-            <th class="filterableCol" filter_type="stringCaseExact">
+            <th filterableCol="checkedmatch" class="filterableCol checkbox"  filter_type="checkBox">
               <select filterContent="1" class="compact checkbox">
                 <option class="compact"></option>
-                <option class="compact">inactive</option>
-                <option class="compact">active</option>
+                <option value="false" class="compact">inactive</option>
+                <option value="true" class="compact">active</option>
               </select>
             </th>
             <th filterableCol="selectmatch" class="filterableCol status" filter_type="selectList">
@@ -113,7 +113,7 @@
     </div>
    
 <!-- main page end -->
-
+<script src="./parameters.js"></script>
     <script src="../content_scripts/NotesHandler.js"></script>
     <script src="../content_scripts/test.js"></script>
 <script src="./on_page_common.js"></script>

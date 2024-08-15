@@ -351,7 +351,7 @@ function listener(request, sender, sendResponse) {
                 return true;
             } else if (request.action == "createnote") {
                 // call to create a universal yellownote
-                console.debug("browsersolutions calling: create_universal_yellownote");
+                console.debug("calling: create_universal_yellownote");
                 create_universal_yellownote(request.info, request.note_type, request.note_template, request.notetype_template, request.note_properties, request.session, request.is_selection_text_connected);
 
                 sendResponse({
@@ -386,7 +386,7 @@ if (request.session_uuid == request.creatorDetails.uuid) {
 request.isOwner = isOwner;
                 //var cont1 = create_yellownote_DOM(request.note_template, request.notetype_template , "canvas", true, true)
                 //console.debug(cont1);
-
+                // check if not is already on the page. If so, move focus to it
                 if (isNoteOnPage(request.noteid)) {
                     console.debug("yellownote is already on page");
                     // move focus to note
@@ -890,25 +890,34 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
      */
 
     // the root of the note object
-    var note_root = document.createElement('container');
+    //var note_root = document.createElement('container');
 
     // var fullURLToCSS = chrome.runtime.getURL("css/yellownote.css");
 
     // insert the overall note template 
 
-    var note_template = safeParseInnerHTML(html_note_template, 'div');
+   // var note_template = safeParseInnerHTML(html_note_template, 'div');
     // note_template = JSON.parse(html);
-    console.debug(note_template);
+    //console.debug(note_template);
 
-    note_root.setAttribute("class", "yellownotecontainer");
-    note_root.setAttribute("note_type", note_type);
-    note_root.setAttribute("button_arrangment", 'new');
+    //note_root.setAttribute("class", "yellownotecontainer");
+    //note_root.setAttribute("note_type", note_type);
+    //note_root.setAttribute("button_arrangment", 'new');
 
-    note_root.setAttribute("isOwner", isOwner);
-    note_root.setAttribute("isNewNote", isNewNote);
+    //note_root.setAttribute("isOwner", isOwner);
+    //note_root.setAttribute("isNewNote", isNewNote);
 
-    note_root.appendChild(note_template);
+    //note_root.appendChild(note_template);
 
+var note_root;
+    // create the basic outline of the note
+    console.debug("calling: create_yellownote_DOM");
+    create_yellownote_DOM(html_note_template, html_notetype_template, note_type, isOwner, isNewNote).
+        then(function (response) {
+            note_root = response;
+console.debug(note_root);
+
+       
    
 // set the note_type as selected on the note_type drop-down menu
     note_root.querySelector('select[name="select_notetype"]').value = note_type;
@@ -974,6 +983,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
 
     console.debug("note_object_data: " + JSON.stringify(note_object_data));
 
+});
 
     try {
         // itterate through the data container object in the not and populate them with values from the note_object_data
@@ -1030,7 +1040,7 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     }
     note_root.setAttribute("box_height", box_height);
     //note_table.st
-    update_note_internal_size(note_root);
+    //update_note_internal_size(note_root);
 
     // give the note color
     var highlight_background = "rgb(" + hexToRGB(note_color) + ", 0.25)";
@@ -1045,8 +1055,8 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     } else {
         // brand-level not implemted yet
     }
-    var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
-    console.debug("box_background" + box_background);
+    //var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
+    //console.debug("box_background" + box_background);
 
     // show/hide elements based on the ower and editing
 
@@ -1096,21 +1106,15 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     }
     console.debug("highlightuniqueid: ", highlightuniqueid);
 
-    // attach event listeners to the note
-
-
-    // render template into a complete note object (with values)
-
-    //console.debug(note_table);
-
-
-    /* where on the page is the note going to be placed ?
-
-    If the not contains coordinates, use them. If not, use the cursor position
-     */
 
     console.debug("calling createNoteHeader");
     createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, isNewNote);
+
+
+    console.debug("calling createNoteFooter");
+    createNoteFooter(note_object_data, note_root, creatorDetails, isOwner, isNewNote).then(function (res) {
+        console.debug(res);
+    
 
     try{
         // set the note_type as selected on the note_type drop-down menu
@@ -1123,11 +1127,11 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
             console.error(e);
     }
     // set background color of the note
-    setBackground(box_background, note_root);
+    setNoteColor(creatorDetails, note_root);
 
     // set sizing
-    console.debug("calling update_note_internal_size");
-    update_note_internal_size(note_root);
+    //console.debug("calling update_note_internal_size");
+    //update_note_internal_size(note_root);
 
     //console.debug("calling highlightTextOccurrences_old")
     //highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
@@ -1186,22 +1190,16 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
        
        
         // move to the default location on the screen if all else fails
-        //inserted.setAttribute("posx", 50);
-        //inserted.setAttribute("posy", 50);
-        //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
-        //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
+
         // width
         console.debug("setting box:width: " + insertedNode.getAttribute("box_width"));
-        insertedNode.querySelector('[name="whole_note_table"]').style.width = insertedNode.getAttribute("box_width");
-
+        setCSSAttributeOnNamedElement(insertedNode, 'whole_note_table', 'width', parseInt(insertedNode.getAttribute("box_width"), 10) +"px");
         // height
-
-
         console.debug("setting box_height: " + insertedNode.getAttribute("box_height"));
-        // since this is a new note, the height is padded by the control bar
+        // since this is a new note, the height is padded by the control/bottom bar
 
-        insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
-
+        setCSSAttributeOnNamedElement(insertedNode, 'whole_note_table', 'height', (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px");
+        
         // place focus
         try {
             insertedNode.querySelector('[focus="true"]').focus();
@@ -1215,8 +1213,8 @@ console.debug("is_selection_text_connected: " + is_selection_text_connected);
     //setComponentVisibility(insertedNode, ",new,.*normalsized,");
 
     // call the function that set sizing for note-internal compoents
-    console.debug("calling: update_note_internal_size");
-update_note_internal_size(insertedNode);
+    //console.debug("calling: update_note_internal_size");
+    //update_note_internal_size(insertedNode);
 
     // call the function that will make the note draggable
     //console.debug("calling: makeDragable");
@@ -1247,7 +1245,10 @@ update_note_internal_size(insertedNode);
     } catch (e) {
         console.error(e);
     }
+
     return;
+
+});
 }
 
 function noteTypeSpecificActions(note_type, insertedNode, info) {
@@ -1352,6 +1353,7 @@ function prepareFrameNote(node_root) {
 }
 
 
+// call this when the note note type is selected 
 function updateNoteMiddleBar(html_notetype_template, node_root) {
     console.debug("updateNoteMiddleBar.start");
     //console.debug(html_notetype_template);

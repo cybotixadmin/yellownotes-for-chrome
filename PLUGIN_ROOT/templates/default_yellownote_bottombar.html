@@ -1,0 +1,101 @@
+<table >
+	<tr name="whole_note_bottombar" subcomponentvisibility=",new,rw,normalsized,fullscreen," style="height: 23px; 
+	width: 100%; position: absolute; top: 205px; z-index: 10103; padding: 0px; border: 0px; margin: 0px;  overflow: visible; background: rgba(255, 255, 0, 0.7); ">
+		<!-- css for the buttons in the bottom tool bar -->
+		<style>
+.icon-button {
+    display: flex;
+    align-items: center;
+    background-color: rgba(124, 200, 9, 0.9);
+    border: none;
+    border-radius: 2px;
+    padding: 1px 2px;
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    font-size: 13px;
+    color: black;
+    cursor: pointer;
+}
+
+.icon-button .icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 1px;
+}
+
+.icon-button:hover {
+    background-color: #a8d5a8;
+}
+
+.icon-button:focus {
+    outline: none;
+    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.2);
+}
+
+		</style>
+		<td  subcomponentvisibility=",new,normalsized,fullscreen," style="position: static; height: 23px; width: 45px; min-width: 45px; padding: 0px; border: 0px; margin: 0px; height: 22px;  text-align: left; overflow: hidden;">
+			<button class="icon-button" style="width: 45px; margin-top: 0px; " js_action="save_new_note" >
+			<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAWlBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///+L93hDAAAAHXRSTlMADxAdL0BlZmdsbneAiJCVl56jpKW7xNvc3ejp6jAgSZQAAAABYktHRB3rA3GRAAAAh0lEQVQoz72S2Q6EIAxF6wi4UBxFQWf5/++cAiMiJj4Z70N7y0nTFAC4Vo9Kdp0kUWzK5PyllbWKRLH/8AhqDYDonIv8G4krNwD8XabAuBnG42ebAKa8WOzbmbw+BUz+xTKANgyxmAM8+ltApfdgEuu1L6M0JqxBeZqL+CBCDUPYg7IoLv4HP948CUfuqidpAAAAAElFTkSuQmCC" height="18" alt="Update Icon" class="icon"  js_action="save_new_note" >
+			Save
+		</button></td>
+		<td subcomponentvisibility=",rw,normalsized,fullscreen," style="position: static; height: 23px; width: 45px; min-width: 45px; padding: 0px; border: 0px; margin: 0px; text-align: left; z-index: 10103;">
+			<button class="icon-button" style="width: 45px; margin-top: 0px; " js_action="update_note">
+				<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAWlBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///+L93hDAAAAHXRSTlMADxAdL0BlZmdsbneAiJCVl56jpKW7xNvc3ejp6jAgSZQAAAABYktHRB3rA3GRAAAAh0lEQVQoz72S2Q6EIAxF6wi4UBxFQWf5/++cAiMiJj4Z70N7y0nTFAC4Vo9Kdp0kUWzK5PyllbWKRLH/8AhqDYDonIv8G4krNwD8XabAuBnG42ebAKa8WOzbmbw+BUz+xTKANgyxmAM8+ltApfdgEuu1L6M0JqxBeZqL+CBCDUPYg7IoLv4HP948CUfuqidpAAAAAElFTkSuQmCC" height="18" alt="Update Icon" class="icon"  js_action="update_note">
+				Save
+			</button></td>
+		<td subcomponentvisibility=",rw,normalsized,fullscreen," style="position: static; height: 23px; width: 52px; min-width: 52px; padding: 0px; border: 0px; margin: 0px; text-align: left; z-index: 10103;">
+			<button class="icon-button" style="width: 52px; margin-top: 0px;" js_action="delete_note">
+				<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAACAklEQVRYR+2Yva4BQRTHzyqEIKIREi+whcIb0GrQSSRaiY5eFB5AJ9FKJEKBRq1UUXgFiUQnKAjOnd3clf0wzI4Vbu5sJZnz8dv/zFnnjAScTzgcxs1mw+Qdj8dhuVxKTMYmIy4nEgPtJnO73XA6nWznszjU63U1uSRZY3k8Huj3+zCfz+3yqfaFQgFkWYbz+Wzxv1wuEAqFoFqtGhKbKWwrw0X6wMnn88HhcLhx3X7k83ns9XpO5+OK1263oVQqqWx/B/D3Vb93i7W9UIrkeDyCy+Xi2h5eJ6VIIpEIVCqVh0XCG/9tfra/S28joQSmAX7qLFp4vgYwEAjAbrcTgNxH9H8o2Gq1oFwuS5lMBsfjsUEtkwKWIms0GlCr1aRisYidTseitFMK6g+xASKXy8FwOFTXY7EYrlYrMwTVVzF0FLDb7aLSOumfdDoNk8lEhYhGo7herwXgvYpUFRIK6qSx+08iFHxUWfo1WrMgFBQKig/1k+lOFIkoElEkLEVyzyabzcJoNPpsw6q1/AQGCYzhPAeDQdhut1rzQW35SaOLpF17W8vPPbU9c/T7/bDf79nmYnKJiOQS8VlMR9cTiQQsFgs2QDKBIZnAHAVgCHa3N6VeHiWTSZxOpwxxXzfRRlLqjEFLMRgMsNlswmw2g+v1+jqJLoLX64VUKnWbBGnBfwC8tbU4CiR7YwAAAABJRU5ErkJggg==" height="18" alt="Delete Icon" class="icon"  js_action="delete_note">
+				Delete
+			</button>
+	
+		</td>
+		<td class="button_cell" subcomponentvisibility=",rw,normalsized,fullscreen," style="position: static; height: 23px; min-width: 52px; width: 52px; max-width: 52px; padding: 0px; border: 0px; margin: 0px; text-align: left;">
+			<div class="icon-button" style="height: 17px; width: 52px; margin-top: 0px"><input name="enabled_status" type="checkbox" class="checkbox" placeholder="Enter text" checked="" js_action="disable_note" style="margin: 0px;height: 20px; z-index: 10103;">Enable
+		</div></td>
+		<!--
+		<td subcomponentvisibility=",new,rw,normalsized,fullscreen," style="right: 80px; bottom: 0px; height: 20px; width: 20px; min-width: 20px; padding: 0px; border: 0px; margin: 0px; line-height: 1.0rem; overflow: visible;background: rgba(255, 255, 0, 0.7);">
+		<style>
+										.yellownote_distributionlist_icon_tooltip {
+											position: absolute;
+											bottom: 0px;
+											display: inline-block;
+											z-index: 120000;
+										}
+								
+										.yellownote_distributionlist_icon_tooltip::after {
+											content: "Select a distribution list for this note";
+											position: absolute;
+											bottom: 50%;
+											left: 0px;
+											transform: translateY(-35%);
+											white-space: wrap;
+											background-color: black;
+											color: white;
+											text-align: center;
+											padding: 4px;
+											border-radius: 2px;
+											font-size: 15px;
+											z-index: 120000;
+								
+											/* Initially hidden */
+											opacity: 0;
+											visibility: hidden;
+											transition: opacity 0.5s;
+										}
+								
+										.yellownote_distributionlist_icon_tooltip:hover::after {
+											/* Show the tooltip */
+											opacity: 1;
+											visibility: visible;
+											z-index: 12000;
+										}
+			</style>
+			<div class="yellownote_distributionlist_icon_tooltip">
+				<img class="yellownote_distributionlist_icon_tooltipLLL" js_action="distribute" height="20" width="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAHB0lEQVRYR81YB1BUVxS9n0WqxCjYwiDGglgwjklQ0YwtNpC2gICCNAsKxmRULNgRdcASFSOKBQEpkSIoJRqDjtGoMU4iURGVKI6IhSQIagSWm/u3wd/9u/xFJ+bt7Pzd924577x773/vMfA/b4wC39Il3njjZgUYGLaTdjU2Nkif+vr0n6QkDY2A9BGJ9IHRY6CpUQJN2AQMowcifRFgE4JE0kgaDOi30wcSVbdBOkg6IpGIbOhBk0QCDQ0S6N6tMyTsP67E0pIzaWeHTg5Y8+eFd8ylFfl/oAZS0UHzbW4WFhZQV9cE//zDsmkkH9CTsgPQRF9WnP3N9rGs1dNXRF9D+dgruY6J/KnQYeVJS1QLnToyUF39jBhtdv31lonw5eKTHJBMfrYtOolLOezZ2dlDScllXsrfFs3ePgGYkX6YY271ioGwfuN1LsCi3AE42fUGr18b29FQVnr2rQIViz0wOzuL19+61YNhzfprXICFx/rjFLebCgXGw8MDs7K4BsaM9YIzxUffCGh4mB/G7U7hAOvcdRg8fXyJMTa2xFevHsKalYNg3YbfuQALcmzR0V25xMrB0WO88OyZoxyDvtODIC31kE5AozfMxsiVqWTnhdJWO8PBkJk2BFzFSXJb/SgQb8HqSFriaJUl1gRQYc12wDgsvfEDB2hoaAjExx/QCnTXznBc8AU7wcctdK0hLWUs+PolqujaEMAyAjiIAKowWJQ7kGLwunKJNSWBRZfh+OzJxRbDJrB2tRusXZ/KcZae+hVO98+lGlfeQtYcdu8SQ9iCBA2T6kMA7wBvDKokiVZWjmWFoadvMTTWt0yq7jBv3jgwMXoKCQcfwPMaZTwTQBNYtdIboja0FhZygKsoSaJUkqS1JeZjNCE+DGeH5tBQpQbCRRAePg3i4tIExqtiidsQg9rqXmzMQlwScYBE6pRigYEBkJh4WCAwhZoWgEW5/SkGm8tMWwpxesokrHleDXPnX9ERmMKbbInXrrKDtVElqoVaWJK0BbhwHS1JUnjMlgq1eh0UbvxtSPYmBu/CGioz61TLTFuS5G1A4tqwJ4CXYdliW9i8pVTlTUIMOr5zBmVw05MnoI//Kd1icPwEfzx9qpDU9cDZxQmO57VW04Tz23/gRLx5/RLt3Exh+dIJsGmzevYz2gu1GVFfq+LxQ/r/RxuzlWOKswdlR3pYj4SK++e5DOZl9kUXz9tSzW92BcL8BbL3pMNId7xwni3G6s3HxwvS09u+u2FEAxAl/Fu8hL1BMHtu8yrx7Kh7EaJy6mdohmqTlKO1pOdDknmPBJ6rzIDdgZuz42ozGz7CGS7+JD17aDIMn9iPgSuXzyhZlP6wsXXBstI8qcHOXYbC0ydXtRoBMCXJFyTTlRzJditW1g7w4P4FzvLkZfugi7iYRmUyYg9nyM7SDrBHTyeouJfPBcgq79g2HUtu1ICxSRfYtZOluDs5f8S7xD2sP6VY+ZmZ4eeKZqYSMLfoDtHRCUz6ES+MWFEBj6r+guH21nDunCwjg4M90ciwAaysusHyFXu1Tt7dfSzk5BSrA1RFsnXLIly0eCsvwJzMeeDuuYfD1gy/EDySwr6X1ZpaQk11CcATeYd5bVMnN0k0SbH9M/wX4pHkHRyRiIhFEBOzlS+LNcQVG4/VavI2/SZj2a0iju2jGZHg5R0tHKBCe+c2VzQyqoc58wt5y8vMmc6YlHRc41y/LxgPnzue5tXdvsULzTu9hpnBebzjGutZQrwbXi81hQ5mdWBspA+v6xFevKS7BWwPo0fVwlS3Y0rdKVM+w8LCcxoBJh/oBf4hbGWQtR3bp2Dlo45gaPCKbhnYHoZuGER0U4GwcVOmEAa70HI90bb6YGo2FF7USrMdlkW44+YY/popN9LCqQHZZg/6mtvQjz3g6i9ZUh0eBruRgSqtBhSDvfpMgvI73/HU0mb1zl1H0tFS+XbQWP9UHfr6BkBa2mGGA/DQvokYNOekIHAthKQ2ThaE4kTHvfSrJYZ+9P+WdDx0rifG783U2TYHYGDgdExMZM+wwtueuFEwL/xHpZ3tseOwsrIcHEYMA/dpGcp+u8FOWHItX7hhmSSXwZn+7piUrDWWOA6WLAmB2FjZ+XhTlCO+rq8Cs/Z6VOyroKG+EZ49s4YPLC1pAtlSmZ69xuC98jO6gOQCDA72woMHubcJmqw5OrlCQX4u4zTVD/NPcK801HUMqKtezqbwGFdjMGSWNx7YnyF0hsyqyCCMij4kVF66ZIf2izFoVrZQHS6DYo9pmJ31bavKHd4fDDV/swdsE8qIl63KKwTmzHKGfbKbVKHZzAUo2FOzoFBHUo2+fT+C27d/0/hy4POvkzCPAZ0A9u5tB3fvcs+9rZHynwK0sRkCZWW/6uRTJ+E3ZbAtAP8FcqeSR1NKrDMAAAAASUVORK5CYII=" alt="distriutionlist"  style="margin: 0px;height: 20px; margin-bottom: 0px; z-index: 12103; position: unset"></img>
+			</div>
+		</td>-->
+		<td  name="distributionlistdropdowncontainer" subcomponentvisibility=",new,rw,normalsized,fullscreen," style="right: 0px; bottom: 0px; padding: 0px; height: 1.25rem; min-width: 98px; width: 98px; max-width: 110px; border: 0px; margin: 0px; line-height: 1.0rem;overflow: hidden; background: rgba(255, 255, 0, 0.7);">
+			<select name="distributionlistdropdown" style="position: relative; top: 2px; min-width: 98px; width: 98px; max-width: 110px; font-size: 1.0rem; height: 1.25rem; margin: 0px; margin-top: -5px; padding: 0px; background: rgba(255, 255, 255, 0.7);"></select>
+		</td>
+	</tr>
+</table>

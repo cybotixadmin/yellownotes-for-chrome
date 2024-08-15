@@ -198,6 +198,9 @@ chrome.storage.sync.get(['defaultSliderPosition'], function (result) {
 // end silder
 
 
+const cache_debug = true;
+
+
 var in_memory_tab_settings = {};
 
 // set up the context menu items here
@@ -1213,7 +1216,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             note_type = "yellownote";
             // check of there is a cached copy of the template
             const cacheKey = "template_" + brand + "_" + note_type;
-            const cachetimeout = 10;
+            const cachetimeout = 3600;
             getCachedData(cacheKey, cachetimeout).then(function (data) {
                 //console.debug("cache data: " + data);
                 if (data != null) {

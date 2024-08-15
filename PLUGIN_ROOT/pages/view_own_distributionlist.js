@@ -64,10 +64,6 @@ const table_columns_filter_array_keyname = table_name + "_filer_columns";
 var column_list = ['createtime', 'lastmodifiedtime', 'note_type', 'feed', 'location', 'enabled_status', 'selection_text', 'message_display_text', 'actions'];
 column_list = ['createtime' ];
 
-// attach event listeners to the column toggle checkboxes
-console.debug("calling addEventColumnToggleListeners");
-addEventColumnToggleListeners(column_list, table_name);
-
 //addEventColumnToggleListeners(['createtime', 'lastmodifiedtime', 'note_type','feed', 'location', 'selection_text', 'message_display_text', 'enabled_status', 'actions'], table_name);
 
 // setup table items for sorting and filtering
@@ -80,6 +76,16 @@ var not_show_by_default_columns = [];
 // check if not_show_by_default_columns has been set
 const pagewidth = window.innerWidth;
 console.debug("window.innerWidth: " + pagewidth);
+
+
+document.getElementById(`toggle-createtime`).addEventListener('change', function () {
+    toggleColumn("createtime", this.checked, tableName, table_columns_to_not_display_keyname);
+});
+
+// attach event listeners to the column toggle checkboxes
+console.debug("calling addEventColumnToggleListeners");
+addEventColumnToggleListeners(column_list, table_name);
+
 
 if (pagewidth < 300) {
     not_show_by_default_columns = ["createtime", "lastmodifiedtime", "note_type", "feed", "selection_text", "enabled_status", "actions"];
@@ -474,8 +480,18 @@ try{
 
         // add a "shareable" link to note
         var shareable_url = document.createElement('a');
-        shareable_url.setAttribute('href', 'https://www.yellownotes.cloud/pages/gothere.html?noteid=' + row.noteid); // Set href to '#' or an appropriate URL
 
+        
+        try {
+    
+            const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + row.noteid);
+            shareable_url.setAttribute('href',"https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=" + redirectUri);
+        } catch (e) {
+            console.debug(e);
+            shareable_url.setAttribute('href', "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + row.noteid);
+        }
+
+        shareable_url.setAttribute('target', '_blank');
         shareable_url.appendChild(goThereButton);
 
         cell_buttons.appendChild(shareable_url);
@@ -704,9 +720,13 @@ async function fetchSubscribers(distributionlistid) {
         goThereButtonContainer.setAttribute('class', 'go_to_location_button');
         const link = document.createElement('a');
         console.log(row);
-        const u = createNoteShareLink(row);
-        console.log(u);
-        link.href = u;
+
+
+        
+
+         goto_url = "";
+        console.log(goto_url);
+        link.href = goto_url;
         link.target = "_blank";
         const goThereButton = document.createElement('img');
         goThereButton.src = "../icons/goto.icon.transparent.40x40.png";

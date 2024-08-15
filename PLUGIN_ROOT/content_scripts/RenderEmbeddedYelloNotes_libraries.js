@@ -210,8 +210,11 @@ function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
                     return chrome.runtime.sendMessage(msg);
                 }).then(function (response) {
                     html_notetype_template = response;
+                    // lookup the branding data for this note creator
+                    // want to minimize these calls,  yet be allert to changes in the creator data
+                    // set cache timeout to 5 minutes
                     console.debug("calling cachableCall2API_POST");
-                    return cachableCall2API_POST(creatorid + "_creator_data", 30, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, {
+                    return cachableCall2API_POST(creatorid + "_creator_data", 300, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, {
                         creatorid: creatorid
                     });
 

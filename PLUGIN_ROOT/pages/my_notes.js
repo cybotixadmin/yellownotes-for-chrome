@@ -61,7 +61,7 @@ const filterStorageKey = table_name + "_rowFilters";
 
 // update the filter in the filter row on the table. Loop through all the filters and update the filter row
 
-console.debug("calling updateFilterRow");
+if (filter_debug) console.debug("calling updateFilterRow");
 updateFilterRow(table_name, filterStorageKey);
 
 try {
@@ -69,7 +69,7 @@ try {
     // setup special handling for creating correctly fomated filter for the filter boxes for columns containing dates
     //console.debug("calling setTimeRangeFilterDialog");
     //setTimeRangeFilterDialog("lastmodified-datetime-input");
-    console.debug("calling setTimeRangeFilterDialog");
+    if (filter_debug) console.debug("calling setTimeRangeFilterDialog");
 
     setTimeRangeFilterDialog("createtime-datetime-input", "createtime-filter-dialog");
 
@@ -293,58 +293,6 @@ async function goThere(datarow) {
     }
 }
 
-// create the URL that when clicked on adds the user to the distribution list
-// append a redirecturi that redicts the the page showing the distribution list
-
-function createNoteShareLink(datarow) {
-    console.debug("createNoteShareLink (datarow)");
-    console.debug(datarow);
-
-    // link must make the user subscribe to the feed the note belongs to, before directing the user to the note.
-    // if the feed/distributionlist allowd anonymous access, the unknown/unauthenticated user will be directed to the note directly after subscribing to the feed
-
-    // first part of the URL is the one to invite the user to subscribe to the feed of which the note is a part
-
-    // the second part is to redirect to displaying  the note in the location where it is attached (the "gothere" functionality)
-
-    // noteid
-    // distributionlistid
-    // url
-
-
-    const userid = "";
-    console.debug("go to url: " + datarow.url);
-
-    const noteid = datarow.noteid;
-
-    console.debug("go lookup noteid: " + noteid);
-
-    console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
-
-    const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
-    console.debug(url);
-
-    var textToCopy;
-    var distributionlistid;
-    try {
-
-        distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
-        console.debug(distributionlistid);
-        const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
-        textToCopy = "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=" + redirectUri;
-    } catch (e) {
-        console.debug(e);
-        textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
-    }
-
-    // place the url value in the clipboard
-    // navigator.clipboard.writeText(textToCopy).then(() => {
-    //     console.debug('Invitation URL copied to clipboard: ' + textToCopy);
-    //}).catch(err => {
-    //     console.error('Error in copying text: ', err);
-    // });
-    return textToCopy;
-}
 
 async function editNote(noteid) {
     try {

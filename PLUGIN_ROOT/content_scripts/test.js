@@ -32,8 +32,8 @@ function create_yellownote_DOM(html_note_template, html_notetype_template, note_
     try {
         return new Promise(function (resolve, reject) {
             // the root of the note object
-            //console.debug(html_note_template);
-            //console.debug(html_notetype_template);
+            console.debug(html_note_template);
+            console.debug(html_notetype_template);
             console.debug("note_type: ", note_type);
             console.debug("isOwner: ",isOwner);
             console.debug("isNewNote: ", isNewNote);
@@ -67,6 +67,11 @@ function create_yellownote_DOM(html_note_template, html_notetype_template, note_
                 node_root.setAttribute("note_type", note_type);
                 node_root.setAttribute("button_arrangment", 'new');
 
+
+
+            
+                note_root.setAttribute("isOwner", isOwner);
+                note_root.setAttribute("isNewNote", isNewNote);
                 //node_root.setAttribute("isOwner", isOwner);
                 //node_root.setAttribute("isNewNote", isNewNote);
 
@@ -94,6 +99,8 @@ function create_yellownote_DOM(html_note_template, html_notetype_template, note_
         console.error(e);
     }
 }
+
+
 
 function mergeHTMLTrees(doc1, selector1, doc2, selector2) {
     console.debug("#mergeHTMLTrees.start");
@@ -449,7 +456,7 @@ function setNoteColor(creatorDetails, cont1) {
     var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
     console.debug("box_background" + box_background);
 
-    setBackground(box_background, cont1);
+    setBackground(creatorDetails, cont1);
 }
 
 /*
@@ -519,7 +526,7 @@ If the note is one the user is subscribing to, the link goes to the feed in the 
 
  */
 
-function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, newNote) {
+function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, isNewNote) {
     console.debug("createNoteHeader.start");
     console.debug("note_object_data:");
     console.debug(note_object_data);
@@ -528,7 +535,7 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
     console.debug("creatorDetails:");
     console.debug(creatorDetails);
     console.debug("isOwner", isOwner);
-    console.debug("isNewNote", newNote);
+    console.debug("isNewNote", isNewNote);
 
     var headerhtml = "";
 
@@ -579,6 +586,7 @@ console.debug(note_object_data.distributionlistname);
             display_text = 'source: ' + note_object_data.displayname;
         }
     }
+    console.debug("display_text: " + display_text);
 
     console.debug(headerhtml);
 
@@ -603,6 +611,7 @@ console.debug(note_object_data.distributionlistname);
     }
 
     try{
+        // populate creator displayname on the note , if present.
     if (creatorDetails.note_display_name != undefined) {
         const topbarcreatordisplayname = note_root.querySelector('[name="creator_note_display_name"]');
         console.debug(topbarcreatordisplayname);
@@ -623,7 +632,7 @@ console.debug(note_object_data.distributionlistname);
         // leave default icon in place
     }
 
-    // set the link to the feed/distributionlist page - if any
+    // set the link to the feed/distributionlist page - if any feed is attached
   
     try {
          if (note_object_data.distributionlistid != undefined && note_object_data.distributionlistname != undefined && note_object_data.distributionlistname != null) {
@@ -720,6 +729,14 @@ NOTE: later feature is that the bottom bar is available on demand by clicking a 
  */
 function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newNote) {
     console.debug("createNoteFooter.start");
+    console.debug("note_object_data:");
+    console.debug(note_object_data);
+    console.debug("cont1:");
+    console.debug(cont1);
+    console.debug("creatorDetails:");
+    console.debug(creatorDetails);
+    console.debug("isOwner: ", isOwner);
+    console.debug("newNote: ", newNote);
     // only do this for the note owner (and later administrator and some other roles)
     if (isOwner) {
         console.debug(note_object_data);
@@ -1941,8 +1958,22 @@ function prepareCaptureNoteEventlistener(note_root) {
 
 }
 
-function setBackground(newBackgroundRGB, note_root) {
-    console.debug("browsersolutions ### setBackground to " + newBackgroundRGB);
+function setBackground(creatorDetails, note_root) {
+    console.debug("browsersolutions ### setBackground to " + creatorDetails.note_color);
+
+ // what color to use for the note
+ var note_color = "#ffff00"; // set default value, override with more specific values if available
+ // attempt to read size parameters from the note properties of the creator
+ if (creatorDetails.note_color) {
+     note_color = creatorDetails.note_color
+         console.debug("creator's note_properties has note_color, use it " + note_color);
+
+ } else {
+     // brand-level not implemted yet
+ }
+ var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
+
+
     // Get all elements in the note_root
     const allElements = note_root.querySelectorAll('*');
 
@@ -1952,7 +1983,7 @@ function setBackground(newBackgroundRGB, note_root) {
         if (element.style && element.style.background) {
             // Update the background style to the new value
             //console.debug(element);
-            element.style.backgroundColor = newBackgroundRGB;
+            element.style.backgroundColor = box_background;
             //console.debug(element);
 
         }

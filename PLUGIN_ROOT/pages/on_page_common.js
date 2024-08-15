@@ -139,39 +139,41 @@ function remove_noteid(noteid) {
 }
 
 function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
-    console.debug("# cachableCall2API_GET.start");
-    console.debug("cacheKey: " + cacheKey);
-    console.debug("cachetimeout: " + cachetimeout);
-    console.debug("protocol: " + protocol);
-    console.debug("endpoint: " + endpoint);
+    if (cache_debug)  console.debug("# cachableCall2API_GET.start");
+    if (cache_debug)  console.debug("cacheKey: " + cacheKey);
+    if (cache_debug)  console.debug("cachetimeout: " + cachetimeout);
+      console.debug("cacheKey: " + cacheKey);
+     console.debug("cachetimeout: " + cachetimeout);
+    if (cache_debug)  console.debug("protocol: " + protocol);
+    if (cache_debug)  console.debug("endpoint: " + endpoint);
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
     var result_data = null;
     return new Promise((resolve, reject) => {
         getCachedData(cacheKey, cachetimeout).then(function (cachedResponse) {
 
-            console.debug(cachedResponse);
+            if (cache_debug)   console.debug(cachedResponse);
             if (cachedResponse) {
-                console.debug("Returning cached response on key: " + cacheKey);
+                if (cache_debug)     console.debug("Returning cached response on key: " + cacheKey);
                 // break here
                 resolve(cachedResponse);
-                console.debug(" complete ");
+                if (cache_debug)   console.debug(" complete ");
                 // break out of the promise chain
                 return;
             } else {
-                console.debug("No cached response on key: " + cacheKey);
+                if (cache_debug) console.debug("No cached response on key: " + cacheKey);
 
                 // proceed to make the request
                 chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
                 .then(function (result) {
-                    console.debug(result);
+                    if (cache_debug)   console.debug(result);
                     ynInstallationUniqueId = result[plugin_uuid_header_name];
                     xYellownotesSession = result[plugin_session_header_name];
 
-                    console.debug("Cache key: " + cacheKey);
+                    if (cache_debug)  console.debug("Cache key: " + cacheKey);
 
-                    console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                    console.debug("xYellownotesSession: " + xYellownotesSession);
+                    if (cache_debug)  console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    if (cache_debug)  console.debug("xYellownotesSession: " + xYellownotesSession);
 
                     const opts = {
                         method: protocol,
@@ -181,16 +183,16 @@ function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
                             [plugin_session_header_name]: xYellownotesSession
                         },
                     };
-                    console.debug("make fresh request: ");
+                    if (cache_debug)   console.debug("make fresh request: ");
                     return fetch(endpoint, opts);
                 })
                 .then(function (response) {
-                    console.debug(response);
+                    if (cache_debug)   console.debug(response);
 
                     return response.json();
                 })
                 .then(function (data) {
-                    console.debug(data);
+                    if (cache_debug)   console.debug(data);
 
                     result_data = data;
 
@@ -198,9 +200,9 @@ function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
                     return cacheData(cacheKey, result_data);
                     // return chrome.storage.local.set({ cacheKey: requestCacheEntry });
                 }).then(function (response) {
-                    console.debug(response);
-                    console.debug("result_data");
-                    console.debug(result_data);
+                    if (cache_debug)   console.debug(response);
+                    if (cache_debug)   console.debug("result_data");
+                    if (cache_debug)  console.debug(result_data);
                     resolve(result_data);
                 })
                 .catch(function (error) {
@@ -216,11 +218,11 @@ function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
 protocol: PUT, PATCH or POST
  */
 function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_body) {
-    console.debug("# cachableCall2API_POST.start");
-    console.debug("cacheKey: " + cacheKey);
-    console.debug("cachetimeout: " + cachetimeout);
-    console.debug("protocol: " + protocol);
-    console.debug("endpoint: " + endpoint);
+    if (cache_debug)  console.debug("# cachableCall2API_POST.start");
+    if (cache_debug) console.debug("cacheKey: " + cacheKey);
+    if (cache_debug)  console.debug("cachetimeout: " + cachetimeout);
+    if (cache_debug)  console.debug("protocol: " + protocol);
+    if (cache_debug)  console.debug("endpoint: " + endpoint);
 
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
@@ -228,28 +230,28 @@ function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_b
     return new Promise((resolve, reject) => {
         getCachedData(cacheKey, cachetimeout).then(function (cachedResponse) {
 
-            console.debug(cachedResponse);
+            if (cache_debug)   console.debug(cachedResponse);
             if (cachedResponse) {
-                console.debug("Returning cached response on key: " + cacheKey);
+                if (cache_debug)   console.debug("Returning cached response on key: " + cacheKey);
                 // break here
                 resolve(cachedResponse);
-                console.debug(" complete ");
+                if (cache_debug) console.debug(" complete ");
                 // break out of the promise chain
                 return;
             } else {
-                console.debug("No cached response on key: " + cacheKey);
+                if (cache_debug)  console.debug("No cached response on key: " + cacheKey);
 
                 // proceed to make the request
                 chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
                 .then(function (result) {
-                    console.debug(result);
+                    if (cache_debug)  console.debug(result);
                     ynInstallationUniqueId = result[plugin_uuid_header_name];
                     xYellownotesSession = result[plugin_session_header_name];
 
-                    console.debug("Cache key: " + cacheKey);
+                    if (cache_debug)  console.debug("Cache key: " + cacheKey);
 
-                    console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
-                    console.debug("xYellownotesSession: " + xYellownotesSession);
+                    if (cache_debug)  console.debug("ynInstallationUniqueId: " + ynInstallationUniqueId);
+                    if (cache_debug)  console.debug("xYellownotesSession: " + xYellownotesSession);
 
                     const opts = {
                         method: protocol,
@@ -260,19 +262,19 @@ function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_b
                         },
                         body: JSON.stringify(msg_body)
                     };
-                    console.debug("make fresh request: ");
+                    if (cache_debug)  console.debug("make fresh request: ");
                     return fetch(endpoint, opts);
                 })
                 .then(function (response) {
-                    console.debug(response);
+                    if (cache_debug)  console.debug(response);
                     if (!response.ok) {
-                        console.debug(response);
+                        if (cache_debug)   console.debug(response);
 
                         // if an invalid session token was sent, it should be removed from the local storage
                         if (response.status == 401) {
                             // compare the response body with the string "Invalid session token" to determine if the session token is invalid
                             if (response.headers.get("session") == "DELETE_COOKIE") {
-                                console.debug("Session token is invalid, remove it from local storage.");
+                                if (cache_debug)    console.debug("Session token is invalid, remove it from local storage.");
                                 chrome.storage.local.remove([plugin_session_header_name]);
                                 // redirect to the front page returning the user to unauthenticated status.
                                 // unauthenticated functionality will be in effect until the user authenticates
@@ -289,7 +291,7 @@ function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_b
                     }
                 })
                 .then(function (data) {
-                    console.debug(data);
+                    if (cache_debug) console.debug(data);
 
                     result_data = data;
 
@@ -297,9 +299,9 @@ function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_b
                     return cacheData(cacheKey, result_data);
                     // return chrome.storage.local.set({ cacheKey: requestCacheEntry });
                 }).then(function (response) {
-                    console.debug(response);
-                    console.debug("result_data");
-                    console.debug(result_data);
+                    if (cache_debug)  console.debug(response);
+                    if (cache_debug)  console.debug("result_data");
+                    if (cache_debug)  console.debug(result_data);
                     resolve(result_data);
                 })
                 .catch(function (error) {
@@ -692,7 +694,7 @@ function integerstring2timestamp(int) {
 }
 
 function sortTa(table_name, event) {
-    console.debug("sortTa().start");
+    if (sort_debug)  console.debug("sortTa().start");
     // console.debug(event);
     // console.debug(event.target);
     // console.debug(event.target.parentNode);
@@ -702,9 +704,9 @@ function sortTa(table_name, event) {
 
 // Function to sort the table
 function sortTable(table_name, columnIndex) {
-    console.debug("sortTable.start");
-    console.debug("columnIndex: " + columnIndex);
-    console.debug("sortTable: " + table_name);
+    if (sort_debug) console.debug("sortTable.start");
+    if (sort_debug)  console.debug("columnIndex: " + columnIndex);
+    if (sort_debug)  console.debug("sortTable: " + table_name);
 
     /*
     sortStates is an array that is preserved inlocalmemory and contains the sort order for up to three columns
@@ -727,43 +729,43 @@ function sortTable(table_name, columnIndex) {
      */
 
     const table = document.querySelector('table[name="' + table_name + '"]');
-    console.debug(table);
+    if (sort_debug) console.debug(table);
 
     let rows = Array.from(table.rows).slice(2); // Ignore the header rows
     const row_count = table.rows.length - 2;
-    console.debug("row count: " + row_count);
+    if (sort_debug) console.debug("row count: " + row_count);
 
     // Get sort states from local storage or initialize if not present
     let sortStates = JSON.parse(localStorage.getItem(table_name + '_sortStates')) || [];
 
     var new_sortStates = JSON.parse(localStorage.getItem(table_name + '_new_sortStates')) || [];
 
-    console.debug("Initial sortStates: ", JSON.stringify(sortStates));
+    if (sort_debug) console.debug("Initial sortStates: ", JSON.stringify(sortStates));
 
     // Check if the column is sortable
     const headerCell = table.rows[0].cells[columnIndex];
     if (!headerCell.querySelector("span")) {
-        console.debug("Column is not sortable.");
+        if (sort_debug) console.debug("Column is not sortable.");
         return;
     }
-    console.debug(headerCell);
-    console.debug(headerCell.querySelector("span"));
-    console.debug(headerCell.querySelector("span").textContent);
+    if (sort_debug) console.debug(headerCell);
+    if (sort_debug)  console.debug(headerCell.querySelector("span"));
+    if (sort_debug)  console.debug(headerCell.querySelector("span").textContent);
     const currentSortSymbol = headerCell.querySelector("span").textContent;
     var currentSortDirection = "";
-    console.debug("currentSortSymbol: ", currentSortSymbol);
+    if (sort_debug)  console.debug("currentSortSymbol: ", currentSortSymbol);
     // update the sort state on the current column
     if (currentSortSymbol === "▶") {
         currentSortDirection = "none";
-        console.debug("setting sortorder for current column to: " + currentSortDirection);
+        if (sort_debug)   console.debug("setting sortorder for current column to: " + currentSortDirection);
         //headerCell.querySelector("span").textContent = "▲";
     } else if (currentSortSymbol === "▲") {
         currentSortDirection = "asc";
-        console.debug("setting sortorder for current column to: " + currentSortDirection);
+        if (sort_debug)   console.debug("setting sortorder for current column to: " + currentSortDirection);
         //headerCell.querySelector("span").textContent = "▼";
     } else {
         currentSortDirection = "desc";
-        console.debug("setting sortorder for current column to: " + currentSortDirection);
+        if (sort_debug)   console.debug("setting sortorder for current column to: " + currentSortDirection);
         //headerCell.querySelector("span").textContent = "▶";
     }
 
@@ -782,20 +784,20 @@ function sortTable(table_name, columnIndex) {
     console.debug("primarySortOrder: ", primarySortOrder);
     console.debug(headerCell.querySelector("span"));
     if (primarySortOrder === 'asc') {
-        console.debug("▲");
+        if (sort_debug)  console.debug("▲");
         // headerCell.querySelector("span").innerHTML = "▲";
     } else if (primarySortOrder === 'desc') {
         // headerCell.querySelector("span").textContent = "▼";
-        console.debug("▼");
+        if (sort_debug)  console.debug("▼");
 
     } else {
-        console.debug("--");
+        if (sort_debug) console.debug("--");
         try {
-            console.debug(table.rows[0].cells[columnIndex].querySelector("span").textContent);
+            if (sort_debug)  console.debug(table.rows[0].cells[columnIndex].querySelector("span").textContent);
             //   table.rows[0].cells[columnIndex].querySelector("span").textContent = "▶";
-            console.debug(table.rows[0].cells[columnIndex].querySelector("span").textContent);
+            if (sort_debug)  console.debug(table.rows[0].cells[columnIndex].querySelector("span").textContent);
             // headerCell.querySelector("span").innerHTML = "▶";
-            console.debug(table.rows[0].cells[columnIndex].querySelector("span").textContent);
+            if (sort_debug)   console.debug(table.rows[0].cells[columnIndex].querySelector("span").textContent);
         } catch (e) {
             console.error(e);
         }
@@ -826,7 +828,7 @@ function sortTable(table_name, columnIndex) {
     if (new_sortStates.length > 3) {
         new_sortStates = new_sortStates.slice(0, 3);
     }
-    console.debug(new_sortStates);
+    if (sort_debug) console.debug(new_sortStates);
 
     // refresh the sort icons across all columns to fit with the values in the new_sortStates array, and setting any columns not mention to the detault value of "▶" no sorting
     for (let i = 0; i < table.rows[0].cells.length; i++) {
@@ -864,11 +866,11 @@ function sortTable(table_name, columnIndex) {
 
     for (let i = new_sortStates.length - 1; i >= 0; i--) {
         const sortState = new_sortStates[i];
-        console.debug("sortState: ", sortState);
+        if (sort_debug) console.debug("sortState: ", sortState);
         const columnIndex = sortState.columnIndex;
         const sortOrder = sortState.sortOrder;
-        console.debug("columnIndex: ", columnIndex);
-        console.debug("sortOrder: ", sortOrder);
+        if (sort_debug) console.debug("columnIndex: ", columnIndex);
+        if (sort_debug)  console.debug("sortOrder: ", sortOrder);
 
         // type of sort - default is case-sensitive alphabetical
 
@@ -919,19 +921,19 @@ function sortTable(table_name, columnIndex) {
 // In most cases the user will noly see the yellownotes column and the other columns where the sorted values are more visible, will not be seen.
 // To change the default sort the user must make the columns visible, add sorting to them, and then hide them again
 function applyExistingSortTable(table_name, new_sortStates) {
-    console.debug("applyExistingSortTable.start");
-    console.debug("sortTable: " + table_name);
+   if (sort_debug) console.debug("applyExistingSortTable.start");
+   if (sort_debug)  console.debug("sortTable: " + table_name);
 
     const table = document.querySelector('table[name="' + table_name + '"]');
-    console.debug(table);
+    if (sort_debug)  console.debug(table);
 
     let rows = Array.from(table.rows).slice(2); // Ignore the header rows
     const row_count = table.rows.length - 2;
-    console.debug("row count: " + row_count);
+    if (sort_debug)  console.debug("row count: " + row_count);
 
     // refresh the sort icons across all columns to fit with the values in the new_sortStates array, and setting any columns not mention to the detault value of "▶" no sorting
     for (let i = 0; i < table.rows[0].cells.length; i++) {
-        console.debug("setting sort icon for column: ", i);
+        if (sort_debug)  console.debug("setting sort icon for column: ", i);
         const cell = table.rows[0].cells[i];
         const span = cell.querySelector("span");
         if (span) {
@@ -939,7 +941,7 @@ function applyExistingSortTable(table_name, new_sortStates) {
             if (sortState) {
                 span.textContent = sortState.sortOrder === 'asc' ? "▲" : "▼";
             } else {
-                console.debug("setting default sort icon for column: ", i);
+                if(cache_debug)  console.debug("setting default sort icon for column: ", i);
                 span.textContent = "▶";
             }
         }
@@ -953,11 +955,11 @@ function applyExistingSortTable(table_name, new_sortStates) {
 
     for (let i = new_sortStates.length - 1; i >= 0; i--) {
         const sortState = new_sortStates[i];
-        console.debug("sortState: ", sortState);
+        if (sort_debug)  console.debug("sortState: ", sortState);
         const columnIndex = sortState.columnIndex;
         const sortOrder = sortState.sortOrder;
-        console.debug("columnIndex: ", columnIndex);
-        console.debug("sortOrder: ", sortOrder);
+        if (sort_debug)  console.debug("columnIndex: ", columnIndex);
+        if (sort_debug)  console.debug("sortOrder: ", sortOrder);
 
         // type of sort - default is case-sensitive alphabetical
 
@@ -1012,7 +1014,7 @@ function applyExistingSortTable(table_name, new_sortStates) {
 
 
 
-// read the sotred filter from local memory ond place them in the filter row of the table
+// read the  filter from local memory ond place them in the filter row of the table
 function updateFilterRow(tableName, filterStorageKey) {
     console.debug("updateFilterRow.start");
     var table = document.querySelector('table[name="' + tableName + '"]');
@@ -1074,12 +1076,12 @@ function triggerFilters(table_name) {
 
 
 function readFiltersFromTable(table_name) {
-    console.debug("readFiltersFromTable.start");
-    console.debug("table_name: " + table_name);
+    if (filter_debug) console.debug("readFiltersFromTable.start");
+    if (filter_debug) console.debug("table_name: " + table_name);
     const table = document.querySelector('table[name="' + table_name + '"]');
     //    const filterRow = table.rows[1]; // Second row for filters
     const filterRow = table.querySelector('tr[name="filter_row"]');; // Second row for filters
-    console.debug(filterRow);
+    if (filter_debug) console.debug(filterRow);
     const filters = [];
     // Read filters from the second row
     for (let i = 0; i < filterRow.cells.length; i++) {
@@ -1087,15 +1089,15 @@ function readFiltersFromTable(table_name) {
         //console.debug(cell);
         if (cell.classList.contains("filterableCol")) {
             const filterType = cell.getAttribute("filter_type") || "stringCaseExact";
-            console.debug("filterType: " + filterType);
+            if (filter_debug) console.debug("filterType: " + filterType);
             var filterValue = cell.querySelector("input, textarea") ? cell.querySelector("input, textarea").value : "";
             // use the selected from a select element if it is present, and not null
             if (cell.querySelector("select")) {
                 filterValue = cell.querySelector("select").value;
             }
 
-            console.debug("filterValue: ");
-            console.debug(filterValue);
+            if (filter_debug) console.debug("filterValue: ");
+            if (filter_debug)  console.debug(filterValue);
             
 
             filters.push({
@@ -1112,28 +1114,32 @@ function readFiltersFromTable(table_name) {
 
 // Function to check if a row matches a filter
 function matchesFilter(cellValue, filterValue, filterType) {
-    console.debug("matchesFilter: cellValue: " + cellValue + " filterValue: " + filterValue + " filterType: " + filterType);
+    if (filter_debug)  console.debug("matchesFilter: cellValue: " + cellValue + " filterValue: " + filterValue + " filterType: " + filterType);
     try {
-        console.debug("1.0.2");
+      if (filter_debug) console.debug("1.0.2");
         if (filterValue === "")
             return true; // No filter applied
 
         switch (filterType) {
         case "stringCaseExact":
-            console.debug("1.0.2");
+            if (filter_debug) console.debug("1.0.2");
             return (cellValue.indexOf(filterValue) > -1);
         case "stringCaseIgnore":
-            console.debug("1.0.2");
+            if (filter_debug)  console.debug("1.0.2");
             return (cellValue.toLowerCase().indexOf(filterValue.toLowerCase()) > -1);
         case "selectList":
-                console.debug("1.0.5");
+            if (filter_debug) console.debug("1.0.5");
                 return (cellValue.toLowerCase().indexOf(filterValue.toLowerCase()) > -1);
+        case "checkBox":
+                    if (filter_debug) console.debug("1.0.6.0 checkBox");
+                    return (( cellValue === true && filterValue === "true") || (cellValue === false && filterValue === "false"));
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         case "wildcardCaseExactMatch":
-            console.debug("1.0.2");
+            if (filter_debug) console.debug("1.0.2");
             const regexPattern = "^" + filterValue.replace(/\*/g, ".*").replace(/\?/g, ".") + "$";
             return new RegExp(regexPattern).test(cellValue);
         case "regexMatch":
-            console.debug("1.0.2");
+            if (filter_debug) console.debug("1.0.2");
             return new RegExp(filterValue).test(cellValue);
         case "integerNumericRange":
             const intCellValue = parseInt(cellValue, 10);
@@ -1149,7 +1155,7 @@ function matchesFilter(cellValue, filterValue, filterType) {
             }
             break;
         case "decimalNumericRange":
-            console.debug("1.0.2");
+            if (filter_debug) console.debug("1.0.2");
             const decCellValue = parseFloat(cellValue);
             if (filterValue.includes("-")) {
                 const[min, max] = filterValue.split("-").map(Number);
@@ -1165,8 +1171,8 @@ function matchesFilter(cellValue, filterValue, filterType) {
             break;
 
         case "datetimeRange":
-            console.debug("1.0.2");
-            console.debug("calling apply_filter_datetimeRange(cellValue, filterValue)");
+            if (filter_debug)  console.debug("1.0.2");
+            if (filter_debug)  console.debug("calling apply_filter_datetimeRange(cellValue, filterValue)");
             return apply_filter_datetimeRange(cellValue, filterValue);
             break;
         default:
@@ -1180,12 +1186,13 @@ function matchesFilter(cellValue, filterValue, filterType) {
 }
 
 function apply_filter_datetimeRange(cellValue, filterValue) {
-    console.debug("apply_filter_datetimeRange.start");
-    console.debug("cellValue: " + cellValue);
-    console.debug("filterValue: " + filterValue);
+    const filter_debug = false;
+    if (filter_debug) console.debug("apply_filter_datetimeRange.start");
+    if (filter_debug) console.debug("cellValue: " + cellValue);
+    if (filter_debug) console.debug("filterValue: " + filterValue);
     const dateCellValue = new Date(cellValue);
-    console.debug(dateCellValue);
-    console.debug((/from .*to */.test(filterValue)));
+    if (filter_debug) console.debug(dateCellValue);
+    //console.debug((/from .*to */.test(filterValue)));
     /* depending on the filter value, the filter can be a timestamp, a time range, or a time range counting backwards from now
 
     alt 1
@@ -1219,10 +1226,10 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
     //  pick the correct processing based on the structure of the filter value
 
     if (/after  *2.* and  *before  *2/.test(filterValue)) {
-        console.debug("Filter alternative 1:  after 2024-05-20 08:42 and before 2024-06-20 20:40");
-        console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/));
-        console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[1].trim());
-        console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[3].trim());
+        if (filter_debug)  console.debug("Filter alternative 1:  after 2024-05-20 08:42 and before 2024-06-20 20:40");
+        if (filter_debug) console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/));
+        if (filter_debug) console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[1].trim());
+        if (filter_debug) console.debug(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[3].trim());
 
         const startDate = new Date(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[1].trim());
         const endDate = new Date(filterValue.match(/after  *(2.*)  *(and before)  *(2.*[0-9 \.\:]*)/)[3].trim());
@@ -1230,8 +1237,8 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
 
         return tsDate >= startDate && tsDate <= endDate;
     } else if (/after *and  *before  *[Nn]ow/.test(filterValue)) {
-        console.debug("Filter alternative 2: after 2024-05-20 20:42 and before Now");
-        console.debug(filterValue.match(/after  *(2.*)  *and  *before/));
+        if (filter_debug) console.debug("Filter alternative 2: after 2024-05-20 20:42 and before Now");
+        if (filter_debug) console.debug(filterValue.match(/after  *(2.*)  *and  *before/));
         const startDate = new Date(filterValue.match(/after  *(2.*)  *and  *before/)[1].trim());
         const tsDate = new Date(cellValue);
 
@@ -1239,7 +1246,7 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
 
     } else if (/after  *2.* and  *for/.test(filterValue)) {
 
-        console.debug("Filter alternative 3: after 2024-06-20 20:42 and for 3 days");
+        if (filter_debug) console.debug("Filter alternative 3: after 2024-06-20 20:42 and for 3 days");
 
         function parseDate(dateString) {
             return new Date(dateString.replace(" ", "T"));
@@ -1309,7 +1316,7 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
         return isTimestampInRange(filterValue, cellValue);
 
     } else if (/from  *.*before .*(to|until)  *[Nn]ow/.test(filterValue)) {
-        console.debug("Filter alternative 4: from 3 days before and (to|until) Now");
+        if (filter_debug)  console.debug("Filter alternative 4: from 3 days before and (to|until) Now");
         function parseRelativeDate(relativeString) {
             const regex = /(\d+)\s(days|day|months|month|hrs|hr|hours|hour)\s(before|to)/i;
             const match = relativeString.match(regex);
@@ -1370,11 +1377,11 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
             return tsDate >= startDate && tsDate <= endDate;
         }
 
-        console.debug(`Filter: ${filterValue.toLowerCase()}, Timestamp: ${cellValue.toLowerCase()}, Result: ${isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase())}`);
+        if (filter_debug) console.debug(`Filter: ${filterValue.toLowerCase()}, Timestamp: ${cellValue.toLowerCase()}, Result: ${isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase())}`);
         return isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase());
 
     } else if (/from  *.* before  *(and  *to|to)/.test(filterValue)) {
-        console.debug("Filter alternative 5: from 3 days before to 2024-06-20 20:42");
+        if (filter_debug) console.debug("Filter alternative 5: from 3 days before to 2024-06-20 20:42");
 
         function parseRelativeDate(relativeString, endDate) {
             const regex = /(\d+)\s(days|day|months|month|hrs|hr|hours|hour)\sbefore/i;
@@ -1435,11 +1442,11 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
             return tsDate >= startDate && tsDate <= endDate;
         }
 
-        console.log(`Filter: ${filterValue.toLowerCase()}, Timestamp: ${cellValue.toLowerCase()}, Result: ${isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase())}`);
+        if (filter_debug) console.log(`Filter: ${filterValue.toLowerCase()}, Timestamp: ${cellValue.toLowerCase()}, Result: ${isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase())}`);
         return isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase());
 
     } else if (/after  *2/.test(filterValue)) {
-        console.debug("Filter alternative 6: after 2024-06-20 20:42");
+        if (filter_debug) console.debug("Filter alternative 6: after 2024-06-20 20:42");
         function parseDate(dateString) {
             return new Date(dateString.replace(" ", "T"));
         }
@@ -1473,7 +1480,7 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
         return isTimestampInRange(filterValue.toLowerCase(), cellValue.toLowerCase());
 
     } else if (/before  *2/.test(filterValue.toLowerCase())) {
-        console.debug("Filter alternative 7: before 2024-06-20 20:42");
+        if (filter_debug) console.debug("Filter alternative 7: before 2024-06-20 20:42");
         function parseDate(dateString) {
             return new Date(dateString.replace(" ", "T"));
         }
@@ -1502,16 +1509,16 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
             return tsDate < endDate;
         }
 
-        console.log(`Filter: ${filterValue}, Timestamp: ${cellValue}, Result: ${isTimestampInRange(filterValue, cellValue)}`);
+        if (filter_debug)  console.log(`Filter: ${filterValue}, Timestamp: ${cellValue}, Result: ${isTimestampInRange(filterValue, cellValue)}`);
 
         return isTimestampInRange(filterValue, cellValue);
     } else if (/before  *[Nn]ow/.test(filterValue)) {
-        console.debug("Filter alternative 8: before Now");
+        if (filter_debug) console.debug("Filter alternative 8: before Now");
         // Note: this alternative is meaningless
         return true;
 
     } else{
-        console.debug("no filter alternative match, accept the data by default");
+        if (filter_debug) console.debug("no filter alternative match, accept the data by default");
         return true;
     
     }
@@ -1519,17 +1526,17 @@ function apply_filter_datetimeRange(cellValue, filterValue) {
 }
 
 function applyFilters(table_name) {
-    console.debug("applyFilters.start");
-    console.debug("table_name: " + table_name);
+  if (filter_debug)   console.debug("applyFilters.start");
+  if (filter_debug)  console.debug("table_name: " + table_name);
     try {
 
-        console.debug("calling readFiltersFromTable");
+        if (filter_debug) console.debug("calling readFiltersFromTable");
         const filters = readFiltersFromTable(table_name);
-        console.debug("filters: " + JSON.stringify(filters));
+        if (filter_debug) console.debug("filters: " + JSON.stringify(filters));
         const table = document.querySelector('table[name="' + table_name + '"]');
 
         // Filter the table rows
-        console.debug("row count: ", table.rows.length);
+        if (filter_debug) console.debug("row count: ", table.rows.length);
         // step through all data rows and determinf if each of them matches the union of the all the filters
         for (let i = 2; i < table.rows.length; i++) { // Start from the third row
             const row = table.rows[i];
@@ -1537,13 +1544,18 @@ function applyFilters(table_name) {
 
             // step through all filter and check if the row matches all of them
             filters.forEach((filter, index) => {
-                console.debug("filter: ", filter);
-                console.debug("index: ", index);
-                console.debug("isRowVisible: ", isRowVisible);
+                if (filter_debug)  console.debug("filter: ", filter);
+                if (filter_debug)  console.debug("index: ", index);
+                if (filter_debug)  console.debug("isRowVisible: ", isRowVisible);
                 if (filter && isRowVisible) {
-                    const cellValue = row.cells[index].innerText;
-                    console.debug("cellValue: ", cellValue);
-                    console.debug("calling: matchesFilter ", filter.filterValue);
+                    var cellValue = row.cells[index].innerText;
+                    if (filter.filterType == "checkBox") { 
+                        //console.debug("checkBox filter");
+                        // if the filter is a checkbox, the value is the value of the checkbox
+                        cellValue = row.cells[index].querySelector('input[type="checkbox"]').checked;
+                     }
+                    if (filter_debug)  console.debug("cellValue: ", cellValue);
+                    if (filter_debug)  console.debug("calling: matchesFilter ", filter.filterValue);
                     if (!matchesFilter(cellValue, filter.filterValue, filter.filterType)) {
                         //console.debug("Hiding row " + i);
                         isRowVisible = false;
@@ -2029,6 +2041,98 @@ function modifyNotShowByDefaultColumns(value, action, key) {
 }
 
 
+// create the URL that when clicked on adds the user to the distribution list
+// append a redirecturi that redicts the the page showing the distribution list
+
+function createNoteShareLink(datarow) {
+    console.debug("createNoteShareLink (datarow)");
+    console.debug(datarow);
+
+    // link must make the user subscribe to the feed the note belongs to, before directing the user to the note.
+    // if the feed/distributionlist allowd anonymous access, the unknown/unauthenticated user will be directed to the note directly after subscribing to the feed
+
+    // first part of the URL is the one to invite the user to subscribe to the feed of which the note is a part
+
+    // the second part is to redirect to displaying  the note in the location where it is attached (the "gothere" functionality)
+
+    // noteid
+    // distributionlistid
+    // url
+
+
+    const userid = "";
+    console.debug("go to url: " + datarow.url);
+
+    const noteid = datarow.noteid;
+
+    console.debug("go lookup noteid: " + noteid);
+
+    console.debug(document.querySelector('tr[noteid="' + noteid + '"]'));
+
+    const url = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="url"]').textContent.trim();
+    console.debug(url);
+
+    var textToCopy;
+    var distributionlistid;
+    try {
+
+        distributionlistid = document.querySelector('tr[noteid="' + noteid + '"]').querySelector('[name="distributionlistid"]').value.trim();
+        console.debug(distributionlistid);
+        const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
+        textToCopy = "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=" + redirectUri;
+    } catch (e) {
+        console.debug(e);
+        textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
+    }
+
+    // place the url value in the clipboard
+    // navigator.clipboard.writeText(textToCopy).then(() => {
+    //     console.debug('Invitation URL copied to clipboard: ' + textToCopy);
+    //}).catch(err => {
+    //     console.error('Error in copying text: ', err);
+    // });
+    return textToCopy;
+}
+
+
+// create the URL that when clicked on adds the user to the distribution list
+// append a redirecturi that redicts the the page showing the distribution list
+
+function createShareableGoThereLink(noteid, distributionlistid) {
+    console.debug("createShareableGoThereLink (datarow)");
+    console.debug(noteid);
+
+    // link must make the user subscribe to the feed the note belongs to, before directing the user to the note.
+    // if the feed/distributionlist allowd anonymous access, the unknown/unauthenticated user will be directed to the note directly after subscribing to the feed
+
+    // first part of the URL is the one to invite the user to subscribe to the feed of which the note is a part
+
+    // the second part is to redirect to displaying  the note in the location where it is attached (the "gothere" functionality)
+
+    // noteid
+    // distributionlistid
+    // url
+
+var textToCopy
+   
+    try {
+
+        const redirectUri = encodeURIComponent("/pages/gothere.html?noteid=" + noteid);
+        textToCopy = "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=" + redirectUri;
+    } catch (e) {
+        console.debug(e);
+        textToCopy = "https://www.yellownotes.cloud/pages/gothere.html?noteid=" + noteid;
+    }
+
+    // place the url value in the clipboard
+    // navigator.clipboard.writeText(textToCopy).then(() => {
+    //     console.debug('Invitation URL copied to clipboard: ' + textToCopy);
+    //}).catch(err => {
+    //     console.error('Error in copying text: ', err);
+    // });
+    return textToCopy;
+}
+
 
 function toggleColumn(columnName, isChecked, tableName, table_columns_to_not_display_keyname) {
     console.debug("toggleColumn.start: " + columnName + " isChecked: " + isChecked, " in table name=" + tableName + " with local storage keyname: " + table_columns_to_not_display_keyname);
@@ -2179,17 +2283,17 @@ function hideColumn(columnName, hide, tableName) {
  * } input_field_id
  */
 function setTimeRangeFilterDialog(input_field_id, dialog_id) {
-    console.debug("setTimeRangeFilterDialog.start (" + input_field_id + ", " + dialog_id + ")");
+    if (filter_debug) console.debug("setTimeRangeFilterDialog.start (" + input_field_id + ", " + dialog_id + ")");
     const inputField = document.getElementById(input_field_id);
     const dialog = document.getElementById(dialog_id);
-    console.debug(dialog);
+    if (filter_debug) console.debug(dialog);
     //console.debug(dialog.outerHTML);
     const closeIcon = dialog.querySelector('.close');
-    console.debug(closeIcon);
+    if (filter_debug) console.debug(closeIcon);
     const okButton = dialog.querySelector('[name="ok-button"]');
-    console.debug(okButton);
+    if (filter_debug) console.debug(okButton);
     const fromSpecificTimeRadio = dialog.querySelector('[id_name="from-specific-time-radio"]');
-    console.debug(fromSpecificTimeRadio);
+    if (filter_debug) console.debug(fromSpecificTimeRadio);
     const fromLengthOfTimeRadio = dialog.querySelector('[id_name="from-length-of-time-radio"]');
     const toSpecificTimeRadio = dialog.querySelector('[id_name="to-specific-time-radio"]');
     const toLengthOfTimeRadio = dialog.querySelector('[id_name="to-length-of-time-radio"]');
@@ -2280,7 +2384,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
         // if it begins with "after" it is a timetamp
 
         if (value.includes('from ')) {
-            console.debug("fromValue: " + fromValue);
+            if (filter_debug) console.debug("fromValue: " + fromValue);
             // is a time span
             // alt 4, alt 5
             try {
@@ -2326,7 +2430,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
                         dialog.querySelector('[name="from-interval-number"]').value = fromDurationNumeric;
 
                         const toTimestamp = toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                        console.debug(toTimestamp);
+                        if (filter_debug)  console.debug(toTimestamp);
                         toYear = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
                         toMonth = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
                         toDay = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
@@ -2335,7 +2439,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
                         console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
 
                         const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
-                        console.debug(t);
+                        if (filter_debug) console.debug(t);
                         toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
 
                         toSpecificTimeRadio.checked = true;
@@ -2358,7 +2462,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
 
                 } else {
                     // error: all "from" contanining values should also contain "before"
-                    console.error("Error: all 'from' contanining values should also contain 'before'");
+                    if (filter_debug) console.error("Error: all 'from' contanining values should also contain 'before'");
                     // from timestamp
                     fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
                     fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
@@ -2395,12 +2499,12 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
              */
             console.debug("1.4.2");
             try {
-                console.debug(" input_field_ide: " + input_field_id);
+                if (filter_debug) console.debug(" input_field_ide: " + input_field_id);
                 // alt 1:  after 2024-05-20 08:42 and before 2024-07-20 20:40
                 if (/before  *\d{4}-\d{2}-\d{2}/.test(toValue)) {
-                    console.debug("alt 1:  after 2024-05-20 08:42 and before 2024-07-20 20:40");
+                    if (filter_debug)  console.debug("alt 1:  after 2024-05-20 08:42 and before 2024-07-20 20:40");
                     const toTimestamp = toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                    console.debug(toTimestamp);
+                    if (filter_debug)  console.debug(toTimestamp);
                     toYear = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
                     toMonth = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
                     toDay = parseInt(toValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
@@ -2411,57 +2515,57 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
                     toSpecificTimeRadio.checked = true;
 
                     const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
-                    console.debug(t);
+                    if (filter_debug)  console.debug(t);
                     toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
 
                     const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                    console.debug(fromTimestamp);
+                    if (filter_debug)   console.debug(fromTimestamp);
                     fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
                     fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
                     fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
                     fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
                     fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    if (filter_debug)   console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
                     const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                    console.debug(t2);
+                    if (filter_debug) console.debug(t2);
                     //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
                     fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
                     // alt 2 after 2024-05-20 20:42 and before Now
                 } else if (/before  *[Nn][Oo][Ww]/.test(toValue)) {
-                    console.debug("alt 2: after 2024-05-20 20:42 and before Now");
+                    if (filter_debug) console.debug("alt 2: after 2024-05-20 20:42 and before Now");
 
                     toSpecificTimeRadio.checked = true;
                     const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                    console.debug(fromTimestamp);
+                    if (filter_debug)  console.debug(fromTimestamp);
                     fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
                     fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
                     fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
                     fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
                     fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    if (filter_debug)  console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
                     const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                    console.debug(t2);
+                    if (filter_debug)  console.debug(t2);
                     //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
                     fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
                     // alt 3 after 2024-06-20 20:42 and for 3 days
                 } else if (/for /.test(toValue)) {
-                    console.debug("alt 3: after 2024-06-20 20:42 and for 5 days");
+                    if (filter_debug)  console.debug("alt 3: after 2024-06-20 20:42 and for 5 days");
 
                     toSpecificTimeRadio.checked = false;
                     toLengthOfTimeRadio.checked = true;
 
                     const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                    console.debug(fromTimestamp);
+                    if (filter_debug) console.debug(fromTimestamp);
                     fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
                     fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
                     fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
                     fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
                     fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    if (filter_debug) console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
                     const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                    console.debug(t2);
+                    if (filter_debug) console.debug(t2);
                     //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
                     fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
@@ -2470,35 +2574,35 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
                     toDurationUnit = toValue.match(/for ([0-9 ]*)(hr|day|month)[s]*/)[2].trim();
                     // place the values in to the dialog form
                     //fromHour.value = fromDurationNumeric;
-                    console.debug("toDurationNumeric: " + toDurationNumeric + " toDurationUnit: " + toDurationUnit);
-                    console.debug(document.getElementById("to-interval-unit").querySelector('option[value="' + toDurationUnit + '"]'));
+                    if (filter_debug) console.debug("toDurationNumeric: " + toDurationNumeric + " toDurationUnit: " + toDurationUnit);
+                    if (filter_debug) console.debug(document.getElementById("to-interval-unit").querySelector('option[value="' + toDurationUnit + '"]'));
 
                     document.getElementById("to-interval-unit").querySelector('option[value="' + toDurationUnit + '"]').selected = true;
                     document.getElementById("to-interval-number").value = toDurationNumeric;
 
                     // alt 6: after 2024-07-20 20:42
                 } else if (/after *2/.test(fromValue)) {
-                    console.debug("alt 6, after 2024-07-20 20:42");
-                    console.debug("after a timestamp");
+                    if (filter_debug) console.debug("alt 6, after 2024-07-20 20:42");
+                    if (filter_debug)  console.debug("after a timestamp");
 
                     toSpecificTimeRadio.checked = false;
                     toLengthOfTimeRadio.checked = false;
 
                     const fromTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-                    console.debug(fromTimestamp);
+                    if (filter_debug)  console.debug(fromTimestamp);
                     fromYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
                     fromMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
                     fromDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
                     fromHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
                     fromMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-                    console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
+                    if (filter_debug)  console.debug("fromYear: " + fromYear + " fromMonth: " + fromMonth + " fromDay: " + fromDay + " fromHour: " + fromHour + " fromMinute: " + fromMinute);
                     const t2 = formatDatetimeForInput(new Date(fromYear, fromMonth - 1, fromDay, fromHour, fromMinute));
-                    console.debug(t2);
+                    if (filter_debug)  console.debug(t2);
                     //toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
                     fromDatetime.value = t2 ? new Date(t2).toISOString().slice(0, -1) : '';
 
                 } else {
-                    console.debug("Error: unknown format of the filter");
+                    if (filter_debug)  console.debug("Error: unknown format of the filter");
 
                 }
             } catch (e) {
@@ -2506,8 +2610,8 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
             }
 
         } else if (fromValue.includes("before ")) {
-            console.debug("alt 7, before 2024-07-20 20:42");
-            console.debug("after a timestamp");
+            if (filter_debug)  console.debug("alt 7, before 2024-07-20 20:42");
+            if (filter_debug) console.debug("after a timestamp");
 
             fromSpecificTimeRadio.checked = false;
             fromLengthOfTimeRadio.checked = false;
@@ -2516,16 +2620,16 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
             toLengthOfTimeRadio.checked = false;
             toNowRadio.checked = false;
             const toTimestamp = fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
-            console.debug(toTimestamp);
+            if (filter_debug)  console.debug(toTimestamp);
             toYear = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[1], 10);
             toMonth = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[2], 10);
             toDay = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[3], 10);
             toHour = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[4], 10);
             toMinute = parseInt(fromValue.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/)[5], 10);
-            console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
+            if (filter_debug)  console.debug("toYear: " + toYear + " toMonth: " + toMonth + " toDay: " + toDay + " toHour: " + toHour + " toMinute: " + toMinute);
 
             const t = formatDatetimeForInput(new Date(toYear, toMonth - 1, toDay, toHour, toMinute));
-            console.debug(t);
+            if (filter_debug)  console.debug(t);
             toDatetime.value = t ? new Date(t).toISOString().slice(0, -1) : '';
 
         }
@@ -2545,18 +2649,18 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
     const formatDatetimeForInput = (datetime) => {
         return new Date(datetime).toISOString().slice(0, 16).replace('T', ' ');
     };
-    console.debug(" input_field_ide: " + input_field_id);
+    if (filter_debug) console.debug(" input_field_ide: " + input_field_id);
 
     const showDialog = () => {
-        console.debug('showDialog.start');
+        if (filter_debug) console.debug('showDialog.start');
         try {
             const currentValue = document.getElementById(input_field_id).value;
-            console.debug(" input_field_ide: " + input_field_id);
-            console.debug('Current value:', currentValue);
+            if (filter_debug) console.debug(" input_field_ide: " + input_field_id);
+            if (filter_debug) console.debug('Current value:', currentValue);
             // read the current values in the input field, and place those, if any, in the form.
-            console.debug("calling parseInputValue");
+            if (filter_debug)  console.debug("calling parseInputValue");
             const parsedValues = parseInputValue(currentValue);
-            console.debug('Parsed values:', JSON.stringify(parsedValues));
+            if (filter_debug)  console.debug('Parsed values:', JSON.stringify(parsedValues));
 
             // Extract the values from the parsed values
             const {
@@ -2600,12 +2704,12 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
     // NOTE: make some adjustments here to account for time zones
 
     function handleOk(cellnodeid) {
-        console.debug('handleOk.start');
+        if (filter_debug)   console.debug('handleOk.start');
         try {
             let fromValue = fromDatetime.value;
             let toValue = toDatetime.value;
-            console.debug(cellnodeid);
-            console.debug(input_field_id);
+            if (filter_debug)   console.debug(cellnodeid);
+            if (filter_debug)  console.debug(input_field_id);
             //const fromHourValue = fromHour.value;
             //const fromMinuteValue = fromMinute.value;
             const fromIntervalValue = fromIntervalNumber.value;
@@ -2631,7 +2735,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
                     result += "from " + `${fromIntervalValue} ${fromIntervalUnitValue}s before`;
                 }
             } else {
-                console.debug("no 'from' value set");
+                if (filter_debug)  console.debug("no 'from' value set");
             }
 
             if (toNowRadio.checked) {
@@ -2651,26 +2755,26 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
                 console.debug("toIntervalValue: " + toIntervalValue);
                 result += ` and ${toIntervalValue} ${toIntervalUnitValue}`;
             } else {
-                console.debug("no 'to' value set");
+                if (filter_debug)   console.debug("no 'to' value set");
             }
 
-            console.debug('Result:', result);
+            if (filter_debug)  console.debug('Result:', result);
             // write the result to the input field
-            console.debug("input_field_id: " + input_field_id);
-            console.debug("previous: " + document.getElementById(input_field_id).value);
+            if (filter_debug)  console.debug("input_field_id: " + input_field_id);
+            if (filter_debug) console.debug("previous: " + document.getElementById(input_field_id).value);
             document.getElementById(input_field_id).value = result;
-            console.debug("new: " + document.getElementById(input_field_id).value);
+            if (filter_debug) console.debug("new: " + document.getElementById(input_field_id).value);
             
             // Dispatch a custom event to indicate the input field has been updated
             //const event = new Event('inputUpdated');
             //document.getElementById(input_field_id).dispatchEvent(event);
-            console.debug("calling closeDialog");
+            if (filter_debug) console.debug("calling closeDialog");
             closeDialog();
             // trigger the filtering process (and save changes to the filter to local storage)
             //console.debug("calling applyFilters");
             //applyFilters(table_name);
             
-            console.debug("calling triggerFilters");
+            if (filter_debug)  console.debug("calling triggerFilters");
             triggerFilters(table_name);
 
         } catch (e) {
@@ -2692,7 +2796,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
     };
 
     const updateFromMode = () => {
-        console.debug('updateFromMode.start');
+        if (filter_debug) console.debug('updateFromMode.start');
         try {
             if (fromSpecificTimeRadio.checked) {
                 fromSpecificTime.style.display = 'block';
@@ -2707,7 +2811,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
     };
 
     const updateToMode = () => {
-        console.debug('updateToMode.start');
+        if (filter_debug)  console.debug('updateToMode.start');
         try {
             if (toSpecificTimeRadio.checked) {
                 toSpecificTime.style.display = 'block';
@@ -2726,32 +2830,32 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
         }
     };
 
-    console.debug("calling fromSpecificTimeRadio");
-    console.debug(fromSpecificTimeRadio);
+    if (filter_debug)  console.debug("calling fromSpecificTimeRadio");
+    if (filter_debug)  console.debug(fromSpecificTimeRadio);
     fromSpecificTimeRadio.addEventListener('change', updateFromMode);
-    console.debug("calling updateFromMode");
+    if (filter_debug) console.debug("calling updateFromMode");
     fromLengthOfTimeRadio.addEventListener('change', updateFromMode);
-    console.debug("calling updateToMode");
+    if (filter_debug) console.debug("calling updateToMode");
     toSpecificTimeRadio.addEventListener('change', updateToMode);
-    console.debug("calling updateToMode");
+    if (filter_debug) console.debug("calling updateToMode");
     toLengthOfTimeRadio.addEventListener('change', updateToMode);
     toNowRadio.addEventListener('change', updateToMode);
-    console.debug(document.getElementById(input_field_id));
+    if (filter_debug)  console.debug(document.getElementById(input_field_id));
     document.getElementById(input_field_id).addEventListener('click', showDialog);
     document.getElementById(input_field_id).addEventListener('touchend', showDialog);
-    console.debug("calling addEventlistener closeDialog");
+    if (filter_debug)  console.debug("calling addEventlistener closeDialog");
     closeIcon.addEventListener('click', closeDialog);
     closeIcon.addEventListener('touchend', closeDialog);
-    console.debug("calling addEventlistener handleOk");
-    console.debug(okButton);
+    if (filter_debug)   console.debug("calling addEventlistener handleOk");
+    if (filter_debug) console.debug(okButton);
 
     okButton.addEventListener('click', function () {
-        console.debug("click event, calling handleOk");
+        if (filter_debug)  console.debug("click event, calling handleOk");
         handleOk(input_field_id);
     });
 
     okButton.addEventListener('touchend', function () {
-        console.debug("touchend event, calling handleOk");
+        if (filter_debug)  console.debug("touchend event, calling handleOk");
         handleOk(input_field_id);
     });
     //okButton.addEventListener('touchend', handleOk());
@@ -2772,7 +2876,7 @@ function setTimeRangeFilterDialog(input_field_id, dialog_id) {
 
     // Add an event listener for the custom 'inputUpdated' event
     document.getElementById(input_field_id).addEventListener('inputUpdated', () => {
-        console.log('Input field updated:', document.getElementById(input_field_id).value);
+        if (filter_debug)  console.log('Input field updated:', document.getElementById(input_field_id).value);
     });
 }
 

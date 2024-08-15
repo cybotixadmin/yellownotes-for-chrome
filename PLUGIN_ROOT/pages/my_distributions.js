@@ -1,5 +1,5 @@
 
-
+const table_name = "mydistributionlists";
 
 const browser_id = chrome.runtime.id;
 
@@ -40,7 +40,7 @@ checkSessionJWTValidity()
     console.error('Error:', error.message);
 });
 
-const table_columns_to_not_display_keyname = "mydistributionlists_hide_columns2";
+const table_columns_to_not_display_keyname = table_name + "_hide_columns2";
 
 
 const column_list =  ["name", "description",  "visibility", "restrictions",  "postcount", "subscriberscount", "createtime", "active_status","anonymous_allowed", "automatic_enrolment" , "actions" ];
@@ -50,47 +50,47 @@ const column_list =  ["name", "description",  "visibility", "restrictions",  "po
 // The users can decide which columns to display by ticking and unticking the checkboxes on a list of column names
 
 document.getElementById('toggle-name').addEventListener('change', function () {
-    toggleColumn('name', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('name', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-description').addEventListener('change', function () {
-    toggleColumn('description', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('description', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-visibility').addEventListener('change', function () {
-    toggleColumn('visibility', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('visibility', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-restrictions').addEventListener('change', function () {
-    toggleColumn('restrictions', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('restrictions', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-postcount').addEventListener('change', function () {
-    toggleColumn('postcount', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('postcount', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-subscriberscount').addEventListener('change', function () {
-    toggleColumn('subscriberscount', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('subscriberscount', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-createtime').addEventListener('change', function () {
-    toggleColumn('createtime', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('createtime', this.checked,table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-active_status').addEventListener('change', function () {
-    toggleColumn('active_status', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('active_status', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-anonymous_allowed').addEventListener('change', function () {
-    toggleColumn('anonymous_allowed', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('anonymous_allowed', this.checked,table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-automatic_enrolment').addEventListener('change', function () {
-    toggleColumn('automatic_enrolment', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('automatic_enrolment', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-actions').addEventListener('change', function () {
-    toggleColumn('actions', this.checked, "distributionsTable", table_columns_to_not_display_keyname);
+    toggleColumn('actions', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
 // set table visibility defaults
@@ -131,7 +131,7 @@ getNotShowByDefaultColumns_asynch(table_columns_to_not_display_keyname, not_show
 
 //not_show_by_default_columns.forEach(column => {
 //    console.debug("not show column: " + column);
-//    toggleColumn(column, false,"distributionsTable", table_columns_to_not_display_keyname);
+//    toggleColumn(column, false,table_name, table_columns_to_not_display_keyname);
 //    document.getElementById(`toggle-${column}`).checked = false;
 //});
 
@@ -143,7 +143,7 @@ fetchData(not_show_by_default_columns)
     console.log("toggle columns off by default");
     console.log(not_show_by_default_columns);
     not_show_by_default_columns.forEach(column => {
-        toggleColumn(column, false, "distributionsTable", table_columns_to_not_display_keyname);
+        toggleColumn(column, false, table_name, table_columns_to_not_display_keyname);
         document.getElementById(`toggle-${column}`).checked = false;
     });
 
@@ -151,7 +151,7 @@ fetchData(not_show_by_default_columns)
 
 // Function to use "fetch" to delete a data row
 async function deleteDataRowByDistributionlistId(distributionlistid) {
-    console.debug("deleteDataRowByDistributionlistId");
+    console.debug("deleteDataRowByDistributionlistId (" + distributionlistid + ")");
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -175,6 +175,26 @@ async function deleteDataRowByDistributionlistId(distributionlistid) {
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
+        }else{
+
+            // refresh the cache
+
+            const cacheKey = URI_plugin_user_get_my_distribution_lists.replace(/\//g, "_");
+          
+    
+            console.debug("Cache key: " + cacheKey);
+         
+    
+           
+            const cachetimeout = 0;
+            const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
+            const protocol = "GET";
+    
+            // Accept data from cache if it is less than 60 seconds old
+            // Make changes to this timeout when there is a procedure to empty the cache if the value has been updated.
+            console.debug("calling cachableCall2API_GET");
+            cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint)
+            .then(function (data) {});
         }
 
         // Parse JSON data
@@ -638,7 +658,7 @@ function fetchData(not_show_by_default_columns) {
         const currentTime = Date.now();
 
         console.debug("currentTime: " + currentTime);
-        const cachetimeout = 60;
+        const cachetimeout = 10;
         const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
         const protocol = "GET";
 
@@ -661,7 +681,7 @@ function fetchData(not_show_by_default_columns) {
             console.debug(data);
             // Get table body element
             const tableBody = document
-                .querySelector('table[name="distributionsTable"]')
+                .querySelector('table[name="' + table_name + '"]')
                 .getElementsByTagName("tbody")[0];
 
             console.debug(tableBody);
@@ -680,298 +700,9 @@ function fetchData(not_show_by_default_columns) {
             }
             // Loop through data and (re-)populate the table with the results returned from the API
             data.forEach(rowData => {
+
                 // Create new row
-                console.debug(rowData);
-                const newRow = tableBody.insertRow();
-                newRow.setAttribute("distributionlistid", rowData.distributionlistid);
-                newRow.setAttribute('selectablecol', "true");
-                // Create cells and populate them with data
-                const cell_name = newRow.insertCell(0);
-                const cell_description = newRow.insertCell(1);
-                const cell_visibility = newRow.insertCell(2);
-                const cell_restrictions = newRow.insertCell(3);
-                const cell_postcount = newRow.insertCell(4);
-                const cell_subscribercount = newRow.insertCell(5);
-                const cell_createtime = newRow.insertCell(6);
-                const cell_active_status = newRow.insertCell(7);
-                const cell_anonymous_allowed = newRow.insertCell(8);
-                const cell_automatic_enrolment = newRow.insertCell(9);
-                const cell_actions = newRow.insertCell(10);
-
-                // name
-                cell_name.textContent = rowData.name;
-                cell_name.setAttribute("name", "name");
-                cell_name.setAttribute("class", "displayname");
-                cell_name.setAttribute("contenteditable", "true");
-                if (not_show_by_default_columns.includes("name")) {
-                    cell_visibility.classList.add('hidden');
-
-                }
-
-                // description
-                cell_description.textContent = rowData.description;
-                cell_description.setAttribute("name", "description");
-                cell_description.setAttribute("contenteditable", "true");
-                cell_description.setAttribute("class", "displayname");
-                if (not_show_by_default_columns.includes("description")) {
-                    cell_visibility.classList.add('hidden');
-                }
-
-                // Create a dropdown for the visibility
-                const visibilityDropdown = document.createElement('select');
-                const options = ['PUBLIC', 'PRIVATE', 'INCOGNITO'];
-
-                options.forEach(optionValue => {
-                    const option = document.createElement('option');
-                    option.value = optionValue;
-                    option.textContent = optionValue;
-                    visibilityDropdown.appendChild(option);
-                });
-
-                // Set the selected value
-                visibilityDropdown.value = rowData.visibility || 'PUBLIC';
-
-                // Add dropdown to the table cell
-                //const visibilityCell = newRow.insertCell(5);
-                cell_visibility.appendChild(visibilityDropdown);
-                cell_visibility.setAttribute("name", "visibility");
-                cell_visibility.setAttribute("class", "compact");
-                if (not_show_by_default_columns.includes("visibility")) {
-                    cell_visibility.classList.add('hidden');
-
-                }
-
-                // restrictions
-                cell_restrictions.textContent = rowData.restrictions;
-                cell_restrictions.setAttribute("name", "restrictions");
-
-                cell_postcount.setAttribute("class", "text");
-
-                if (not_show_by_default_columns.includes("restrictions")) {
-                    cell_subscribercount.classList.add('hidden');
-
-                }
-
-                // post count
-                cell_postcount.textContent = rowData.postcount;
-                cell_postcount.setAttribute("class", "compact number");
-                cell_postcount.setAttribute("name", "postcount");
-
-                if (not_show_by_default_columns.includes("postcount")) {
-                    cell_subscribercount.classList.add('hidden');
-
-                }
-                // subscriber count
-                cell_subscribercount.textContent = rowData.subscriberscount;
-                cell_subscribercount.setAttribute("class", "compact number");
-                cell_subscribercount.setAttribute("name", "subscriberscount");
-
-                if (not_show_by_default_columns.includes("subscriberscount")) {
-                    cell_subscribercount.classList.add('hidden');
-
-                }
-
-                // time of creation
-                cell_createtime.setAttribute("value", "createdtime");
-                cell_createtime.setAttribute("name", "createdtime");
-                cell_createtime.setAttribute("class", "datetime");
-                console.debug(rowData.createdtime);
-                cell_createtime.textContent = reformatTimestamp(rowData.createdtime);
-                if (not_show_by_default_columns.includes("created")) {
-                    cell_createtime.classList.add('hidden');
-
-                }
-
-                
-                //Suspend/Active check switch
-                const suspendActButton = document.createElement("span");
-                if (rowData.active == 1) {
-                    // active
-                    suspendActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
-                } else {
-                    // deactivated
-                    suspendActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="active" /><span></span></label>';
-                }
-
-                const inputElement = suspendActButton.querySelector("input");
-                if (inputElement) {
-                    inputElement.classList.add("input-class");
-                }
-
-                const labelElement = suspendActButton.querySelector("label");
-                if (labelElement) {
-                    labelElement.classList.add("switch");
-                }
-                const spanElement = suspendActButton.querySelector("span");
-                if (spanElement) {
-                    spanElement.classList.add("slider");
-                }
-                suspendActButton.addEventListener("change", async(e) => {
-                    if (e.target.checked) {
-                        await activateByUUID(rowData.distributionlistid);
-                    } else {
-                        await deactivateByUUID(rowData.distributionlistid);
-                    }
-                });
-                cell_active_status.appendChild(suspendActButton);
-                cell_active_status.setAttribute("class", "checkbox");
-                cell_active_status.setAttribute("name", "active");
-                if (not_show_by_default_columns.includes("active")) {
-                    cell_active_status.classList.add('hidden');
-
-                }
-
-                //anonymous enrolment allowed check switch
-                const anonActButton = document.createElement("span");
-                if (rowData.anonymous_allowed == 1) {
-                    // active
-                    anonActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
-                } else {
-                    // deactivated
-                    anonActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="active" /><span></span></label>';
-                }
-
-                const anonInputElement = anonActButton.querySelector("input");
-                if (anonInputElement) {
-                    anonInputElement.classList.add("input-class");
-                }
-
-                const anonLabelElement = anonActButton.querySelector("label");
-                if (anonLabelElement) {
-                    anonLabelElement.classList.add("switch");
-                }
-                const anonSpanElement = anonActButton.querySelector("span");
-                if (anonSpanElement) {
-                    anonSpanElement.classList.add("slider");
-                }
-                anonActButton.addEventListener("change", async(e) => {
-                    if (e.target.checked) {
-                        await setAnonymousByUUID(rowData.distributionlistid, 1);
-                    } else {
-                        await setAnonymousByUUID(rowData.distributionlistid, 0);
-                    }
-                });
-                cell_anonymous_allowed.appendChild(anonActButton);
-                cell_anonymous_allowed.setAttribute("name", "anonymous_allowed");
-                cell_anonymous_allowed.setAttribute("class", "checkbox");
-
-                //
-
-console.debug("automatic enrolment: " + rowData.automatic_enrolment);
-console.debug(rowData.automatic_enrolment == 1);
-
-                //automatic enrolment check switch
-                const autoActButton = document.createElement("span");
-                if (rowData.automatic_enrolment == 1) {
-                    // active
-                    autoActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
-                } else {
-                    // deactivated
-                    autoActButton.innerHTML =
-                        '<label><input type="checkbox" placeholder="active" /><span></span></label>';
-                }
-
-                const autoInputElement = autoActButton.querySelector("input");
-                if (autoInputElement) {
-                    autoInputElement.classList.add("input-class");
-                }
-
-                const autoLabelElement = autoActButton.querySelector("label");
-                if (autoLabelElement) {
-                    autoLabelElement.classList.add("switch");
-                }
-                const autoSpanElement = autoActButton.querySelector("span");
-                if (autoSpanElement) {
-                    autoSpanElement.classList.add("slider");
-                }
-                autoActButton.addEventListener("change", async(e) => {
-                    if (e.target.checked) {
-                        await setAutomaticByUUID(rowData.distributionlistid, 1);
-                    } else {
-                        await setAutomaticByUUID(rowData.distributionlistid, 0);
-                    }
-                });
-                cell_automatic_enrolment.appendChild(autoActButton);
-                cell_automatic_enrolment.setAttribute("class", "checkbox");
-                cell_automatic_enrolment.setAttribute("name", "automatic_enrolment");
-
-                //
-                // action buttons
-                //
-                // Add delete button
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                deleteButton.classList.add("deleteBtn");
-                deleteButton.onclick = function () {
-                    // Remove the row from the table
-                    newRow.remove();
-                    // call to API to delete row from data base
-                    deleteDataRowByDistributionlistId(rowData.distributionlistid);
-                };
-
-                // Add View Notes button
-                //const viewNotesButton = document.createElement("button");
-                //viewNotesButton.textContent = "View";
-                //viewNotesButton.classList.add("viewBtn");
-                // viewNotesButton.onclick = function () {
-                // call to API to delete row from data base
-                //     viewDistributionlist(rowData.distributionlistid);
-                // };
-
-                const viewNotesButton = document.createElement("a");
-                viewNotesButton.classList.add("viewBtn");
-                //viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>'
-
-                viewNotesButton.innerHTML = '<a href="/pages/view_own_distributionlist.html?distributionlistid=' + rowData.distributionlistid + '"><button>Notes</button></a>'
-
-                    // Add View subscribers button
-                    //const viewNotesButton = document.createElement("button");
-                    //viewNotesButton.textContent = "View";
-                    //viewNotesButton.classList.add("viewBtn");
-                    // viewNotesButton.onclick = function () {
-                    // call to API to delete row from data base
-                    //     viewDistributionlist(rowData.distributionlistid);
-                    // };
-
-                    const viewSubscribersButton = document.createElement("a");
-                viewSubscribersButton.classList.add("viewBtn");
-                //viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>'
-
-                viewSubscribersButton.innerHTML = '<a href="/pages/view_own_subscribers.html?distributionlistid=' + rowData.distributionlistid + '"><button>Subscribers</button></a>'
-
-                    // Add save button
-                    const saveButton = document.createElement("button");
-                saveButton.textContent = "Save";
-                saveButton.classList.add("deleteBtn");
-                saveButton.onclick = function () {
-                    // call to API to save row to data base
-                    console.debug("calling updateDataRowByUUID");
-                    updateDataRowByUUID(rowData.distributionlistid);
-                };
-
-                // Add create invite button
-                const createInviteButton = document.createElement("button");
-
-                // title="Click to copy the invitation URL to your clipboard"
-                createInviteButton.title = "Click to create an invition to subscribe link, and copy it to the clipboard";
-                createInviteButton.textContent = "Invite";
-                createInviteButton.classList.add("deleteBtn");
-                createInviteButton.onclick = function () {
-                    // call to API to save row to data base
-                    createOpenInvitation(rowData.distributionlistid);
-                };
-
-                cell_actions.appendChild(viewNotesButton);
-                cell_actions.appendChild(viewSubscribersButton);
-                cell_actions.appendChild(deleteButton);
-                cell_actions.appendChild(saveButton);
-                cell_actions.appendChild(createInviteButton);
-                cell_actions.setAttribute("class", "action-5");
+                newTableRow(rowData, tableBody, not_show_by_default_columns);
 
             });
 
@@ -981,13 +712,302 @@ console.debug(rowData.automatic_enrolment == 1);
 }
 
 // setup table items for sorting and filtering
-setupTableFilteringAndSorting("distributionsTable");
+setupTableFilteringAndSorting(table_name);
 
 // Sort states for each column
 const sortStates = {
     0: "none", // None -> Ascending -> Descending -> None -> ...
     1: "none",
 };
+
+function newTableRow(rowData, tableBody, not_show_by_default_columns) {
+    console.debug(rowData);
+    const newRow = tableBody.insertRow();
+    newRow.setAttribute("distributionlistid", rowData.distributionlistid);
+    newRow.setAttribute('selectablecol', "true");
+    // Create cells and populate them with data
+    const cell_name = newRow.insertCell(0);
+    const cell_description = newRow.insertCell(1);
+    const cell_visibility = newRow.insertCell(2);
+    const cell_restrictions = newRow.insertCell(3);
+    const cell_postcount = newRow.insertCell(4);
+    const cell_subscribercount = newRow.insertCell(5);
+    const cell_createtime = newRow.insertCell(6);
+    const cell_active_status = newRow.insertCell(7);
+    const cell_anonymous_allowed = newRow.insertCell(8);
+    const cell_automatic_enrolment = newRow.insertCell(9);
+    const cell_actions = newRow.insertCell(10);
+
+    // name
+    cell_name.textContent = rowData.name;
+    cell_name.setAttribute("name", "name");
+    cell_name.setAttribute("class", "displayname");
+    cell_name.setAttribute("contenteditable", "true");
+    if (not_show_by_default_columns.includes("name")) {
+        cell_visibility.classList.add('hidden');
+
+    }
+
+    // description
+    cell_description.textContent = rowData.description;
+    cell_description.setAttribute("name", "description");
+    cell_description.setAttribute("contenteditable", "true");
+    cell_description.setAttribute("class", "displayname");
+    if (not_show_by_default_columns.includes("description")) {
+        cell_visibility.classList.add('hidden');
+    }
+
+    // Create a dropdown for the visibility
+    const visibilityDropdown = document.createElement('select');
+    const options = ['PUBLIC', 'PRIVATE', 'INCOGNITO'];
+
+    options.forEach(optionValue => {
+        const option = document.createElement('option');
+        option.value = optionValue;
+        option.textContent = optionValue;
+        visibilityDropdown.appendChild(option);
+    });
+
+    // Set the selected value
+    visibilityDropdown.value = rowData.visibility || 'PUBLIC';
+
+    // Add dropdown to the table cell
+    //const visibilityCell = newRow.insertCell(5);
+    cell_visibility.appendChild(visibilityDropdown);
+    cell_visibility.setAttribute("name", "visibility");
+    cell_visibility.setAttribute("class", "compact");
+    if (not_show_by_default_columns.includes("visibility")) {
+        cell_visibility.classList.add('hidden');
+
+    }
+
+    // restrictions
+    cell_restrictions.textContent = rowData.restrictions;
+    cell_restrictions.setAttribute("name", "restrictions");
+
+    cell_postcount.setAttribute("class", "text");
+
+    if (not_show_by_default_columns.includes("restrictions")) {
+        cell_subscribercount.classList.add('hidden');
+
+    }
+
+    // post count
+    cell_postcount.textContent = rowData.postcount;
+    cell_postcount.setAttribute("class", "compact number");
+    cell_postcount.setAttribute("name", "postcount");
+
+    if (not_show_by_default_columns.includes("postcount")) {
+        cell_subscribercount.classList.add('hidden');
+
+    }
+    // subscriber count
+    cell_subscribercount.textContent = rowData.subscriberscount;
+    cell_subscribercount.setAttribute("class", "compact number");
+    cell_subscribercount.setAttribute("name", "subscriberscount");
+
+    if (not_show_by_default_columns.includes("subscriberscount")) {
+        cell_subscribercount.classList.add('hidden');
+
+    }
+
+    // time of creation
+    cell_createtime.setAttribute("value", "createdtime");
+    cell_createtime.setAttribute("name", "createdtime");
+    cell_createtime.setAttribute("class", "datetime");
+    console.debug(rowData.createdtime);
+    cell_createtime.textContent = reformatTimestamp(rowData.createdtime);
+    if (not_show_by_default_columns.includes("created")) {
+        cell_createtime.classList.add('hidden');
+
+    }
+
+
+    //Suspend/Active check switch
+    const suspendActButton = document.createElement("span");
+    if (rowData.active == 1) {
+        // active
+        suspendActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+    } else {
+        // deactivated
+        suspendActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+    }
+
+    const inputElement = suspendActButton.querySelector("input");
+    if (inputElement) {
+        inputElement.classList.add("input-class");
+    }
+
+    const labelElement = suspendActButton.querySelector("label");
+    if (labelElement) {
+        labelElement.classList.add("switch");
+    }
+    const spanElement = suspendActButton.querySelector("span");
+    if (spanElement) {
+        spanElement.classList.add("slider");
+    }
+    suspendActButton.addEventListener("change", async (e) => {
+        if (e.target.checked) {
+            await activateByUUID(rowData.distributionlistid);
+        } else {
+            await deactivateByUUID(rowData.distributionlistid);
+        }
+    });
+    cell_active_status.appendChild(suspendActButton);
+    cell_active_status.setAttribute("class", "checkbox");
+    cell_active_status.setAttribute("name", "active");
+    if (not_show_by_default_columns.includes("active")) {
+        cell_active_status.classList.add('hidden');
+
+    }
+
+    //anonymous enrolment allowed check switch
+    const anonActButton = document.createElement("span");
+    if (rowData.anonymous_allowed == 1) {
+        // active
+        anonActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+    } else {
+        // deactivated
+        anonActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+    }
+
+    const anonInputElement = anonActButton.querySelector("input");
+    if (anonInputElement) {
+        anonInputElement.classList.add("input-class");
+    }
+
+    const anonLabelElement = anonActButton.querySelector("label");
+    if (anonLabelElement) {
+        anonLabelElement.classList.add("switch");
+    }
+    const anonSpanElement = anonActButton.querySelector("span");
+    if (anonSpanElement) {
+        anonSpanElement.classList.add("slider");
+    }
+    anonActButton.addEventListener("change", async (e) => {
+        if (e.target.checked) {
+            await setAnonymousByUUID(rowData.distributionlistid, 1);
+        } else {
+            await setAnonymousByUUID(rowData.distributionlistid, 0);
+        }
+    });
+    cell_anonymous_allowed.appendChild(anonActButton);
+    cell_anonymous_allowed.setAttribute("name", "anonymous_allowed");
+    cell_anonymous_allowed.setAttribute("class", "checkbox");
+
+    //
+    console.debug("automatic enrolment: " + rowData.automatic_enrolment);
+    console.debug(rowData.automatic_enrolment == 1);
+
+    //automatic enrolment check switch
+    const autoActButton = document.createElement("span");
+    if (rowData.automatic_enrolment == 1) {
+        // active
+        autoActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+    } else {
+        // deactivated
+        autoActButton.innerHTML =
+            '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+    }
+
+    const autoInputElement = autoActButton.querySelector("input");
+    if (autoInputElement) {
+        autoInputElement.classList.add("input-class");
+    }
+
+    const autoLabelElement = autoActButton.querySelector("label");
+    if (autoLabelElement) {
+        autoLabelElement.classList.add("switch");
+    }
+    const autoSpanElement = autoActButton.querySelector("span");
+    if (autoSpanElement) {
+        autoSpanElement.classList.add("slider");
+    }
+    autoActButton.addEventListener("change", async (e) => {
+        if (e.target.checked) {
+            await setAutomaticByUUID(rowData.distributionlistid, 1);
+        } else {
+            await setAutomaticByUUID(rowData.distributionlistid, 0);
+        }
+    });
+    cell_automatic_enrolment.appendChild(autoActButton);
+    cell_automatic_enrolment.setAttribute("class", "checkbox");
+    cell_automatic_enrolment.setAttribute("name", "automatic_enrolment");
+
+    //
+    // action buttons
+    //
+    // Add delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.classList.add("deleteBtn");
+    deleteButton.onclick = function () {
+        // Remove the row from the table
+        newRow.remove();
+        // call to API to delete row from data base
+        deleteDataRowByDistributionlistId(rowData.distributionlistid);
+    };
+
+    // Add View Notes button
+    //const viewNotesButton = document.createElement("button");
+    //viewNotesButton.textContent = "View";
+    //viewNotesButton.classList.add("viewBtn");
+    // viewNotesButton.onclick = function () {
+    // call to API to delete row from data base
+    //     viewDistributionlist(rowData.distributionlistid);
+    // };
+    const viewNotesButton = document.createElement("a");
+    viewNotesButton.classList.add("viewBtn");
+    //viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>'
+    viewNotesButton.innerHTML = '<a href="/pages/view_own_distributionlist.html?distributionlistid=' + rowData.distributionlistid + '"><button>Notes</button></a>';
+
+    // Add View subscribers button
+    //const viewNotesButton = document.createElement("button");
+    //viewNotesButton.textContent = "View";
+    //viewNotesButton.classList.add("viewBtn");
+    // viewNotesButton.onclick = function () {
+    // call to API to delete row from data base
+    //     viewDistributionlist(rowData.distributionlistid);
+    // };
+    const viewSubscribersButton = document.createElement("a");
+    viewSubscribersButton.classList.add("viewBtn");
+    //viewNotesButton.innerHTML =  '<a href="/api/v1.0/plugin_user_get_all_distributionlist_notes?distributionlistid' + rowData.distributionlistid + '"><button>View</button></a>'
+    viewSubscribersButton.innerHTML = '<a href="/pages/view_own_subscribers.html?distributionlistid=' + rowData.distributionlistid + '"><button>Subscribers</button></a>';
+
+    // Add save button
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Save";
+    saveButton.classList.add("deleteBtn");
+    saveButton.onclick = function () {
+        // call to API to save row to data base
+        console.debug("calling updateDataRowByUUID");
+        updateDataRowByUUID(rowData.distributionlistid);
+    };
+
+    // Add create invite button
+    const createInviteButton = document.createElement("button");
+
+    // title="Click to copy the invitation URL to your clipboard"
+    createInviteButton.title = "Click to create an invition to subscribe link, and copy it to the clipboard";
+    createInviteButton.textContent = "Invite";
+    createInviteButton.classList.add("deleteBtn");
+    createInviteButton.onclick = function () {
+        // call to API to save row to data base
+        createOpenInvitation(rowData.distributionlistid);
+    };
+
+    cell_actions.appendChild(viewNotesButton);
+    cell_actions.appendChild(viewSubscribersButton);
+    cell_actions.appendChild(deleteButton);
+    cell_actions.appendChild(saveButton);
+    cell_actions.appendChild(createInviteButton);
+    cell_actions.setAttribute("class", "action-5");
+}
 
 // create the URL that when clicked on adds the user to the distribution list
 // append a redirecturi that redicts the the page showing the distribution list
@@ -1074,7 +1094,7 @@ async function add_distribution() {
     console.debug("add_distribution");
     // create a small window/form to add a new distribution list
 
-    var tableHTML = '<table class="formTable" border="1">';
+    var tableHTML = '<table name="new_distributionlist" class="formTable" border="1">';
 
     // Add table headers
     //  tableHTML += '<tr><th>Name</th><th>Age</th><th>City</th></tr>';
@@ -1199,12 +1219,12 @@ async function add_distribution() {
                 // append the new row to the table of existing distributions lists
                 // const dataTable = document.querySelector('table[name="dataTable"]');
                 const tableBody = document
-                    .querySelector('table[name="distributionsTable"]')
+                    .querySelector('table[name="'+table_name+'"]')
                     .getElementsByTagName("tbody")[0];
                 data.subscriberscount = 0;
                 data.postcount = 0;
 
-                newTableRow2(tableBody, data);
+                newTableRow(data, tableBody, not_show_by_default_columns);
                 //               const newRow1 = dataTable.insertRow();
 
                 //             var rowHTML = '<tr>';
@@ -1217,6 +1237,10 @@ async function add_distribution() {
                 //       rowHTML += '<td></td>';
                 //       rowHTML += '</tr>';
                 //       newRow1.innerHTML = rowHTML;
+
+// remove the form 
+// name="new_distributionlist"
+document.querySelector('table.formTable').remove();
 
                 // Usage: Pass the ID of the parent element to cleanup
                 removeAllChildren('form');
