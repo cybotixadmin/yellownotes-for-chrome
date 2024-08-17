@@ -290,6 +290,15 @@ async function saveData() {
     // Check for errors
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
+    }else{
+// call to re-read data from the server and update the cache
+
+const creatorid = localStorage.getItem("creatorid");
+        console.debug("calling cachableCall2API_POST");
+        return cachableCall2API_POST(creatorid + "_creator_data", 0, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, {
+            creatorid: creatorid
+        });
+
     }
     // update the row in the table
     // Parse JSON data

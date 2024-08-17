@@ -10,11 +10,10 @@ This is height is added to the heigh the note will ordinarily have and is substr
 
 const note_owners_control_bar_height = 23;
 
-
+const DOM_debug = true;
 
 const default_box_width = "350px";
 const default_box_height = "250px";
-
 
 const frame_note_url_bar_height = 50;
 
@@ -22,138 +21,166 @@ const note_internal_height_padding = 25;
 
 const note_internal_width_padding = 2;
 
-
 function test() {
     console.debug("test");
 }
 
 function create_yellownote_DOM(html_note_template, html_notetype_template, note_type, isOwner, isNewNote) {
-    console.debug("create_yellownote_DOM.start");
+    if (DOM_debug)
+        console.debug("create_yellownote_DOM.start");
     try {
         return new Promise(function (resolve, reject) {
             // the root of the note object
-            console.debug(html_note_template);
-            console.debug(html_notetype_template);
-            console.debug("note_type: ", note_type);
-            console.debug("isOwner: ",isOwner);
-            console.debug("isNewNote: ", isNewNote);
-            var node_root = document.createElement('container');
+            if (DOM_debug)
+                console.debug(html_note_template);
+            if (DOM_debug)
+                console.debug(html_notetype_template);
+            if (DOM_debug)
+                console.debug("note_type: ", note_type);
+            if (DOM_debug)
+                console.debug("isOwner: ", isOwner);
+            if (DOM_debug)
+                console.debug("isNewNote: ", isNewNote);
+            var note_root = document.createElement('container');
             //console.debug(node_root.outerHTML);
 
             //const modifiedDoc2 = mergeDOMTrees(doc1, "querySelector", doc2, '#destination');
-            console.debug("calling mergeHTMLTrees");
-            mergeHTMLTrees(html_notetype_template, "querySelector", html_note_template, '#destination').then(function (response) {
+            if (DOM_debug)
+                console.debug("calling mergeHTMLTrees");
 
-                const modifiedDoc2 = response;
+            // mergeHTMLTrees(html_notetype_template, "querySelector", html_note_template, '#destination').then(function (response) {
 
-                //console.debug(modifiedDoc2.outerHTML);
+            const modifiedDoc2 = mergeHTMLTrees(html_notetype_template, "querySelector", html_note_template, '#destination');
 
-                // Example usage:
-                //const doc1 = new DOMParser().parseFromString(html_notetype_template, 'text/html');
-                //const doc2 = new DOMParser().parseFromString(html_note_template, 'text/html');
-                //console.debug(doc1.documentElement.outerHTML);
-                //console.debug(doc2.documentElement.outerHTML);
+            if (DOM_debug)
+                console.debug(modifiedDoc2.outerHTML);
 
-
-                // var fullURLToCSS = chrome.runtime.getURL("css/yellownote.css");
-
-                // insert the overall note template
-
-                //var note_template = safeParseInnerHTML(html_note_template, 'div');
-                // note_template = JSON.parse(html);
-                //console.debug(note_template);
-
-                node_root.setAttribute("class", "yellownotecontainer");
-                node_root.setAttribute("note_type", note_type);
-                node_root.setAttribute("button_arrangment", 'new');
+            // Example usage:
+            //const doc1 = new DOMParser().parseFromString(html_notetype_template, 'text/html');
+            //const doc2 = new DOMParser().parseFromString(html_note_template, 'text/html');
+            //console.debug(doc1.documentElement.outerHTML);
+            //console.debug(doc2.documentElement.outerHTML);
 
 
+            // var fullURLToCSS = chrome.runtime.getURL("css/yellownote.css");
 
-            
-                note_root.setAttribute("isOwner", isOwner);
-                note_root.setAttribute("isNewNote", isNewNote);
-                //node_root.setAttribute("isOwner", isOwner);
-                //node_root.setAttribute("isNewNote", isNewNote);
+            // insert the overall note template
 
-                node_root.appendChild(modifiedDoc2);
+            //var note_template = safeParseInnerHTML(html_note_template, 'div');
+            // note_template = JSON.parse(html);
+            //console.debug(note_template);
 
-                console.debug(node_root);
-                // update the body of the note which is different for each note type
+            note_root.setAttribute("class", "yellownotecontainer");
+            note_root.setAttribute("note_type", note_type);
+            note_root.setAttribute("button_arrangment", 'new');
 
-                //console.debug(node_root.querySelector('[name]'));
-                //var notetype_template = safeParseInnerHTML(html_notetype_template, 'div');
-                //console.debug(notetype_template);
-                //const nodeToReplace = node_root.querySelector('[name="whole_note_middlebar"]');
-                //console.debug(nodeToReplace);
-                //const middle_bar = notetype_template.querySelector('tr[name="whole_note_middlebar"]');
-                //console.debug(middle_bar);
-                //nodeToReplace.parentNode.insertBefore(middle_bar, nodeToReplace.nextSibling);
+            note_root.setAttribute("isOwner", isOwner);
+            note_root.setAttribute("isNewNote", isNewNote);
 
-                //nodeToReplace.remove();
+            note_root.appendChild(modifiedDoc2);
 
-                //console.debug(node_root.outerHTML);
-                resolve(node_root);
-            });
+            if (DOM_debug)
+                console.debug(note_root);
+            // update the body of the note which is different for each note type
+
+            //console.debug(node_root.querySelector('[name]'));
+            //var notetype_template = safeParseInnerHTML(html_notetype_template, 'div');
+            //console.debug(notetype_template);
+            //const nodeToReplace = node_root.querySelector('[name="whole_note_middlebar"]');
+            //console.debug(nodeToReplace);
+            //const middle_bar = notetype_template.querySelector('tr[name="whole_note_middlebar"]');
+            //console.debug(middle_bar);
+            //nodeToReplace.parentNode.insertBefore(middle_bar, nodeToReplace.nextSibling);
+
+            //nodeToReplace.remove();
+console.debug("create_yellownote_DOM.end");
+            if (DOM_debug)
+                console.debug(note_root.outerHTML);
+            resolve(note_root);
+            // });
         });
     } catch (e) {
         console.error(e);
     }
 }
 
-
-
 function mergeHTMLTrees(doc1, selector1, doc2, selector2) {
-    console.debug("#mergeHTMLTrees.start");
-    return new Promise(function (resolve, reject) {
-        //console.debug("0.0.0");
-        try {
-            //console.debug("doc1");
-            // Select the element from the first document using the provided selector
-            //var notetype_template = safeParseInnerHTML(doc1, 'div');
-            var notetype_template = document.createElement("div");
-            // Populate it with the raw HTML content
+    if (DOM_debug)
+        console.debug("#mergeHTMLTrees.start");
+    // return new Promise(function (resolve, reject) {
+    //console.debug("0.0.0");
+    try {
+        //console.debug("doc1");
+        // Select the element from the first document using the provided selector
+        //var notetype_template = safeParseInnerHTML(doc1, 'div');
+        var notetype_template = document.createElement("div");
+        // Populate it with the raw HTML content
 
-            notetype_template.innerHTML = doc1;
+        notetype_template.innerHTML = doc1;
 
-            //console.debug(notetype_template.outerHTML);
-            // var note_template = safeParseInnerHTML(doc2, 'div');
+        //console.debug(notetype_template.outerHTML);
+        // var note_template = safeParseInnerHTML(doc2, 'div');
 
-            var note_template = document.createElement("div");
-            // Populate it with the raw HTML content
+        var note_template = document.createElement("div");
+        // Populate it with the raw HTML content
 
-            note_template.innerHTML = doc2;
-            //console.debug(note_template.outerHTML);
+        note_template.innerHTML = doc2;
+        if (DOM_debug)
+            console.debug(note_template.outerHTML);
 
-            const elementFromDoc1 = notetype_template.querySelector('[name="whole_note_middlebar"]');
-            //console.debug(elementFromDoc1.outerHTML);
-            // Select the target element in the second document using the provided selector
-            const targetElementInDoc2 = note_template.querySelector('[name="whole_note_middlebar"]');
-            //console.debug(targetElementInDoc2.outerHTML);
-            // If either of the selected elements is not found, throw an error
-            if (!elementFromDoc1) {
-                throw new Error('Element not found in the first document using the selector: ' + selector1);
-            }
-            if (!targetElementInDoc2) {
-                throw new Error('Target element not found in the second document using the selector: ' + selector2);
-            }
-
-            // Clone the element from the first document to preserve the original
-            const elementToInsert = elementFromDoc1.cloneNode(true);
-            //console.debug(elementToInsert.outerHTML);
-
-            // Replace the target element in the second document with the cloned element
-            const one = targetElementInDoc2.replaceWith(elementToInsert);
-            //console.debug(note_template.outerHTML);
-            // Return the modified second document
-            console.debug("0.0.3");
-            resolve(note_template);
-        } catch (e) {
-            console.debug("0.0.1");
-            console.error(e);
-            resolve(null);
+        const elementFromDoc1 = notetype_template.querySelector('[name="whole_note_middlebar"]');
+        //console.debug(elementFromDoc1.outerHTML);
+        // Select the target element in the second document using the provided selector
+        const targetElementInDoc2 = note_template.querySelector('[name="whole_note_middlebar"]');
+        //console.debug(targetElementInDoc2.outerHTML);
+        // If either of the selected elements is not found, throw an error
+        if (!elementFromDoc1) {
+            throw new Error('Element not found in the first document using the selector: ' + selector1);
         }
-    });
+        if (!targetElementInDoc2) {
+            throw new Error('Target element not found in the second document using the selector: ' + selector2);
+        }
 
+        // Clone the element from the first document to preserve the original
+        const elementToInsert = elementFromDoc1.cloneNode(true);
+        //console.debug(elementToInsert.outerHTML);
+
+        // Replace the target element in the second document with the cloned element
+        const one = targetElementInDoc2.replaceWith(elementToInsert);
+        //console.debug(note_template.outerHTML);
+        // Return the modified second document
+        if (DOM_debug)
+            console.debug("0.0.3");
+        return (note_template);
+    } catch (e) {
+        if (DOM_debug)
+            console.debug("0.0.1");
+        console.error(e);
+        return (null);
+    }
+    //});
+
+}
+
+function getTypeTemplate(note_type) {
+    console.debug("getTypeTemplate.start");
+    console.debug("note_type: " + note_type);
+
+    var typetemplate;
+    return new Promise(function (resolve, reject) {
+
+        // collect the right template for the middle bar for this type of node
+        console.debug('looking for template file ./templates/typetemplate_yellownote_' + note_type + '.html');
+        fetch(chrome.runtime.getURL('./templates/typetemplate_yellownote_' + note_type + '.html')).then(function (response) {
+            // found the file locally
+            console.debug(response);
+            typetemplate = response.text();
+            resolve(typetemplate);
+        }).catch(function (err) {
+            console.debug(err);
+            reject(err);
+        });
+    });
 }
 
 /**
@@ -172,196 +199,205 @@ function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, 
 
     const note_type = note_object_data.note_type;
     console.debug("note_type: " + note_type);
+
     return new Promise(function (resolve, reject) {
 
-        // part pertain to all note types
-        try {
-            if (note_object_data.hasOwnProperty("createtime")) {
-                cont1.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
-            }
-            if (note_object_data.hasOwnProperty("lastmodifiedtime")) {
-                cont1.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
-            }
-            if (note_object_data.hasOwnProperty("note_type")) {
-                cont1.querySelector('input[type="hidden"][name="note_type"]').replaceChildren(document.createTextNode(note_object_data.note_type));
-            }
+        // get the template for the middle bar of the note
+        getTypeTemplate(note_type).then(function (html_notetype_template) {
+            console.debug(html_notetype_template);
+            // update the body of the note which is different for each note type
+            console.debug("calling: updateNoteMiddleBar");
+            updateNoteMiddleBar(html_notetype_template, cont1);
 
-            // capture local url
-            cont1.querySelector('input[type="hidden"][name="url"]').replaceChildren(document.createTextNode(note_object_data.url));
-            if (typeof note_object_data.enabled != undefined) {
-                cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode(note_object_data.enabled));
-            } else {
-                // default value if undefined, is enabled(=true)
-                cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode("true"));
-            }
+        }).then(function (response) {
 
-            if (note_object_data.hasOwnProperty("noteid")) {
-                cont1.querySelector('input[type="hidden"][name="noteid"]').replaceChildren(document.createTextNode(note_object_data.noteid));
-            }
-
-        } catch (e) {
-            console.error(e);
-        }
-
-        if (note_type == "http_get_url" || note_type == "webframe" || note_object_data.type == "webframe") {
-            // part pertain only to notes of type http_get_url (looking up URLs)
-            // Locate the form element
-            console.debug("webframe note type");
-
-            console.debug("#### perform url lookup ####");
-
-            // check for content_url for notes that collect content from elsewhere
+            // part of the middlebar that pertains to all note types
             try {
-                if (note_object_data.content_url != undefined) {
-                    cont1.querySelector('input[name="urlInput"]').value = note_object_data.content_url;
+                if (note_object_data.hasOwnProperty("createtime")) {
+                    cont1.querySelector('input[type="hidden"][name="createtime"]').replaceChildren(document.createTextNode(note_object_data.createtime));
+                }
+                if (note_object_data.hasOwnProperty("lastmodifiedtime")) {
+                    cont1.querySelector('input[type="hidden"][name="lastmodifiedtime"]').replaceChildren(document.createTextNode(note_object_data.lastmodifiedtime));
+                }
+                if (note_object_data.hasOwnProperty("note_type")) {
+                    cont1.querySelector('input[type="hidden"][name="note_type"]').replaceChildren(document.createTextNode(note_object_data.note_type));
                 }
 
-                // start the process of looking up the content
-                var content_iframe = cont1.querySelector('[name="contentframe"]');
-                //console.debug("content_iframe: " );
-                //console.debug(content_iframe);
-                // send message to background serviceworker and it will lookup the URL. This is to bypass any CORS issues
-                // Send save request back to background
-                // Stickynotes are always enabled when created.
-                console.debug("remote url: " + note_object_data.content_url);
-                chrome.runtime.sendMessage({
-                    message: {
-                        "action": "simple_url_lookup",
-                        "url": note_object_data.content_url
-                    }
-                }).then(function (response) {
-                    //console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
-                    // render content of ifram based on this
-                    //console.debug(getYellowStickyNoteRoot(event.target));
-                    setContentInIframe(content_iframe, response);
+                // capture local url
+                cont1.querySelector('input[type="hidden"][name="url"]').replaceChildren(document.createTextNode(note_object_data.url));
+                if (typeof note_object_data.enabled != undefined) {
+                    cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode(note_object_data.enabled));
+                } else {
+                    // default value if undefined, is enabled(=true)
+                    cont1.querySelector('input[type="hidden"][name="enabled"]').replaceChildren(document.createTextNode("true"));
+                }
 
-                    //set scroll position
-                    var framenote_scroll_y = "0";
-                    if (note_object_data.framenote_scroll_x !== undefined) {
-                        framenote_scroll_x = note_object_data.framenote_scroll_x;
-                        cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
+                if (note_object_data.hasOwnProperty("noteid")) {
+                    cont1.querySelector('input[type="hidden"][name="noteid"]').replaceChildren(document.createTextNode(note_object_data.noteid));
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+
+            if (note_type == "http_get_url" || note_type == "webframe" || note_object_data.type == "webframe") {
+                // part pertain only to notes of type http_get_url (looking up URLs)
+                // Locate the form element
+                console.debug("webframe note type");
+
+                console.debug("#### perform url lookup ####");
+
+                // check for content_url for notes that collect content from elsewhere
+                try {
+                    if (note_object_data.content_url != undefined) {
+                        cont1.querySelector('input[name="urlInput"]').value = note_object_data.content_url;
                     }
-                    var framenote_scroll_y = "0";
-                    if (note_object_data.framenote_scroll_y !== undefined) {
-                        framenote_scroll_y = note_object_data.framenote_scroll_y;
-                        cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
+
+                    // start the process of looking up the content
+                    var content_iframe = cont1.querySelector('[name="contentframe"]');
+                    //console.debug("content_iframe: " );
+                    //console.debug(content_iframe);
+                    // send message to background serviceworker and it will lookup the URL. This is to bypass any CORS issues
+                    // Send save request back to background
+                    // Stickynotes are always enabled when created.
+                    console.debug("remote url: " + note_object_data.content_url);
+                    chrome.runtime.sendMessage({
+                        message: {
+                            "action": "simple_url_lookup",
+                            "url": note_object_data.content_url
+                        }
+                    }).then(function (response) {
+                        //console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                        // render content of ifram based on this
+                        //console.debug(getYellowStickyNoteRoot(event.target));
+                        setContentInIframe(content_iframe, response);
+
+                        //set scroll position
+                        var framenote_scroll_y = "0";
+                        if (note_object_data.framenote_scroll_x !== undefined) {
+                            framenote_scroll_x = note_object_data.framenote_scroll_x;
+                            cont1.setAttribute("framenote_scroll_x", framenote_scroll_x);
+                        }
+                        var framenote_scroll_y = "0";
+                        if (note_object_data.framenote_scroll_y !== undefined) {
+                            framenote_scroll_y = note_object_data.framenote_scroll_y;
+                            cont1.setAttribute("framenote_scroll_y", framenote_scroll_y);
+                        }
+                        console.debug("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
+                        try {
+                            content_iframe.contentWindow.scrollTo(scrollPosition.x, framenote_scroll_y);
+                        } catch (e) {
+                            console.error(e);
+                        }
+                        resolve(cont1);
+                    });
+
+                } catch (e) {
+                    console.error(e);
+                }
+            } else if (note_type == "canvas") {
+                // part pertain only to notes of type canvas
+                console.debug("part pertain only to notes of type canvas");
+
+                // read the canvase data uri frm the note object
+                const canvas_uri = note_object_data.canvas_uri;
+
+                console.debug(canvas_uri);
+
+                // Create a new image
+                const img = new Image();
+                // Set the source of the image to the data URI
+
+                img.onload = function () {
+                    console.debug("image load");
+                    const canvas = cont1.querySelector('canvas[name="canvas"]');
+                    console.debug(canvas);
+                    const ctx = canvas.getContext('2d');
+                    // Set canvas size to match the image size
+                    //    canvas.width = 200px;
+                    //  canvas.height = img.height;
+
+                    // Draw the image onto the canvas
+                    ctx.drawImage(img, 0, 0);
+                    //draw a box over the top
+                    // ctx.fillStyle = "rgba(200, 0, 0, 0.5)";
+                    // ctx.fillRect(0, 0, 500, 500);
+                    console.debug("image loaded");
+                    console.debug(ctx);
+                    console.debug(canvas);
+                    console.debug(img);
+                };
+                img.src = canvas_uri;
+                console.debug("image src set");
+                console.debug("calling prepareCanvasNoteForDrawing");
+                prepareCanvasNoteForDrawing(cont1);
+                resolve(cont1);
+
+            } else {
+                // "regular" yellow note type, use this as the default but type="yellownote should be set regardless"
+                console.debug("yellownote note type");
+                // insert the note metatdata and other permanent content
+                if (note_object_data.hasOwnProperty("selection_text")) {
+                    try {
+                        cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.selection_text)));
+                    } catch (e) {
+                        console.error(e);
+                        cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(""));
                     }
-                    console.debug("framescrollPosition: ", framenote_scroll_x, framenote_scroll_y);
-                    try{
-                    content_iframe.contentWindow.scrollTo(scrollPosition.x, framenote_scroll_y);
-                    }catch(e){
+                    cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+                }
+                if (note_object_data.hasOwnProperty("selection_text")) {
+                    try {
+                        cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+                    } catch (e) {
+                        console.error(e);
+                        cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(""));
+
+                    }
+                    cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+                }
+
+                // insert the displayed text(html) content that consitute the message itself
+                try {
+                    if (note_object_data.hasOwnProperty("message_display_text")) {
+                        console.debug(cont1.querySelector('[name="message_display_text"]'));
+                        const message_html = b64_to_utf8(note_object_data.message_display_text);
+                        console.debug(message_html);
+
+                        //cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
+                        console.debug(cont1.querySelector('[name="message_display_text"]').innerHTML);
+                        cont1.querySelector('[name="message_display_text"]').innerHTML = message_html;
+                        console.debug(cont1.querySelector('[name="message_display_text"]').innerHTML);
+
+                    } else {
+                        console.debug("no message_display_text attribute defined");
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+
+                console.debug(JSON.stringify(creatorDetails));
+                console.debug(cont1.querySelector('td[name="topbar_filler"]'));
+                console.debug(creatorDetails != undefined);
+                if (creatorDetails != undefined) {
+                    try {
+                        if (creatorDetails.displayname != undefined) {
+                            //cont1.querySelector('[name="creator"]').replaceChildren(document.createTextNode(creatorDetails.displayname));
+                        }
+                    } catch (e) {
                         console.error(e);
                     }
-                    resolve(cont1);
-                });
-
-            } catch (e) {
-                console.error(e);
-            }
-        } else if (note_type == "canvas") {
-            // part pertain only to notes of type canvas
-            console.debug("part pertain only to notes of type canvas");
-
-            // read the canvase data uri frm the note object
-            const canvas_uri = note_object_data.canvas_uri;
-
-            console.debug(canvas_uri);
-
-            // Create a new image
-            const img = new Image();
-            // Set the source of the image to the data URI
-
-            img.onload = function () {
-                console.debug("image load");
-                const canvas = cont1.querySelector('canvas[name="canvas"]');
-                console.debug(canvas);
-                const ctx = canvas.getContext('2d');
-                // Set canvas size to match the image size
-                //    canvas.width = 200px;
-                //  canvas.height = img.height;
-
-                // Draw the image onto the canvas
-                ctx.drawImage(img, 0, 0);
-                //draw a box over the top
-                // ctx.fillStyle = "rgba(200, 0, 0, 0.5)";
-                // ctx.fillRect(0, 0, 500, 500);
-                console.debug("image loaded");
-                console.debug(ctx);
-                console.debug(canvas);
-                console.debug(img);
-            };
-            img.src = canvas_uri;
-            console.debug("image src set");
-            console.debug("calling prepareCanvasNoteForDrawing");
-            prepareCanvasNoteForDrawing(cont1);
-            resolve(cont1);
-
-        } else {
-            // "regular" yellow note type, use this as the default but type="yellownote should be set regardless"
-            console.debug("yellownote note type");
-            // insert the note metatdata and other permanent content
-            if (note_object_data.hasOwnProperty("selection_text")) {
-                try {
-                    cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.selection_text)));
-                } catch (e) {
-                    console.error(e);
-                    cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(""));
-                }
-                cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
-            }
-            if (note_object_data.hasOwnProperty("selection_text")) {
-                try {
-                    cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
-                } catch (e) {
-                    console.error(e);
-                    cont1.querySelector('input[type="hidden"][name="selection_text"]').replaceChildren(document.createTextNode(""));
+                    console.debug(creatorDetails.banner_image != undefined);
 
                 }
-                cont1.querySelector('input[type="hidden"][name="encoded_selection_text"]').replaceChildren(document.createTextNode(note_object_data.selection_text));
+
+                //console.debug(cont1.innerHTML)
+                console.debug("createNoteMiddleBody.start");
+                resolve(cont1);
             }
-
-            // insert the displayed text(html) content that consitute the message itself
-            try {
-                if (note_object_data.hasOwnProperty("message_display_text")) {
-                    console.debug(cont1.querySelector('[name="message_display_text"]'));
-                    const message_html = b64_to_utf8(note_object_data.message_display_text);
-                    console.debug(message_html);
-
-                    //cont1.querySelector('[name="message_display_text"]').replaceChildren(document.createTextNode(b64_to_utf8(note_object_data.message_display_text)));
-                    console.debug(cont1.querySelector('[name="message_display_text"]').innerHTML);
-                    cont1.querySelector('[name="message_display_text"]').innerHTML = message_html;
-                    console.debug(cont1.querySelector('[name="message_display_text"]').innerHTML);
-
-                } else {
-                    console.debug("no message_display_text attribute defined");
-                }
-            } catch (e) {
-                console.error(e);
-            }
-
-            console.debug(JSON.stringify(creatorDetails));
-            console.debug(cont1.querySelector('td[name="topbar_filler"]'));
-            console.debug(creatorDetails != undefined);
-            if (creatorDetails != undefined) {
-                try {
-                    if (creatorDetails.displayname != undefined) {
-                        //cont1.querySelector('[name="creator"]').replaceChildren(document.createTextNode(creatorDetails.displayname));
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
-                console.debug(creatorDetails.banner_image != undefined);
-
-            }
-
-           
-            //console.debug(cont1.innerHTML)
-            resolve(cont1);
-        }
+        });
     });
 }
-
-
 
 function createDropdown(optionsArray, selectedDistributionListId) {
     //console.debug("createDropdown.start");
@@ -399,7 +435,7 @@ function createDropdown(optionsArray, selectedDistributionListId) {
         // Only trigger fetch call if the selected value is not empty
         if (selectedId) {
             //console.debug("update the note with this distrubtionlistid: " + selectedId);
-console.debug("calling setNoteDistributionlistId");
+            console.debug("calling setNoteDistributionlistId");
             setNoteDistributionlistId(noteid, selectedId);
 
         } else {
@@ -436,7 +472,6 @@ console.debug("calling setNoteDistributionlistId");
     });
     return selectElement;
 }
-
 
 function setNoteColor(creatorDetails, cont1) {
     console.debug("setNoteColor.start");
@@ -549,13 +584,12 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
     //    } else {
     //        creator_link_target = 'https://www.yellownotes.cloud/pages/my_subscriptions.html?distributionlistid=' + note_object_data.distributionlistid;
     //    }
-    creator_link_target = 'https://www.yellownotes.cloud/pages/publicprofile.html?creatorid=' + creatorDetails.uuid + "&distributionlistid=" + note_object_data.distributionlistid + "&noteid=" + note_object_data.noteid;  
+    creator_link_target = 'https://www.yellownotes.cloud/pages/publicprofile.html?creatorid=' + creatorDetails.uuid + "&distributionlistid=" + note_object_data.distributionlistid + "&noteid=" + note_object_data.noteid;
 
     console.debug("creator_link_target: " + creator_link_target);
 
-console.debug(note_object_data.distributionlistid);
-console.debug(note_object_data.distributionlistname);
-
+    console.debug(note_object_data.distributionlistid);
+    console.debug(note_object_data.distributionlistname);
 
     try {
         console.debug(note_root.querySelector('[name="creator_link_target"]'));
@@ -610,17 +644,17 @@ console.debug(note_object_data.distributionlistname);
         // There is no option for setting image at the level of the feed or the individial note at this time
     }
 
-    try{
+    try {
         // populate creator displayname on the note , if present.
-    if (creatorDetails.note_display_name != undefined) {
-        const topbarcreatordisplayname = note_root.querySelector('[name="creator_note_display_name"]');
-        console.debug(topbarcreatordisplayname);
-        topbarcreatordisplayname.replaceChildren(document.createTextNode(creatorDetails.note_display_name));
+        if (creatorDetails.note_display_name != undefined) {
+            const topbarcreatordisplayname = note_root.querySelector('[name="creator_note_display_name"]');
+            console.debug(topbarcreatordisplayname);
+            topbarcreatordisplayname.replaceChildren(document.createTextNode(creatorDetails.note_display_name));
 
-        topbarcreatordisplayname.setAttribute("href", creator_link_target);
+            topbarcreatordisplayname.setAttribute("href", creator_link_target);
 
-    }
-    }catch(e){
+        }
+    } catch (e) {
         console.error(e);
     }
     // if there is abannerimage defined for this user, put it in the creator icon field
@@ -633,21 +667,21 @@ console.debug(note_object_data.distributionlistname);
     }
 
     // set the link to the feed/distributionlist page - if any feed is attached
-  
+
     try {
-         if (note_object_data.distributionlistid != undefined && note_object_data.distributionlistname != undefined && note_object_data.distributionlistname != null) {
-        const topbar_feed_link_target = note_root.querySelector('[name="feed_link_target"]');
-        console.debug(topbar_feed_link_target);
-        topbar_feed_link_target.replaceChildren(document.createTextNode("" + note_object_data.distributionlistname));
-        topbar_feed_link_target.setAttribute("href", feed_link_target);
-        topbar_feed_link_target.setAttribute("tb", "feed_link_target");
-         }else{
+        if (note_object_data.distributionlistid != undefined && note_object_data.distributionlistname != undefined && note_object_data.distributionlistname != null) {
+            const topbar_feed_link_target = note_root.querySelector('[name="feed_link_target"]');
+            console.debug(topbar_feed_link_target);
+            topbar_feed_link_target.replaceChildren(document.createTextNode("" + note_object_data.distributionlistname));
+            topbar_feed_link_target.setAttribute("href", feed_link_target);
+            topbar_feed_link_target.setAttribute("tb", "feed_link_target");
+        } else {
             console.debug("no distributionlistid or distributionlistname");
-         }
+        }
     } catch (e) {
         console.error(e);
     }
-
+    console.debug("createNoteHeader.end");
     return;
     const topbarfield = note_root.querySelector('td[name="topbar_filler"]');
     console.debug(topbarfield);
@@ -690,22 +724,20 @@ console.debug(note_object_data.distributionlistname);
 
 }
 
-
-
 function setCSSAttributeOnNamedElement(search_root, elementName, cssAttribute, value) {
     console.debug("setCSSAttributeOnNamedElement.start:" + elementName + " " + cssAttribute + " " + value);
     // Check if the elementName is an ID or a class
     let element;
-    if (search_root.querySelector('[name="'+elementName+'"]') ) {
+    if (search_root.querySelector('[name="' + elementName + '"]')) {
         // It's an ID
-        element = search_root.querySelector('[name="'+elementName+'"]') ;
+        element = search_root.querySelector('[name="' + elementName + '"]');
     } else {
         console.error("Element not found");
         return;
     }
-//console.debug(element);
-//console.debug(cssAttribute);
-//console.debug(value);
+    //console.debug(element);
+    //console.debug(cssAttribute);
+    //console.debug(value);
 
     // Set the CSS attribute
     element.style[cssAttribute] = value;
@@ -715,8 +747,8 @@ function setCSSAttributeOnNamedElement(search_root, elementName, cssAttribute, v
  *
 
  * create bottom bar of the note. This bar is only visible/accessible to those with editing priviliges on the note (typically the owner/creator)
-The height of the bottom bar is not included in the note height when the note is saved to the database. 
-The idea being that the note is generally seen by those without editing priviliges and the sizing should conform to the general case. 
+The height of the bottom bar is not included in the note height when the note is saved to the database.
+The idea being that the note is generally seen by those without editing priviliges and the sizing should conform to the general case.
 A user may have a grea many note visible and the screen "realestate" should not be used up by the bottom bar unless it is needed.
 
 NOTE: later feature is that the bottom bar is available on demand by clicking a small icon in the lower corner of the note. This is not yet implemented
@@ -744,88 +776,80 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
 
         // set the width of the distributionlist dropdown list
         // dynamically size this list to fit the width of the yellownote
-var distributionlist_dropdownlist_width = 98;
+        var distributionlist_dropdownlist_width = 98;
 
-console.debug(note_object_data.box_height);
-console.debug(parseInt(note_object_data.box_height, 10));
+        console.debug(note_object_data.box_height);
+        console.debug(parseInt(note_object_data.box_height, 10));
 
-console.debug(creatorDetails.box_height);
-console.debug(parseInt(creatorDetails.box_height, 10));
+        console.debug(creatorDetails.box_height);
+        console.debug(parseInt(creatorDetails.box_height, 10));
 
-console.debug(note_object_data.box_width);
-console.debug(parseInt(note_object_data.box_width, 10));
+        console.debug(note_object_data.box_width);
+        console.debug(parseInt(note_object_data.box_width, 10));
 
-console.debug(creatorDetails.box_width);
-console.debug(parseInt(creatorDetails.box_width, 10));
+        console.debug(creatorDetails.box_width);
+        console.debug(parseInt(creatorDetails.box_width, 10));
 
+        var box_width = parseInt(note_object_data.box_width, 10);
+        if (box_width > 0) {
+            console.debug("use note-specific box_width: " + box_width);
+        } else {
+            box_width = parseInt(creatorDetails.box_width, 10);
+            if (box_width > 0) {
+                console.debug("use creator-specific box_width: " + box_width);
+            } else {
+                console.debug("use default box_width: " + default_box_width);
+                box_width = default_box_width;
+            }
+        }
 
-var box_width = parseInt(note_object_data.box_width, 10);
-if (box_width > 0 ) {
-    console.debug("use note-specific box_width: " + box_width);
-}else{
-    box_width = parseInt(creatorDetails.box_width, 10);
-    if (box_width > 0 ) {
-        console.debug("use creator-specific box_width: " + box_width);
-    }else{
-        console.debug("use default box_width: " + default_box_width);
-        box_width = default_box_width;
-    }    
-}
+        if (box_width > 0) {
+            if (box_width < 600) {
+                distributionlist_dropdownlist_width = box_width - 160;
+            } else {
+                distributionlist_dropdownlist_width = 440;
+            }
+        }
 
-if (box_width > 0 ) {
-    if (box_width < 600) {
-        distributionlist_dropdownlist_width = box_width - 160;
-    }else{
-        distributionlist_dropdownlist_width = 440;
-    }
-}
+        //console.debug("setting "+distributionlist_dropdownlist_width);
+        setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'width', distributionlist_dropdownlist_width + "px");
+        setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'width', distributionlist_dropdownlist_width + "px");
+        setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'max-width', distributionlist_dropdownlist_width + "px");
+        setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'max-width', distributionlist_dropdownlist_width + "px");
 
+        var bottombar_position;
+        // prefer the note-specific value, but if none is found user the one from the creator profile, or as a last resort , the default
 
-//console.debug("setting "+distributionlist_dropdownlist_width);
-setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'width', distributionlist_dropdownlist_width+"px");
-setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'width', distributionlist_dropdownlist_width+"px");
-setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'max-width', distributionlist_dropdownlist_width+"px");
-setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'max-width', distributionlist_dropdownlist_width+"px");
+        var box_height = default_box_height;
 
-var bottombar_position;
-// prefer the note-specific value, but if none is found user the one from the creator profile, or as a last resort , the default
+        var box_height = parseInt(note_object_data.box_height, 10);
+        console.debug("use note-specific box_height: " + box_width);
+        if (box_height > 0) {}
+        else {
+            box_height = parseInt(creatorDetails.box_height, 10);
+            console.debug("use creator-specific box_height: " + box_width);
+            if (box_height > 0) {}
+            else {
+                console.debug("use default box_height: " + default_box_height);
 
-var  box_height = default_box_height;
+            }
+        }
+        bottombar_position = box_height - 0;
 
-var box_height = parseInt(note_object_data.box_height, 10);
-console.debug("use note-specific box_height: " + box_width);
-if (box_height > 0 ) {
-}else{
-    box_height = parseInt(creatorDetails.box_height, 10);
-    console.debug("use creator-specific box_height: " + box_width);
-    if (box_height > 0 ) {
-    }else{
-        console.debug("use default box_height: " + default_box_height);
+        // expand the note downwards by the height of the bottom bar - the bottom bar does not count towards the maximum note size (height)
 
-    }    
-}
-bottombar_position = box_height - 0;
+        setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height) + "px");
 
+        // set the height of the middle bar to the height of the note minus the height of the top
+        setCSSAttributeOnNamedElement(cont1, 'whole_note_middlebar', 'height', (box_height - parseInt(frame_note_url_bar_height, 10)) + "px");
+        console.debug(cont1);
+        console.debug(cont1.querySelector('[name="whole_note_middlebar"]').style.height);
 
-// expand the note downwards by the height of the bottom bar - the bottom bar does not count towards the maximum note size (height)
+        console.debug("setting bottombar_position: " + bottombar_position);
+        // place the bottom bar at the bottom of the note
+        setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_position + "px");
 
-setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height  )+"px");
-
-// set the height of the middle bar to the height of the note minus the height of the top 
-setCSSAttributeOnNamedElement(cont1, 'whole_note_middlebar', 'height', (box_height  - parseInt(frame_note_url_bar_height, 10) )+"px");
-console.debug(cont1);
-console.debug(cont1.querySelector('[name="whole_note_middlebar"]').style.height);
-
-
-
-console.debug("setting bottombar_position: " + bottombar_position);
-// place the bottom bar at the bottom of the note
-setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_position+"px");
-
-
-
-
-        // the enable checkbox should be set(or unset) according to the value of "enabled_status" in the note object data 
+        // the enable checkbox should be set(or unset) according to the value of "enabled_status" in the note object data
         if (note_object_data.hasOwnProperty("enabled_status")) {
             console.debug(note_object_data.enabled);
             const enablecheckbox = cont1.querySelector('input[type="checkbox"][name="enabled_status"]');
@@ -866,7 +890,7 @@ setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_po
                 get_distributionlist().then(function (response) {
                     console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                     try {
-                      //  const selectElement = document.getElementById('distributionList');
+                        //  const selectElement = document.getElementById('distributionList');
                         response.forEach(item => {
                             console.debug(item);
                             const option = document.createElement('option');
@@ -885,8 +909,8 @@ setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_po
 
                         if (note_object_data.hasOwnProperty("distributionlistid")) {
                             dl_container.value = note_object_data.distributionlistid;
-    
-                        }else{
+
+                        } else {
                             // if no distributionlistid is set, set the value to the first option (the "do not share")
                             console.debug("no distributionlistid set, set the value to the last option (the 'do not share')");
                             dl_container.value = "";
@@ -900,10 +924,9 @@ setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_po
             } else {
                 console.debug("calling: get_distributionlist");
                 get_distributionlist().then(function (response) {
-                    //console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+                    console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                     // at the top of the list add the option of not sharing the note with any distribution list/feeds
 
-                    
 
                     const option0 = document.createElement('option');
                     option0.value = '';
@@ -921,22 +944,22 @@ setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_po
                     });
                     //      console.debug(dl_container.outerHTML );
                     //      console.debug(dl_container.innerHTML );
-// set the existing distributionlistid as selected on the dropdown list
+                    // set the existing distributionlistid as selected on the dropdown list
 
 
                     if (note_object_data.hasOwnProperty("distributionlistid")) {
                         dl_container.value = note_object_data.distributionlistid;
 
-                    }else{
+                    } else {
                         // if no distributionlistid is set, set the value to the first option (the "do not share")
                         console.debug("no distributionlistid set, set the value to the first option (the 'do not share')");
                         dl_container.value = "";
                     }
 
+                    console.debug("createNoteFooter.end");
                     resolve(null);
                 });
             }
-
 
         });
     } else {
@@ -1279,11 +1302,9 @@ function setComponentVisibility(note, visibility) {
 
 }
 
-
-
 /**
- * 
- * @param {*} distributionlists 
+ *
+ * @param {*} distributionlists
  */
 function createQRCode(url) {
     // Create the QR code container
@@ -1297,7 +1318,7 @@ function createQRCode(url) {
     qrContainer.style.border = '2px solid black';
     qrContainer.style.zIndex = '300000';
     qrContainer.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-    
+
     // Create the close button
     const closeButton = document.createElement('span');
     closeButton.textContent = '✖';
@@ -1326,8 +1347,6 @@ function createQRCode(url) {
     // Append the QR code container to the body
     document.body.appendChild(qrContainer);
 }
-
-
 
 function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
     console.debug("attachEventlistenersToYellowStickynote.start");
@@ -1491,7 +1510,6 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         console.error(e);
     }
 
-
     try {
         const mydelete_note = (event) => {
             delete_note(event);
@@ -1506,7 +1524,6 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
     } catch (e) {
         console.error(e);
     }
-
 
     try {
         const mydismiss_note = (event) => {
@@ -1523,29 +1540,27 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         console.debug(e);
     }
 
-
-    
-// QR-code
+    // QR-code
     try {
 
         const qr_code_note = (event) => {
-            
-  // for button going to note location
-  const noteid = note_root.getAttribute("noteid");
-  const distributionlistid = note_root.getAttribute("distributionlistid");
 
-  console.debug("noteid: " + noteid);
-  console.debug("distributionlistid: " + distributionlistid);
-var link ="";
-  if (distributionlistid != null && distributionlistid != "" && distributionlistid != undefined) {
-          console.debug("goto_notetarget_link");
-          link = "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid;
-  } else {
-          console.debug("goto_notetarget_link");
-          link =  "https://www.yellownotes.cloud/pages/subscribe.html?gothere.html?noteid=" + noteid;
-  }
+            // for button going to note location
+            const noteid = note_root.getAttribute("noteid");
+            const distributionlistid = note_root.getAttribute("distributionlistid");
 
-  createQRCode(link);
+            console.debug("noteid: " + noteid);
+            console.debug("distributionlistid: " + distributionlistid);
+            var link = "";
+            if (distributionlistid != null && distributionlistid != "" && distributionlistid != undefined) {
+                console.debug("goto_notetarget_link");
+                link = "https://www.yellownotes.cloud/pages/subscribe.html?add_feedid=" + distributionlistid + "&redirecturi=%2Fpages%2Fgothere.html%3Fnoteid%3D" + noteid;
+            } else {
+                console.debug("goto_notetarget_link");
+                link = "https://www.yellownotes.cloud/pages/subscribe.html?gothere.html?noteid=" + noteid;
+            }
+
+            createQRCode(link);
             event.stopPropagation();
         };
         var allGoTo28 = note_root.querySelectorAll('[js_action="qr_code"]');
@@ -1678,7 +1693,7 @@ var link ="";
         //
     }
 
-   // console.debug(note_root.outerHTML);
+    // console.debug(note_root.outerHTML);
     console.debug("attachEventlistenersToYellowStickynote.end");
 }
 
@@ -1961,18 +1976,17 @@ function prepareCaptureNoteEventlistener(note_root) {
 function setBackground(creatorDetails, note_root) {
     console.debug("browsersolutions ### setBackground to " + creatorDetails.note_color);
 
- // what color to use for the note
- var note_color = "#ffff00"; // set default value, override with more specific values if available
- // attempt to read size parameters from the note properties of the creator
- if (creatorDetails.note_color) {
-     note_color = creatorDetails.note_color
-         console.debug("creator's note_properties has note_color, use it " + note_color);
+    // what color to use for the note
+    var note_color = "#ffff00"; // set default value, override with more specific values if available
+    // attempt to read size parameters from the note properties of the creator
+    if (creatorDetails.note_color) {
+        note_color = creatorDetails.note_color
+            console.debug("creator's note_properties has note_color, use it " + note_color);
 
- } else {
-     // brand-level not implemted yet
- }
- var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
-
+    } else {
+        // brand-level not implemted yet
+    }
+    var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
 
     // Get all elements in the note_root
     const allElements = note_root.querySelectorAll('*');
@@ -2000,7 +2014,8 @@ function get_distributionlist() {
                     action: "get_my_distribution_lists"
                 }
             }).then(function (response) {
-                console.debug("get_distributionlist message sent to background.js with response: " + JSON.stringify(response));
+                console.debug("get_distributionlist message sent to background.js with response: " );
+                console.debug(response);
                 // render content of ifram based on this
                 //console.debug(getYellowStickyNoteRoot(event.target));
                 //setContentInIframe(content_iframe, response);
@@ -2013,13 +2028,9 @@ function get_distributionlist() {
     });
 }
 
-
-
 function isUndefined(variable) {
     return typeof variable === 'undefined';
 }
-
-
 
 function create_stickynote_node(note_object_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote) {
     console.debug("create_stickynote_node.start");
@@ -2111,34 +2122,33 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
                 // then replace those values with more specific ones if they are available/applicable
 
                 // set defaults
-                
-                var box_height = default_box_height ;
 
+                var box_height = default_box_height;
 
                 var box_width = parseInt(note_object_data.box_width, 10);
-                if (box_width > 0 ) {
+                if (box_width > 0) {
                     console.debug("use note-specific box_width: " + box_width);
-                }else{
+                } else {
                     box_width = parseInt(creatorDetails.box_width, 10);
-                    if (box_width > 0 ) {
+                    if (box_width > 0) {
                         console.debug("use creator-specific box_width: " + box_width);
-                    }else{
+                    } else {
                         console.debug("use default box_width: " + default_box_width);
                         box_width = default_box_width;
-                    }    
+                    }
                 }
 
                 var box_height = parseInt(note_object_data.box_height, 10);
-                if (box_height > 0 ) {
+                if (box_height > 0) {
                     console.debug("use note-specific box_height: " + box_height);
-                }else{
+                } else {
                     box_height = parseInt(creatorDetails.box_height, 10);
-                    if (box_height > 0 ) {
+                    if (box_height > 0) {
                         console.debug("use creator-specific box_height: " + box_height);
-                    }else{
+                    } else {
                         console.debug("use default box_width: " + default_box_height);
                         box_width = default_box_height;
-                    }    
+                    }
                 }
 
                 // check for template-specific values - not implemented yet
@@ -2146,42 +2156,39 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
 
                 // check for brand/organization-specific values - not implemented yet
 
-              
+
                 // check for feed-specific values - not implemented yet
 
 
                 // check for note specific values
 
-                // 
+                //
                 // set the established note dimensions to the note root object
-                cont1.setAttribute("box_height", box_height+"px");
-                cont1.setAttribute("box_width", box_width+"px");
-//                // as well as to the graphical elements of the note
+                cont1.setAttribute("box_height", box_height + "px");
+                cont1.setAttribute("box_width", box_width + "px");
+                //                // as well as to the graphical elements of the note
                 var whole_note_table = cont1.querySelector('table[name="whole_note_table"]');
                 console.debug(whole_note_table);
                 //whole_note_table.style.width = box_width;
-                setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'width', box_width +"px");
-if (isOwner){
-    // expand the note downwards to make room for the note owner's control bar
-    console.debug("isOwner=true expand note downwards");
+                setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'width', box_width + "px");
+                if (isOwner) {
+                    // expand the note downwards to make room for the note owner's control bar
+                    console.debug("isOwner=true expand note downwards");
 
+                    setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height) + "px");
 
-    setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height  )+"px");
+                } else {
+                    // remove the bottom bar
+                    const bottom_bar = cont1.querySelector('tr[name="whole_note_bottombar"]');
+                    console.debug(bottom_bar);
+                    bottom_bar.style.display = 'none';
 
+                    //whole_note_table.style.height = box_height;
+                    setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', box_height + "px");
 
-
-}else{
-// remove the bottom bar
-const bottom_bar = cont1.querySelector('tr[name="whole_note_bottombar"]');
-console.debug(bottom_bar);
-bottom_bar.style.display = 'none';
-
-                //whole_note_table.style.height = box_height;
-                setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', box_height +"px");
-
-            }
-//console.debug(whole_note_table.innerHTML);
-//console.debug(whole_note_table.outerHTML);
+                }
+                //console.debug(whole_note_table.innerHTML);
+                //console.debug(whole_note_table.outerHTML);
 
                 console.debug(cont1);
                 //console.debug("calling update_note_internal_size");
@@ -2205,27 +2212,24 @@ function DELETEscaleElementAndSubtree(element, scaleFactor) {
 
     // check of the element has a width set
     console.debug(element.offsetWidth);
-    if (element.style.width){
+    if (element.style.width) {
         const w = parseInt(element.style.width, 10);
         console.debug(w);
-console.debug( "setting new width to: "+   w * scaleFactor);
+        console.debug("setting new width to: " + w * scaleFactor);
         element.style.width = `${w * scaleFactor}px`;
 
+        //      element.style.height = `${element.offsetHeight * scaleFactor}px`;
 
-  //      element.style.height = `${element.offsetHeight * scaleFactor}px`;
-    
     }
     console.debug(element.style.width);
     console.debug(element.offsetHeight);
 
-   
     // Recursively scale child elements
     //const children = element.children;
     //for (let i = 0; i < children.length; i++) {
     //    scaleElementAndSubtree(children[i], scaleFactor);
     //}
 }
-
 
 function scaleGraphicalElement(element, maxWidth) {
     console.debug("scaleGraphicalElement.start");
@@ -2236,37 +2240,36 @@ function scaleGraphicalElement(element, maxWidth) {
     const originalDisplay = element.style.display;
     console.debug("originalDisplay: ", originalDisplay);
     // Ensure the element is visible to get correct measurements
-  element.style.display = 'block';
+    element.style.display = 'block';
 
-  // Get the original dimensions of the graphical element
-  const originalWidth = element.offsetWidth;
-  const originalHeight = element.offsetHeight;
+    // Get the original dimensions of the graphical element
+    const originalWidth = element.offsetWidth;
+    const originalHeight = element.offsetHeight;
 
-  // Calculate the scale factor
-  const scaleFactor = maxWidth / originalWidth;
+    // Calculate the scale factor
+    const scaleFactor = maxWidth / originalWidth;
 
-  // Apply the scale factor to the graphical element
-  element.style.transform = `scale(${scaleFactor})`;
+    // Apply the scale factor to the graphical element
+    element.style.transform = `scale(${scaleFactor})`;
 
-  // Adjust the container height to fit the scaled element
-  //container.style.height = `${originalHeight * scaleFactor}px`;
+    // Adjust the container height to fit the scaled element
+    //container.style.height = `${originalHeight * scaleFactor}px`;
 
-// make adjustments to offset the way the scaling will move the x-y position of the element
+    // make adjustments to offset the way the scaling will move the x-y position of the element
     element.style.transformOrigin = '0 0';
     if (originalDisplay === '') {
         console.debug("display was orignaly unset");
-  // unset the display style to revert to the default
-    element.style.display = '';
-    }else{
+        // unset the display style to revert to the default
+        element.style.display = '';
+    } else {
         console.debug("display was orignaly set to: ", originalDisplay);
-    // restore the original display style
-    element.style.display = originalDisplay;
+        // restore the original display style
+        element.style.display = originalDisplay;
     }
     // Hide the element again
     //element.style.display = 'none';
 
 }
-
 
 function update_note(event) {
     console.debug("update_note (event)");
@@ -2407,13 +2410,13 @@ function update_note(event) {
         //const box_width = processBoxParameterInput(note_root.getAttribute("box_width"), 250, 50, 500);
         var box_width = note_root.getAttribute("box_width");
         if (box_width == null || box_width == undefined) {
-            box_width = default_box_width ;
+            box_width = default_box_width;
         }
 
         //const box_height = processBoxParameterInput(note_root.getAttribute("box_height"), 250, 50, 500);
         var box_height = note_root.getAttribute("box_height");
         if (box_height == null || box_height == undefined) {
-            box_height = default_box_height ;
+            box_height = default_box_height;
         }
 
         console.debug("message_display_text: " + message_display_text);
@@ -2475,9 +2478,6 @@ function update_note(event) {
     }
 }
 
-
-
-
 /* update the sizing of internal items in the note object
 such as the canvas for the canvas note, the message display area for the yellow note, etc.
  */
@@ -2537,39 +2537,39 @@ function update_note_internal_size(note) {
     }
 
     // cancase
-if (note_type === "canvas"){
-    // a convas is wiped everytime it is resized. Therefore manipulation of the note should not by itself resize the canvas, as this looks like a bug to the user 
-    try {
-console.debug( "canvas current width: ", note.querySelector('[name="canvas"]').getAttribute("width") );
-console.debug( "canvas new width: ", usable_width );
-console.debug( "canvas current height: ", note.querySelector('[name="canvas"]').getAttribute("height") );
-console.debug( "canvas new height: ", (usable_height - canvas_toolbar_height) );
+    if (note_type === "canvas") {
+        // a convas is wiped everytime it is resized. Therefore manipulation of the note should not by itself resize the canvas, as this looks like a bug to the user
+        try {
+            console.debug("canvas current width: ", note.querySelector('[name="canvas"]').getAttribute("width"));
+            console.debug("canvas new width: ", usable_width);
+            console.debug("canvas current height: ", note.querySelector('[name="canvas"]').getAttribute("height"));
+            console.debug("canvas new height: ", (usable_height - canvas_toolbar_height));
 
-        // make sure the size parameters are not updates unless there is an actual change in values
-        if (note.querySelector('[name="canvas"]').getAttribute("width") == usable_width) {
-            console.debug("no need to update canvas width");
-        } else {
-           // console.debug("setting new canvas width " + usable_width);
-           // note.querySelector('[name="canvas"]').setAttribute("width", usable_width);
-           // const new_canvas_width = (usable_width );
-           // console.debug("setting new canvas_width " + new_canvas_width);
-           // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_width);
-           // note.setAttribute("canvas_width", (new_canvas_width ) + "px");
+            // make sure the size parameters are not updates unless there is an actual change in values
+            if (note.querySelector('[name="canvas"]').getAttribute("width") == usable_width) {
+                console.debug("no need to update canvas width");
+            } else {
+                // console.debug("setting new canvas width " + usable_width);
+                // note.querySelector('[name="canvas"]').setAttribute("width", usable_width);
+                // const new_canvas_width = (usable_width );
+                // console.debug("setting new canvas_width " + new_canvas_width);
+                // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_width);
+                // note.setAttribute("canvas_width", (new_canvas_width ) + "px");
+            }
+            if (note.querySelector('[name="canvas"]').getAttribute("height") == (usable_height - canvas_toolbar_height)) {
+                console.debug("no need to update canvas height");
+            } else {
+                // const new_canvas_height = (usable_height - canvas_toolbar_height);
+                // console.debug("setting new canvas height " + new_canvas_height);
+                // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_height);
+                // note.setAttribute("canvas_height", (new_canvas_height ) + "px");
+
+            }
+
+        } catch (e) {
+            console.debug(e);
         }
-        if (note.querySelector('[name="canvas"]').getAttribute("height") == (usable_height - canvas_toolbar_height)) {
-            console.debug("no need to update canvas height");
-        } else {
-           // const new_canvas_height = (usable_height - canvas_toolbar_height);
-           // console.debug("setting new canvas height " + new_canvas_height);
-           // note.querySelector('[name="canvas"]').setAttribute("height", new_canvas_height);
-           // note.setAttribute("canvas_height", (new_canvas_height ) + "px");
-
-        }
-
-    } catch (e) {
-        console.debug(e);
     }
-}
     try {
 
         note.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';

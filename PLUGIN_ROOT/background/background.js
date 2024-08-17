@@ -1306,7 +1306,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             const currentTime = Date.now();
 
             console.debug("currentTime: " + currentTime);
-            const cachetimeout = 60;
+            const cachetimeout = 2;
             const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
             const protocol = "GET";
 
