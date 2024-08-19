@@ -161,7 +161,7 @@ return response;
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
         chrome.tabs.create({
-            url: "https://www.yellownotes.cloud/pages/welcome.html"
+            url: "https://www.yellownotes.cloud/post_install_redirect_target"
         });
     }
 });
@@ -3325,6 +3325,9 @@ function getNotetypeTemplate(note_type) {
 
     });
 }
+
+
+
 
 function isDoubleByte(str) {
     for (var i = 0, n = str.length; i < n; i++) {

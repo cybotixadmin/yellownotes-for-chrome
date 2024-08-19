@@ -1168,6 +1168,9 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
             console.debug("calling setComponentVisibility");
             setComponentVisibility(insertedNode, ",new,.*normalsized,");
 
+            console.debug("calling noteTypeSpecificActions");
+            noteTypeSpecificActions(insertedNode.getAttribute("note_type"), note_root, null);
+
             // move to the default location on the screen if all else fails
 
             // width
@@ -1289,19 +1292,29 @@ function preparePlainNote(node_root) {
     try {
         const textarea = node_root.querySelector('[name="message_display_text"]');
         console.debug(textarea);
+        console.debug(textarea.textContent);
+        
         // Set initial placeholder text that should vanish when typing begins
         const placeholderText = "write your notes here..";
         textarea.innerHTML = "<div>" + placeholderText + "</div>";
 
+        console.debug(textarea.textContent);
+        
         // Attach a focus event listener to remove the text as soon as the textarea gains focus
         textarea.addEventListener('focus', function () {
+            console.debug("focus");
             if (textarea.value === placeholderText) {
                 textarea.value = '';
             }
         });
 
+        textarea.addEventListener('keydown', (event) => {
+            console.log('Key pressed:', event.key);
+        });
+
         // Attach an input event listener to handle the case where the user starts typing
         textarea.addEventListener('input', function () {
+            console.debug("input");
             if (textarea.value === '') {
                 textarea.value = placeholderText;
             }
@@ -1309,6 +1322,8 @@ function preparePlainNote(node_root) {
 
         // Attach a blur event to reset placeholder if nothing is typed
         textarea.addEventListener('blur', function () {
+            console.debug("blur");
+
             if (textarea.value === '') {
                 textarea.value = placeholderText;
             }

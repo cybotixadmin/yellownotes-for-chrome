@@ -166,16 +166,24 @@ function getTypeTemplate(note_type) {
     console.debug("getTypeTemplate.start");
     console.debug("note_type: " + note_type);
 
+    const brand = "default";
     var typetemplate;
     return new Promise(function (resolve, reject) {
 
-        // collect the right template for the middle bar for this type of node
-        console.debug('looking for template file ./templates/typetemplate_yellownote_' + note_type + '.html');
-        fetch(chrome.runtime.getURL('./templates/typetemplate_yellownote_' + note_type + '.html')).then(function (response) {
+
+        const msg = {
+            action: "get_notetype_template",
+            brand: brand,
+            note_type: note_type
+
+        }
+        console.debug("msg: ", JSON.stringify(msg));
+
+        chrome.runtime.sendMessage(msg).then(function (response) {
             // found the file locally
             console.debug(response);
-            typetemplate = response.text();
-            resolve(typetemplate);
+           // typetemplate = response.text();
+            resolve(response);
         }).catch(function (err) {
             console.debug(err);
             reject(err);
@@ -1376,6 +1384,12 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         console.error(e);
     }
 
+try{
+    console.debug("calling noteTypeSpecificActions");
+    noteTypeSpecificActions(note_root.getAttribute("note_type"), note_root, null);
+}catch(e){
+    console.error(e);
+}
     try {
 
         const mySave_new_note = (event) => {
