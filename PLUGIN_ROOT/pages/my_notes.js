@@ -485,8 +485,8 @@ function fetchData(not_show_by_default_columns) {
                         console.debug(e);
                     }
                     try {
-                      //  console.debug(row.lastmodifiedtime);
-                      //  console.debug(/2024/.test(row.lastmodifiedtime));
+                 
+                        //  console.debug(/2024/.test(row.lastmodifiedtime));
                         if (/2024/.test(row.lastmodifiedtime)) {
                             console.debug("lastmodifiedtime is timestamp: " + row.lastmodifiedtime);
                             cell_lastmodified.textContent = timestampstring2timestamp(row.lastmodifiedtime);
@@ -616,8 +616,6 @@ function fetchData(not_show_by_default_columns) {
 
                         cell_message.innerHTML = b64_to_utf8(obj.message_display_text);
                        // console.debug(cell_message);
-
-                        //cell_message.textContent = b64_to_utf8(obj.message_display_text);
                         cell_message.setAttribute('name', 'message_display_text');
                     }
                     cell_message.setAttribute('contenteditable', 'true');
@@ -634,10 +632,9 @@ function fetchData(not_show_by_default_columns) {
                     cell_distributionlist.appendChild(dropdown);
                     //cell_distributionlist.setAttribute('name', 'distributionlistid');
                     cell_distributionlist.firstChild.setAttribute('name', 'distributionlistid');
-                    // cell7.textContent = 'yellownote=%7B%22url%22%3A%22file%3A%2F%2F%2FC%3A%2Ftemp%2F2.html%22%2C%22uuid%22%3A%22%22%2C%22message_display_text%22%3A%22something%22%2C%22selection_text%22%3A%22b71-4b02-87ee%22%2C%22posx%22%3A%22%22%2C%22posy%22%3A%22%22%2C%22box_width%22%3A%22250%22%2C%22box_height%22%3A%22250%22%7D=yellownote';
-                    //cell7.setAttribute('style', 'height: 250px; width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;');
-
-
+                    cell_distributionlist.firstChild.setAttribute('class', 'feed_name_cell');
+                    cell_distributionlist.setAttribute('class', 'feed_name_cell');
+                   
                     // create small table to contain the action buttons
 
                     // Add button container
@@ -778,6 +775,9 @@ function fetchData(not_show_by_default_columns) {
                         cell_note.setAttribute("style", "height: " + (parseInt(note_root.getAttribute("box_height")) + parseInt(note_owners_control_bar_height)) + "px" + "; width: 250px;");
                         console.debug("calling attachEventlistenersToYellowStickynote");
                         attachEventlistenersToYellowStickynote(inserted, true, false);
+
+                         // scale the yellownote to fit inside the table cell-width
+                         scaleGraphicalElement( inserted , 250 );
                     });
 
                 });

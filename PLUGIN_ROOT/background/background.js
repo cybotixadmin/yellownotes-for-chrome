@@ -1,6 +1,11 @@
 
 console.debug("start with YellowNotes for the Cloud");
 
+
+// log level
+// function_call_debuging=true sets debugging on all function calls
+const function_call_debuging = true;
+
 /*
  *
  * This tool is for adding annotation to the live internet. Describable as Augmentet Reality for the Internet.
@@ -158,6 +163,11 @@ return response;
 
  */
 
+
+/*
+
+
+*/
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
         chrome.tabs.create({
@@ -263,8 +273,8 @@ chrome.contextMenus.create({
 // listener for context menu clicks
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-    console.debug("chrome.contextMenus.onClicked.addListener:info:" + JSON.stringify(info));
-    console.debug("chrome.contextMenus.onClicked.addListener:tab:" + JSON.stringify(tab));
+    if(function_call_debuging)  console.debug("chrome.contextMenus.onClicked.addListener:info:" + JSON.stringify(info));
+    if(function_call_debuging) console.debug("chrome.contextMenus.onClicked.addListener:tab:" + JSON.stringify(tab));
 
     if (info.menuItemId === "create-attached-yellownote") {
         console.debug("# create-attached-yellownote");
@@ -677,6 +687,30 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             });
 
             return true;
+        } else if (action === "captureTabAsPNG") {
+
+            console.debug("captureTabAsPNG.start");
+            console.debug(message);
+
+            chrome.tabs.create({ url: message.url, active: false }, function(tab) {
+                // Wait for the tab to fully load before capturing
+                chrome.tabs.onUpdated.addListener(function onUpdated(tabId, changeInfo) {
+                  if (tabId === tab.id && changeInfo.status === 'complete') {
+                    chrome.tabs.onUpdated.removeListener(onUpdated);
+          
+                    // Capture the tab as a screenshot
+                    chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }, function(dataUrl) {
+                      // Close the newly opened tab
+                      chrome.tabs.remove(tab.id);
+          console.debug(dataUrl);
+                      // Send back the data URI
+                      sendResponse({ dataUri: dataUrl });
+                    });
+                  }
+                });
+              });
+
+            return true; // Keep the message channel open for async response
 
         } else if (action === "capturePage") {
 
@@ -711,11 +745,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 // this is essetial for authentication purposes. The cookies are needed to authenticate the user with the server.
                 // session cookie are generallt set to SameSite = lax,
                 // which means that they are not sent to the server when the url is being opened from inside an iframe
+                console.debug("calling logCookiesForUrl");
                 logCookiesForUrl(url).then(function (cookies) {
                     console.debug(cookies);
 
                     // make a fetch to get the page content, using the cookies retieved above
-
+                    console.debug("calling fetchContentWithCookies");
                     return fetchContentWithCookies(url, cookies);
                     //return capturePageForEmbedingInIframe(url, cookies);
 
@@ -1306,7 +1341,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             const currentTime = Date.now();
 
             console.debug("currentTime: " + currentTime);
-            const cachetimeout = 2;
+            const cachetimeout = 300;
             const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
             const protocol = "GET";
 
@@ -1502,7 +1537,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     })
                 };
                 console.debug(JSON.stringify(opts));
-                console.debug("calling fetch");
+                if(function_call_debuging) console.debug("calling fetch");
                 return fetch(server_url + URI_plugin_user_get_an_authorized_note, opts);
             }).then(function (response) {
                 console.debug(response);
@@ -1528,7 +1563,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug(use_this_tab);
                 console.debug("######## ####### 2 ######### ######## #######");
 
-                console.debug("calling cachableCall2API_POST");
+                if(function_call_debuging)  console.debug("calling cachableCall2API_POST");
                 return cachableCall2API_POST( creatorid + "_creator_data", 1, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: creatorid } );
 
             }).then(function (response) {
@@ -1541,11 +1576,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     isOwner = false;
                 }
                 console.debug("######## ####### 3 ######### ######## #######");
-                console.debug("calling getTemplate");
+                if(function_call_debuging)  console.debug("calling getTemplate");
                 return getTemplate(brand, "yellownote");
             }).then(function (response) {
                 note_template = response;
-                console.debug("calling getNotetypeTemplate");
+                if(function_call_debuging) console.debug("calling getNotetypeTemplate");
                 return getNotetypeTemplate(note_type);
             }).then(function (result) {
                 //console.debug(result);
@@ -1575,12 +1610,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     isOwner: isOwner
                 }
                 console.debug(msg);
-                console.debug("######## ####### 4 ######### ######## #######");
-                console.debug("calling chrome.tabs.sendMessage");
+                if(function_call_debuging)  console.debug("######## ####### 4 ######### ######## #######");
+                if(function_call_debuging)  console.debug("calling chrome.tabs.sendMessage");
                 return chrome.tabs.sendMessage(use_this_tab, msg);
             }).then(function (response) {
                 console.debug(response);
-                console.debug("######## ####### 5 ######### ######## #######");
+                if(function_call_debuging)  console.debug("######## ####### 5 ######### ######## #######");
 
                 const msg = {
                     action: "moveFocusToNote",
@@ -1590,7 +1625,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 }
                 //chrome.tabs.sendMessage(tabs[i].id, msg);
                 console.debug(msg);
-                console.debug("calling chrome.tabs.sendMessage");
+                if(function_call_debuging)  console.debug("calling chrome.tabs.sendMessage");
                 return chrome.tabs.sendMessage(tab_id, msg);
 
             }).then(function (response) {
@@ -1894,11 +1929,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
-    console.debug("# cachableCall2API_GET.start");
-    console.debug("cacheKey: " + cacheKey);
-    console.debug("cachetimeout: " + cachetimeout);
-    console.debug("protocol: " + protocol);
-    console.debug("endpoint: " + endpoint);
+    if(function_call_debuging)  console.debug("# cachableCall2API_GET.start");
+    if(function_call_debuging)  console.debug("cacheKey: " + cacheKey);
+    if(function_call_debuging) console.debug("cachetimeout: " + cachetimeout);
+    if(function_call_debuging) console.debug("protocol: " + protocol);
+    if(function_call_debuging) console.debug("endpoint: " + endpoint);
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
     var result_data = null;
@@ -1970,7 +2005,9 @@ function cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint) {
 
 // Function to capture a page as a PNG image, convert it to Base64, and return the data URL
 function capturePageAsPng(url, timeout) {
-    console.debug('capturePageAsPng: Capturing page as PNG image:', url);
+    if(function_call_debuging) console.debug('capturePageAsPng: Capturing page as PNG image:', url);
+    if(function_call_debuging) console.debug("url: " + url);
+    if(function_call_debuging) console.debug("timeout: " + timeout);
     return new Promise((resolve, reject) => {
         // Open a new tab with the specified URL
         chrome.tabs.create({
@@ -2037,7 +2074,7 @@ function saveScreenshot(dataUrl) {
 
 // Helper to cache data with a timestamp
 function cacheData(key, data) {
-    console.debug('cacheData: Caching data for key:', key);
+    if(function_call_debuging) console.debug('cacheData: Caching data for key:', key);
     return new Promise((resolve, reject) => {
         const cachedData = {
             data: data,
@@ -2054,7 +2091,7 @@ function cacheData(key, data) {
 
 // Helper to get cached data , timeout in seconds
 function getCachedData(key, cachetimeout) {
-    console.debug('getCachedData: Getting cached data for key:', key, ", with timeout:", cachetimeout);
+    if(function_call_debuging)  console.debug('getCachedData: Getting cached data for key:', key, ", with timeout:", cachetimeout);
     return new Promise((resolve, reject) => {
         try {
             chrome.storage.local.get([key], function (result) {
@@ -2093,11 +2130,11 @@ function getCachedData(key, cachetimeout) {
 protocol: PUT, PATCH or POST
  */
 function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_body) {
-    console.debug("# cachableCall2API_POST.start");
-    console.debug("cacheKey: " + cacheKey);
-    console.debug("cachetimeout: " + cachetimeout);
-    console.debug("protocol: " + protocol);
-    console.debug("endpoint: " + endpoint);
+    if(function_call_debuging)  console.debug("# cachableCall2API_POST.start");
+    if(function_call_debuging)  console.debug("cacheKey: " + cacheKey);
+    if(function_call_debuging) console.debug("cachetimeout: " + cachetimeout);
+    if(function_call_debuging)  console.debug("protocol: " + protocol);
+    if(function_call_debuging) console.debug("endpoint: " + endpoint);
 
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
@@ -2170,7 +2207,7 @@ function cachableCall2API_POST(cacheKey, cachetimeout, protocol, endpoint, msg_b
 
 
 function fetchNewData(creatorId, cacheKey) {
-    console.debug('fetchNewData: Fetching new data for creatorId:', creatorId);
+    if(function_call_debuging) console.debug('fetchNewData: Fetching new data for creatorId:', creatorId);
     return chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name])
     .then(result => {
         const installationUniqueId = result[plugin_uuid_header_name];
@@ -2231,9 +2268,9 @@ function fetchNewData(creatorId, cacheKey) {
 }
 
 function focusOnNote(tab_id, noteid) {
-    console.debug("focusOnNote: ");
-    console.debug(tab_id);
-    console.debug(noteid);
+    if(function_call_debuging)  console.debug("focusOnNote: ");
+    if(function_call_debuging)  console.debug(tab_id);
+    if(function_call_debuging) console.debug(noteid);
     return new Promise((resolve, reject) => {
         const msg = {
             action: "moveFocusToNote",
@@ -2250,11 +2287,11 @@ function focusOnNote(tab_id, noteid) {
 
 //  return placeNoteOnTab(sender.tab, datarow.url, datarow.noteid, datarow, false, session_uuid);
 function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid) {
-    console.debug("placeNoteOnTab: ");
-    console.debug(datarow);
-    console.debug(tab);
-    console.debug(openNewTab);
-    console.debug(session_uuid);
+    if(function_call_debuging)  console.debug("placeNoteOnTab: ");
+    if(function_call_debuging)  console.debug(datarow);
+    if(function_call_debuging) console.debug(tab);
+    if(function_call_debuging)  console.debug(openNewTab);
+    if(function_call_debuging) console.debug(session_uuid);
 
     const tab_id = tab.id;
 
@@ -2282,8 +2319,8 @@ function placeNoteOnTab(tab, url, noteid, datarow, openNewTab, session_uuid) {
 }
 
 function openURLinTab(tab, url) {
-    console.debug('openURLinTab: Opening url ' + url + ' in tab ' + tab + ' and scrolling to element with noteid ');
-    console.debug(tab);
+    if(function_call_debuging)  console.debug('openURLinTab: Opening url ' + url + ' in tab ' + tab + ' and scrolling to element with noteid ');
+    if(function_call_debuging)  console.debug(tab);
     const tab_id = tab.id;
     return new Promise((resolve, reject) => {
         try {
@@ -2312,9 +2349,9 @@ function openURLinTab(tab, url) {
 }
 
 function openUrlAndScrollToElement(tab, url, noteid, datarow, openNewTab, session_uuid) {
-    console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab + ' and scrolling to element with noteid ' + noteid + " openNewTab: " + openNewTab + " session_uuid: " + session_uuid);
-    console.debug(datarow);
-    console.debug(tab);
+    if(function_call_debuging) console.debug('openUrlAndScrollToElement: Opening url ' + url + ' in tab ' + tab + ' and scrolling to element with noteid ' + noteid + " openNewTab: " + openNewTab + " session_uuid: " + session_uuid);
+    if(function_call_debuging) console.debug(datarow);
+    if(function_call_debuging) console.debug(tab);
     const tab_id = tab.id;
     const creatorid = datarow.creatorid;
     var notes = [datarow];
@@ -2434,7 +2471,7 @@ function openUrlAndScrollToElement(tab, url, noteid, datarow, openNewTab, sessio
 }
 
 function sendMessageToContentScript(tabId, resp, noteid, session_uuid) {
-    console.debug('sendMessageToContentScript: Sending message to tab ' + tabId);
+    if(function_call_debuging) console.debug('sendMessageToContentScript: Sending message to tab ' + tabId);
     const datarow = resp.notes_found[0];
     console.debug(datarow);
 
@@ -2590,6 +2627,7 @@ include relevant cookies that have been set for this URL earlier. This is essent
 
  */
 function fetchContentWithCookies(url, cookies) {
+    if(function_call_debuging) console.debug('fetchContentWithCookies: Fetching content from', url);
     const cookieHeader = createCookieHeader(cookies);
 
     return new Promise((resolve, reject) => {
@@ -2645,30 +2683,12 @@ function capturePageForEmbedingInIframe(url, cookieString) {
     });
 }
 
-function fetchResourceAsDataURI(url, cookieString) {
-    console.debug("fetchResourceAsDataURI.start");
-    console.debug('Fetching resource as data URI:', url);
-    return fetch(url)
-    .then(response => {
-        if (!response.ok)
-            throw new Error(`Network response was not ok for ${url}`);
-        return response.blob();
-    })
-    .then(blob => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-    });
-}
 
 function inlineResources(html, baseUrl, cookieString) {
-    console.debug("inlineResources.start");
-    console.debug('Inlining resources for', baseUrl);
-    console.debug('Cookie string:', cookieString);
-    console.debug('HTML:', html);
+    if(function_call_debuging) console.debug("inlineResources.start");
+    if(function_call_debuging) console.debug('Inlining resources for', baseUrl);
+    if(function_call_debuging)  console.debug('Cookie string:', cookieString);
+    if(function_call_debuging)  console.debug('HTML:', html);
     // Regex to find image and link tags
     const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
     const cssRegex = /<link[^>]+href=["']([^"']+)["'][^>]*rel=["']stylesheet["'][^>]*>/gi;
@@ -2724,13 +2744,12 @@ function blobToDataURI(blob) {
     });
 }
 
+
+
 function fetchResourceAsDataURI(url, cookieString) {
-    console.debug("fetchResourceAsDataURI.start");
-    return fetch(url, {
-        headers: {
-            'Cookie': cookieString
-        }
-    })
+    if(function_call_debuging) console.debug("fetchResourceAsDataURI.start");
+    if(function_call_debuging) console.debug('Fetching resource as data URI:', url);
+    return fetch(url)
     .then(response => {
         if (!response.ok)
             throw new Error(`Network response was not ok for ${url}`);
@@ -2747,8 +2766,8 @@ function fetchResourceAsDataURI(url, cookieString) {
 }
 
 function capturePageAndProcess(url, cookieString) {
-    console.debug("capturePageAndProcess.start");
-    console.debug(url);
+    if(function_call_debuging) console.debug("capturePageAndProcess.start");
+    if(function_call_debuging) console.debug(url);
     return fetch(url, {
         headers: {
             'Cookie': cookieString
@@ -2803,11 +2822,11 @@ Authentication to Yellow Notes Cloud infrastructure takes place here
 
 chrome.webRequest.onHeadersReceived.addListener(
     (details) => {
-    console.debug(details);
-    console.debug(details.responseHeaders);
-    console.debug("looking for " + plugin_session_header_name);
+        if(function_call_debuging) console.debug(details);
+        if(function_call_debuging)  console.debug(details.responseHeaders);
+        if(function_call_debuging)  console.debug("looking for " + plugin_session_header_name);
     const xSessionHeader = details.responseHeaders.find(header => header.name.toLowerCase() === plugin_session_header_name);
-    console.debug('Possible Yellownotes session authentication header detected * * * * * *');
+    if(function_call_debuging)  console.debug('Possible Yellownotes session authentication header detected * * * * * *');
     if (xSessionHeader) {
         console.debug('Yellownotes session value:' + xSessionHeader.value);
         chrome.storage.local.set({
@@ -2837,7 +2856,7 @@ chrome.webRequest.onHeadersReceived.addListener(
     ["responseHeaders"]);
 
 function logHeaders(tabId, url) {
-    console.debug('Listening for headers on tab:', tabId);
+    if(function_call_debuging)  console.debug('Listening for headers on tab:', tabId);
     chrome.webRequest.onBeforeSendHeaders.addListener(
         function (details) {
         console.debug('Headers received for tab:', details.tabId);
@@ -2886,7 +2905,7 @@ function fetchPageContent(url) {
 }
 
 function logCookiesForUrl(url) {
-    console.debug(`logCookiesForUrl.start Fetching cookies for ${url}`);
+    if(function_call_debuging) console.debug(`logCookiesForUrl.start Fetching cookies for ${url}`);
     return new Promise(function (resolve, reject) {
         // Retrieve cookies for the given URL
         chrome.cookies.getAll({
@@ -2921,10 +2940,10 @@ function create_free_yellownote(info, tab) {
     // contenttype
     // permitted values: text, html, embeded, linked
 
-    console.debug("create_free-yellownote(info,tab)");
+    if(function_call_debuging)   console.debug("create_free-yellownote(info,tab)");
 
-    console.debug(JSON.stringify(info));
-    console.debug(JSON.stringify(tab));
+    if(function_call_debuging) console.debug(JSON.stringify(info));
+    if(function_call_debuging) console.debug(JSON.stringify(tab));
 
     var pageUrl = info.pageUrl;
 
@@ -2963,10 +2982,10 @@ function create_free_webframe_note(info, tab) {
     // contenttype
     // permitted values: text, html, embeded, linked
 
-    console.debug("create_free-webframenote(info,tab)");
+    if(function_call_debuging) console.debug("create_free-webframenote(info,tab)");
 
-    console.debug(JSON.stringify(info));
-    console.debug(JSON.stringify(tab));
+    if(function_call_debuging) console.debug(JSON.stringify(info));
+    if(function_call_debuging) console.debug(JSON.stringify(tab));
 
     var pageUrl = info.pageUrl;
 
@@ -3011,10 +3030,10 @@ function create_yellownote(info, tab, contenttype) {
     // Should the user later click "save" The event handler for the save-event in the content script will then call back to the background script to save the note to the database.
 
 
-    console.debug("create_yellownote(info," + contenttype + ")");
+    if(function_call_debuging) console.debug("create_yellownote(info," + contenttype + ")");
 
-    console.debug(JSON.stringify(info));
-    console.debug(JSON.stringify(tab));
+    if(function_call_debuging)  console.debug(JSON.stringify(info));
+    if(function_call_debuging) console.debug(JSON.stringify(tab));
 
     var pageUrl = info.pageUrl;
     // this is the selection the user flagged.
@@ -3079,10 +3098,10 @@ function pinContentNote(info, tab, note_type, brand) {
     // Should the user later click "save" The event handler for the save-event in the content script will then call back to the background script to save the note to the database.
 
 
-    console.debug("pinContentNote(info," + note_type + ") and " + brand);
+    if(function_call_debuging) console.debug("pinContentNote(info," + note_type + ") and " + brand);
 
-    console.debug(JSON.stringify(info));
-    console.debug(JSON.stringify(tab));
+    if(function_call_debuging) console.debug(JSON.stringify(info));
+    if(function_call_debuging)  console.debug(JSON.stringify(tab));
 
     var pageUrl = info.pageUrl;
     // this is the selection the user flagged.
@@ -3170,7 +3189,7 @@ function isUndefined(variable) {
  * Get the template file from the server
  */
 function getTemplate(brand, note_type) {
-    console.debug("getTemplate(brand, note_type):   " + brand + " " + note_type);
+    if(function_call_debuging) console.debug("getTemplate(brand, note_type):   " + brand + " " + note_type);
     // lookup the template file
     console.debug(isUndefined(brand) || brand == null || brand == '' || brand == 'undefined');
     if (isUndefined(brand) || brand == null || brand == '' || brand == 'undefined') {
@@ -3295,7 +3314,7 @@ function getTemplate(brand, note_type) {
  * Get the type template file from the server
  */
 function getNotetypeTemplate(note_type) {
-    console.debug("getNotetypeTemplate(note_type): " + note_type);
+    if(function_call_debuging) console.debug("getNotetypeTemplate(note_type): " + note_type);
     // lookup the template file
 
     // The notes are/can be branded. The brand is a feature for premium users.
@@ -3348,9 +3367,9 @@ function messageTab(tabs) {
 }
 
 function onExecuted(result) {
-    console.debug("background.js: onExecuted: We made it....");
-    console.debug("background.js: onExecuted: result: " + result);
-    console.debug("backgroupd.js: onExecute: selected_text: " + selected_text);
+    if(function_call_debuging)  console.debug("background.js: onExecuted: We made it....");
+    if(function_call_debuging)  console.debug("background.js: onExecuted: result: " + result);
+    if(function_call_debuging)  console.debug("backgroupd.js: onExecute: selected_text: " + selected_text);
 
     var querying = chrome.tabs.query({
             active: true,
@@ -3661,7 +3680,7 @@ function getPosition(el) {
 }
 
 function getUuid(sessiontoken) {
-    console.debug(sessiontoken);
+    if(function_call_debuging)  console.debug(sessiontoken);
 
     const parsed = parseJwt(sessiontoken);
     const tokendata = getClaimsFromJwt(parsed, ["uuid"]);
@@ -3675,8 +3694,8 @@ function getUuid(sessiontoken) {
 }
 
 function parseJwt(token) {
-    console.debug("2.parseJwt( " + token + " )");
-    console.debug("2.parseJwt( " + (typeof token) + " )");
+    if(function_call_debuging)  console.debug("2.parseJwt( " + token + " )");
+    if(function_call_debuging)  console.debug("2.parseJwt( " + (typeof token) + " )");
     try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -3693,8 +3712,8 @@ function parseJwt(token) {
 }
 
 function getClaimsFromJwt(decodedToken, claimNames) {
-    console.debug("getClaimsFromJwt( " + decodedToken + " )");
-    console.debug(claimNames);
+    if(function_call_debuging)  console.debug("getClaimsFromJwt( " + decodedToken + " )");
+    if(function_call_debuging)  console.debug(claimNames);
     if (!decodedToken)
         return null;
     let claims = {};

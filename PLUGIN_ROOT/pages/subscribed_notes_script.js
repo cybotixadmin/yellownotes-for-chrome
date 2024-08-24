@@ -626,7 +626,7 @@ function fetchData(not_show_by_default_columns) {
                     note_table.removeAttribute("style");
                     // add the completed graphical yellownote to the table cell
                     const inserted = cell_note.appendChild(note);
-                    // make the cell size large enough to contain the note
+                    // make the cell size large enough to contain the note - but the not is shrunk to fit the cell-width
                     cell_note.setAttribute("style", "height: 280px; width: 250px;");
                     console.debug("calling attachEventlistenersToYellowStickynote");
                     attachEventlistenersToYellowStickynote(inserted, false, false);

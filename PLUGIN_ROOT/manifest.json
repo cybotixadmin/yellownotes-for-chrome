@@ -4,7 +4,7 @@
     "author": "The BrowserSolutions Team",
     "description": "__MSG_appDesc__",
     "homepage_url": "https://www.yellownotes.cloud/",
-    "version": "0.9.7",
+    "version": "0.9.8",
     "icons": {
         "32": "icons/yellownotecloud-32x32.png",
         "48": "icons/yellownotecloud-48x48.png",
@@ -55,8 +55,8 @@
         "cookies",
         "scripting",
         "storage",
-        "tabCapture",
         "tabs",
+		"tabCapture",
         "unlimitedStorage",
         "webNavigation",
         "webRequest"

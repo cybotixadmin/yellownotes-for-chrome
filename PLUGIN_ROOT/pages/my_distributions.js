@@ -1245,6 +1245,29 @@ document.querySelector('table.formTable').remove();
                 // Usage: Pass the ID of the parent element to cleanup
                 removeAllChildren('form');
 
+// call to refresh the cache 
+const cacheKey = URI_plugin_user_get_my_distribution_lists.replace(/\//g, "_");
+//const cacheKey = "cacheKey0002";
+
+console.debug("Cache key: " + cacheKey);
+//const currentTime = Date.now();
+
+//console.debug("currentTime: " + currentTime);
+const cachetimeout = 0;
+const endpoint = server_url + URI_plugin_user_get_my_distribution_lists;
+const protocol = "GET";
+
+// set cache timeout to 0 to ensure the API-call is made and the data in the cache is completely refreshed
+// Make changes to this timeout when there is a procedure to empty the cache if the value has been updated.
+return cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint);
+            }).then(function (data) {
+    console.debug(data);
+    
+
+
+
+
+
             }).catch((error) => console.error('Error:', error));
 
         } else {

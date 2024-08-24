@@ -269,6 +269,7 @@ table.notesTable th {
     color: white;
   }
   
+  /* some classes to provide width to certain categories of table columns */
 .datetime {
   max-width: 160px;
   width: 160px;
@@ -308,6 +309,18 @@ table.notesTable th {
   min-width: 150px;
   width: 150px;
   max-width: 150px;
+}
+
+.feed_name_cell {
+  min-width: 150px;
+  width: 150px;
+  max-width: 150px;
+}
+
+.feed_name_field {
+  min-width: 145px;
+  width: 145px;
+  max-width: 145px;
 }
 
 
@@ -430,13 +443,7 @@ table.notesTable td {
 
 
 
-table.notesTable tr td:nth-child(3) {
-  max-width: 200px;
-}
 
-table.notesTable tr td:nth-child(4) {
-  max-width: 40px;
-}
 
 table.notesTable tr td:nth-child(5) {
  
@@ -446,17 +453,6 @@ table.notesTable tr td:nth-child(5) {
 
 
 
-table.notesTable tr td:nth-child(9) {
-  width: 120px;
-}
-
-
-
-table.notesTable tr td:nth-child(11) {
-  width: 80px;
-  min-width: 70px;
-  max-width: 70px;
-}
 
 
 

@@ -15,7 +15,7 @@ const DOM_debug = true;
 const default_box_width = "350px";
 const default_box_height = "250px";
 
-const frame_note_url_bar_height = 50;
+const frame_note_top_bar_height = 50;
 
 const note_internal_height_padding = 25;
 
@@ -163,8 +163,8 @@ function mergeHTMLTrees(doc1, selector1, doc2, selector2) {
 }
 
 function getTypeTemplate(note_type) {
-    console.debug("getTypeTemplate.start");
-    console.debug("note_type: " + note_type);
+    if(function_call_debuging) console.debug("getTypeTemplate.start");
+    if(function_call_debuging) console.debug("note_type: " + note_type);
 
     const brand = "default";
     var typetemplate;
@@ -195,18 +195,21 @@ function getTypeTemplate(note_type) {
  * process the middle part of the note. This is the part where there are diference between the different types of yellownotes
  */
 function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, isNewNote) {
-    console.debug("createNoteMiddleBody.start");
-    console.debug("note_object_data:");
-    console.debug(note_object_data);
-    console.debug("cont1:");
-    console.debug(cont1);
-    console.debug("creatorDetails:");
-    console.debug(creatorDetails);
-    console.debug("isOwner: ", isOwner);
-    console.debug("isNewNote: ", isNewNote);
+    if(function_call_debuging) console.debug("createNoteMiddleBody.start");
+    if(function_call_debuging) console.debug("note_object_data:");
+    if(function_call_debuging) console.debug(note_object_data);
+    if(function_call_debuging) console.debug("cont1:");
+    if(function_call_debuging) console.debug(cont1);
+    if(function_call_debuging) console.debug("creatorDetails:");
+    if(function_call_debuging) console.debug(creatorDetails);
+    if(function_call_debuging) console.debug("isOwner: ", isOwner);
+    if(function_call_debuging) console.debug("isNewNote: ", isNewNote);
 
     const note_type = note_object_data.note_type;
     console.debug("note_type: " + note_type);
+
+    if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+    setCSSAttributeOnNamedElement(note, "whole_note_middlebar", "top", parseInt(frame_note_top_bar_height,10) + 'px');
 
     return new Promise(function (resolve, reject) {
 
@@ -278,7 +281,7 @@ function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, 
                         //console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                         // render content of ifram based on this
                         //console.debug(getYellowStickyNoteRoot(event.target));
-                        setContentInIframe(content_iframe, response);
+                        setContentIntoIframe(content_iframe, response);
 
                         //set scroll position
                         var framenote_scroll_y = "0";
@@ -408,9 +411,9 @@ function createNoteMiddleBody(note_object_data, cont1, creatorDetails, isOwner, 
 }
 
 function createDropdown(optionsArray, selectedDistributionListId) {
-    //console.debug("createDropdown.start");
-    //console.debug(optionsArray);
-    //console.debug(selectedDistributionListId);
+    if(function_call_debuging) console.debug("createDropdown.start");
+    if(function_call_debuging) console.debug(optionsArray);
+    if(function_call_debuging) console.debug(selectedDistributionListId);
     // Create a select element
     const selectElement = document.createElement('select');
 
@@ -482,7 +485,7 @@ function createDropdown(optionsArray, selectedDistributionListId) {
 }
 
 function setNoteColor(creatorDetails, cont1) {
-    console.debug("setNoteColor.start");
+    if(function_call_debuging) console.debug("setNoteColor.start");
     var note_color = "#ffff00"; // set default value, override with more specific values if available
 
 
@@ -570,15 +573,15 @@ If the note is one the user is subscribing to, the link goes to the feed in the 
  */
 
 function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, isNewNote) {
-    console.debug("createNoteHeader.start");
-    console.debug("note_object_data:");
-    console.debug(note_object_data);
-    console.debug("note_root:");
-    console.debug(note_root);
-    console.debug("creatorDetails:");
-    console.debug(creatorDetails);
-    console.debug("isOwner", isOwner);
-    console.debug("isNewNote", isNewNote);
+    if(function_call_debuging) console.debug("createNoteHeader.start");
+    if(function_call_debuging) console.debug("note_object_data:");
+    if(function_call_debuging) console.debug(note_object_data);
+    if(function_call_debuging) console.debug("note_root:");
+    if(function_call_debuging) console.debug(note_root);
+    if(function_call_debuging) console.debug("creatorDetails:");
+    if(function_call_debuging) console.debug(creatorDetails);
+    if(function_call_debuging) console.debug("isOwner", isOwner);
+    if(function_call_debuging) console.debug("isNewNote", isNewNote);
 
     var headerhtml = "";
 
@@ -733,7 +736,7 @@ function createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, 
 }
 
 function setCSSAttributeOnNamedElement(search_root, elementName, cssAttribute, value) {
-    console.debug("setCSSAttributeOnNamedElement.start:" + elementName + " " + cssAttribute + " " + value);
+    if(function_call_debuging) console.debug("setCSSAttributeOnNamedElement.start:" + elementName + " " + cssAttribute + " " + value);
     // Check if the elementName is an ID or a class
     let element;
     if (search_root.querySelector('[name="' + elementName + '"]')) {
@@ -768,15 +771,15 @@ NOTE: later feature is that the bottom bar is available on demand by clicking a 
  * @returns
  */
 function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newNote) {
-    console.debug("createNoteFooter.start");
-    console.debug("note_object_data:");
-    console.debug(note_object_data);
-    console.debug("cont1:");
-    console.debug(cont1);
-    console.debug("creatorDetails:");
-    console.debug(creatorDetails);
-    console.debug("isOwner: ", isOwner);
-    console.debug("newNote: ", newNote);
+    if(function_call_debuging) console.debug("createNoteFooter.start");
+    if(function_call_debuging) console.debug("note_object_data:");
+    if(function_call_debuging) console.debug(note_object_data);
+    if(function_call_debuging) console.debug("cont1:");
+    if(function_call_debuging) console.debug(cont1);
+    if(function_call_debuging) console.debug("creatorDetails:");
+    if(function_call_debuging) console.debug(creatorDetails);
+    if(function_call_debuging) console.debug("isOwner: ", isOwner);
+    if(function_call_debuging) console.debug("newNote: ", newNote);
     // only do this for the note owner (and later administrator and some other roles)
     if (isOwner) {
         console.debug(note_object_data);
@@ -820,41 +823,60 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
         }
 
         //console.debug("setting "+distributionlist_dropdownlist_width);
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
         setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'width', distributionlist_dropdownlist_width + "px");
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
         setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'width', distributionlist_dropdownlist_width + "px");
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
         setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdowncontainer', 'max-width', distributionlist_dropdownlist_width + "px");
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
         setCSSAttributeOnNamedElement(cont1, 'distributionlistdropdown', 'max-width', distributionlist_dropdownlist_width + "px");
 
+        // place the bottom bar directly below the body of the note.making it apear as a continuation of the note
+        // the size set for the not is for the combined area of the top bar and the middle bar. 
+        // The bottom bar is not included in this size as this bar will only be seen by those with editing priveliges 
         var bottombar_position;
         // prefer the note-specific value, but if none is found user the one from the creator profile, or as a last resort , the default
 
-        var box_height = default_box_height;
+       
 
         var box_height = parseInt(note_object_data.box_height, 10);
-        console.debug("use note-specific box_height: " + box_width);
-        if (box_height > 0) {}
+        if (box_height > 0) {
+            console.debug("use note-specific box_height: " + box_height);
+
+        }
         else {
             box_height = parseInt(creatorDetails.box_height, 10);
-            console.debug("use creator-specific box_height: " + box_width);
+            console.debug("use creator-specific box_height: " + box_height);
             if (box_height > 0) {}
             else {
+                box_height = default_box_height;
                 console.debug("use default box_height: " + default_box_height);
 
             }
         }
-        bottombar_position = box_height - 0;
+
+        bottombar_position = parseInt(box_height,10) - 0;
 
         // expand the note downwards by the height of the bottom bar - the bottom bar does not count towards the maximum note size (height)
 
-        setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height) + "px");
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        console.debug(box_height);
+        console.debug(parseInt(box_height,10));
+        console.debug(note_owners_control_bar_height);
+        console.debug(parseInt(note_owners_control_bar_height,10));
 
-        // set the height of the middle bar to the height of the note minus the height of the top
-        setCSSAttributeOnNamedElement(cont1, 'whole_note_middlebar', 'height', (box_height - parseInt(frame_note_url_bar_height, 10)) + "px");
-        console.debug(cont1);
+        setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (parseInt(box_height,10) + parseInt(note_owners_control_bar_height,10)) + "px");
+
+        // set the height of the middle bar to the height of the note minus the height of the top bar
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(cont1, 'whole_note_middlebar', 'height', (parseInt(box_height,10) - parseInt(frame_note_top_bar_height, 10)) + "px");
+       if(DOM_debug) console.debug(cont1.outerHTML);
         console.debug(cont1.querySelector('[name="whole_note_middlebar"]').style.height);
 
         console.debug("setting bottombar_position: " + bottombar_position);
         // place the bottom bar at the bottom of the note
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
         setCSSAttributeOnNamedElement(cont1, 'whole_note_bottombar', 'top', bottombar_position + "px");
 
         // the enable checkbox should be set(or unset) according to the value of "enabled_status" in the note object data
@@ -894,7 +916,7 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
             //   console.debug(dl_container.innerHTML );
             if (!isUndefined(note_object_data.distributionlistid) && note_object_data.distributionlistid != undefined) {
                 console.debug("there is a distribution list assigned already: " + note_object_data.distributionlistid);
-                console.debug("calling: get_distributionlist");
+                if(function_call_debuging) console.debug("calling: get_distributionlist");
                 get_distributionlist().then(function (response) {
                     console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                     try {
@@ -930,11 +952,12 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
                 });
 
             } else {
-                console.debug("calling: get_distributionlist");
+                if(function_call_debuging) console.debug("calling: get_distributionlist");
                 get_distributionlist().then(function (response) {
                     console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
                     // at the top of the list add the option of not sharing the note with any distribution list/feeds
 
+                    console.debug(response.count);
 
                     const option0 = document.createElement('option');
                     option0.value = '';
@@ -943,6 +966,7 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
                     //         console.debug(dl_container.outerHTML );
                     //         console.debug(dl_container.innerHTML );
 
+                    if (response.count > 0) {
                     response.forEach(item => {
                         console.debug(item);
                         const option = document.createElement('option');
@@ -963,7 +987,7 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
                         console.debug("no distributionlistid set, set the value to the first option (the 'do not share')");
                         dl_container.value = "";
                     }
-
+                    }
                     console.debug("createNoteFooter.end");
                     resolve(null);
                 });
@@ -982,8 +1006,9 @@ function createNoteFooter(note_object_data, cont1, creatorDetails, isOwner, newN
 }
 
 function prepareCanvasNoteForDrawing(node_root) {
-    console.debug("prepareCanvasNoteForDrawing.start");
-    console.debug(node_root);
+    if(function_call_debuging) console.debug("prepareCanvasNoteForDrawing.start");
+    if(function_call_debuging)  console.debug(node_root);
+    if (DOM_debug) console.debug(node_root.outerHTML);
     // Constants for canvas size and colors
     const canvasWidth = 200;
     const canvasHeightLarge = 250;
@@ -1218,7 +1243,7 @@ function prepareCanvasNoteForDrawing(node_root) {
 
 }
 function hexToRGB(hex) {
-    console.debug("hexToRGB.start (" + hex + ")");
+    if(function_call_debuging) console.debug("hexToRGB.start (" + hex + ")");
     try {
         if (hex) {
 
@@ -1249,8 +1274,9 @@ function hexToRGB(hex) {
  * make different parts of the graphical elements visible or not.
  */
 function setComponentVisibility(note, visibility) {
-    console.debug("# setComponentVisibility.start " + visibility);
-    console.debug(note);
+    if(function_call_debuging) console.debug("# setComponentVisibility.start " + visibility);
+    if(function_call_debuging) console.debug(note);
+    if (DOM_debug) console.debug(note.outerHTML);
     const regex = new RegExp(visibility, 'i');
     // locate all elements that have the attribute "subcomponentvisibility"
     const allElements = note.querySelectorAll('[ subcomponentvisibility ]');
@@ -1299,11 +1325,14 @@ function setComponentVisibility(note, visibility) {
         console.debug(note.getAttribute("isOwner"));
         if (note.getAttribute("isOwner") === "false") {
             console.debug("note owner? false");
-            note.querySelector('table[name="whole_note_table"]').style.height = note.getAttribute("box_height");
+            if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+            setCSSAttributeOnNamedElement(note, "whole_note_table", "height",  note.getAttribute("box_height") + 'px');
+                
         } else {
             console.debug("note owner? true");
-            note.querySelector('table[name="whole_note_table"]').style.height = (parseInt(note.getAttribute("box_height")) + note_owners_control_bar_height) + "px";
-
+            if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+            setCSSAttributeOnNamedElement(note, "whole_note_table", "height",  (parseInt(note.getAttribute("box_height")) + note_owners_control_bar_height) + 'px');
+        
         }
 
     }
@@ -1315,6 +1344,7 @@ function setComponentVisibility(note, visibility) {
  * @param {*} distributionlists
  */
 function createQRCode(url) {
+    if(function_call_debuging)  console.debug("createQRCode.start: "+url);
     // Create the QR code container
     const qrContainer = document.createElement('div');
     qrContainer.style.position = 'fixed';
@@ -1357,13 +1387,13 @@ function createQRCode(url) {
 }
 
 function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
-    console.debug("attachEventlistenersToYellowStickynote.start");
+    if(function_call_debuging) console.debug("attachEventlistenersToYellowStickynote.start");
 
-    console.debug("7.7.1");
-    console.debug(note_root);
-    console.debug(isOwner);
-    console.debug(isNewNote);
-    console.debug("note_type: " + note_root.getAttribute("note_type"));
+    if(function_call_debuging) console.debug("7.7.1");
+    if(function_call_debuging) console.debug(note_root);
+    if(function_call_debuging) console.debug(isOwner);
+    if(function_call_debuging) console.debug(isNewNote);
+    if(function_call_debuging) console.debug("note_type: " + note_root.getAttribute("note_type"));
 
     try {
         // drop-down for selecting the note type
@@ -1373,9 +1403,15 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
         noteTypeSelect.addEventListener('change', function () {
             console.debug("noteTypeSelect.change");
             console.debug("calling replaceNoteType with " + noteTypeSelect.value);
-            console.debug(note_root);
-            replaceNoteType(note_root, noteTypeSelect.value).then(function (response) {
+            // updateing note type in note root
+            note_root.setAttribute("note_type", noteTypeSelect.value);
+            if (DOM_debug) console.debug(note_root.outerHTML);
+
+            if(function_call_debuging) console.debug("calling replaceNoteType");
+            replaceNoteType(note_root, noteTypeSelect.value,  isOwner, isNewNote).then(function (response) {
                 console.debug(response);
+                if(function_call_debuging) console.debug("calling noteTypeSpecificActions");
+
                 noteTypeSpecificActions(note_root.getAttribute("note_type"), note_root, null);
             });
         });
@@ -1385,8 +1421,8 @@ function attachEventlistenersToYellowStickynote(note_root, isOwner, isNewNote) {
     }
 
 try{
-    console.debug("calling noteTypeSpecificActions");
-    noteTypeSpecificActions(note_root.getAttribute("note_type"), note_root, null);
+    if(function_call_debuging) console.debug("calling noteTypeSpecificActions");
+    noteTypeSpecificActions(note_root.getAttribute("note_type"), note_root, null, isOwner, isNewNote);
 }catch(e){
     console.error(e);
 }
@@ -1685,17 +1721,17 @@ try{
     if (note_type == "plaintext") {
         if (isNewNote) {
             // make the message in the textarea touch-n-go
-            prepareNewTextNoteEventlistener(note_root);
+          //  prepareNewTextNoteEventlistener(note_root);
         }
     } else if (note_type == "plainhtml") {
         if (isNewNote) {
             // make the message in the textarea touch-n-go
-            prepareNewTextNoteEventlistener(note_root);
+          //  prepareNewTextNoteEventlistener(note_root);
         }
     } else if (note_type == "yellownote") {
         if (isNewNote) {
             // make the message in the textarea touch-n-go
-            prepareNewTextNoteEventlistener(note_root);
+         //   prepareNewTextNoteEventlistener(note_root);
         }
     } else if (note_type == "capture_note") {
         prepareCaptureNoteEventlistener(note_root, info);
@@ -1717,7 +1753,7 @@ try{
  * @returns
  */
 function getYellowStickyNoteRoot(currentElement) {
-    console.debug("# getYellowStickyNoteRoot");
+    if(function_call_debuging)  console.debug("# getYellowStickyNoteRoot");
     //console.debug(currentElement);
 
     // let currentElement = element;
@@ -1764,9 +1800,9 @@ User can still mange the note from the GUI - and re-enable it.
  */
 
 function disable_note(event) {
-    console.debug("disable note");
-    console.debug(event);
-    console.debug(event.target);
+    if(function_call_debuging) console.debug("disable note");
+    if(function_call_debuging) console.debug(event);
+    if(function_call_debuging) console.debug(event.target);
     const isChecked = event.target.checked;
     // stop clicking anything behind the button
     event.stopPropagation();
@@ -1860,8 +1896,8 @@ function isHttpUrl() {
 }
 
 function delete_note(event) {
-    console.debug("delete_note.start");
-    console.debug(event);
+    if(function_call_debuging)  console.debug("delete_note.start");
+    if(function_call_debuging)  console.debug(event);
     // stop clicking anything behind the button
     event.stopPropagation();
 
@@ -1897,7 +1933,7 @@ function delete_note(event) {
 }
 
 function delete_note_by_noteid(noteid) {
-    console.debug("delete_note_by_noteid.start");
+    if(function_call_debuging) console.debug("delete_note_by_noteid.start");
 
     chrome.runtime.sendMessage({
         message: {
@@ -1914,7 +1950,7 @@ function delete_note_by_noteid(noteid) {
 }
 
 function prepareNewTextNoteEventlistener(note_root) {
-    console.debug("preparePlainNoteEventlistener.start");
+    if(function_call_debuging) console.debug("preparePlainNoteEventlistener.start");
     // make the message in the textarea touch-n-go
     try {
         // Grab the textarea element
@@ -1951,8 +1987,8 @@ function prepareNewTextNoteEventlistener(note_root) {
 }
 
 function prepareCaptureNoteEventlistener(note_root) {
-    console.debug("prepareCaptureNoteEventlistener.start");
-    console.debug("capture_note");
+    if(function_call_debuging) console.debug("prepareCaptureNoteEventlistener.start");
+    if(function_call_debuging) console.debug("capture_note");
 
     // place the note on the orignal capture coordinates
 
@@ -1988,7 +2024,7 @@ function prepareCaptureNoteEventlistener(note_root) {
 }
 
 function setBackground(creatorDetails, note_root) {
-    console.debug("browsersolutions ### setBackground to " + creatorDetails.note_color);
+    if(function_call_debuging) console.debug("browsersolutions ### setBackground to " + creatorDetails.note_color);
 
     // what color to use for the note
     var note_color = "#ffff00"; // set default value, override with more specific values if available
@@ -2018,9 +2054,10 @@ function setBackground(creatorDetails, note_root) {
     });
 }
 
+
 // return a drop down html list of all available distribution lists
 function get_distributionlist() {
-    console.debug("# get_distributionlist");
+    if(function_call_debuging) console.debug("# get_distributionlist");
     return new Promise(function (resolve, reject) {
         try {
             chrome.runtime.sendMessage({
@@ -2047,7 +2084,7 @@ function isUndefined(variable) {
 }
 
 function create_stickynote_node(note_object_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote) {
-    console.debug("create_stickynote_node.start");
+    if(function_call_debuging) console.debug("create_stickynote_node.start");
     return new Promise(function (resolve, reject) {
         console.debug("note_object_data:");
         console.debug(note_object_data);
@@ -2079,6 +2116,8 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
                 // set note active status
                 if (!isUndefined(note_object_data.status) && note_object_data.status != undefined) {
                     cont1.setAttribute("note_active_status", note_object_data.status);
+                  
+
                 }
             }
 
@@ -2184,10 +2223,12 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
                 var whole_note_table = cont1.querySelector('table[name="whole_note_table"]');
                 console.debug(whole_note_table);
                 //whole_note_table.style.width = box_width;
+                if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
                 setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'width', box_width + "px");
                 if (isOwner) {
                     // expand the note downwards to make room for the note owner's control bar
                     console.debug("isOwner=true expand note downwards");
+                    if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
 
                     setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', (box_height + note_owners_control_bar_height) + "px");
 
@@ -2198,6 +2239,7 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
                     bottom_bar.style.display = 'none';
 
                     //whole_note_table.style.height = box_height;
+                    if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
                     setCSSAttributeOnNamedElement(cont1, 'whole_note_table', 'height', box_height + "px");
 
                 }
@@ -2215,39 +2257,10 @@ function create_stickynote_node(note_object_data, html_note_template, html_notet
     });
 }
 
-function DELETEscaleElementAndSubtree(element, scaleFactor) {
-    console.debug("scaleElementAndSubtree.start");
-    console.debug(element);
-    console.debug(scaleFactor);
-    // Apply the scale factor to the current element
-    element.style.transform = `scale(${scaleFactor})`;
-
-    // Adjust the width and height of the current element to maintain layout
-
-    // check of the element has a width set
-    console.debug(element.offsetWidth);
-    if (element.style.width) {
-        const w = parseInt(element.style.width, 10);
-        console.debug(w);
-        console.debug("setting new width to: " + w * scaleFactor);
-        element.style.width = `${w * scaleFactor}px`;
-
-        //      element.style.height = `${element.offsetHeight * scaleFactor}px`;
-
-    }
-    console.debug(element.style.width);
-    console.debug(element.offsetHeight);
-
-    // Recursively scale child elements
-    //const children = element.children;
-    //for (let i = 0; i < children.length; i++) {
-    //    scaleElementAndSubtree(children[i], scaleFactor);
-    //}
-}
 
 function scaleGraphicalElement(element, maxWidth) {
-    console.debug("scaleGraphicalElement.start");
-    console.debug(element);
+    if(function_call_debuging) console.debug("scaleGraphicalElement.start");
+    if(function_call_debuging) console.debug(element);
     //const container = document.getElementById(containerId);
     //const element = document.getElementById(elementId);
 
@@ -2286,8 +2299,8 @@ function scaleGraphicalElement(element, maxWidth) {
 }
 
 function update_note(event) {
-    console.debug("update_note (event)");
-    console.debug(event);
+    if(function_call_debuging)  console.debug("update_note (event)");
+    if(function_call_debuging)  console.debug(event);
 
     // save note to database
     try {
@@ -2339,29 +2352,45 @@ function update_note(event) {
                 console.debug(e);
             }
         }
-        // carry createtime forwards unchanged
-        var createtime = "";
-        try {
-            createtime = note_root.querySelectorAll('input[name="createtime"]')[0].textContent.trim();
-        } catch (e) {
-            // set default, current timestamp
-            createtime = getCurrentTimestamp();
-
-        }
+       
 
         var content_url = "";
-        // check for content_url for notes that collect content from elsewhere
+        // check for content_url for notes that collect content from elsewher
+if (note_type == "webframe") {
         try {
             content_url = note_root.querySelector('input[name="urlInput"]').value.trim();
         } catch (e) {
             console.error(e);
 
         }
+    }
 
-        var message_display_text = "";
+// extract the text in the message_display_text node
+var message_display_text = "";
         try {
             //console.debug(note_root.querySelectorAll('[name="message_display_text"]')[0].value.trim())
             const message_display_text_node = note_root.querySelector('[name="message_display_text"]');
+// two different type: plaintext and html
+if (note_type == "plaintext") {
+
+    message_display_text = note_root.querySelector('[name="message_display_text"]').value.trim();
+
+} else if (note_type == "plainhtml") {
+    console.debug("collected note contents as if it is plain html");
+    console.debug(note_root.querySelector('[name="whole_note_middlecell"]'));
+    console.debug(note_root.querySelector('[name="whole_note_middlecell"]').innerHTML);
+   
+
+
+    message_display_text = note_root.querySelector('[name="whole_note_middlecell"]').innerHTML;
+} else if (note_type == "yellownote") {
+console.debug("collected note contents as if it is plaintext");
+    message_display_text = note_root.querySelector('[name="whole_note_middlecell"]').textContent.trim();
+
+}
+console.debug(message_display_text);
+
+
             console.debug(message_display_text_node);
             console.debug(message_display_text_node.innerHTML);
             message_display_text = note_root.querySelector('[name="message_display_text"]').innerHTML;
@@ -2496,8 +2525,8 @@ function update_note(event) {
 such as the canvas for the canvas note, the message display area for the yellow note, etc.
  */
 function update_note_internal_size(note) {
-    console.debug("update_note_internal_size.start");
-    console.debug(note);
+    if(function_call_debuging)  console.debug("update_note_internal_size.start");
+    if(function_call_debuging) console.debug(note);
     const note_type = note.getAttribute("note_type");
     console.debug("note_type: ", note_type);
 
@@ -2508,26 +2537,29 @@ function update_note_internal_size(note) {
 
     // update some internal objects in the note object to reflect the new overall size of the note
     const usable_width = (parseInt(box_width) - note_internal_width_padding);
-    const usable_height = (parseInt(box_height) - note_internal_height_padding);
+    const usable_height = (parseInt(box_height, 10) - (frame_note_top_bar_height + note_internal_height_padding));
     console.debug("setting new content frame usable width " + usable_width);
     console.debug("setting new content frame usable height " + usable_height);
 
     // webframe
 
-    // if (note_type === "webframe") {
+    if (note_type === "webframe") {
     try {
         console.debug("setting new (fake)iframe width " + usable_width);
-        note.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-        //       note.querySelector('[name="fakeiframe"]').style.height = (usable_height - note_owners_control_bar_height) + 'px';
-        note.querySelector('[name="fakeiframe"]').style.height = (usable_height - 55) + 'px';
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "fakeiframe", "width",  usable_width + 'px');
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "fakeiframe", "height",   (usable_height - 55) + 'px');
 
     } catch (e) {
         //console.error(e);
     }
-    //}
+    
     try {
-        note.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
-        note.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "whole_note_middlecell", "width",  usable_width + 'px');
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "whole_note_middlecell", "height",  usable_height + 'px');
     } catch (e) {
         //console.error(e);
     }
@@ -2536,20 +2568,24 @@ function update_note_internal_size(note) {
     try {
         const new_field_width = (parseInt(box_width) - 40);
         console.debug("setting new url intput field width " + new_field_width);
-        note.querySelector('[name="urlInput"]').style.width = new_field_width + 'px';
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "urlInput", "width",  new_field_width + 'px');
     } catch (e) {
         //console.error(e);
     }
-
+    }
     // plainhtml / yellownote
-
+    if (note_type === "plaintext" || note_type === "yellownote" || note_type === "plainhtml") {
     try {
-        note.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
-        note.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "message_display_text", "width", usable_width + 'px');
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "message_display_text", "height", usable_height + 'px');
+
     } catch (e) {
         //console.debug(e);
     }
-
+    }
     // cancase
     if (note_type === "canvas") {
         // a convas is wiped everytime it is resized. Therefore manipulation of the note should not by itself resize the canvas, as this looks like a bug to the user
@@ -2586,7 +2622,8 @@ function update_note_internal_size(note) {
     }
     try {
 
-        note.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';
+        if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
+        setCSSAttributeOnNamedElement(note, "whole_note_middlebar", "height", usable_height + 'px');
     } catch (e) {
         console.debug(e);
     }
