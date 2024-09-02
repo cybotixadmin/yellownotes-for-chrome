@@ -61,7 +61,7 @@ const filterStorageKey = table_name + "_rowFilters";
 
 // update the filter in the filter row on the table. Loop through all the filters and update the filter row
 
-if (filter_debug) console.debug("calling updateFilterRow");
+if (function_call_debuging) console.debug("calling updateFilterRow");
 updateFilterRow(table_name, filterStorageKey);
 
 try {
@@ -120,9 +120,11 @@ const table_columns_filter_array_keyname = table_name + "_filer_columns";
 const column_list = ['createtime', 'lastmodifiedtime', 'type', 'feed', 'location', 'enabled_status', 'selection_text', 'message_display_text', 'action', 'yellownote'];
 
 // attach event listeners to the column toggle checkboxes
+if (function_call_debuging) console.debug("calling addEventColumnToggleListeners");
 addEventColumnToggleListeners(column_list, table_name);
 
 // setup table items for sorting and filtering
+if (function_call_debuging) console.debug("calling setupTableFilteringAndSorting");
 setupTableFilteringAndSorting(table_name);
 
 // set table visibility defaults
@@ -151,6 +153,7 @@ console.debug("not_show_by_default_columns.length: " + not_show_by_default_colum
 
 
   // check if the columns suppression has been set in memory, if not set it to the default, otherwise use the stored value
+  if (function_call_debuging) console.debug("calling: getNotShowByDefaultColumns_asynch");
   getNotShowByDefaultColumns_asynch(table_columns_to_not_display_keyname, not_show_by_default_columns).then(columns => {
     not_show_by_default_columns = columns;
     console.log(not_show_by_default_columns);
@@ -174,11 +177,13 @@ console.debug("not_show_by_default_columns.length: " + not_show_by_default_colum
 
 
 // create event listeners for the column toggle checkboxes
+if (function_call_debuging) console.debug("calling addEventColumnToggleListeners");
 addEventColumnToggleListeners(column_list, table_name);
 
 
 
 // call to database to get notes and place them in a table
+if (function_call_debuging) console.debug("calling fetchData");
 fetchData(not_show_by_default_columns).then(function (d) {
     console.debug("read notes complete");
     console.debug(d);
@@ -248,6 +253,7 @@ async function DELETEdeleteSubscription(noteid) {
 }
 
 async function goThere(datarow) {
+    if (function_call_debuging) console.debug("goThere.start");
     try {
 
         const userid = "";
@@ -295,6 +301,7 @@ async function goThere(datarow) {
 
 
 async function editNote(noteid) {
+    if (function_call_debuging) console.debug("editNote.start");
     try {
 
         const userid = "";
@@ -338,7 +345,7 @@ async function editNote(noteid) {
 
 
 function fetchData(not_show_by_default_columns) {
-    console.debug("fetchData");
+    if(function_call_debuging)  console.debug("fetchData.start");
     try {
         return new Promise(
             function (resolve, reject) {
@@ -591,7 +598,7 @@ function fetchData(not_show_by_default_columns) {
 
                     // message payload
                     // contenteditable="true"
-                    if (obj.note_type == "yellownote") {
+                    if (obj.note_type == "yellownote" || obj.note_type == "plaintext") {
                         try {
                             //      cell_message.textContent = b64_to_utf8(obj.message_display_text);
 
@@ -757,7 +764,7 @@ function fetchData(not_show_by_default_columns) {
                     if (not_show_by_default_columns.indexOf("yellownote") !== -1) {
                         cell_note.className = "hidden";
                     }
-                    console.debug("calling createYellowNoteFromNoteDataObject");
+                   if(function_call_debuging) console.debug("calling createYellowNoteFromNoteDataObject");
                     createYellowNoteFromNoteDataObject(note_obj, true, false).then(function (note_root) {
                         console.debug(note_root);
                         // make certain redaction from the note that should not be shown in feed-mode
@@ -773,7 +780,7 @@ function fetchData(not_show_by_default_columns) {
                         //console.debug(inserted.outerHTML);
                         // make the cell size large enough to contain the note
                         cell_note.setAttribute("style", "height: " + (parseInt(note_root.getAttribute("box_height")) + parseInt(note_owners_control_bar_height)) + "px" + "; width: 250px;");
-                        console.debug("calling attachEventlistenersToYellowStickynote");
+                        if(function_call_debuging) console.debug("calling attachEventlistenersToYellowStickynote");
                         attachEventlistenersToYellowStickynote(inserted, true, false);
 
                          // scale the yellownote to fit inside the table cell-width
@@ -793,7 +800,7 @@ var valid_noteid_regexp = /^[a-zA-Z0-9\-\.\_]{20,100}$/;
 
 // Function to use "fetch" to re-activate a data agreement
 async function setNoteEnabledStatusByUUID(noteid, enabled_status) {
-    console.debug("setNoteEnabledStatusByUUID: " + noteid + " status: " + enabled_status);
+    if(function_call_debuging)  console.debug("setNoteEnabledStatusByUUID: " + noteid + " status: " + enabled_status);
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -862,9 +869,9 @@ async function setNoteEnabledStatusByUUID(noteid, enabled_status) {
  * } noteid
  */
 async function saveChanges(noteid, event) {
-    console.debug("saveChanges: " + noteid);
-    console.debug(event.target);
-    console.debug(event.target.parentNode);
+    if(function_call_debuging)  console.debug("saveChanges: " + noteid);
+    if(function_call_debuging)  console.debug(event.target);
+    if(function_call_debuging) console.debug(event.target.parentNode);
 
     const row_root = document.querySelector('tr[noteid="' + noteid + '"]');
     console.debug(row_root);
@@ -952,7 +959,7 @@ async function saveChanges(noteid, event) {
 }
 
 async function setNoteDistributionlistId(noteid, distributionlistid) {
-    console.debug("setNoteDistributionlistId: noteid: " + noteid + ", distributionlistid: " + distributionlistid);
+    if(function_call_debuging)  console.debug("setNoteDistributionlistId: noteid: " + noteid + ", distributionlistid: " + distributionlistid);
     try {
         let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
         let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -987,7 +994,7 @@ async function setNoteDistributionlistId(noteid, distributionlistid) {
 }
 
 function delete_note_by_noteid(noteid) {
-    console.debug("delete_note_by_noteid.start");
+    if(function_call_debuging) console.debug("delete_note_by_noteid.start");
 
     chrome.runtime.sendMessage({
         message: {
@@ -1004,8 +1011,8 @@ function delete_note_by_noteid(noteid) {
 }
 
 function disable_note_with_noteid(noteid) {
-    console.debug("disable_note_with_noteid: " + noteid);
-    console.debug(valid_noteid_regexp.test(noteid));
+    if(function_call_debuging) console.debug("disable_note_with_noteid: " + noteid);
+    if(function_call_debuging) console.debug(valid_noteid_regexp.test(noteid));
     if (valid_noteid_regexp.test(noteid)) {
         // send save request back to background
         chrome.runtime.sendMessage({
@@ -1025,8 +1032,8 @@ function disable_note_with_noteid(noteid) {
 }
 
 function enable_note_with_noteid(noteid) {
-    console.debug("enable_note_with_noteid: " + noteid);
-    console.debug(valid_noteid_regexp.test(noteid));
+    if(function_call_debuging) console.debug("enable_note_with_noteid: " + noteid);
+    if(function_call_debuging) console.debug(valid_noteid_regexp.test(noteid));
     if (valid_noteid_regexp.test(noteid)) {
         // send save request back to background
         chrome.runtime.sendMessage({
@@ -1043,7 +1050,7 @@ function enable_note_with_noteid(noteid) {
 }
 
 if (is_authenticated()) {
-    console.debug("user is authenticated - show menu accordingly");
+    if(function_call_debuging) console.debug("user is authenticated - show menu accordingly");
     //page_display_login_status();
     // login_logout_action();
 
@@ -1052,7 +1059,7 @@ if (is_authenticated()) {
     page_display_login_status();
 
 } else {
-    console.debug("user is not authenticated - show menu accordingly");
+    if(function_call_debuging) console.debug("user is not authenticated - show menu accordingly");
     //page_display_login_status();
     //   login_logout_action();
 

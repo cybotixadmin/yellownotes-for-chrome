@@ -1,17 +1,16 @@
 <table>
 	<tr name="whole_note_middlebar" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 180px; width: 100%; position: absolute; top: 50px; padding: 0px; border: 0px; margin: 0px; overflow: hidden; background: rgba(255, 255, 0, 0.7); z-index: 10103;">
 		<td name="whole_note_middlecell"  contenteditable="true" style="height: 180px; width: 250px; position: absolute; top: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 140px; min-height: 40px; text-align: left; text-wrap: wrap; overflow: visible; background: rgba(255, 255, 0, 0.7); z-index: 10103;" >
-			<iframe name="note_content_frame" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 200px; width: 300px; position: relative; border: 1px solid black;" >
-				<html>
-					<body>
-					<div name="message_display_text"  style="height: 100px; width: 100px; position: absolute; left: 0px; top: 0px; color: rgba(0, 0, 0, 0.7); background: rgba(255, 255, 0, 0.7); border: 0px solid #ffff00; border-radius: 0px; overflow-x: hidden; overflow-y: auto; line-height: 0.9; padding: 2px; margin: 0px; position: relative; bottom: 0; z-index: 10104; white-space: pre-wrap; word-wrap: break-word; "  contenteditable="true" aria-multiline="true" aria-placeholder="Type here...">
-here 2 ?
-</div>
-					</body>
-				</html>
-			</iframe>	
-	    </td>
-			
+			<div name="message_display_text"  style=" position: absolute; left: 0px; top: 0px; color: rgba(0, 0, 0, 0.7); background: rgba(255, 255, 0, 0.7); border: 0px solid #ffff00; border-radius: 0px; overflow-x: hidden; overflow-y: auto; line-height: 0.9; padding: 2px; margin: 0px; position: relative; bottom: 0; z-index: 10104; white-space: pre-wrap; word-wrap: break-word; "  contenteditable="true" aria-multiline="true" aria-placeholder="Type here...">
+			<div>
+			</div>
+		</div>
+		
+	</td>
+			<!--
+			<form name="note_form" style="border: 0px solid #ffff00;
+ border-radius: 0px; width: 100%; overflow: hidden; padding: 0px; margin: 0px; position: relative; bottom: 0; z-index: 10104;">
+ </form>-->
 			<input type="hidden" name="selection_text"></input>
 			<input type="hidden" name="encoded_selection_text"></input>
 			<input type="hidden" name="url"></input>

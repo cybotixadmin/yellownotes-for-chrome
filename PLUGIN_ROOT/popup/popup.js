@@ -68,7 +68,7 @@ if (defaultSliderPosition == 1) {
     // pre-select the third option
     document.querySelector('#option_all_notes').classList.add('enlarged-font');
 } else {
-}  
+}
 
 document.querySelector('#option_nothing').addEventListener('click', () => {
     console.log("option_nothing selected");

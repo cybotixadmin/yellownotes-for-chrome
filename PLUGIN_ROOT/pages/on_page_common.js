@@ -694,7 +694,7 @@ function integerstring2timestamp(int) {
 }
 
 function sortTa(table_name, event) {
-    if (sort_debug)  console.debug("sortTa().start");
+    if (function_call_debuging)  console.debug("sortTa().start");
     // console.debug(event);
     // console.debug(event.target);
     // console.debug(event.target.parentNode);
@@ -704,9 +704,9 @@ function sortTa(table_name, event) {
 
 // Function to sort the table
 function sortTable(table_name, columnIndex) {
-    if (sort_debug) console.debug("sortTable.start");
-    if (sort_debug)  console.debug("columnIndex: " + columnIndex);
-    if (sort_debug)  console.debug("sortTable: " + table_name);
+    if (function_call_debuging) console.debug("sortTable.start");
+    if (function_call_debuging)  console.debug("columnIndex: " + columnIndex);
+    if (function_call_debuging)  console.debug("sortTable: " + table_name);
 
     /*
     sortStates is an array that is preserved inlocalmemory and contains the sort order for up to three columns
@@ -730,9 +730,11 @@ function sortTable(table_name, columnIndex) {
 
     const table = document.querySelector('table[name="' + table_name + '"]');
     if (sort_debug) console.debug(table);
+    if (sort_debug) console.debug(table.rows);
 
-    let rows = Array.from(table.rows).slice(2); // Ignore the header rows
-    const row_count = table.rows.length - 2;
+    let rows = Array.from(table.rows).slice(2); // Ignore the two header rows
+    if (sort_debug) console.debug(rows);
+    const row_count = rows.length ;
     if (sort_debug) console.debug("row count: " + row_count);
 
     // Get sort states from local storage or initialize if not present
@@ -749,8 +751,8 @@ function sortTable(table_name, columnIndex) {
         return;
     }
     if (sort_debug) console.debug(headerCell);
-    if (sort_debug)  console.debug(headerCell.querySelector("span"));
-    if (sort_debug)  console.debug(headerCell.querySelector("span").textContent);
+    if (sort_debug) console.debug(headerCell.querySelector("span"));
+    if (sort_debug) console.debug(headerCell.querySelector("span").textContent);
     const currentSortSymbol = headerCell.querySelector("span").textContent;
     var currentSortDirection = "";
     if (sort_debug)  console.debug("currentSortSymbol: ", currentSortSymbol);
@@ -823,16 +825,20 @@ function sortTable(table_name, columnIndex) {
             sortOrder: primarySortOrder
         });
     }
-    // ensure that we only keep the top 3 entries
-    // Ensure we only keep the top 3 entries
-    if (new_sortStates.length > 3) {
-        new_sortStates = new_sortStates.slice(0, 3);
+    // Ensure we only keep the top 1 of entries
+    // this has been created to be able to surt on multipl columns, but the functionality is not yet fully implemented
+    if (new_sortStates.length > 1 ){
+        new_sortStates = new_sortStates.slice(0, 1);
     }
     if (sort_debug) console.debug(new_sortStates);
 
+    if (sort_debug) console.debug("col count: ", table.rows[0].cells.length);
     // refresh the sort icons across all columns to fit with the values in the new_sortStates array, and setting any columns not mention to the detault value of "▶" no sorting
+ try{
+        console.debug(table.rows[0]);
+     // loop across the columns and set and reset the sort icon for each column
     for (let i = 0; i < table.rows[0].cells.length; i++) {
-        //console.debug("setting sort icon for column: ", i);
+        //console.debug("setting sort icon for column: ", i);0
         const cell = table.rows[0].cells[i];
         const span = cell.querySelector("span");
         if (span) {
@@ -845,7 +851,9 @@ function sortTable(table_name, columnIndex) {
             }
         }
     }
-
+ }catch(h){
+console.error(h);
+    }
     localStorage.setItem(table_name + '_new_sortStates', JSON.stringify(new_sortStates));
 
     const isColumnIndexPresent = new_sortStates.some(sortState => sortState.columnIndex === 4);
@@ -855,6 +863,9 @@ function sortTable(table_name, columnIndex) {
         const cell = row.cells[columnIndex];
         if (sortType === "selectCaseExact") {
             return cell.querySelector('select').value;
+        }else if (sortType === "stringCaseIgnore") {
+            return cell.innerText.toLowerCase();
+
         }
         return cell.innerText;
     }
@@ -863,7 +874,7 @@ function sortTable(table_name, columnIndex) {
     // The last entry in the array is the first sort column added , and not yet bumped, and must have the lowest priority sort (meaning the first sort)
 
     let sortedRows;
-
+console.debug("new_sortStates count: ", new_sortStates.length);
     for (let i = new_sortStates.length - 1; i >= 0; i--) {
         const sortState = new_sortStates[i];
         if (sort_debug) console.debug("sortState: ", sortState);
@@ -873,18 +884,21 @@ function sortTable(table_name, columnIndex) {
         if (sort_debug)  console.debug("sortOrder: ", sortOrder);
 
         // type of sort - default is case-sensitive alphabetical
-
+        if (sort_debug)  console.debug(rows);
+        if (sort_debug)  console.debug(new_sortStates);
 
         // Perform sorting based on sort states
         sortedRows = rows.sort((rowA, rowB) => {
                 for (let entry of new_sortStates) {
+                    console.debug(entry);
                     const sortType = table.rows[0].cells[entry.columnIndex].getAttribute("sort_type") || "stringCaseExact";
                     const cellA = getCellValue(rowA, entry.columnIndex, sortType);
                     const cellB = getCellValue(rowB, entry.columnIndex, sortType);
-
+                    if (sort_debug)  console.debug("sortType: " +sortType + " " + cellA + " " + cellB);
                     let comparison = 0;
                     if (sortType === "stringCaseExact") {
                         comparison = cellA.localeCompare(cellB);
+                        if (sort_debug)  console.debug("comparison: " + comparison);
                     } else if (sortType === "stringCaseIgnore") {
                         comparison = cellA.toLowerCase().localeCompare(cellB.toLowerCase());
                     } else if (sortType === "selectCaseExact") {
@@ -904,6 +918,8 @@ function sortTable(table_name, columnIndex) {
             sortedRows.reverse();
         }
 
+        if (sort_debug)  console.debug(sortedRows);
+
         // Remove existing rows (excluding the two header rows)
         while (table.rows.length > 2) {
             table.deleteRow(2);
@@ -921,8 +937,8 @@ function sortTable(table_name, columnIndex) {
 // In most cases the user will noly see the yellownotes column and the other columns where the sorted values are more visible, will not be seen.
 // To change the default sort the user must make the columns visible, add sorting to them, and then hide them again
 function applyExistingSortTable(table_name, new_sortStates) {
-   if (sort_debug) console.debug("applyExistingSortTable.start");
-   if (sort_debug)  console.debug("sortTable: " + table_name);
+   if (function_call_debuging) console.debug("applyExistingSortTable.start");
+   if (function_call_debuging)  console.debug("sortTable: " + table_name);
 
     const table = document.querySelector('table[name="' + table_name + '"]');
     if (sort_debug)  console.debug(table);
@@ -1016,7 +1032,7 @@ function applyExistingSortTable(table_name, new_sortStates) {
 
 // read the  filter from local memory ond place them in the filter row of the table
 function updateFilterRow(tableName, filterStorageKey) {
-    console.debug("updateFilterRow.start");
+   if(function_call_debuging) console.debug("updateFilterRow.start");
     var table = document.querySelector('table[name="' + tableName + '"]');
     var filtersCols = table.querySelector('tr[name="filter_row"]').querySelectorAll('input, select, textarea');
     console.debug(filtersCols);
@@ -1049,8 +1065,8 @@ and chose to have the filters to be caseinsensitive or not (caseinsensitive defa
  */
 
 function triggerFilters(table_name) {
-    console.debug("triggerFilters.start");
-    console.debug("table_name: " + table_name);
+   if(function_call_debuging) console.debug("triggerFilters.start");
+   if(function_call_debuging) console.debug("table_name: " + table_name);
     try {
 
         const filterStorageKey = table_name + "_rowFilters";
@@ -1076,8 +1092,8 @@ function triggerFilters(table_name) {
 
 
 function readFiltersFromTable(table_name) {
-    if (filter_debug) console.debug("readFiltersFromTable.start");
-    if (filter_debug) console.debug("table_name: " + table_name);
+    if (function_call_debuging) console.debug("readFiltersFromTable.start");
+    if (function_call_debuging) console.debug("table_name: " + table_name);
     const table = document.querySelector('table[name="' + table_name + '"]');
     //    const filterRow = table.rows[1]; // Second row for filters
     const filterRow = table.querySelector('tr[name="filter_row"]');; // Second row for filters

@@ -53,6 +53,8 @@ const URI_plugin_user_get_a_subscribed_note = "/api/v1.0/plugin_user_get_a_subsc
 
 const URI_plugin_user_get_creatorlevel_note_properties = "/api/v1.0/get_creatorlevel_note_properties";
 
+
+
 let salt;
 
 // at installation time a unique identifies is ser for this browser extension. Make this available to the server for identification purposes.
@@ -350,8 +352,12 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
         // Should the user later click "save" The event handler for the save-event in the content script will then call back to the background script to save the note to the database.
 
 
-        console.debug(info);
-        console.debug(tab);
+        if(function_call_debuging) console.debug(info);
+        if(function_call_debuging) console.debug(tab);
+        if(function_call_debuging) console.debug("note_type: " + note_type);
+        if(function_call_debuging) console.debug("brand: " + brand);
+        if(function_call_debuging) console.debug("is_selection_text_connected: " + is_selection_text_connected);
+        if(function_call_debuging) console.debug("type: " + type);
         var pageUrl = info.pageUrl;
         // this is the selection the user flagged.
         var selectionText = info.selectionText;
@@ -395,7 +401,7 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             note_template = result;
             console.debug("note_template read");
             // get the part of the template that pertain to the type of note
-            return getNotetypeTemplate(type);
+            return getNotetypeTemplate(note_type);
         }).then(function (result) {
             //console.debug(result);
             notetype_template = result;
@@ -468,7 +474,7 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             const msg = {
                 action: "createnote",
                 sharedsecret: PinToSelectedHTML_sharedsecret,
-                note_type: type,
+                note_type: note_type,
                 brand: brand,
                 note_template: note_template,
                 notetype_template: notetype_template,
@@ -557,7 +563,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             // set slider show/noshow
             // show the notes slider on the page
             try {
-                console.debug("action: toggleSlider")
+                if(function_call_debuging)   console.debug("action: toggleSlider")
                 // get new value
                 console.debug(message);
                 console.debug(message.isSlidersEnabled);
@@ -593,7 +599,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             // set slider default position
             // for new pages, or pages where no setting has been made, this is the default
             try {
-                console.debug("action: setSliderDefaultPosition")
+                if(function_call_debuging)  console.debug("action: setSliderDefaultPosition")
                 // get new value
                 console.debug(message);
                 console.debug(message.setting);
@@ -629,19 +635,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug(e);
             }
         } else if (action === "activeateSubscriptionOnAllTabs") {
-            console.debug("activeateSubscriptionOnAllTabs: subscription_details: " + JSON.stringify(message.subscription_details));
+            if(function_call_debuging)  console.debug("activeateSubscriptionOnAllTabs: subscription_details: " + JSON.stringify(message.subscription_details));
 
             // send message to all tabs to activate the subscription (look for any notes pertaning to the URL in question) on those tabs, if the slider position is set to 3
 
 
         } else if (action === "suspendSubscriptionOnAllTabs") {
-            console.debug("suspendSubscriptionOnAllTabs: subscription_details: " + JSON.stringify(message.subscription_details));
+            if(function_call_debuging)  console.debug("suspendSubscriptionOnAllTabs: subscription_details: " + JSON.stringify(message.subscription_details));
 
             // send message to all tabs to suspend the subscription (remove any notes pertaning to the URL in question) from those tabs, if the slider position is set to 3
 
 
         } else if (action === "getSliderDefaultPosition") {
-            console.debug("getSliderDefaultPosition: " + defaultSliderPosition)
+            if(function_call_debuging) console.debug("getSliderDefaultPosition: " + defaultSliderPosition)
             // Relay the state to all open tabs
 
             sendResponse({
@@ -661,10 +667,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 
         } else if (action === "execute_notesupdate_on_page") {
-            console.debug("execute_notesupdate_on_page");
-            console.debug("tab_id: " + sender.tab.id);
-            console.debug(message);
-            console.debug(message.message);
+            if(function_call_debuging)  console.debug("execute_notesupdate_on_page");
+            if(function_call_debuging) console.debug("tab_id: " + sender.tab.id);
+            if(function_call_debuging) console.debug(message);
+            if(function_call_debuging)  console.debug(message.message);
 
             //chrome.scripting.executeScript({
             //    target: {
@@ -674,6 +680,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             //}).then(function (result) {
             // send message to the active tab
             //    return chrome.tabs.sendMessage(sender.tab.id, {
+
+            // call to the tab and the NotesHandler content script to effect an update of the notes on the page
             chrome.tabs.sendMessage(sender.tab.id, {
                 sharedsecret: "qwertyui",
                 action: "update_notes_on_page",
@@ -689,8 +697,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             return true;
         } else if (action === "captureTabAsPNG") {
 
-            console.debug("captureTabAsPNG.start");
-            console.debug(message);
+            if(function_call_debuging)  console.debug("captureTabAsPNG.start");
+            if(function_call_debuging)  console.debug(message);
 
             chrome.tabs.create({ url: message.url, active: false }, function(tab) {
                 // Wait for the tab to fully load before capturing
@@ -714,7 +722,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         } else if (action === "capturePage") {
 
-            console.debug("browsersolutions calling: capturePage");
+            if(function_call_debuging)  console.debug("capturePage");
 
             console.debug(message);
             const url = message.url;
@@ -731,7 +739,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 
         } else if (action === "simple_url_lookup") {
-            console.debug("simple_url_lookup " + JSON.stringify(message));
+            if(function_call_debuging) console.debug("simple_url_lookup " + JSON.stringify(message));
             // upen a tab and get a URL, then close the tab
 
 
@@ -768,7 +776,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             }
             return true;
         } else if (action === "dismiss_note") {
-            console.debug("dismiss_note " + JSON.stringify(message));
+            if(function_call_debuging)  console.debug("dismiss_note " + JSON.stringify(message));
             // close a note and do not automatically reopen it (when the page is reloaded)
             // it can still be accessed from the notes panel
             // get all distribution list belonging to the user
@@ -806,7 +814,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
                     };
                     console.debug(opts);
-
+                    if(function_call_debuging)  console.debug("calling: fetch(server_url + URI_plugin_user_update_subscribednote_status, opts)");
                     return fetch(server_url + URI_plugin_user_update_subscribednote_status, opts);
                 }).then(function (response) {
                     //                console.debug(response);
@@ -829,7 +837,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
              * To address this limitation, there option to create a note from the context menu is also available from the browser action icon.
              *
              */
-            console.debug("attach_to_current_tab");
+           if(function_call_debuging) console.debug("attach_to_current_tab");
             console.debug(message);
             console.debug(message.url);
             const url = message.url;
@@ -842,15 +850,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             const tab = {
                 id: message.tab_id
             };
-
-            pinYellowNote(psuedo_info, tab, 'yellownote', 'default', false, 'plainhtml');
+            if(function_call_debuging) console.debug("calling: pinYellowNote" );
+            pinYellowNote(psuedo_info, tab, 'plaintext', 'default', false, 'plainhtml');
             //pinYellowNote(psuedo_info, tab, 'yellownote', 'default');
 
             // close the connection to the calling popup immediately
             return false;
 
         } else if (action === "undismiss_note") {
-            console.debug("undismiss_note " + JSON.stringify(message));
+            if(function_call_debuging)  console.debug("undismiss_note " + JSON.stringify(message));
             // close a note and do not automatically reopen it (when the page is reloaded)
             // it can still be accessed from the notes panel
             // get all distribution list belonging to the user
@@ -1353,6 +1361,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             });
 
             return true;
+
+        } else if (action == 'remove_note_everywhere') {
+            console("remove_note_everywhere");
+            // send message to all tabs to remove any occurence of the note with this id
+
+
 
         } else if (action == 'single_note_delete') {
             console.debug("request: delete a single yellow note");
