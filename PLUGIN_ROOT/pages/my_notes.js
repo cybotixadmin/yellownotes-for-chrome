@@ -1008,6 +1008,18 @@ function delete_note_by_noteid(noteid) {
         console.debug("message sent to backgroup.js with response code: " + response.statuscode);
 
     });
+    // send message to all tabs to remove any occurence of this note
+    chrome.runtime.sendMessage({
+        
+            action: "remove_note_everywhere",
+            noteid: noteid
+        
+    }, function (response) {
+        console.debug("message sent to backgroup.js with response: " + JSON.stringify(response));
+        
+
+    });
+
 }
 
 function disable_note_with_noteid(noteid) {

@@ -1363,9 +1363,26 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             return true;
 
         } else if (action == 'remove_note_everywhere') {
-            console("remove_note_everywhere");
+            console.debug("remove_note_everywhere");
             // send message to all tabs to remove any occurence of the note with this id
 
+            const noteid = message.noteid;
+            chrome.tabs.query({}, function (tabs) {
+                for (let tab of tabs) {
+                    try {
+                        console.debug("sending message to tab: " + tab.id);
+                        const msg = {
+                            "action": "remove_note_everywhere",
+                            "noteid": message.noteid,
+                            "sharedsecret": "update_sharedsecret"
+                        };
+                        console.debug(msg);
+                        chrome.tabs.sendMessage(tab.id, msg);
+                    } catch (e) {
+                        console.debug(e);
+                    }
+                }
+            });
 
 
         } else if (action == 'single_note_delete') {

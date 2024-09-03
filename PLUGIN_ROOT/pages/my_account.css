@@ -9,6 +9,23 @@
     margin-bottom: 10px;
 }
 
+
+p {
+    color: black;
+    font-size: 16px; /* Base font size for the text */
+    margin: 0;
+    padding: 0;
+}
+
+.stats {
+    font-weight: bold;
+    font-size: 1.25em; /* This makes the numbers inside the div one size larger than the text */
+}
+
+p + p {
+    margin-top: 20px; /* Adds space between each paragraph to create blank lines */
+}
+
 #drop_zone {
     border: 2px dashed #0087F7;
     background: #F3F4F6;

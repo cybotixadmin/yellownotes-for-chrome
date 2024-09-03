@@ -2063,6 +2063,7 @@ function hexToRGB(hex) {
     }
 }
 
+
 /**
  * make different parts of the graphical elements visible or not.
  */

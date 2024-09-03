@@ -34,6 +34,11 @@ const URI_plugin_user_set_self_subscription_active_status = "/api/v1.0/plugin_us
 const URI_plugin_user_set_subscription_application_status = "/api/v1.0/plugin_user_set_subscription_application_status";
 
 
+const URI_plugin_user_get_statistics = "/api/v1.0/plugin_user_get_statistics";
+
+
+
+
 
 const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subscriptions";
 

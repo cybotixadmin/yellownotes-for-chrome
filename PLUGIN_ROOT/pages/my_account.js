@@ -30,10 +30,29 @@ try {
     console.error(e);
 }
 
+
+const stats_table_name = "stats_table";
+
+
+// call to database to get notes and place them in a table
+if (function_call_debuging) console.debug("calling fetchData");
+fetchData(stats_table_name).then(function (d) {
+    console.debug("read stastics complete");
+    console.debug(d);
+
+   
+   
+
+});
+
+try{
 document.getElementById('drop_zone').addEventListener('click', function () {
     console.debug("drop_zone clicked");
     document.getElementById('file_input').click();
 });
+} catch (e) {
+    console.error(e);
+}
 
 var note_properties = {
     note_color: "#FFFF00",
@@ -271,6 +290,104 @@ async function saveData() {
 
     console.debug(r_data);
 
+}
+
+
+
+
+
+function fetchData(table_name) {
+    if(function_call_debuging)  console.debug("fetchData.start");
+    try {
+        return new Promise(
+            function (resolve, reject) {
+            var ynInstallationUniqueId = "";
+            var xYellownotesSession = "";
+            var distributionlists;
+            var data;
+
+            chrome.storage.local.get([plugin_uuid_header_name, plugin_session_header_name]).then(function (result) {
+                console.debug(result);
+                console.debug(ynInstallationUniqueId);
+                ynInstallationUniqueId = result[plugin_uuid_header_name];
+                xYellownotesSession = result[plugin_session_header_name];
+                console.debug(ynInstallationUniqueId);
+                console.debug(xYellownotesSession);
+                return fetch(server_url + URI_plugin_user_get_statistics, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [plugin_uuid_header_name]: ynInstallationUniqueId,
+                        [plugin_session_header_name]: xYellownotesSession,
+                    },
+                });
+            }).then(response => {
+                if (!response.ok) {
+                    console.debug(response);
+
+                    // if an invalid session token was sent, it should be removed from the local storage
+                    if (response.status == 401) {
+                        // compare the response body with the string "Invalid session token" to determine if the session token is invalid
+                        if (response.headers.get("session") == "DELETE_COOKIE") {
+                            console.debug("Session token is invalid, remove it from local storage.");
+                            chrome.storage.local.remove([plugin_session_header_name]);
+                            // redirect to the front page returning the user to unauthenticated status.
+                            // unauthenticated functionality will be in effect until the user authenticates
+                            window.location.href = "/pages/my_account.html";
+                            reject('logout');
+                        } else {
+                            reject('Network response was not ok');
+                        }
+                    } else {
+                        reject('Network response was not ok');
+                    }
+                } else {
+                    return response.json();
+                }
+             }).then(function (data) {
+               
+
+                console.debug(data);
+
+  
+                // Loop through data and populate the table
+                data.forEach(row => {
+                    console.debug(row);
+                    console.debug(row.json);
+                 
+                  
+                    // key column - not to be displayed
+                    // create timestamp - not to be dsiplayed either
+                    try {
+                      
+// place values in the table cells
+
+                            // place the notedays data in the html object with the id notedays
+                            document.getElementById("notedays").textContent = row.notedays;
+
+                             // place the notedays data in the html object with the id notedays
+                             document.getElementById("notecount_max_allowed").textContent = row.notecount_max_allowed;
+
+                              // place the notedays data in the html object with the id notedays
+                            document.getElementById("notecount").textContent = row.notecount;
+
+                               // place the notedays data in the html object with the id notedays
+                               document.getElementById("currentnotedays").textContent = row.currentnotedays;
+
+                                  // place the notedays data in the html object with the id count
+                            document.getElementById("currentnotecount").textContent = row.currentnotecount;
+                        
+                    } catch (e) {
+                        console.debug(e);
+                    }
+                  
+                });
+                resolve('');
+            });
+        });
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 // Function to fetch and update banner image
