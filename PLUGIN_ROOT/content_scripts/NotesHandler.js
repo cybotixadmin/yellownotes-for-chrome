@@ -535,6 +535,7 @@ function listener(request, sender, sendResponse) {
 
                 const moveFocus = true;
                 var promiseArray = [];
+                console.debug("calling isNoteOnPage ("+noteid +")");
                 if (isNoteOnPage(noteid)) {
                     console.debug("browsersolutions note IS already on page");
                     // move focus to note
@@ -1053,9 +1054,7 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
             console.error(e);
         }
 
-        // give the note color
-        var highlight_background = "rgb(" + hexToRGB(note_color) + ", 0.25)";
-
+       
         // what color to use for the note
         var note_color = "#ffff00"; // set default value, override with more specific values if available
         // attempt to read size parameters from the note properties of the creator
@@ -1066,8 +1065,11 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
         } else {
             // brand-level not implemted yet
         }
-        //var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
-        //console.debug("box_background" + box_background);
+        var box_background = "rgb(" + hexToRGB(note_color) + ", 0.7)";
+        console.debug("box_background" + box_background);
+
+         // give the note color
+         var highlight_background = "rgb(" + hexToRGB(note_color) + ", 0.25)";
 
         // show/hide elements based on the ower and editing
 
@@ -1117,16 +1119,19 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
 
         }
         console.debug("highlightuniqueid: ", highlightuniqueid);
-
+       // console.debug(note_root.outerHTML);
+        
         if (function_call_debuging)
             console.debug("calling createNoteHeader");
         createNoteHeader(note_object_data, note_root, creatorDetails, isOwner, isNewNote);
 
+       // console.debug(note_root.outerHTML);
         if (function_call_debuging)
             console.debug("calling createNoteFooter");
         createNoteFooter(note_object_data, note_root, creatorDetails, isOwner, isNewNote).then(function (res) {
             console.debug(res);
-
+            console.debug(note_root.outerHTML);
+        
             try {
                 // set the note_type as selected on the note_type drop-down menu
                 const noteTypeSelect = note_root.querySelector('select[name="select_notetype"]');
@@ -1137,64 +1142,36 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
             } catch (e) {
                 console.error(e);
             }
+
             // set background color of the note
             setNoteColor(creatorDetails, note_root);
 
-            // set sizing
-            //console.debug("calling update_note_internal_size");
-            //update_note_internal_size(note_root);
+        
 
-            //console.debug("calling highlightTextOccurrences_old")
-            //highlightuniqueid = highlightTextOccurrences_old(selection_text, highlight_background);
-            //console.debug("highlightuniqueid", highlightuniqueid)
+           
 
-            //console.debug("calling getSelectionTextDOMPosition")
-            if (DOM_debug)
-                console.debug(note_root.outerHTML);
-
+            // place the note in the underlying page/document
             var doc = window.document;
             var doc_root = doc.documentElement;
-            //console.debug(doc_root);
-
+           
+            
             const insertedNode = doc_root.insertBefore(note_root, doc_root.firstChild);
 
-            if (DOM_debug)
+           // if (DOM_debug)
                 console.debug(insertedNode.outerHTML);
             // attach event listeners to buttons and icons
 
-            noteTypeSpecificActions(note_type, insertedNode, info, isOwner, isNewNote);
-            //insertedNode.setAttribute("isOwner: ", isOwner);
-            //insertedNode.setAttribute("isNewNote: ", isNewNote);
-            console.debug("highlightuniqueid: ", highlightuniqueid);
-            if (highlightuniqueid && highlightuniqueid !== "0") {
-                // selection text was matched in the document
-                // place note next to where the text is highlighted
+            if (function_call_debuging)  console.debug("calling: noteTypeSpecificActions");
 
+           noteTypeSpecificActions(note_type, insertedNode, info, isOwner, isNewNote);
 
-                if (function_call_debuging)
-                    console.debug("calling size_and_place_note_based_on_texthighlight");
-                size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, isOwner, isNewNote);
+           
 
-                insertedNode.setAttribute("highlightuniqueid", highlightuniqueid);
-                console.debug(insertedNode);
-                if (function_call_debuging)
-                    console.debug("calling size_and_place_note_based_on_texthighlight");
-                size_and_place_note_based_on_texthighlight(insertedNode, note_object_data, creatorDetails, isOwner, isNewNote);
+           if (function_call_debuging)  console.debug("calling: place_note_on_page");
 
-            } else {
-                // selection text was not matched in the document, or there is no selection text
-                console.debug("selection text was not matched in the document, or there is no selection text");
+             place_note_on_page(note_object_data, note_type, insertedNode, creatorDetails, session, is_selection_text_connected, isOwner, isNewNote) ;
 
-                // move to the default location on the screen if all else fails
-                //inserted.setAttribute("posx", 50);
-                //inserted.setAttribute("posy", 50);
-                //insertedNode.querySelector('[name="whole_note_table"]').style.left = insertedNode.getAttribute("posx");
-                //insertedNode.querySelector('[name="whole_note_table"]').style.top = insertedNode.getAttribute("posy");
-                if (function_call_debuging)
-                    console.debug("calling size_and_place_note_based_on_coordinates");
-                size_and_place_note_based_on_coordinates(insertedNode, note_object_data, creatorDetails, isOwner, isNewNote);
-
-            }
+        
             // set the flag that contral which button are shown
             insertedNode.setAttribute("button_arrangment", 'new');
 
@@ -1209,48 +1186,15 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
 
             // move to the default location on the screen if all else fails
 
-            // width
-            // console.debug("setting box:width: " + insertedNode.getAttribute("box_width"));
-            // if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
-            // setCSSAttributeOnNamedElement(insertedNode, 'whole_note_table', 'width', parseInt(insertedNode.getAttribute("box_width"), 10) + "px");
-            // // height
-            // console.debug("setting box_height: " + insertedNode.getAttribute("box_height"));
-            // // since this is a new note, the height is padded by the control/bottom bar
-
-            //if(function_call_debuging) console.debug("calling setCSSAttributeOnNamedElement" );
-            //setCSSAttributeOnNamedElement(insertedNode, 'whole_note_table', 'height', (parseInt(insertedNode.getAttribute("box_height")) + note_owners_control_bar_height) + "px");
-
-            // place focus
-            try {
-                insertedNode.querySelector('[focus="true"]').focus();
-            } catch (e) {
-                console.debug(e);
-            }
-
-            // call the function that will set which part of the note will be displayed
-            //console.debug("calling setComponentVisibility");
-            //setComponentVisibility(insertedNode, ",new,.*normalsized,");
-
-            // call the function that set sizing for note-internal compoents
-            //console.debug("calling: update_note_internal_size");
-            //update_note_internal_size(insertedNode);
-
-            // call the function that will make the note draggable
-            //console.debug("calling: makeDragable");
-            //makeDragable(insertedNode);
-
-            //console.debug("calling: makeResizeable");
-            //makeResizeable(insertedNode);
+         // make the note draggable
             if (function_call_debuging)
                 console.debug("calling: makeDragAndResize");
             makeDragAndResize(insertedNode, isOwner, isNewNote, true);
 
-            console.debug(insertedNode);
             // attach eventlisteners to the note
 
             // call the function that will make the note resizeable
-            // console.debug("browsersolutions: makeResizeable");
-
+     
             if (function_call_debuging)
                 console.debug("browsersolutions: calling dropdownlist_add_option");
             dropdownlist_add_option(insertedNode, "", "", "");
@@ -1263,6 +1207,7 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
             if (function_call_debuging)
                 console.debug("calling update_note_internal_size");
             update_note_internal_size(insertedNode);
+
             // place focus on the new yellownote
             try {
                 if (insertedNode.querySelector('[focus="true"]')) {
@@ -1414,12 +1359,12 @@ function preparePlainNote(node_root, isOwner, isNewNote) {
         } else {
             // existing note - add content to the textarea inside the iframe
             console.debug("carry out the note procedure for existing note");
-
+if (textarea) {
             console.debug("add events");
             try {
-                textarea.addEventListener('keydown', (event) => {
-                    console.log('event: Key pressed:', event.key);
-                });
+                //textarea.addEventListener('keydown', (event) => {
+                //    console.log('event: Key pressed:', event.key);
+                //});
 
                 textarea.addEventListener('click', (event) => {
                     if (event_debug)
@@ -1469,6 +1414,7 @@ function preparePlainNote(node_root, isOwner, isNewNote) {
             }
             console.debug("preparePlainNote.end");
         }
+        }
 
     } catch (e) {
         console.error(e);
@@ -1492,6 +1438,7 @@ function updateNoteMiddleBarNoteType(html_notetype_template, node_root) {
     //console.debug(html_notetype_template);
     if (function_call_debuging)
         console.debug(node_root);
+
     console.debug(node_root.querySelector('[name="whole_note_middlebar"]'));
     console.debug(node_root.querySelector('[name="whole_note_middlebar"].outerHTML'));
     var notetype_template = safeParseInnerHTML(html_notetype_template, 'div');
@@ -1519,6 +1466,7 @@ function updateNoteMiddleBarNoteType(html_notetype_template, node_root) {
 
     if (DOM_debug)
         console.debug(node_root.outerHTML);
+
     nodeToReplace.remove();
 
     if (DOM_debug)
@@ -1531,18 +1479,24 @@ function updateNoteMiddleBarNoteType(html_notetype_template, node_root) {
         console.debug(iframe.outerHTML);
     try {
 
-        //const htmlContent = '<html><body><div name="message_display_text"  style=" position: absolute; left: 0px; top: 0px; color: rgba(0, 0, 0, 0.7); background: rgba(255, 255, 0, 0.7); border: 0px solid #ffff00; border-radius: 0px; overflow-x: hidden; overflow-y: auto; line-height: 0.9; padding: 2px; margin: 0px; position: relative; bottom: 0; z-index: 10104; white-space: pre-wrap; word-wrap: break-word; "  contenteditable="true" aria-multiline="true" aria-placeholder="Type here...">' + b64_to_utf8(note_object_data.message_display_text) + '</div></body></html>';
 
+    const usable_width = parseInt(node_root.getAttribute("box_width"), 10) ;
+    const usable_height = parseInt(node_root.getAttribute("box_height"), 10) - frame_note_top_bar_height;
 
         iframe.onload = function () {
             const iframeWindow = iframe.contentWindow;
             if (iframeWindow) {
                 console.log('iframe contentWindow is available');
 
-                const iframeDoc = iframeWindow.document;
+                  const iframeDoc = iframeWindow.document;
 
                 iframeDoc.open();
                 iframeDoc.write(iframe_content_html);
+
+                if (function_call_debuging ) console.debug("calling setCSSAttributeOnNamedElement");
+                setCSSAttributeOnNamedElement(iframeDoc, "message_display_text", "width", usable_width + 'px');
+                if (function_call_debuging ) console.debug("calling setCSSAttributeOnNamedElement");
+                setCSSAttributeOnNamedElement(iframeDoc, "message_display_text", "height", usable_height + 'px');
 
                 iframeDoc.close();
 
@@ -3179,7 +3133,7 @@ function page_update(request, sender, sendResponse) {
 }
 
 function checkValueAndTriggerFunction() {
-    console.debug("browsersolutions #checkValueAndTriggerFunction");
+    if (function_call_debuging) console.debug("checkValueAndTriggerFunction");
     // Define your regex pattern here
     const regexPattern = /.*/; // Replace with your actual pattern
 
@@ -3199,7 +3153,7 @@ function checkValueAndTriggerFunction() {
 }
 
 function removeSubscribedNotes() {
-    console.debug("removeSubscribedNotes");
+    if (function_call_debuging) console.debug("removeSubscribedNotes.start");
     // remove not not belonging to this user
 
     console.debug(document.querySelectorAll('container[class="yellownotecontainer"] , div[class="yellownotecontainer"]'));
@@ -3213,7 +3167,7 @@ function removeSubscribedNotes() {
 }
 
 function removeAllNotes() {
-    console.debug("removeAllNotes");
+    if (function_call_debuging) console.debug("removeAllNotes.start");
     console.debug(document.querySelectorAll('container[class="yellownotecontainer"] , div[class="yellownotecontainer"]'));
 
     document.querySelectorAll('container[class="yellownotecontainer"] , div[class="yellownotecontainer"]').forEach(function (a) {
@@ -3225,9 +3179,10 @@ function removeAllNotes() {
 }
 
 function remove_noteid(noteid) {
-    console.debug("# remove_noteid (" + noteid + ")");
+   if (function_call_debuging) console.debug("# remove_noteid.start ");
+   if (function_call_debuging) console.debug(noteid );
     //    var note_root = document.querySelectorAll('[type="yellownote"]')[0];
-
+if (noteid) {
     // is there any highlighting to clear ?
 
 
@@ -3239,7 +3194,7 @@ function remove_noteid(noteid) {
     //if (note_root != null || note_root != undefined) {
     remove_note(note_root);
 
-    //}
+    }
 }
 
 function remove_note(noteroot) {
@@ -3444,7 +3399,7 @@ function getOwnNotes(note_type) {
 
                         // check what other attribute which present may indicate note type
                     }
-
+console.debug("calling isNoteOnPage ("+note_data.noteid +")");
                     if (isNoteOnPage(note_data.noteid)) {
                         console.debug("browsersolutions note IS already on page");
                     } else {
@@ -3504,7 +3459,7 @@ function getOwnNotes(note_type) {
                                             var newNote = res;
 
                                             console.debug(newNote);
-                                            console.debug(newNote.outerHTML);
+                                           if (DOM_debug) console.debug(newNote.outerHTML);
 
                                             // place the note on the page in the correct position
                                             console.debug("calling place_note_on_page");
@@ -3787,6 +3742,8 @@ function getSubscribedNotes(note_type) {
                 } catch (e) {
                     console.error(e);
                 }
+                console.debug("calling isNoteOnPage("+note_data.noteid+")");
+
                 if (isNoteOnPage(note_data.noteid)) {
                     console.debug("browsersolutions note IS already on page");
                 } else {
@@ -3981,7 +3938,8 @@ function getAllNotes() {
                     note_type = "yellownote";
                 }
                 console.debug(note_data);
-                console.debug("browsersolutions note_type of note: " + note_type);
+                console.debug("note_type of note: " + note_type);
+                console.debug("calling isNoteOnPage(" + note_data.noteid + ")");
 
                 if (isNoteOnPage(note_data.noteid)) {
                     console.debug("browsersolutions note IS already on page");
@@ -4121,6 +4079,7 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
 
     return new Promise(function (resolve, reject) {
         // first , check if the note is already on the page
+        if (function_call_debuging  ) console.debug("isNoteOnPage(" + note_obj.noteid + ")");
         if (isNoteOnPage(note_obj.noteid)) {
             console.debug("browsersolutions: note IS already on page");
             // move focus ?
@@ -4209,7 +4168,8 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
                             console.debug(note_obj);
 
                             // check if note is already on page
-                            console.debug("isNoteOnPage: " + isNoteOnPage(noteid) + "");
+                            console.debug("calling isNoteOnPage: (" + noteid + ")");
+
                             if (!isNoteOnPage(noteid)) {
                                 // Decode the String containing the selection text
                                 console.debug("selection_text: " + note_obj.selection_text);
@@ -4479,7 +4439,7 @@ function moveFocusToNote(noteid) {
     try {
 
         return new Promise((resolve, reject) => {
-            console.debug(isNoteOnPage(noteid));
+           
 
             // Find the element by its ID
             const note_root = document.querySelectorAll('[noteid="' + noteid + '"]')[0];
@@ -5590,62 +5550,7 @@ function minimize_note(event) {
         console.debug("calling setCSSAttributeOnNamedElement");
     setCSSAttributeOnNamedElement(note, 'whole_note_table', 'height', "26px");
 
-    return;
-    // step through all DOM nodes in the node and set to not visible, the ones that should not be displayed when the note is minimized.
-    // only nodes with minimized="display" should be displayed when the note is minimized.
-    // Select all elements in the DOM
-    const allElements = note.querySelectorAll('[ minimized="notvisible" ]');
-    // Iterate over the selected elements
-    allElements.forEach(function (element) {
-        // If the element does not have the attribute with the given value, set display to 'none'
-        console.debug(element);
-        element.style.display = 'none';
-        console.debug("element has minimized attribute set to visible" + element);
-
-    });
-
-    // shrink the size of the note
-
-    note.querySelector('table[name="whole_note_table"]').style.height = "30px";
-
-    // replace the minimize icon, with the maximize one
-
-    // get the minimize button
-    const minimize_icon = note.querySelector('td[js_action="minimize_note"]');
-
-    console.debug(minimize_icon);
-    // swap event handler
-    const myminimize_note = (event) => {
-        minimize_note(event);
-        event.stopPropagation();
-    };
-
-    const myrightsize_note = (event) => {
-        rightsize_note(event);
-        event.stopPropagation();
-    };
-
-    var td = document.createElement('td');
-    td.setAttribute("js_action", "rightsize_note");
-    td.setAttribute("class", "icon");
-    //var textnode = document.createTextNode("max");
-    //td.appendChild(textnode);
-
-    var img = document.createElement('img');
-    img.setAttribute("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYYAAB2GAV2iE4EAAABrSURBVFhH7dixCoAgFEDRZ0v//7m2WKAF5RR38A33wEPHi+JiaS1aJLaNNS0DqfSB0yMpZWwWuXpevGLKQMpAykDKQMpAykDKQMpAykDKQMpAykDqCay1z2rfDq/4r/3oc0t/gv5RUwYyESdp8RUPFGMofQAAAABJRU5ErkJggg==");
-    img.setAttribute("alt", "max");
-    img.setAttribute("style", "padding: 0px; height: 20px; width: 20px;");
-    td.appendChild(img);
-
-    minimize_icon.parentNode.insertBefore(td, minimize_icon.nextSibling);
-
-    //minimize_icon.removeEventListener("click", myminimize_note);
-    td.addEventListener("click", myrightsize_note);
-    td.style.zIndex = '130';
-
-    minimize_icon.parentNode.removeChild(minimize_icon);
-
-    //console.debug(event);
+   
 }
 
 function maximize_note(event) {
@@ -5685,51 +5590,7 @@ function rightsize_note(event) {
 
     setCSSAttributeOnNamedElement(note, 'whole_note_table', 'height', original_height);
 
-    return;
-
-    const allElements = note.querySelectorAll('[ minimized="notvisible" ]');
-    // Iterate over the selected elements
-    allElements.forEach(function (element) {
-        // If the element does not have the attribute with the given value, set display to 'none'
-        // if (element.getAttribute('minimized') === "notvisible") {
-        console.debug(element);
-        element.style.display = 'inherit';
-        console.debug("element has minimized attribute set to visible" + element);
-
-        //}else{
-        // }
-    });
-
-    // shrink the size of the note
-
-    note.querySelector('table[name="whole_note_table"]').style.height = "250px";
-
-    // get the rigtsize button
-    const rigtsize_icon = note.querySelector('td[js_action="rightsize_note"]');
-    console.debug(rigtsize_icon);
-
-    var td = document.createElement('td');
-    td.setAttribute("js_action", "minimize_note");
-    td.setAttribute("class", "icon");
-
-    //var textnode = document.createTextNode("min");
-    //td.appendChild(textnode);
-    var img = document.createElement('img');
-    img.setAttribute("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAdhgAAHYYBXaITgQAAAJFJREFUWEftjjEKwDAMxPz/F2dLBaGTti5VoWAJo+lmby4MdiyBHUtgxxLYsQR2LIEdS2DHEtixBHYsgR1LYMcS2LEEdiyBHUtgxxLYsQR2LIEdS2DHEtixBHYsgR1LYMcS2LEEdiyBHUtgxxLYsQR2LIEdS2DHEvg8ax1m3uXe8Q98yncHVsGOJbBjCezYYfYFZAOuYDgLc3IAAAAASUVORK5CYII=");
-    img.setAttribute("alt", "min");
-    img.setAttribute("style", "padding: 0px; height: 20px; width: 20px;");
-    td.appendChild(img);
-
-    rigtsize_icon.parentNode.insertBefore(td, rigtsize_icon.nextSibling);
-
-    const myminimize_note = (event) => {
-        minimize_note(event);
-        event.stopPropagation();
-    };
-    td.addEventListener("click", myminimize_note);
-    td.style.zIndex = '130';
-
-    rigtsize_icon.parentNode.removeChild(rigtsize_icon);
+    
 }
 
 function close_note(event) {
@@ -7205,13 +7066,13 @@ function size_and_place_note_based_on_texthighlight(newGloveboxNode, note_obj, i
 
 
 
-function size_note(newGloveboxNode, note_obj, isOwner, isNewNote) {
+function size_note(newNode, note_obj, isOwner, isNewNote) {
     if (function_call_debuging)
         console.debug("size_note.start");
     if (function_call_debuging)
-        console.debug(newGloveboxNode);
+        console.debug(newNode);
     if (DOM_debug)
-        console.debug(newGloveboxNode.outerHTML);
+        console.debug(newNode.outerHTML);
     // the text the note is connected to has been located in the text of the page
     // the unique id of the highlight, highlightuniqueid, has been added to the porperties of the root object of the note
 
@@ -7227,7 +7088,7 @@ function size_note(newGloveboxNode, note_obj, isOwner, isNewNote) {
 
     //console.debug("browsersolutions " + valid_stickynote_position_coordinate_regexp.test(posx));
     //console.debug("browsersolutions " + valid_stickynote_position_coordinate_regexp.test(posy));
-
+try{
     const rootElement = document.documentElement;
     //console.debug(rootElement);
     // check one more time that the note is not already on the page
@@ -7236,12 +7097,12 @@ function size_note(newGloveboxNode, note_obj, isOwner, isNewNote) {
         // cleanup by removing it
         close_noteid(note_obj.noteid);
     }
-    let insertedNode = rootElement.insertBefore(newGloveboxNode, rootElement.firstChild.nextSibling);
+    let insertedNode = rootElement.insertBefore(newNode, rootElement.firstChild.nextSibling);
     //let insertedNode = rootElement.appendChild(newGloveboxNode);
 
     console.debug(insertedNode);
 
-    const highlightuniqueid = newGloveboxNode.getAttribute("highlightuniqueid");
+    const highlightuniqueid = newNode.getAttribute("highlightuniqueid");
     console.debug(highlightuniqueid);
     const firstNode = document.querySelector('[data-highlight-id="' + highlightuniqueid + '"]');
     const secondNode = insertedNode;
@@ -7411,6 +7272,9 @@ function size_note(newGloveboxNode, note_obj, isOwner, isNewNote) {
     insertedNode.setAttribute("box_width", box_width);
     insertedNode.setAttribute("box_height", box_height);
     console.debug(insertedNode);
+} catch (h) {
+    console.error(h);
+}
 
     console.debug("size_and_place_note_based_on_texthighlight.end");
 
@@ -8035,10 +7899,7 @@ function place_note_based_on_coordinates(newGloveboxNode, note_obj, creatorDetai
             }
         }
 
-        // set default values first
-        // then replace those values with more specific ones if they are available
-        var box_width = parseInt(default_box_width) + "px";
-        var box_height = parseInt(default_box_height) + "px";
+       
 
         // check for brand/organization-specific values - not implemented yet
 
@@ -8051,134 +7912,8 @@ function place_note_based_on_coordinates(newGloveboxNode, note_obj, creatorDetai
         // check for note specific value
 
 
-        // if note has valid size settings, use those, otherwise go with defaults
-        if (note_obj.box_width !== undefined) {
-            box_width = note_obj.box_width;
-        }
-        if (note_obj.box_height !== undefined) {
-            box_height = note_obj.box_height;
-        }
-
-        console.debug("using box_width:" + box_width + " box_height:" + box_height);
-
-        // examine options to make the width context sensitive
-
-        // Set overall size of the note
-        // adjust if the note is owned by the current user or is new. In both cases the bottom controll bar will be appended
-        insertedNode.style.width = box_width;
-        //insertedNode.querySelector('[name="whole_note_table"]').style.width = box_width;
-        //insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = (parseInt(box_height) - note_internal_height_padding) + 'px';
-
-        if (function_call_debuging)
-            console.debug("calling setCSSAttributeOnNamedElement");
-        setCSSAttributeOnNamedElement(insertedNode, 'whole_note_middlebar', 'height', (parseInt(box_height) - note_internal_height_padding) + 'px');
-
-        if (isOwner || isNewNote) {
-            // the note much be expanded to show the edit bar at the bottom
-
-            //insertedNode.querySelector('[name="whole_note_table"]').style.height = (parseInt(box_height) + note_owners_control_bar_height) + 'px';
-            if (function_call_debuging)
-                console.debug("calling setCSSAttributeOnNamedElement");
-            setCSSAttributeOnNamedElement(insertedNode, 'whole_note_table', 'height', (parseInt(box_height) + note_owners_control_bar_height) + 'px');
-
-        } else {
-            // keep configured height
-            insertedNode.style.height = box_height;
-
-            // insertedNode.querySelector('[name="whole_note_table"]').style.height = box_height + 'px';
-            if (function_call_debuging)
-                console.debug("calling setCSSAttributeOnNamedElement");
-            setCSSAttributeOnNamedElement(insertedNode, 'whole_note_table', 'height', box_height + 'px');
-        }
-
-        if (function_call_debuging)
-            console.debug("calling setCSSAttributeOnNamedElement");
-        setCSSAttributeOnNamedElement(insertedNode, 'whole_note_table', 'position', "absolute");
-
-        // update the size of some other fields in the note object
-
-
-        var usable_height;
-        if (isOwner) {
-            usable_height = (parseInt(box_height) - note_internal_height_padding);
-
-        } else {
-            // if the note is not owned by the current user, the note will be smaller as the bottom bar is removed
-
-            usable_height = (parseInt(box_height) - (note_internal_height_padding - note_owners_control_bar_height));
-        }
-
-        // update some internal objects in the note object to reflect the new overall size of the note
-        const usable_width = (parseInt(box_width) - note_internal_width_padding);
-
-        console.debug("setting new content frame usable width " + usable_width);
-        console.debug("setting new content frame usable height " + usable_height);
-
-        const note_type = insertedNode.getAttribute("note_type");
-
-        if (note_type === "webframe") {
-            try {
-                //insertedNode.querySelector('[name="fakeiframe"]').style.width = usable_width + 'px';
-                if (function_call_debuging)
-                    console.debug("calling setCSSAttributeOnNamedElement");
-                setCSSAttributeOnNamedElement(insertedNode, 'fakeiframe', 'width', usable_width + 'px');
-                //insertedNode.querySelector('[name="fakeiframe"]').style.height = (usable_height - frame_note_top_bar_height) + 'px';
-
-                if (function_call_debuging)
-                    console.debug("calling setCSSAttributeOnNamedElement");
-                setCSSAttributeOnNamedElement(insertedNode, 'fakeiframe', 'height', (usable_height - frame_note_top_bar_height) + 'px');
-
-            } catch (e) {
-                console.error(e);
-            }
-        } else {
-            try {
-                //insertedNode.querySelector('[name="message_display_text"]').style.width = usable_width + 'px';
-                if (function_call_debuging)
-                    console.debug("calling setCSSAttributeOnNamedElement");
-                setCSSAttributeOnNamedElement(insertedNode, 'message_display_text', 'width', usable_width + 'px');
-
-                //insertedNode.querySelector('[name="message_display_text"]').style.height = usable_height + 'px';
-                if (function_call_debuging)
-                    console.debug("calling setCSSAttributeOnNamedElement");
-                setCSSAttributeOnNamedElement(insertedNode, 'message_display_text', 'height', usable_height + 'px');
-            } catch (e) {
-                console.error(e);
-            }
-
-            try {
-                //insertedNode.querySelector('[name="whole_note_middlecell"]').style.width = usable_width + 'px';
-
-                if (function_call_debuging)
-                    console.debug("calling setCSSAttributeOnNamedElement");
-                setCSSAttributeOnNamedElement(insertedNode, 'whole_note_middlecell', 'width', usable_width + 'px');
-
-                //insertedNode.querySelector('[name="whole_note_middlecell"]').style.height = usable_height + 'px';
-
-                if (function_call_debuging)
-                    console.debug("calling setCSSAttributeOnNamedElement");
-                setCSSAttributeOnNamedElement(insertedNode, 'whole_note_middlecell', 'height', usable_height + 'px');
-
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        try {
-
-            //insertedNode.querySelector('[name="whole_note_middlebar"]').style.height = usable_height + 'px';
-            if (function_call_debuging)
-                console.debug("calling setCSSAttributeOnNamedElement");
-            setCSSAttributeOnNamedElement(insertedNode, 'whole_note_middlebar', 'height', usable_height + 'px');
-        } catch (e) {
-            console.error(e);
-        }
-
-        insertedNode.setAttribute("box_width", box_width);
-        insertedNode.setAttribute("box_height", box_height);
-        if (DOM_debug)
-            console.debug(insertedNode.outerHTML);
-        //console.debug("calling: size_and_place_note_based_on_coordinates");
-
+       
+ 
         console.debug("size_and_place_note_based_on_coordinates.end");
 
         return insertedNode;
