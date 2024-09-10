@@ -15,8 +15,8 @@ border-color: rgba(255, 255, 0, 0.7);
 background: rgba(255, 255, 0, 0.7);">
 				
 	<tr name="whole_note_topbar" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," style="height: 50px;
-	 width: 100%; position: absolute;  top: 0px; z-index: 10103; padding: 0px; border: 0px; margin: 0px; overflow: visible; background: rgba(255, 255, 0, 0.7);">
-		<td style="padding: 0px; border: 0px; margin: 0px; table-layout: fixed; height: 100%; width: 100%; z-index: 10103; border-collapse: collapse; background: rgba(255, 255, 0, 0.7);">		
+	 width: 100%; position: absolute;  top: 5px; left: 5px; z-index: 10103; padding: 0px; border: 0px; margin: 0px; overflow: visible; background: rgba(255, 255, 0, 0.7);">
+		<td name="whole_note_topbar_cell" style="padding: 0px; border: 0px; margin: 0px; table-layout: fixed; height: 100%; width: 100%; z-index: 10103; border-collapse: collapse; background: rgba(255, 255, 0, 0.7);">		
 			<table style="top: 0px; padding: 0px; border: 0px; margin: 0px; table-layout: fixed; height: 100%; width: 100%; z-index: 10103; border-collapse: collapse; background: rgba(255, 255, 0, 0.7);">
 				<tr name="topbar_creator_tools_row" style="top: 0px; left: 0px; height: 25px; text-align: left; flex-grow:1;  padding: 0px; border: 0px; margin: 0px; background: rgba(255, 255, 0, 0.7);" >
 					<style>
@@ -53,9 +53,15 @@ background: rgba(255, 255, 0, 0.7);">
 			}
 		</style>
 		<td name="topbar_filler" style="top: 0px; text-align: left; flex-grow:1;  padding: 0px; border: 0px; margin: 0px;  overflow: hidden ;z-index: 10103; font-size: 14px">
-			
+						<!-- row of information on the note creator --> 
+
+			<div style="height: 25px; position: relative; display: flex;  padding: 0px; border: 0px; margin: 0px; ">
+				<a name="creator_link_target" href="" target="_blank" rel="noopener noreferrer"><img name="creator_icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYYAAB2GAV2iE4EAAASxSURBVEhLnZc5S2VNEIbbq47jMu67mZOpgSgYK4KhghumLpn+APEXjNlkYyZoYK6R4I6II2Ig+AcU933f7a+ewrqcuZ7rMN8LTfXprqq3uk9Vnz7u6OjIg8PDQ5XHx8cqT09P/dvbmz8/P/cvLy/+4uLCPz09+fv7e51nzuTj46N/eHjw19fXqnN1dRW1eX199WdnZ6qLT5MJdITUFRUVOSF1BQUF7uTkxOXn5zsxcNnZ2U6curS0NAfu7u7c79+/dU5IXWFhoaupqXHfvn3TeXSTkpLc7e2tjl1eXqoP9PPy8qIczlZ6cHCg0nZAyFUCdLq7u734/bShs7+//27ldbfYEVux+UQ6OkYW3Gbw/PzsGxsbQ0k+a01NTWoPjNx8GjlL145Jm5ibmwt1+i9teXlZfcWunCB0xUZmUY2Pj4c6+j9tYmJCfQZXjnSxWzA/Px/qwFpnZ6ff3d1VXbC9va1jYbrWlpaWVNfIkWRmdAt4p2GG1iYnJ1WPkqF8JMPVBjAXZmPN9CClxJxFAT5LpIGBAdW5ublRUikXrWkkDfT394fa0urr61UHUuo7gUKXA8CJQ63leBAbJ0QuEok4MVYpAbuEhARt4OvXr9F+GPb29rSmk5OTXQRCDofBwcH36Y8oLi5WCZkE+gcpAdE3cKDEw9DQkEtNTdVDyNney3jc9v37d9WJ3WbeMX2ToLy8PNSHNUCOJGBExBkZGTIeH6LveCWx22yg/7etBnKe65EaYelra2vvw/ExNTXlUlJSQkkBpJLZ70/xsb6+rroRViK1/D4cH83NzSpjV4U9wYOWlhaVn8G4IjgJJsdnQHdjY0OJrJGYjP1tiw0EqhBSv7i4+CEJgm1mZkb0vZd3o89fvnzxbW1tvrW11cv26xhzYHp6+g/b2AYXnCSMfrjDlGhkMrDs//nzpy8rK4vO02cMmA42QR/BBhecfLhVOUyJEwYEyycemAuWFd+AMJ8AXxGJUp6d6+npUWkYGRlxWVlZepNITEzUMuI9cnpxyxAS7ZsE4lOznrHc3Fz369cvHTf09fWpVF8UMx05s11paalOyDvUmoWUmuO0MkkQJCMEEBmM1OaQJB4lKByqw5FJQCwgQrQ4LSkpcXKQq8Lw8LBKzlR2JIwUCYw8SMpC0AU/fvxQ2dDQoBzMs6hIenq6rgxI9qqsrKxUiQKrN3JzaARBBEnRtVdYVVWlcnZ2VnVYKGeBsyuoJZIoaBLItuizZSFX19jPIdKSysbQsUrg4oevhYUFfbZrr9w8PRFGP85GPjY2pgarq6v6jCMjR/JsRMFALDCALT5GR0f1GTJI4UBy39WCRloQgCgx7Orq0mdDkCC4YnwYsMGWCyMIktoCtbDsvmVBGDn92tpaddLb2+s3Nzd1PAxbW1uqg251dbUSAFuh7aotkL8GVQjeNIPkgMtdR0eHOqVlZmb6iooKL0no5W8hOt7e3u53dnbUBh/BlQZ9Qq6/MPZbwZeD3wyZcDk5Ofr7wXeaDLUvkGyxW1lZ4Z9Ls5TbSV1dnR42QEtFslteg9ax5IOTQD/8ykRXHPyLIDqismiFWKMnsXivAB2TNm5JSPaajW2z+QRnZ2f+PwH6bWl44hM6AAAAAElFTkSuQmCC" style="margin: 0px; height: 25px; width: auto;">
+					</a></div>
+	<div  style="font-size: 4px; text-align: center; margin: 0px; padding: 0px; height: 10px; top: -1px; line-height: 0.8em; min-height: 0.8em; position: relative" ><a name="creator_note_display_name" href="">below the image</a></div>
+
 		</td>
-		<td name="topbar_icons" style="position: absolute; top: 0px; right: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 98px; max-width: 98px; top: 0px; z-index: 10103; overflow: visible;">
+		<td name="topbar_icons" style="position: absolute; top: 0px; right: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 132px; max-width: 132px; top: 0px; z-index: 10103; overflow: visible;">
 			<table style="padding: 0px; border: 0px; margin: 0px; table-layout: fixed; height: 100%; width: 100%; z-index: 10103; border-collapse: collapse; background: rgba(255, 255, 0, 0.7);">
 				<tr style="display: table; height: 22px; overflow: visible; background: rgba(255, 255, 0, 0.7);">
 					<!-- icons curtesy of https://buttonoptimizer.com/ -->
@@ -69,7 +75,7 @@ background: rgba(255, 255, 0, 0.7);">
 						</select>
 					</td>
 					<!-- icon to present a QR-code that links to the note -->
-					<td name="qr_code" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="qr_code" style="position: absolute; right: 100px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+					<td name="qr_code" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="qr_code" style="position: absolute; right: 110px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
 						<style>
 							.copy_tooltip_content::after {
 								content: "link to the note";
@@ -80,7 +86,7 @@ background: rgba(255, 255, 0, 0.7);">
 						</div>
 					</td>
 					
-					<td name="goto" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="goto_note" style="position: absolute; right: 80px; top: 0px;  display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+					<td name="goto" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="goto_note" style="position: absolute; right: 88px; top: 0px;  display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
 						<style>
 							/* text content of tooltip */
 							.goto_tooltip_content::after {
@@ -95,7 +101,7 @@ background: rgba(255, 255, 0, 0.7);">
 					</td>
 					
 					<!-- icon to delete the note, for non-owner this simply means to dismiss it and no longer make it visible on the page where it is attached -->
-					<td name="dismiss" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="dismiss" style="position: absolute; right: 60px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+					<td name="dismiss" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen," js_action="dismiss" style="position: absolute; right: 66px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
 						<style>
 							.copy_tooltip_content::after {
 								content: "dismiss the note";
@@ -106,7 +112,7 @@ background: rgba(255, 255, 0, 0.7);">
 						</div>
 					</td>
 					<!-- icon to copy the note to clipboard -->
-					<td name="copy" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen,"  js_action="copy_note_to_clipboard" style="position: absolute; right: 40px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
+					<td name="copy" subcomponentvisibility=",new,ro,rw,minimized,normalsized,fullscreen,"  js_action="copy_note_to_clipboard" style="position: absolute; right: 44px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px;  z-index: 10103; border: 0px solid #F00;">
 						<style>
 							.copy_tooltip_content::after {
 								content: "copy note to clipboard";
@@ -119,7 +125,7 @@ background: rgba(255, 255, 0, 0.7);">
 						</div>
 					</td>
 					<!--icon to minimize the note -->
-					<td name="minize" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," js_action="minimize_note" style="position: absolute; right: 20px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px; z-index: 10103; border: 0px solid #F00;">
+					<td name="minize" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," js_action="minimize_note" style="position: absolute; right: 22px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px; z-index: 10103; border: 0px solid #F00;">
 						<style>
 										.minimize_tooltip_content::after {
 											content: "minimize note";
@@ -130,7 +136,7 @@ background: rgba(255, 255, 0, 0.7);">
 						</div>
 					</td>
 					<!--icon to restore the note to regular size -->
-					<td name="minize" subcomponentvisibility=",new,ro,rw,minimized,fullscreen," js_action="rightsize_note" style="position: absolute; right: 20px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px; z-index: 10103; border: 0px solid #F00;">
+					<td name="minize" subcomponentvisibility=",new,ro,rw,minimized,fullscreen," js_action="rightsize_note" style="position: absolute; right: 22px; top: 0px; display: unset; padding: unset; text-align: left; width: 22px; z-index: 10103; border: 0px solid #F00;">
 						<style>
 										.rightsize_tooltip_content::after {
 											content: "rightsize note";
@@ -148,17 +154,15 @@ background: rgba(255, 255, 0, 0.7);">
 				</td>
 			
 				</tr>
-				<!-- row of information on the note creator etc. --> 
+				<!-- row of information on the note feed etc. --> 
 				<tr name="topbar_creator_creator_row" style="top: 25px; left: 0px; height: 25px; text-align: left; flex-grow:1;  padding: 0px; border: 0px; margin: 0px; display: contents; background: rgba(255, 255, 0, 0.7); position: absolute" >
-					<td name="topbar_creator" style="left: 0px; height: 25px; text-align: left;  padding: 0px; border: 0px; margin: 0px;  overflow: hidden ;z-index: 10103; font-size: 14px">
+					<td name="topbar_feed" style="left: 0px; height: 25px; text-align: left;  padding: 0px; border: 0px; margin: 0px;  overflow: hidden ;z-index: 10103; font-size: 14px">
 
 				
 
-					<div style="height: 25px; position: relative; display: flex;  padding: 0px; border: 0px; margin: 0px; "><a name="creator_link_target" href="" target="_blank" rel="noopener noreferrer"><img name="creator_icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYYAAB2GAV2iE4EAAASxSURBVEhLnZc5S2VNEIbbq47jMu67mZOpgSgYK4KhghumLpn+APEXjNlkYyZoYK6R4I6II2Ig+AcU933f7a+ewrqcuZ7rMN8LTfXprqq3uk9Vnz7u6OjIg8PDQ5XHx8cqT09P/dvbmz8/P/cvLy/+4uLCPz09+fv7e51nzuTj46N/eHjw19fXqnN1dRW1eX199WdnZ6qLT5MJdITUFRUVOSF1BQUF7uTkxOXn5zsxcNnZ2U6curS0NAfu7u7c79+/dU5IXWFhoaupqXHfvn3TeXSTkpLc7e2tjl1eXqoP9PPy8qIczlZ6cHCg0nZAyFUCdLq7u734/bShs7+//27ldbfYEVux+UQ6OkYW3Gbw/PzsGxsbQ0k+a01NTWoPjNx8GjlL145Jm5ibmwt1+i9teXlZfcWunCB0xUZmUY2Pj4c6+j9tYmJCfQZXjnSxWzA/Px/qwFpnZ6ff3d1VXbC9va1jYbrWlpaWVNfIkWRmdAt4p2GG1iYnJ1WPkqF8JMPVBjAXZmPN9CClxJxFAT5LpIGBAdW5ublRUikXrWkkDfT394fa0urr61UHUuo7gUKXA8CJQ63leBAbJ0QuEok4MVYpAbuEhARt4OvXr9F+GPb29rSmk5OTXQRCDofBwcH36Y8oLi5WCZkE+gcpAdE3cKDEw9DQkEtNTdVDyNney3jc9v37d9WJ3WbeMX2ToLy8PNSHNUCOJGBExBkZGTIeH6LveCWx22yg/7etBnKe65EaYelra2vvw/ExNTXlUlJSQkkBpJLZ70/xsb6+rroRViK1/D4cH83NzSpjV4U9wYOWlhaVn8G4IjgJJsdnQHdjY0OJrJGYjP1tiw0EqhBSv7i4+CEJgm1mZkb0vZd3o89fvnzxbW1tvrW11cv26xhzYHp6+g/b2AYXnCSMfrjDlGhkMrDs//nzpy8rK4vO02cMmA42QR/BBhecfLhVOUyJEwYEyycemAuWFd+AMJ8AXxGJUp6d6+npUWkYGRlxWVlZepNITEzUMuI9cnpxyxAS7ZsE4lOznrHc3Fz369cvHTf09fWpVF8UMx05s11paalOyDvUmoWUmuO0MkkQJCMEEBmM1OaQJB4lKByqw5FJQCwgQrQ4LSkpcXKQq8Lw8LBKzlR2JIwUCYw8SMpC0AU/fvxQ2dDQoBzMs6hIenq6rgxI9qqsrKxUiQKrN3JzaARBBEnRtVdYVVWlcnZ2VnVYKGeBsyuoJZIoaBLItuizZSFX19jPIdKSysbQsUrg4oevhYUFfbZrr9w8PRFGP85GPjY2pgarq6v6jCMjR/JsRMFALDCALT5GR0f1GTJI4UBy39WCRloQgCgx7Orq0mdDkCC4YnwYsMGWCyMIktoCtbDsvmVBGDn92tpaddLb2+s3Nzd1PAxbW1uqg251dbUSAFuh7aotkL8GVQjeNIPkgMtdR0eHOqVlZmb6iooKL0no5W8hOt7e3u53dnbUBh/BlQZ9Qq6/MPZbwZeD3wyZcDk5Ofr7wXeaDLUvkGyxW1lZ4Z9Ls5TbSV1dnR42QEtFslteg9ax5IOTQD/8ykRXHPyLIDqismiFWKMnsXivAB2TNm5JSPaajW2z+QRnZ2f+PwH6bWl44hM6AAAAAElFTkSuQmCC" style="margin: 0px; height: 25px; width: auto;"></a></div>
-<!--
-        <div  style="font-size: 4px; text-align: center; margin: 0px; padding: 0px; height: 10px; top: -1px; line-height: 0.8em; min-height: 0.8em; position: relative" ><a name="creator_note_display_name" href="">below the image</a></div>
--->
-						<div style="height: 25px; top: 27px; left: 200px; font-size: 16px; text-align: left;  padding: 0px; border: 0px; margin: 0px;  line-height: 0.8em; min-height: 0.8em; position: absolute;" ><a name="feed_link_target" href=""></a></div>
+feed
+        
+						<div style="height: 25px; top: 27px; font-size: 16px; text-align: left;  padding: 0px; border: 0px; margin: 0px;  line-height: 0.8em; min-height: 0.8em; position: absolute;" ><a name="feed_link_target" href=""></a></div>
 		
 					</td>
 				</tr>

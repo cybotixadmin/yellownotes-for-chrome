@@ -9,12 +9,25 @@ try {
         console.debug('JWT is valid:', isValid);
         if (isValid) {
             console.debug("JWT is valid - show menu accordingly");
-            fetchAndDisplayStaticContent("../fragments/en_US/my_account_page_header_authenticated.html", "my_account_page_main_text").then(() => {});
+            fetchAndDisplayStaticContent("../fragments/en_US/my_account_page_header_authenticated.html", "my_account_page_main_text").then(() => {
+
+                // attach event listeners to button etc. after the main text has been loaded
+                attach_event_listeners_to_my_account_page();
+
+
+            });
 
             const uuid = localStorage.getItem("creatorid");
             const replacements = {creatorid: uuid};
-            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {});
+            fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_authenticated.html", "sidebar", replacements).then(() => {
+
+
+            });
             //page_display_login_status();
+
+            // attach event listeners to button etc.
+            //attach_event_listeners_to_my_account_page();
+
         } else {
             console.debug("JWT is not valid - show menu accordingly");
             fetchAndDisplayStaticContent("../fragments/en_US/sidebar_fragment_unauthenticated.html", "sidebar").then(() => {});
@@ -45,15 +58,6 @@ fetchData(stats_table_name).then(function (d) {
 
 });
 
-try{
-document.getElementById('drop_zone').addEventListener('click', function () {
-    console.debug("drop_zone clicked");
-    document.getElementById('file_input').click();
-});
-} catch (e) {
-    console.error(e);
-}
-
 var note_properties = {
     note_color: "#FFFF00",
     box_width: "200px",
@@ -62,12 +66,43 @@ var note_properties = {
 
 };
 
+function attach_event_listeners_to_my_account_page(){
+console.debug("attach_event_listeners_to_my_account_page.start");
 
-document.getElementById('file_input').addEventListener('change', handleFileSelect, false);
-document.getElementById('colorPicker').addEventListener('input', changeBannerColor, false);
-document.getElementById('saveButton').addEventListener('click', saveData, false);
+    try{
+        document.getElementById('drop_zone').addEventListener('click', function () {
+            console.debug("drop_zone clicked");
+            document.getElementById('file_input').click();
+        });
+        } catch (e) {
+            console.error(e);
+        }
+        
+        try{
+
+//document.getElementById('file_input').addEventListener('change', handleFileSelect, false);
+//document.getElementById('colorPicker').addEventListener('input', changeBannerColor, false);
+//document.getElementById('saveButton').addEventListener('click', saveData, false);
+
+console.debug( document.getElementById('downloadAllButton'));
+document.getElementById('downloadAllButton').addEventListener('click', downloadAllButton, false);
+
+ // Attach the function to the button's click event
+ document.getElementById('deleteAllButton').addEventListener('click', handleDeleteAllClick);
+
+
+} catch (e) {
+    console.error(e);
+}
+
+try{
+
 document.getElementById('drop_zone').addEventListener('dragover', handleDragOver, false);
 document.getElementById('drop_zone').addEventListener('drop', handleFileDrop, false);
+
+} catch (e) {
+    console.error(e);
+}
 
 document.querySelector('.remove-icon').addEventListener('click', function (event) {
     // Prevent the event from bubbling up to parent elements
@@ -134,6 +169,9 @@ document.querySelector('.remove-icon').addEventListener('click', function (event
     });
 });
 
+}
+
+
 function handleFileSelect(evt) {
     console.debug("handleFileSelect()");
     processFile(evt.target.files[0]);
@@ -161,6 +199,49 @@ try {
 } catch (e) {
     console.error(e);
 }
+
+
+
+
+async function handleDeleteAllClick() {
+    console.debug("handleDeleteAllClick().start");
+    // Display a confirmation prompt
+    const userAccepted = confirm("Do you really want to delete all your data on the YellowNotes Cloud platform?");
+    
+    // If the user clicks "OK" (confirm returns true)
+    if (userAccepted) {
+      try {
+
+
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+        const userid = "";
+      
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_delete_all_data, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+               
+            });
+
+
+        // Check if the response was successful
+        if (response.ok) {
+          alert('Event One accepted and data sent successfully!');
+        } else {
+          alert('Failed to send data.');
+        }
+      } catch (error) {
+        console.error('Error during fetch:', error);
+        alert('Error occurred while sending data.');
+      }
+    }
+  }
 
 function processFile(file) {
     if (!file.type.match('image/png')) {
@@ -224,44 +305,13 @@ function changeBannerColor(evt) {
     document.getElementById('bannerContainer').style.backgroundColor = evt.target.value;
 }
 
-async function saveData() {
-    console.debug("saveData()");
+async function downloadAllButton() {
+    console.debug("downloadAllButton()");
     var newdata;
     //console.debug(bannerImgElement);
     //console.debug(bannerImgElement.src);
 
-    const color = document.getElementById('colorPicker').value;
-    const banner = document.getElementById('bannerContainer');
-    const width = banner.offsetWidth;
-    const height = banner.offsetHeight;
-
-    const displayName = document.getElementById('displayName').value;
-
-    const bannerImgElement = document.getElementById('bannerImage');
-    if (bannerImgElement) {
-
-        var img = "";
-
-        img = bannerImgElement.src;
-
-        newdata = {
-            banner_image: img,
-            note_display_name: displayName,
-            note_color: color,
-            box_width: width + "px",
-            box_height: height + "px"
-        };
-    } else {
-        newdata = {
-            note_color: color,
-            note_display_name: displayName,
-            box_width: width + "px",
-            box_height: height + "px",
-            banner_image: ""
-
-        };
-
-    }
+ 
 
     let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
     let session = await chrome.storage.local.get([plugin_session_header_name]);
@@ -270,14 +320,14 @@ async function saveData() {
     console.debug(message_body);
     // Fetch data from web service (replace with your actual API endpoint)
     const response = await fetch(
-            server_url + URI_plugin_user_update_yellownote_creatorlevel_attributes, {
-            method: "POST",
+            server_url + URI_plugin_user_download_data, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
                 [plugin_session_header_name]: session[plugin_session_header_name],
             },
-            body: message_body,
+           
         });
 
     // Check for errors
@@ -289,8 +339,25 @@ async function saveData() {
     const r_data = await response.json();
 
     console.debug(r_data);
-
+   
+    // Convert the data to a JSON string
+    const jsonString = JSON.stringify(r_data, null, 2);
+    
+    // Create a Blob object representing the data as a JSON file
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create a link element to download the Blob as a file
+    const downloadLink = document.createElement('a');
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = 'data.json'; // Filename of the downloaded file
+    
+    // Programmatically click the link to trigger the download
+    downloadLink.click();
+    
+    // Clean up by revoking the object URL
+    URL.revokeObjectURL(downloadLink.href);
 }
+
 
 
 
@@ -343,6 +410,10 @@ function fetchData(table_name) {
                     }
                 } else {
                     return response.json();
+
+
+
+                    
                 }
              }).then(function (data) {
                
@@ -388,92 +459,4 @@ function fetchData(table_name) {
     } catch (error) {
         console.error(error);
     }
-}
-
-// Function to fetch and update banner image
-async function fetchAndUpdateBannerImage() {
-
-    let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
-    let session = await chrome.storage.local.get([plugin_session_header_name]);
-    console.debug(session);
-    const sessiontoken = session[plugin_session_header_name];
-
-    const claimNames = ['userid', 'uuid']; // Replace with the claims you want to extract
-    const claims = getClaimsFromJwt(sessiontoken, claimNames);
-    const uuid = claims.uuid;
-
-    const message_body = JSON.stringify({
-            creatorid: uuid
-        });
-
-    fetch(server_url + '/api/v1.0/get_creatorlevel_note_properties', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
-            [plugin_session_header_name]: session[plugin_session_header_name],
-        },
-        body: message_body,
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not OK');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.debug('Success:');
-        console.debug(data);
-
-        var bannerImgElement; // = document.getElementById('bannerImage');
-        console.debug(bannerImgElement);
-        //console.debug(bannerImgElement);
-
-        if (data.banner_image) {
-            // image was returned from the storeprofile
-            bannerImgElement = document.createElement("img");
-            bannerImgElement.src = data.banner_image;
-            bannerImgElement.id = "bannerImage";
-            bannerImgElement.setAttribute("style", "z-index: 1400; position: relative;");
-            bannerImgElement.setAttribute("alt", "Banner Image");
-
-        } else {
-            console.debug('Banner image data not found in response');
-        }
-        if (data.banner_image !== "" && data.banner_image !== null) {
-            console.debug("data.banner_image is not null");
-            document.getElementById('bannerContainer').querySelector('#drop_zone').appendChild(bannerImgElement);
-            const n = document.getElementById('bannerContainer').querySelector('#drop_zone');
-            n.insertBefore(bannerImgElement, n.firstChild);
-
-        }
-        const colorElement = document.getElementById('colorPicker');
-        if (data.note_color) {
-            colorElement.value = data.note_color;
-            document.getElementById('bannerContainer').style.backgroundColor = data.note_color;
-        } else {
-            console.debug('Banner color data not found in response');
-        }
-
-        if (data.box_width) {
-            document.getElementById('bannerContainer').style.width = data.box_width;
-        } else {
-            console.debug('Banner width data not found in response');
-        }
-
-        if (data.box_height) {
-            document.getElementById('bannerContainer').style.height = data.box_height;
-        } else {
-            console.debug('Banner height data not found in response');
-        }
-
-    })
-    .catch(error => console.error('Fetch error:', error));
-}
-
-// Call the function to update the banner image
-try {
-    fetchAndUpdateBannerImage();
-} catch (e) {
-
 }

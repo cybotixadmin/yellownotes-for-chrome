@@ -223,7 +223,7 @@ function createYellowNoteFromNoteDataObject(note_obj, isOwner, isNewNote) {
                     console.debug(creatorDetails);
                     test();
                     console.debug("calling create_stickynote_node");
-                    return create_stickynote_node(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote);
+                    return create_stickynote_node(note_obj, html_note_template, html_notetype_template, html_notetype_frame_template, creatorDetails, isOwner, isNewNote);
                 }).then(function (response) {
                     console.debug("createNote.complete");
                     node_root = response;

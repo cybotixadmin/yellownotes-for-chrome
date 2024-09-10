@@ -53,6 +53,8 @@ const URI_plugin_user_get_a_subscribed_note = "/api/v1.0/plugin_user_get_a_subsc
 
 const URI_plugin_user_get_creatorlevel_note_properties = "/api/v1.0/get_creatorlevel_note_properties";
 
+// subcomponent debug level
+const jwt_debug = false;
 
 
 let salt;
@@ -386,6 +388,7 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
         // lookup the template file
         var note_template;
         var notetype_template;
+        var notetype_frame_template;
         var note_properties;
         var sessionToken;
         chrome.storage.local.get([plugin_session_header_name]).then(function (result) {
@@ -406,6 +409,16 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             //console.debug(result);
             notetype_template = result;
             console.debug("notetype_template read");
+
+          // get the part of the template that pertain to the type of note
+            return getNotetypeFrameTemplate(note_type);
+        }).then(function (result) {
+            //console.debug(result);
+            notetype_frame_template = result;
+            console.debug("notetype_frame_template read");
+
+
+
 
             // get personal template related informaton
             console.debug("uuid" + uuid);
@@ -438,38 +451,7 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             console.debug(tabs[0].id);
             tab_id = tabs[0].id;
             console.debug("tabs[0].id: " + tab_id);
-            //      return fetch(server_url + '/api/v1.0/get_note_properties', {
-            //          method: 'POST',
-            //          headers: {
-            //              'Content-Type': 'application/json',
-            //              [plugin_uuid_header_name]: installationUniqueId,
-            //              [plugin_session_header_name]: sessiontoken
-            //          },
-            //          body: JSON.stringify({
-            //              creatorid: uuid
-            //           })
-            //       });
-            //   }).then(function (response) {
-            //       console.debug(response);
-            //       if (!response.ok) {
-            //           console.debug('API_URL_2 Fetch Error: ' + response.statusText);
-            //           // return blank (lower-priority values, or defaults, will be used later.)
-            //           return {};
-            //      } else {
-            //          //note_properties = response.json();
-            //          return response.json();
-            //      }
-            //  }).then(function (data) {
-            //      note_properties = data;
-            // execute script in active tab
-            //    return chrome.scripting.executeScript({
-            //        target: {
-            //            tabId: tab.id
-            //        },
-            //        files: ["./content_scripts/PinToSelectedHTML.js"]
-            //    });
-            //})
-            // .then(function (result) {
+         
             // send message to the active tab
             const msg = {
                 action: "createnote",
@@ -478,6 +460,7 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
                 brand: brand,
                 note_template: note_template,
                 notetype_template: notetype_template,
+                notetype_frame_template: notetype_frame_template,
                 note_properties: note_properties,
                 session: sessionToken,
                 is_selection_text_connected: is_selection_text_connected,
@@ -895,6 +878,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                         signal: signal
 
                     };
+                    if(function_call_debuging)  console.debug("calling: fetch(server_url + URI_plugin_user_update_subscribednote_status, opts)");
                     console.debug(opts);
 
                     return fetch(server_url + URI_plugin_user_update_subscribednote_status, opts);
@@ -1259,7 +1243,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             note_type = "yellownote";
             // check of there is a cached copy of the template
             const cacheKey = "template_" + brand + "_" + note_type;
-            const cachetimeout = 3600;
+            const cachetimeout = 10;
             getCachedData(cacheKey, cachetimeout).then(function (data) {
                 //console.debug("cache data: " + data);
                 if (data != null) {
@@ -1334,6 +1318,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             console.debug(message);
             console.debug("calling getNotetypeTemplate");
             getNotetypeTemplate(message.note_type).then(function (result) {
+                // console.debug(result);
+                sendResponse(result);
+            });
+
+            return true;
+        } else if (action == 'get_notetype_frame_template') {
+
+            console.debug("action: get_notetype_frame_template");
+            const brand = message.brand;
+            console.debug(message);
+            console.debug("calling getNotetypeFrameTemplate");
+            getNotetypeFrameTemplate(message.note_type).then(function (result) {
                 // console.debug(result);
                 sendResponse(result);
             });
@@ -1618,6 +1614,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 notetype_template = result;
                 console.debug("notetype_template");
 
+                if(function_call_debuging) console.debug("calling getNotetypeFrameTemplate");
+                return getNotetypeFrameTemplate(note_type);
+            }).then(function (result) {
+                //console.debug(result);
+                notetype_frame_template = result;
+                console.debug("notetype_frame_template");
+
                 //get current user id from the session token
                 //const session_uuid = getUuid(xYellownotesSession);
 
@@ -1637,6 +1640,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     note_data: note_data,
                     note_template: note_template,
                     notetype_template: notetype_template,
+                    notetype_frame_template: notetype_frame_template,
                     creatorDetails: creatorDetails,
                     isOwner: isOwner
                 }
@@ -3377,6 +3381,41 @@ function getNotetypeTemplate(note_type) {
 }
 
 
+/**
+ * Get the type template file from the server
+ */
+function getNotetypeFrameTemplate(note_type) {
+    if(function_call_debuging) console.debug("getNotetypeFrameTemplate(note_type): " + note_type);
+    // lookup the template file
+
+    // The notes are/can be branded. The brand is a feature for premium users.
+    // The user can also be part of a brand/organization. If so, the notes are branded accordingly.
+
+    // feature priority: brand over user. Check first if the user is part of a brand. If so, search for a template belonging to this brand first.
+    // search order: local filesystem, remote database, default templates
+
+    // If searches return nothing or fail, the default templates are used.
+
+
+    return new Promise(function (resolve, reject) {
+
+        var typetemplate;
+
+        // no luck with the brand,  try the default
+        console.debug('looking for template file ./templates/type_frametemplate_yellownote_' + note_type + '.html');
+        fetch(chrome.runtime.getURL('./templates/type_frametemplate_yellownote_' + note_type + '.html')).then(function (response) {
+            // found the file locally
+            console.debug(response);
+            typetemplate = response.text();
+            resolve(typetemplate);
+        }).catch(function (err) {
+            console.debug(err);
+            reject(err);
+        });
+
+    });
+}
+
 
 
 function isDoubleByte(str) {
@@ -3715,7 +3754,7 @@ function getUuid(sessiontoken) {
 
     const parsed = parseJwt(sessiontoken);
     const tokendata = getClaimsFromJwt(parsed, ["uuid"]);
-    console.debug(tokendata);
+  if (jwt_debug)  console.debug(tokendata);
     if (tokendata != null) {
         return uuid = tokendata.uuid;
     } else {
@@ -3730,14 +3769,14 @@ function parseJwt(token) {
     try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        console.debug("2.parseJwt( " + base64 + " )");
+        if (jwt_debug)  console.debug("2.parseJwt( " + base64 + " )");
         const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
                     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
                 }).join(''));
-        console.debug(jsonPayload);
+                if (jwt_debug)  console.debug(jsonPayload);
         return JSON.parse(jsonPayload);
     } catch (e) {
-        console.error('Invalid token:', e);
+         console.error('Invalid token:', e);
         return null;
     }
 }

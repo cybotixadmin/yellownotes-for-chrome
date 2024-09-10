@@ -948,7 +948,11 @@ async function saveChanges(noteid, event) {
         // Check for errors
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        }else{
+            // read the note back from the API to update the local cache
+
+
+    }
         // update the row in the table
 
         // Parse JSON data
