@@ -43,7 +43,7 @@ checkSessionJWTValidity()
 const table_columns_to_not_display_keyname = table_name + "_hide_columns2";
 
 
-const column_list =  ["name", "description",  "visibility", "restrictions",  "postcount", "subscriberscount", "createtime", "active_status","anonymous_allowed", "automatic_enrolment" , "actions" ];
+const column_list =  ["name", "description",  "visibility", "restrictions",  "postcount", "subscriberscount", "createtime", "active_status","anonymous_allowed", "browsing_allowed", "automatic_enrolment" , "actions" ];
 
 
 // which columns to display
@@ -83,6 +83,10 @@ document.getElementById('toggle-active_status').addEventListener('change', funct
 
 document.getElementById('toggle-anonymous_allowed').addEventListener('change', function () {
     toggleColumn('anonymous_allowed', this.checked,table_name, table_columns_to_not_display_keyname);
+});
+
+document.getElementById('toggle-browsing_allowed').addEventListener('change', function () {
+    toggleColumn('browsing_allowed', this.checked,table_name, table_columns_to_not_display_keyname);
 });
 
 document.getElementById('toggle-automatic_enrolment').addEventListener('change', function () {
@@ -228,6 +232,15 @@ var anonymous_allowed = 0;
         anonymous_allowed = 0;
     }
 
+    const browsing_checkbox = row.querySelector('[name="browsing_allowed"').querySelector("input");
+    console.debug(browsing_checkbox);
+var browsing_allowed = 0;
+if (browsing_checkbox.checked) {
+    browsing_allowed = 1;
+} else {
+    browsing_allowed = 0;
+}
+
     var automatic_enrolment = 0;
     if (row.querySelector('[name="automatic_enrolment"').querySelector("input").checked) {
         automatic_enrolment = 1;
@@ -248,6 +261,7 @@ var anonymous_allowed = 0;
             description: row.querySelector('[name="description"').textContent,
             visibility: row.querySelector('[name="visibility"]').querySelector("select").value,
             anonymous_allowed: anonymous_allowed,
+            browsing_allowed: browsing_allowed,
             active: active,
             automatic_enrolment: automatic_enrolment,
             restrictions: row.querySelector('[name="restrictions"').textContent
@@ -571,6 +585,44 @@ async function setAnonymousByUUID(distributionlistid, anonymous_allowed) {
     }
 }
 
+
+// Function to use 
+async function setBrowsingByUUID(distributionlistid, browsing_allowed) {
+    console.debug("setBrowsingByUUID" + distributionlistid, " browsing_allowed: " + browsing_allowed);
+    try {
+        let plugin_uuid = await chrome.storage.local.get([plugin_uuid_header_name]);
+        let session = await chrome.storage.local.get([plugin_session_header_name]);
+
+        const message_body = JSON.stringify({
+                distributionlistid: distributionlistid,
+                browsing_allowed: browsing_allowed,
+            });
+        //console.debug(message_body);
+        // Fetch data from web service (replace with your actual API endpoint)
+        const response = await fetch(
+                server_url + URI_plugin_user_set_distributionlist_browsing_allowed_status, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [plugin_uuid_header_name]: plugin_uuid[plugin_uuid_header_name],
+                    [plugin_session_header_name]: session[plugin_session_header_name],
+                },
+                body: message_body, // example IDs, replace as necessary
+            });
+        //console.debug(response);
+        // Check for errors
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // update the row in the table
+
+        // Parse JSON data
+        const data = await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 // Function to use "fetch" to re-activate a data agreement
 async function setAutomaticByUUID(distributionlistid, automatic_enrolment) {
     console.debug("setAutomaticByUUID" + distributionlistid, " automatic_enrolment: " + automatic_enrolment);
@@ -735,8 +787,9 @@ function newTableRow(rowData, tableBody, not_show_by_default_columns) {
     const cell_createtime = newRow.insertCell(6);
     const cell_active_status = newRow.insertCell(7);
     const cell_anonymous_allowed = newRow.insertCell(8);
-    const cell_automatic_enrolment = newRow.insertCell(9);
-    const cell_actions = newRow.insertCell(10);
+    const cell_browsing_allowed = newRow.insertCell(9);
+    const cell_automatic_enrolment = newRow.insertCell(10);
+    const cell_actions = newRow.insertCell(11);
 
     // name
     cell_name.textContent = rowData.name;
@@ -875,6 +928,9 @@ function newTableRow(rowData, tableBody, not_show_by_default_columns) {
             '<label><input type="checkbox" placeholder="active" /><span></span></label>';
     }
 
+  
+
+
     const anonInputElement = anonActButton.querySelector("input");
     if (anonInputElement) {
         anonInputElement.classList.add("input-class");
@@ -938,6 +994,45 @@ function newTableRow(rowData, tableBody, not_show_by_default_columns) {
     cell_automatic_enrolment.appendChild(autoActButton);
     cell_automatic_enrolment.setAttribute("class", "checkbox");
     cell_automatic_enrolment.setAttribute("name", "automatic_enrolment");
+
+
+      //browsing allowed check switch
+      const browsingActButton = document.createElement("span");
+      if (rowData.automatic_enrolment == 1) {
+          // active
+          browsingActButton.innerHTML =
+              '<label><input type="checkbox" placeholder="active" checked/><span></span></label>';
+      } else {
+          // deactivated
+          browsingActButton.innerHTML =
+              '<label><input type="checkbox" placeholder="active" /><span></span></label>';
+      }
+  
+      const browseInputElement = browsingActButton.querySelector("input");
+      if (browseInputElement) {
+          browseInputElement.classList.add("input-class");
+      }
+  
+      const browseLabelElement = browsingActButton.querySelector("label");
+      if (browseLabelElement) {
+          browseLabelElement.classList.add("switch");
+      }
+      const browseSpanElement = browsingActButton.querySelector("span");
+      if (browseSpanElement) {
+        browseSpanElement.classList.add("slider");
+      }
+      browsingActButton.addEventListener("change", async (e) => {
+          if (e.target.checked) {
+              await setBrowsingByUUID(rowData.distributionlistid, 1);
+          } else {
+              await setBrowsingByUUID(rowData.distributionlistid, 0);
+          }
+      });
+      cell_browsing_allowed.appendChild(browsingActButton);
+      cell_browsing_allowed.setAttribute("class", "checkbox");
+      cell_browsing_allowed.setAttribute("name", "browsing_allowed");
+  
+
 
     //
     // action buttons
@@ -1225,18 +1320,7 @@ async function add_distribution() {
                 data.postcount = 0;
 
                 newTableRow(data, tableBody, not_show_by_default_columns);
-                //               const newRow1 = dataTable.insertRow();
-
-                //             var rowHTML = '<tr>';
-                //           rowHTML += '<td>' + data.distributionlistid + '</td>';
-
-                //rowHTML += '<td>' + data.name + '</td>';
-                //         rowHTML += '<td id="distributiondescription" contenteditable="true" style="border: 1px solid black;">' + data.description + '</td>';
-                //       rowHTML += '<td>' + data.visibility + '</td>';
-                //       rowHTML += '<td>' + data.restrictions + '</td>';
-                //       rowHTML += '<td></td>';
-                //       rowHTML += '</tr>';
-                //       newRow1.innerHTML = rowHTML;
+              
 
 // remove the form 
 // name="new_distributionlist"

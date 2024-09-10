@@ -3044,7 +3044,7 @@ function isUndefined(variable) {
     return typeof variable === 'undefined';
 }
 
-function create_stickynote_node(note_object_data, html_note_template, html_notetype_template,html_notetype_frame_template, creatorDetails, isOwner, isNewNote) {
+function create_stickynote_node(note_object_data, html_note_template, html_notetype_template, html_notetype_frame_template, creatorDetails, isOwner, isNewNote) {
     if (function_call_debuging)
         console.debug("create_stickynote_node.start");
     return new Promise(function (resolve, reject) {

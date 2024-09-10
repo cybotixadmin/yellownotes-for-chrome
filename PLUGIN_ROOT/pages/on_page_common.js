@@ -44,6 +44,9 @@ const URI_plugin_user_get_my_subscriptions = "/api/v1.0/plugin_user_get_my_subsc
 
 const URI_plugin_user_set_distributionlist_active_status = "/api/plugin_user_set_distributionlist_active_status";
 const URI_plugin_user_set_distributionlist_anonymous_allowed_status = "/api/plugin_user_set_distributionlist_anonymous_allowed_status";
+
+const URI_plugin_user_set_distributionlist_browsing_allowed_status = "/api/plugin_user_set_distributionlist_browsing_allowed_status";
+
 const URI_plugin_user_set_distributionlist_automatic_enrolment_status = "/api/plugin_user_set_distributionlist_automatic_enrolment_status";
 
 const URI_plugin_user_deactivate_agreements = "/api/plugin_user_deactivate_distribution_list";

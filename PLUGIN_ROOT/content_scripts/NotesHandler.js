@@ -416,7 +416,7 @@ function listener(request, sender, sendResponse) {
                     var note_template = safeParseInnerHTML(request.note_template, 'div');
                     var notetype_template = safeParseInnerHTML(request.notetype_template, 'div');
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(request.note_data, request.note_template, request.notetype_template, request.creatorDetails, request.isOwner, false, true)
+                    placeStickyNote(request.note_data, request.note_template, request.notetype_template, request.notetype_frame_template, request.creatorDetails, request.isOwner, false, true)
                     .then(function (res) {
                         console.debug(res);
                         sendResponse({
@@ -574,7 +574,7 @@ function listener(request, sender, sendResponse) {
                                     //console.debug("browsersolutions resolve");
                                     //var template = safeParseInnerHTML(note_template, 'div');
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote, true).then(function (res) {
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, html_notetype_frame_template, creatorDetails, isOwner, isNewNote, true).then(function (res) {
                                         console.debug(res);
                                     });
                                     resolve({
@@ -920,25 +920,7 @@ function create_universal_yellownote(info, note_type, html_note_template, html_n
 
      */
 
-    // the root of the note object
-    //var note_root = document.createElement('container');
 
-    // var fullURLToCSS = chrome.runtime.getURL("css/yellownote.css");
-
-    // insert the overall note template
-
-    // var note_template = safeParseInnerHTML(html_note_template, 'div');
-    // note_template = JSON.parse(html);
-    //console.debug(note_template);
-
-    //note_root.setAttribute("class", "yellownotecontainer");
-    //note_root.setAttribute("note_type", note_type);
-    //note_root.setAttribute("button_arrangment", 'new');
-
-    //note_root.setAttribute("isOwner", isOwner);
-    //note_root.setAttribute("isNewNote", isNewNote);
-
-    //note_root.appendChild(note_template);
 
     var note_data = {}
 
@@ -3573,7 +3555,7 @@ function getOwnNotes(note_type) {
                     results.forEach(result => {
                         // create the note object on the page
                         console.debug("calling create_universal_yellownote_existing");
-                        var newNote = create_universal_yellownote_existing(info, note_type, result.note_template, result.notetype_template, creatorDetails, session, is_selection_text_connected, true, false);
+                        var newNote = create_universal_yellownote_existing(info, note_type, result.note_template, result.notetype_template, result.html_notetype_frame_template, creatorDetails, session, is_selection_text_connected, true, false);
 
                         console.debug(newNote);
                         console.debug(newNote.outerHTML);
@@ -3585,7 +3567,7 @@ function getOwnNotes(note_type) {
                         // var note_template = safeParseInnerHTML(result.note_template, 'div');
 
                         console.debug("calling placeStickyNote");
-                        placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
+                        placeStickyNote(result.note_data, result.note_template, result.notetype_template, html_notetype_frame_template,creatorDetails, isOwner, isNewNote, false).then(function (res) {
                             console.debug(res);
                         });
                     });
@@ -3687,7 +3669,7 @@ function getSubscribedNotes(note_type) {
         }
     }
 
-    console.debug("browsersolutions " + JSON.stringify(msg));
+    console.debug(msg);
     chrome.runtime.sendMessage(msg).then(function (response) {
         console.debug("browsersolutions" + "message sent to backgroup.js with response: ");
         console.debug((response));
@@ -3844,6 +3826,13 @@ function getSubscribedNotes(note_type) {
                         let promise = new Promise((resolve, reject) => {
                                 var html_note_template;
                                 var html_notetype_template;
+                                var html_notetype_frame_template;
+
+const get_notetype_frame_template_msg = {
+                                    action: "get_notetype_frame_template",  
+                                    brand: brand,
+                                    note_type: note_type
+                                } 
 
                                 const get_template_msg = {
                                     action: "get_template",
@@ -3873,10 +3862,18 @@ function getSubscribedNotes(note_type) {
                                     console.debug("html_notetype_template.length: ", html_notetype_template.length);
                                     console.debug("html_notetype_template: ");
                                     console.debug(html_notetype_template);
+
+                                    return chrome.runtime.sendMessage(get_notetype_frame_template_msg);
+
+                                }).then(function (response) {
+                                    html_notetype_frame_template = response;
+
+
+
                                     //console.debug("browsersolutions resolve");
                                     //var template = safeParseInnerHTML(html_note_template, 'div');
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, html_note_template, html_notetype_template, note.creatorDetails, isOwner, isNewNote, false).then(function (res) {
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template,html_notetype_frame_template, note.creatorDetails, isOwner, isNewNote, false).then(function (res) {
                                         console.debug(res);
                                     });
                                     resolve({
@@ -3905,7 +3902,7 @@ function getSubscribedNotes(note_type) {
                     // Call procedure that places the notes in thep age with the isOwner flag set to false, since these notes belong to others.
                     // The practical effect of this is to remove all buttons to perform edit-actions on the note, such as edit, delete, etc.
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, note.creatorDetails, isOwner, isNewNote, false).then(function (res) {
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, html_notetype_frame_template ,note.creatorDetails, isOwner, isNewNote, false).then(function (res) {
                         console.debug(res);
                     });
                 });
@@ -4060,7 +4057,7 @@ function getAllNotes() {
                                     // console.debug("browsersolutions resolve");
                                     // var template = safeParseInnerHTML(html_note_template, 'div');
                                     console.debug("calling placeStickyNote");
-                                    placeStickyNote(note_data, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
+                                    placeStickyNote(note_data, html_note_template, html_notetype_template, html_notetype_frame_template,creatorDetails, isOwner, isNewNote, false).then(function (res) {
                                         console.debug(res);
                                     });
                                     resolve({
@@ -4087,7 +4084,7 @@ function getAllNotes() {
                     //console.debug(result.note_template);
                     //var note_template = safeParseInnerHTML(result.note_template, 'div');
                     console.debug("calling placeStickyNote");
-                    placeStickyNote(result.note_data, result.note_template, result.notetype_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
+                    placeStickyNote(result.note_data, result.note_template, result.notetype_template,html_notetype_frame_template, creatorDetails, isOwner, isNewNote, false).then(function (res) {
                         console.debug(res);
                     });
                 });
@@ -4118,7 +4115,7 @@ isNewNote       boolean
 moveFocus       boolean     If set to true, move the focus to this note
  * */
 
-function placeStickyNote(note_obj, html_note_template, html_notetype_template, creatorDetails, isOwner, isNewNote, moveFocus) {
+function placeStickyNote(note_obj, html_note_template, html_notetype_template, html_notetype_frame_template, creatorDetails, isOwner, isNewNote, moveFocus) {
     console.debug("placeStickyNote.start");
     // contenttype
     // permitted values: text, html, embeded, linked
@@ -4132,6 +4129,9 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
     //console.debug(html_note_template);
     if (function_call_debuging)
         console.debug("html_notetype_template.length: ", html_notetype_template.length);
+
+    if (function_call_debuging)
+        console.debug("html_notetype_frame_template.length: ", html_notetype_frame_template.length);
 
     //console.debug(html_notetype_template);
 
@@ -4445,9 +4445,42 @@ function placeStickyNote(note_obj, html_note_template, html_notetype_template, c
                     } else {
                         // if no selection_text, only position co-ordinates can place the note
 
+const is_selection_text_connected = false;
+
                         try {
+                         
+                            console.debug("calling create_universal_yellownote_existing");
+                            create_universal_yellownote_existing(note_obj, note_obj.note_type, html_note_template, html_notetype_template, html_notetype_frame_template, creatorDetails, null, is_selection_text_connected, isOwner, isNewNote).then(function (res) {
+                                console.debug(res);
+                                var newNote = res;
+
+                                console.debug(newNote);
+                                try{
+                                if (DOM_debug)
+                                    console.debug(newNote.outerHTML);
+                                 }catch(e){
+                                }
+
+                                // place the note on the page in the correct position
+                                console.debug("calling place_note_on_page");
+                                var rc = place_note_on_page(note_data, note_type, newNote, creatorDetails, session, is_selection_text_connected, isOwner, isNewNote);
+
+                                console.debug(rc);
+
+                                // attach eventlisteners to the note ( common to all types of notes)
+                                if (function_call_debuging)
+                                    console.debug("calling attachEventlistenersToYellowStickynote");
+                                attachEventlistenersToYellowStickynote(rc, isOwner, isNewNote);
+
+                                if (function_call_debuging)
+                                    console.debug("calling: makeDragAndResize");
+                                makeDragAndResize(rc, isOwner, isNewNote, true);
+
+                            });
+
+
                             console.debug("calling: create_stickynote_node");
-                            create_stickynote_node(note_obj, html_note_template, html_notetype_template, html_notetype_frame_template, creatorDetails, isOwner, isNewNote).then(function (response) {
+                            DISABLEcreate_stickynote_node(note_obj, html_note_template, html_notetype_template, html_notetype_frame_template, creatorDetails, isOwner, isNewNote).then(function (response) {
                                 var newGloveboxNode = response;
 
                                 console.debug(newGloveboxNode);

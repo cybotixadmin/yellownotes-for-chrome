@@ -54,6 +54,7 @@
             <th name="createtime" class="sortableCol datetime" sort_type="stringDatetime">created<span class="sort-icon url">&#9650;</span></th>
             <th name="active_status" class="sortableCol checkbox" sort_type="stringCaseExact">active<span class="sort-icon url">&#9650;</span></th>
             <th name="anonymous_allowed" class="sortableCol checkbox" sort_type="stringCaseExact">anonymous allowed<span class="sort-icon url">&#9650;</span></th>
+            <th name="browsing_allowed" class="sortableCol checkbox" sort_type="stringCaseExact">browsing allowed<span class="sort-icon url">&#9650;</span></th>
             <th name="automatic_enrolment" class="sortableCol checkbox" sort_type="stringCaseExact">automatic enrolment<span class="sort-icon url">&#9650;</span></th>
             <th name="actions" class="action-5"></th>
           </tr>
@@ -74,6 +75,7 @@ The lists are returned by calling to the background script.
             <th filterableCol="wildcardmatch" class="compact"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
             <th filterableCol="wildcardmatch" class="compact"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
             <th filterableCol="wildcardmatch" class="datetime"><input filterContent="1" type="text" class="" placeholder="Filter "></th>
+            <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
             <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
             <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
             <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
@@ -148,7 +150,10 @@ which columns to show
   <label for="toggle-anonymous_allowed">anonymous_allowed</label>
   <input type="checkbox" id="toggle-anonymous_allowed" checked>
 </div>
-
+<div class="toggle-button">
+  <label for="toggle-browsing_allowed">browsing_allowed</label>
+  <input type="checkbox" id="toggle-browsing_allowed" checked>
+</div>
 <div class="toggle-button">
   <label for="toggle-automatic_enrolment">automatic_enrolment</label>
   <input type="checkbox" id="toggle-automatic_enrolment" checked>
