@@ -53,6 +53,8 @@ const URI_plugin_user_get_a_subscribed_note = "/api/v1.0/plugin_user_get_a_subsc
 
 const URI_plugin_user_get_creatorlevel_note_properties = "/api/v1.0/get_creatorlevel_note_properties";
 
+const URI_plugin_user_get_noteheaderhtml = "/api/v1.0/plugin_user_get_distribution_list_noteheader";
+
 // subcomponent debug level
 const jwt_debug = false;
 
@@ -168,10 +170,7 @@ return response;
  */
 
 
-/*
 
-
-*/
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
         chrome.tabs.create({
@@ -283,8 +282,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "create-attached-yellownote") {
         console.debug("# create-attached-yellownote");
         // use embeded as the content type. It captures more data some of which will not be used, but it more likely to be uniquely anchored.
-        //create_yellownote(info, tab, 'anchor');
-        pinYellowNote(info, tab, 'yellownote', 'default', true, 'plaintext');
+        if(function_call_debuging) console.debug("calling pinYellowNote()");
+        pinYellowNote(info, tab, 'plaintext', 'default', true, 'plaintext');
    // } else if (info.menuItemId === "pin-content-note") {
    //     pinYellowNote(info, tab, 'yellownote', 'default', true, 'webframe');
     } else if (info.menuItemId === "captureSelection") {
@@ -293,19 +292,20 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             sharedsecret: "secret1234"
         });
     } else if (info.menuItemId === "lookup-yellow-stickynotes") {
+        if(function_call_debuging) console.debug("calling lookup_yellownotes()");
         lookup_yellownotes(info, tab);
     } else if (info.menuItemId === "create-free-yellownote") {
         console.debug("# create-free-yellownote");
-        //create_free_yellownote(info, tab);
-        pinYellowNote(info, tab, 'yellownote', 'default', false, 'plaintext');
+        if(function_call_debuging) console.debug("calling pinYellowNote()");
+        pinYellowNote(info, tab, 'plaintext', 'default', false, 'plaintext');
     } else if (info.menuItemId === "create-free-webframenote") {
         console.debug("# create-free-webframenote");
-        //create_free_webframe_note(info, tab);
-        pinYellowNote(info, tab, 'yellownote', 'default', false, 'webframe');
+        if(function_call_debuging) console.debug("calling pinYellowNote()");
+        pinYellowNote(info, tab, 'plaintext', 'default', false, 'webframe');
     } else if (info.menuItemId === "create-free-canvasnote") {
         console.debug("# create-free-canvasnote");
-        //create_free_webframe_note(info, tab);
-        pinYellowNote(info, tab, 'yellownote', 'default', false, 'canvas');
+        if(function_call_debuging) console.debug("calling pinYellowNote()");
+        pinYellowNote(info, tab, 'plaintext', 'default', false, 'canvas');
     }
 });
 
@@ -390,6 +390,9 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
         var notetype_template;
         var notetype_frame_template;
         var note_properties;
+        // contains the html to display in the note header - typically this has been customised by the note owner
+        var noteheader_html;
+        
         var sessionToken;
         chrome.storage.local.get([plugin_session_header_name]).then(function (result) {
             console.debug(JSON.stringify(result));
@@ -410,13 +413,12 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             notetype_template = result;
             console.debug("notetype_template read");
 
-          // get the part of the template that pertain to the type of note
+          // get the iframe-content part of the template that pertain to the type of note
             return getNotetypeFrameTemplate(note_type);
         }).then(function (result) {
             //console.debug(result);
             notetype_frame_template = result;
             console.debug("notetype_frame_template read");
-
 
 
 
@@ -452,7 +454,7 @@ function pinYellowNote(info, tab, note_type, brand, is_selection_text_connected,
             tab_id = tabs[0].id;
             console.debug("tabs[0].id: " + tab_id);
          
-            // send message to the active tab
+            // send message to the active tab to create the yellownote on the page
             const msg = {
                 action: "createnote",
                 sharedsecret: PinToSelectedHTML_sharedsecret,
@@ -523,7 +525,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         }
         try {
             // keep this code around until all messgae formats have been migrated to the new format
-            if (isUndefined(message.stickynote)) {
+            if (isUndefined(message.note_type)) {
                 if (isUndefined(message.stickynote.request)) {
                     if (message.stickynote.request) {
                         action = message.stickynote.request;
@@ -896,6 +898,67 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             }
             return true;
+
+            
+        } else if (action === "get_noteheaderhtml") {
+            console.debug("action: get_noteheaderhtml")
+
+const cacheKey = "get_noteheaderhtml."+message.distributionlistid;
+const cachetimeout = 100;
+const protocol = "GET";
+const endpoint = server_url + URI_plugin_user_get_noteheaderhtml + "?distributionlistid=" + message.distributionlistid;
+console.debug("endpoint: " + endpoint);
+if (message.distributionlistid != undefined && message.distributionlistid != null && message.distributionlistid != "") {
+            cachableCall2API_GET(cacheKey, cachetimeout, protocol, endpoint).then(function (data) {
+                console.debug(data[0]);
+                sendResponse(data[0]);
+            });
+        }else{
+            // use default
+            console.debug("no distributionlistid provided, use the default");
+            // lookup the users preferred default background color and use this for the note header as well.
+
+            // use plain html and the name of the distribution list
+            var title="not assigned to any feed";
+            var note_color = "#ffff00"; // the platform-wide default color(yellow)
+             var banner_image;
+            const creatorid = message.creatorid;
+if (creatorid != undefined && creatorid != null && creatorid != "") {
+    // get the note creators information
+    console.debug("calling cachableCall2API_POST");
+    cachableCall2API_POST( creatorid + "_creator_data", 10, "POST", server_url + URI_plugin_user_get_creatorlevel_note_properties, { creatorid: creatorid } ).then(function (result) {
+        console.debug(result);
+        if (result != null && result.note_color != null) {
+            note_color = result.note_color;
+        }
+        if (result != null && result.banner_image != null) {
+            banner_image = result.banner_image;
+        }
+        var html;
+            if (banner_image != null && banner_image != "") {
+            // use the banner image of the user in the note header
+                html = '<div style="display: flex; align-items: center; background-color: '+ 'rgb(' +hexToRGB(note_color)+ ', 0.7)'+'; justify-content: "flex-start"};"><img name="feed_icon" src="${banner_image}" style="height: 50px; width: auto; margin-left: 8px;"><span>'+title+'</span></div>';
+
+            } else {
+                    html = '<div style="display: flex; align-items: center; background-color: '+ 'rgb(' +hexToRGB(note_color)+ ', 0.7)'+'; justify-content: "flex-start"};"><span>'+title+'</span></div>';
+
+                }
+                const ret_msg = {"noteheader_html": html};
+                console.debug(ret_msg);
+                sendResponse(ret_msg);
+
+                });
+
+            }else{
+                console.error("no creatorid provided");
+            }
+        }
+
+
+
+                return true;
+
+
         } else if (action === "getDistributionLists") {
             console.debug("action: getDistributionLists")
             // get all distribution list belonging to the user
@@ -1645,8 +1708,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     isOwner: isOwner
                 }
                 console.debug(msg);
-                if(function_call_debuging)  console.debug("######## ####### 4 ######### ######## #######");
-                if(function_call_debuging)  console.debug("calling chrome.tabs.sendMessage");
+                if(function_call_debuging) console.debug("######## ####### 4 ######### ######## #######");
+                if(function_call_debuging) console.debug("calling chrome.tabs.sendMessage");
                 return chrome.tabs.sendMessage(use_this_tab, msg);
             }).then(function (response) {
                 console.debug(response);
@@ -1924,7 +1987,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 console.debug(response);
                 if (!response.ok) {
                     throw new Error('Initial Fetch Error: ' + response.statusText);
-                }
+                } 
                 // examine each note and for each note creator lookup the note formating infomation for the creator of the note
                 // this is needed to display the note in the correct format
                 return response.json();
@@ -3762,6 +3825,40 @@ function getUuid(sessiontoken) {
 
     }
 }
+
+
+
+function hexToRGB(hex) {
+    if (function_call_debuging)
+        console.debug("hexToRGB.start (" + hex + ")");
+    try {
+        if (hex) {
+            // Remove the leading '#' if it exists
+            if (hex.charAt(0) === '#') {
+                hex = hex.slice(1);
+            }
+            console.log(hex)
+            // Parse the red, green, and blue values
+            let r = parseInt(hex.slice(0, 2), 16);
+            let g = parseInt(hex.slice(2, 4), 16);
+            let b = parseInt(hex.slice(4, 6), 16);
+
+           
+
+            // Return the RGB string
+            return `${r},${g},${b}`;
+        } else {
+            // return the default color
+            return "255,255,0";
+        }
+    } catch (e) {
+        console.error(e);
+        // return the default color
+        return "255,255,0";
+    }
+}
+
+
 
 function parseJwt(token) {
     if(function_call_debuging)  console.debug("2.parseJwt( " + token + " )");

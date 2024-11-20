@@ -8,6 +8,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>view feed</title>
+    <style>
+      body { font-family: Arial, sans-serif; }
+      .editor { display: flex; flex-direction: column; }
+      label { margin: 5px 0; }
+      input[type="text"], select { width: 100%; }
+      #preview-table { margin-top: 0px; border-collapse: collapse; }
+      #preview-table td { width: 120px; height: 25px; border: 1px solid #ddd; text-align: center; }
+    </style>
 </head>
 <body>
  <!-- side bar start here-->
@@ -20,8 +28,93 @@
 -->
 
 
+
   <div id="view_own_distributionlist_main_text"></div>
-    <!-- Empty table structure -->
+
+  <div id="note_header_customization_start_text"></div>
+
+
+  <!-- edit for the note header for all notes in this feed-->
+ 
+  <div class="editor">
+    <label>Text Content:</label>
+    <input type="text" id="text_content"  style="width: 200px;">
+    
+    <label>Font Size:</label>
+    <select id="font-size" style="width: 60px;">
+      <option>5px</option>
+      <option>6px</option>
+      <option>7px</option>
+      <option>8px</option>
+      <option>9px</option>
+      <option selected="true">10px</option>
+      <option>12px</option>
+      <option>14px</option>
+      <option>16px</option>
+      <option>18px</option>
+      <option>20px</option>
+    </select>
+    
+    <label>Font Color:</label>
+    <input type="color" id="font-color" value="#000000">
+    
+    <label>Background Color:</label>
+    <input type="color" id="bg-color" value="#FFFF00">
+    
+    <label>Font Family:</label>
+    <select id="font-family" style="width: 140px;">
+      <!-- Serif Fonts -->
+  <option style="font-family: 'Times New Roman';" value="Times New Roman">Times New Roman</option>
+  <option style="font-family: Georgia;" value="Georgia">Georgia</option>
+  <option style="font-family: 'Palatino Linotype', 'Book Antiqua', Palatino;" value="Palatino">Palatino</option>
+  <option style="font-family: 'Garamond';" value="Garamond">Garamond</option>
+
+  <!-- Sans-Serif Fonts -->
+  <option style="font-family: Arial;" value="Arial">Arial</option>
+  <option style="font-family: 'Arial Black';" value="Arial Black">Arial Black</option>
+  <option style="font-family: Verdana;" value="Verdana">Verdana</option>
+  <option style="font-family: Tahoma;" value="Tahoma">Tahoma</option>
+  <option style="font-family: 'Trebuchet MS';" value="Trebuchet MS">Trebuchet MS</option>
+  <option style="font-family: Impact;" value="Impact">Impact</option>
+
+  <!-- Monospace Fonts -->
+  <option style="font-family: 'Courier New';" value="Courier New">Courier New</option>
+  <option style="font-family: 'Lucida Console', Monaco, monospace;" value="Lucida Console">Lucida Console</option>
+
+  <!-- Cursive Fonts -->
+  <option style="font-family: 'Comic Sans MS';" value="Comic Sans MS">Comic Sans MS</option>
+
+  <!-- Fantasy Fonts -->
+  <option style="font-family: 'Copperplate';" value="Copperplate">Copperplate</option>
+  <option style="font-family: 'Papyrus';" value="Papyrus">Papyrus</option>
+    </select>
+
+    <label>Image</label>
+    <img id="distributionlist_icon" height="50px" width="50px">
+    <label>Image Upload:</label>
+    <input type="file" id="image-upload" accept="image/*" style="width: 180px;">
+    
+    <label>Image Position:</label>
+    <select id="image-position" style="width: 100px;">
+      <option value="left">Left</option>
+      <option value="right">Right</option>
+    </select>
+
+    <br/>
+    Preview if the note header is applied to a note:
+    <table id="preview-table" style="width: 290px; height: 50px; top: 0px; border: 0px; margin: 0px">
+      <tr style="width: 290px; height: 50px; top: 0px; border: 0px; margin: 0px">
+        <td style="width: 290px; height: 50px; top: 0px; border: 0px; margin: 0px"><div id="noteheader-preview-cell" style="width: 280px; height: 35px; border: 0px; margin: 5px;">Preview</div></td>
+      </tr>
+    </table>
+    <br/>
+    <button class="yc_panel_buttons save_button" id="save-noteheader-btn">Save</button>
+
+  </div>
+
+  <div id="note_header_customization_end_text"></div>
+
+  <!-- Empty table structure -->
 <div class="scrollable-table">
     <table name="ownDistributionlistNotesTable" class="ownNotesTable">
       <thead>
@@ -104,23 +197,29 @@
     
     <div id="my_notes_page_footer_text"></div>
     </div>
-   
+    
+
 
   <!-- main page end -->
-  <script src="./parameters.js"></script>
-  <script  src="on_page_common.js"></script>
-
-  <script src="../content_scripts/NotesHandler.js"></script>
-
-  <!-- reference functions needed to render a yellownote from serlialized form-->
-  <script src="../content_scripts/RenderEmbeddedYelloNotes_libraries.js"></script>
-  <script src="../content_scripts/test.js"></script>
 
 
-  <script src="./common_cache_functions.js"></script>
+  
+    <script src="./parameters.js"></script>
+    <script  src="on_page_common.js"></script>
 
-  <script src="view_own_distributionlist.js"></script>
+    <script src="../content_scripts/NotesHandler.js"></script>
 
+    <!-- reference functions needed to render a yellownote from serlialized form-->
+   
+    <script src="../content_scripts/RenderEmbeddedYelloNotes_libraries.js"></script>
+
+    <script src="../content_scripts/test.js"></script>
+
+    <script src="./common_cache_functions.js"></script>
+
+    <script src="./view_own_distributionlist.js"></script>
+
+    <script src="./editform_feedspecific_noteheader.js"></script>
 
   </body>
 </html>

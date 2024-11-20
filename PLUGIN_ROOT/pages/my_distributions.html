@@ -57,6 +57,7 @@
             <th name="browsing_allowed" class="sortableCol checkbox" sort_type="stringCaseExact">browsing allowed<span class="sort-icon url">&#9650;</span></th>
             <th name="automatic_enrolment" class="sortableCol checkbox" sort_type="stringCaseExact">automatic enrolment<span class="sort-icon url">&#9650;</span></th>
             <th name="actions" class="action-5"></th>
+            <th name="noteheader" class="action-5">note header</th>
           </tr>
 <!-- populate the table with the distribution list owned by this user  
 
@@ -79,6 +80,7 @@ The lists are returned by calling to the background script.
             <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
             <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
             <th filterableCol="checkedmatch" class="checkbox"><select class="compact checkbox"><option class="compact"></option><option class="compact">inactive</option><option class="compact">active</option></select></th>
+            <th class="action-5"></th>
             <th class="action-5"></th>
     </tr> 
           </thead>
@@ -162,6 +164,10 @@ which columns to show
 <div class="toggle-button">
   <label for="toggle-actions">Actions</label>
   <input type="checkbox" id="toggle-actions" checked>
+</div>
+<div class="toggle-button">
+  <label for="toggle-noteheader">Note Header</label>
+  <input type="checkbox" id="toggle-noteheader" checked>
 </div>
 </div>
 

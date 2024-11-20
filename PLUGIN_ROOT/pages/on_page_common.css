@@ -330,11 +330,26 @@ position: relative;
   z-index: 12000;
 }
 
-.delete_button {
+.yc_panel_buttons{
+  display: flex;
   height: 20px;
+  justify-content: space-between;
+  margin-top: 1px;
+}
+
+
+.delete_button {
+ 
 position: relative;
   z-index: 12000;
 }
+
+.save_button {
+  width: 70px;
+position: relative;
+  z-index: 12000;
+}
+
 
 .yellownote {
   height: 200px;

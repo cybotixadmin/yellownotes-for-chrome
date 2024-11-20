@@ -462,8 +462,13 @@ function DELETEfetchAndDisplayStaticContent(url, dom_id) {
 
 
 
-
+/**
+ * 
+ * @param {*} distributionlists 
+ */
 function in_html_macro_replace(distributionlists) {
+    console.debug("in_html_macro_replace().start");
+    console.debug("distributionlists: ", distributionlists);
     var ynInstallationUniqueId = "";
     var xYellownotesSession = "";
    // var distributionlists;
@@ -476,7 +481,7 @@ function in_html_macro_replace(distributionlists) {
         xYellownotesSession = result[plugin_session_header_name];
         console.log(ynInstallationUniqueId);
         console.log(xYellownotesSession);
-        return fetch(server_url + '/api/v1.0/plugin_user_get_public_distribution_list', {
+        return fetch(server_url + '/api/v1.0/plugin_user_get_distribution_list', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -500,8 +505,11 @@ function in_html_macro_replace(distributionlists) {
             return response.json();
         }
     }).then(function (resp) {
+        console.debug(resp);
         data = resp;
         console.debug(data[0]);
+        // use macro substituion on the page. The data object is a key-value pair object
+        // replacing strong on the page with values from the data object (the distributionlist)
         console.debug("calling substituteAttributes");
         substituteAttributes(data[0]);
 

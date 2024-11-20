@@ -1,37 +1,9 @@
 <table>
 <tr name="whole_note_middlebar" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 180px; width: 100%; position: absolute; top: 25px; padding: 0px; border: 0px; margin: 0px; overflow: hidden; background: rgba(255, 255, 0, 0.7); z-index: 10103;">
 		<td name="whole_note_middlecell"  contenteditable="true" style="height: 180px; width: 250px; position: absolute; top: 0px; padding: 0px; border: 0px; margin: 0px; min-width: 140px; min-height: 40px; text-align: left; text-wrap: wrap; overflow: visible; background: rgba(255, 255, 0, 0.7); z-index: 10103;" >
-			<table>
-				<tr>
-					<td name="canvas-cell">
-						<canvas name="canvas" width="250" height="180"></canvas>
-
-						
-						
-					</td>
-				</tr>
-				<tr>
-					<td name="controls-cell">
-						<input type="color" name="canvas-color-picker" value="#FFFF00">
-						<input type="color" name="draw-color-picker" value="#000000">
-						<select name="line-width-select">
-							<option value="1">1</option>
-							<option value="2">2</option>
-							<option value="3">3</option>
-							<option value="4">4</option>
-							<option value="5">5</option>
-						</select>
-						<select name="line-type-select">
-							<option value="solid">Solid Line</option>
-							<option value="widely_stapled">Widely Stapled Line</option>
-							<option value="dencely_stapled">Densely Stapled Line</option>
-						</select>
-						<button name="save-button">Save as PNG</button>
-					</td>
-				</tr>
-			</table>
-		
-	</td>
+			<iframe name="note_content_frame" subcomponentvisibility=",new,ro,rw,normalsized,fullscreen," style="height: 200px; width: 300px; position: relative; border: 1px solid black;" >
+			</iframe>
+	    </td>
 			<!--
 			<form name="note_form" style="border: 0px solid #ffff00;
  border-radius: 0px; width: 100%; overflow: hidden; padding: 0px; margin: 0px; position: relative; bottom: 0; z-index: 10104;">

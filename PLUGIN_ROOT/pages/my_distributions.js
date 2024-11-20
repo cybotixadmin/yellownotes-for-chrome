@@ -97,6 +97,10 @@ document.getElementById('toggle-actions').addEventListener('change', function ()
     toggleColumn('actions', this.checked, table_name, table_columns_to_not_display_keyname);
 });
 
+document.getElementById('toggle-noteheader').addEventListener('change', function () {
+    toggleColumn('noteheader', this.checked, table_name, table_columns_to_not_display_keyname);
+});
+
 // set table visibility defaults
 // make this sensitive to the size screen the user is using
 
@@ -150,6 +154,10 @@ fetchData(not_show_by_default_columns)
         toggleColumn(column, false, table_name, table_columns_to_not_display_keyname);
         document.getElementById(`toggle-${column}`).checked = false;
     });
+
+// populate the column contaning a graphical  the note header
+console.debug("calling processNodesWithAsyncFunction");
+    processNodesWithAsyncFunction('div[name="noteheaderhtml"]');
 
 });
 
@@ -790,7 +798,7 @@ function newTableRow(rowData, tableBody, not_show_by_default_columns) {
     const cell_browsing_allowed = newRow.insertCell(9);
     const cell_automatic_enrolment = newRow.insertCell(10);
     const cell_actions = newRow.insertCell(11);
-
+    const cell_noteheader = newRow.insertCell(12);
     // name
     cell_name.textContent = rowData.name;
     cell_name.setAttribute("name", "name");
@@ -1102,6 +1110,105 @@ function newTableRow(rowData, tableBody, not_show_by_default_columns) {
     cell_actions.appendChild(saveButton);
     cell_actions.appendChild(createInviteButton);
     cell_actions.setAttribute("class", "action-5");
+
+
+    // Add container for displaying the note header
+    const noteheaderContainer = document.createElement("div");
+    noteheaderContainer.classList.add("noteheader2");
+    noteheaderContainer.setAttribute("name", "noteheaderhtml");
+    noteheaderContainer.textContent = "Delete";
+    const noteheaderLink = document.createElement("a");
+
+    noteheaderLink.appendChild(noteheaderContainer);
+    noteheaderLink.setAttribute("href", "/pages/view_own_distributionlist.html?distributionlistid=" + rowData.distributionlistid );
+    
+    cell_noteheader.appendChild(noteheaderLink);
+    
+
+  //  viewNotesButton.innerHTML = '<a href="/pages/view_own_distributionlist.html?distributionlistid=' + rowData.distributionlistid + '"><button>Notes</button></a>';
+
+
+}
+
+/**
+ * Execute a promisified function on each DOM node returned by querySelectorAll
+ * and insert the result as a child of that node.
+ * 
+ * @param {string} selector - The CSS selector to query the DOM nodes.
+ * @param {Function} asyncFunction - A promisified function that takes a DOM node as input
+ *                                    and returns a promise resolving to a value.
+ */
+ function processNodesWithAsyncFunction(selector, asyncFunction) {
+    console.debug("processNodesWithAsyncFunction.start");
+    console.debug("selector: ", selector);
+    //console.debug("asyncFunction: ", asyncFunction);
+    // Select all DOM nodes matching the given selector
+    const nodes = document.querySelectorAll(selector);
+
+        // Process each node
+        nodes.forEach((node) => {
+            console.debug("node: ", node);
+            console.debug(node);
+            console.debug(node.parentElement);
+            console.debug(node.parentElement.parentElement);
+            console.debug(node.parentElement.parentElement.parentElement);
+            console.debug(node.parentElement.parentElement.parentElement.getAttribute("distributionlistid"));
+            distributionlistid = node.parentElement.parentElement.parentElement.getAttribute("distributionlistid");
+            // Execute the async function and handle the result with `.then` and `.catch`
+            setNoteHeader(node, distributionlistid)
+                .then((result) => {
+                    // Create a text node or use the result as an element
+                    const childNode = document.createTextNode(result);
+
+                    const noteheaderLink = document.createElement("a");
+                    noteheaderLink.appendChild(childNode);
+                    noteheaderLink.setAttribute("href", "/pages/view_own_distributionlist.html?distributionlistid=" + distributionlistid );
+                    // Append the result as a child of the current DOM node
+                    //node.appendChild(noteheaderLink);
+                    node.appendChild(noteheaderLink);
+                })
+                .catch((error) => {
+                    console.error(`Error processing node: ${node}`, error);
+                });
+        });
+}
+
+
+
+// create the URL that when clicked on adds the user to the distribution list
+// append a redirecturi that redicts the the page showing the distribution list
+
+function setNoteHeader(node, distributionlistid) {
+    console.debug("netNoteHeader (" + node + ")");
+
+
+   
+
+    // create a small window/form to add a new distribution list
+    return new Promise((resolve, reject) => {
+// call to background to get the noteheaderhtml for the selected distribution list
+const msg = {
+    "action": "get_noteheaderhtml",
+    "distributionlistid": distributionlistid,
+    "creatorid": "creatorid"
+};
+console.debug(msg);
+
+chrome.runtime.sendMessage(msg, function (response) {
+    console.debug("message sent");
+    console.debug(response);
+    console.debug(response.noteheader_html);
+    // update the note header with the new note header
+    node.innerHTML = response.noteheader_html;
+    // update the note object root DOM node with the distribution list id
+    //note_root.setAttribute("distributionlistid", distributionlistid);
+
+
+    
+    
+});
+});
+
 }
 
 // create the URL that when clicked on adds the user to the distribution list
